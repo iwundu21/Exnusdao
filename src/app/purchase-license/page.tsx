@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -50,16 +51,16 @@ export default function PurchaseLicensePage() {
     </div>
   );
 
-  const purchasedCount = state.licenses.length;
+  // Use claimed licenses to reflect "Active Slots" dynamically
+  const claimedCount = state.licenses.filter(l => l.is_claimed).length;
   const totalLimit = state.licenseLimit || 21;
-  const remainingSlots = totalLimit - purchasedCount;
+  const remainingSlots = totalLimit - claimedCount;
 
   return (
     <main className="min-h-screen pb-20">
       <Navbar 
         exnBalance={state.exnBalance} 
         usdcBalance={state.usdcBalance}
-        toggleAdmin={() => {}}
       />
       
       <div className="max-w-3xl mx-auto px-10 py-20 space-y-12">
@@ -95,10 +96,10 @@ export default function PurchaseLicensePage() {
           <div className="space-y-6">
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
-                 <span className="text-white/40">License Availability</span>
+                 <span className="text-white/40">Active Nodes / Total Slots</span>
                  <div className="flex items-center gap-1.5 font-black">
                    <span className={remainingSlots > 0 ? "text-[#00f5ff]" : "text-red-400"}>
-                     {purchasedCount}
+                     {claimedCount}
                    </span>
                    <span className="text-white/20">/</span>
                    <span className="text-white/60">
@@ -109,7 +110,7 @@ export default function PurchaseLicensePage() {
               <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                 <div 
                   className="h-full exn-gradient-bg transition-all duration-500 shadow-[0_0_10px_rgba(0,245,255,0.3)]" 
-                  style={{ width: `${Math.min(100, (purchasedCount / totalLimit) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (claimedCount / totalLimit) * 100)}%` }}
                 />
               </div>
             </div>
@@ -121,10 +122,10 @@ export default function PurchaseLicensePage() {
             
             <button 
               onClick={handlePurchase}
-              disabled={remainingSlots <= 0}
-              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${remainingSlots > 0 ? 'exn-button' : 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'}`}
+              disabled={state.licenses.length >= totalLimit}
+              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${state.licenses.length < totalLimit ? 'exn-button' : 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'}`}
             >
-              {remainingSlots > 0 ? 'Purchase License' : 'Registration Capped'}
+              {state.licenses.length < totalLimit ? 'Purchase License' : 'Registration Capped'}
             </button>
           </div>
 
