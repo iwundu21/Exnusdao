@@ -130,11 +130,10 @@ export default function ManageNodePage() {
       ...prev,
       exnBalance: prev.exnBalance + seedRefund + rewards,
       validators: prev.validators.filter(v => v.id !== vId),
-      // Mark license as burned instead of reclaiming it
       licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_burned: true } : l)
     }));
 
-    toast({ title: "Account Closed", description: "Node decommissioned. Associated license has been burned." });
+    toast({ title: "Account Closed", description: "Node decommissioned. Associated license has been burned 🔥." });
     router.push('/');
   };
 
@@ -341,7 +340,7 @@ export default function ManageNodePage() {
                             <div className="space-y-1">
                                <p className="text-sm font-bold text-white uppercase">Close Node Account</p>
                                <p className="text-xs text-white/40 leading-relaxed max-w-sm">
-                                 Decommissioning is permanent. The associated license will be burned and cannot be reused.
+                                 Decommissioning is permanent. The associated license will be burned 🔥 and cannot be reused.
                                </p>
                             </div>
                             <button 

@@ -65,7 +65,7 @@ export default function RegisterNodePage() {
     if (license.is_burned) {
       return toast({ 
         title: "Burned License", 
-        description: "This license has been permanently burned and cannot be reused.", 
+        description: "This license has been permanently burned 🔥 and cannot be reused.", 
         variant: "destructive" 
       });
     }

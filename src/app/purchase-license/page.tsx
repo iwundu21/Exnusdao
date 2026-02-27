@@ -122,7 +122,7 @@ export default function PurchaseLicensePage() {
                     <div className="flex items-center gap-2">
                       {lic.is_burned ? (
                         <span className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-black uppercase bg-red-900/30 text-red-500">
-                          <Flame className="w-3 h-3" /> Burned
+                          <Flame className="w-3 h-3" /> Burned 🔥
                         </span>
                       ) : (
                         <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase ${lic.is_claimed ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
