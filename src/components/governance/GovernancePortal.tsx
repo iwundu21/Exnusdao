@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -12,8 +13,8 @@ export function GovernancePortal({ proposals, onVote, onExecute }: any) {
     <div className="space-y-10">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
-          <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">Phase 12-14: DAO</h2>
-          <p className="text-white/40 text-sm">Propose upgrades, vote with staked EXN weight, and execute on-chain.</p>
+          <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">DAO Governance</h2>
+          <p className="text-white/40 text-sm">Propose upgrades, vote with staked EXN weight, and execute on-chain autonomously.</p>
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
@@ -26,14 +27,14 @@ export function GovernancePortal({ proposals, onVote, onExecute }: any) {
       {showCreate && (
         <div className="exn-card p-8 border-[#a855f7]/40 animate-in fade-in slide-in-from-top-4">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <FileText className="w-6 h-6 text-[#a855f7]" /> Create Proposal (Phase 12)
+            <FileText className="w-6 h-6 text-[#a855f7]" /> Create New Proposal
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
                <input className="exn-input text-xs" placeholder="Proposal Title (PIP-XXX)..." />
                <select className="exn-input text-xs">
                  <option>Standard Param Change</option>
-                 <option>Treasury Transaction (Phase 14 Target)</option>
+                 <option>Treasury Transaction</option>
                </select>
             </div>
             <textarea className="exn-input h-[104px] text-xs" placeholder="Describe the change and rationale..." />
@@ -58,7 +59,7 @@ export function GovernancePortal({ proposals, onVote, onExecute }: any) {
                 <div className="flex-1 space-y-4">
                   <div className="flex items-center gap-3">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${prop.type === 1 ? 'bg-[#a855f7]/20 text-[#a855f7]' : 'bg-[#00f5ff]/20 text-[#00f5ff]'}`}>
-                      {prop.type === 1 ? 'Treasury' : 'Param'}
+                      {prop.type === 1 ? 'Treasury' : 'Parameter'}
                     </span>
                     <h3 className="text-2xl font-bold text-white tracking-tight">{prop.title}</h3>
                   </div>
@@ -98,11 +99,11 @@ export function GovernancePortal({ proposals, onVote, onExecute }: any) {
                          {passed ? 'Passed' : 'Failed'}
                        </div>
                        {passed && !prop.executed && (
-                         <button onClick={() => onExecute(prop.id)} className="w-full exn-button text-[10px] font-black h-10">Execute (Phase 14)</button>
+                         <button onClick={() => onExecute(prop.id)} className="w-full exn-button text-[10px] font-black h-10">Execute Changes</button>
                        )}
                        {prop.executed && (
                          <div className="flex items-center justify-center gap-2 text-emerald-400 text-xs font-bold uppercase pt-2">
-                           <CheckCircle className="w-4 h-4" /> On-Chain Applied
+                           <CheckCircle className="w-4 h-4" /> Applied On-Chain
                          </div>
                        )}
                     </div>

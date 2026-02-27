@@ -15,13 +15,13 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
             <div className="p-2 bg-[#a855f7]/20 rounded-lg text-[#a855f7]">
               <ShieldAlert className="w-6 h-6" />
             </div>
-            <h2 className="text-3xl font-bold exn-gradient-text uppercase tracking-tighter">Protocol Management</h2>
+            <h2 className="text-3xl font-bold exn-gradient-text uppercase tracking-tighter">Protocol Configuration</h2>
           </div>
           <button 
              onClick={() => (window as any).location.reload()} 
              className="text-white/50 hover:text-white font-mono text-xs uppercase"
           >
-            [ Exit System ]
+            [ Close Dashboard ]
           </button>
         </div>
 
@@ -32,19 +32,19 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
                 <RefreshCw className="w-5 h-5" /> Epoch Settlement
               </h3>
               <div className="p-5 bg-white/5 rounded-xl space-y-4 border border-white/5">
-                <p className="text-[10px] text-white/40 leading-relaxed uppercase">Initiate reward distribution for all active network nodes based on current TVL and global inflation cap.</p>
+                <p className="text-[10px] text-white/40 leading-relaxed uppercase">Initiate reward distribution for all active network nodes based on current TVL.</p>
                 <button onClick={onSettle} className="w-full exn-button text-xs py-3">
-                   Settle Rewards
+                   Distribute Rewards
                 </button>
               </div>
             </section>
 
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-widest">
-                <PlusCircle className="w-5 h-5" /> Node Registration
+                <PlusCircle className="w-5 h-5" /> Node Setup
               </h3>
               <div className="space-y-3 p-5 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-2">Simulate validator registration. In a live environment, this requires a license and seed deposit.</p>
+                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-2">Simulate validator registration and initial seed deposit.</p>
                 <input 
                   value={newValidator.name} 
                   onChange={e => setNewValidator({...newValidator, name: e.target.value})}
@@ -55,7 +55,7 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
                   onClick={() => { onRegister(newValidator.name, "Community Node"); setNewValidator({name: '', description: ''}); }} 
                   className="w-full exn-button-outline text-[10px] font-black"
                 >
-                  Register Node
+                  Confirm Registration
                 </button>
               </div>
             </section>
@@ -64,7 +64,7 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
           <div className="space-y-8">
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-yellow-400 flex items-center gap-2 uppercase tracking-widest">
-                <Banknote className="w-5 h-5" /> Protocol Parameters
+                <Banknote className="w-5 h-5" /> Financial Parameters
               </h3>
               <div className="space-y-4 p-5 bg-white/5 rounded-xl border border-white/5">
                 <div>
@@ -76,7 +76,7 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
                      className="exn-input text-sm" 
                    />
                 </div>
-                <button className="w-full exn-button text-[10px] font-black">Update Parameters</button>
+                <button className="w-full exn-button text-[10px] font-black">Apply Changes</button>
               </div>
             </section>
 
@@ -85,7 +85,7 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
                 <PauseCircle className="w-5 h-5" /> Circuit Breaker
               </h3>
               <div className="p-5 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-4">Emergency pause stops new staking actions but cannot freeze user funds or deactivate nodes.</p>
+                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-4">Emergency pause stops new staking actions. Cannot freeze user funds.</p>
                 <button 
                   onClick={() => setGlobalState({...globalState, isPaused: !globalState.isPaused})}
                   className={`w-full flex items-center justify-center gap-2 h-12 rounded-lg font-bold transition-all text-xs ${globalState.isPaused ? 'bg-emerald-500 text-black' : 'bg-red-500 text-black'}`}
@@ -100,7 +100,7 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
           <div className="space-y-8">
              <section className="space-y-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2 uppercase tracking-widest">
-                <CheckCircle className="w-5 h-5" /> Registry View
+                <CheckCircle className="w-5 h-5" /> Network Health
               </h3>
               <div className="space-y-2 max-h-[350px] overflow-auto pr-2">
                 {validators.map((v: any) => (

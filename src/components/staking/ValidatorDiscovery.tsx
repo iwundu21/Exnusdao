@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -9,10 +10,10 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold exn-gradient-text uppercase tracking-widest">Node Registry (Phase 9)</h2>
+        <h2 className="text-2xl font-bold exn-gradient-text uppercase tracking-widest">Node Registry</h2>
         <div className="flex gap-2">
-          <span className="bg-[#00f5ff]/10 text-[#00f5ff] text-xs px-3 py-1 rounded-full border border-[#00f5ff]/20">{validators.length} Validators</span>
-          <span className="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/20">{validators.filter((v: any) => v.is_active).length} Active</span>
+          <span className="bg-[#00f5ff]/10 text-[#00f5ff] text-xs px-3 py-1 rounded-full border border-[#00f5ff]/20">{validators.length} Total</span>
+          <span className="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/20">{validators.filter((v: any) => v.is_active).length} Online</span>
         </div>
       </div>
 
@@ -37,7 +38,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="p-2 bg-white/5 rounded-lg">
-                  <p className="text-white/40 text-[9px] uppercase">Phase 10: Fee</p>
+                  <p className="text-white/40 text-[9px] uppercase">Node Fee</p>
                   <p className="text-white font-bold text-xs">{(validator.commission_rate / 100).toFixed(1)}%</p>
                 </div>
                 <div className="p-2 bg-white/5 rounded-lg">
@@ -45,7 +46,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                   <p className="text-white font-bold text-xs">{validator.total_staked.toLocaleString()}</p>
                 </div>
                 <div className="p-2 bg-white/5 rounded-lg">
-                  <p className="text-white/40 text-[9px] uppercase">Phase 5: Index</p>
+                  <p className="text-white/40 text-[9px] uppercase">Reward Index</p>
                   <p className="text-[#00f5ff] font-bold text-xs">{(validator.global_reward_index / 1000).toFixed(1)}k</p>
                 </div>
               </div>
@@ -69,7 +70,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                      }}
                      className="px-4 exn-button-outline border-emerald-500 text-emerald-400 flex items-center justify-center gap-2 text-[10px]"
                    >
-                     <ArrowRightLeft className="w-3 h-3" /> Migrate (Phase 3)
+                     <ArrowRightLeft className="w-3 h-3" /> Migrate Stake
                    </button>
                 )}
               </div>

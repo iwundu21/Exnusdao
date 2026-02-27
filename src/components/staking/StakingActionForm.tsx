@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -75,7 +76,7 @@ export function StakingActionForm({ selectedNode, exnBalance, onStake, userStake
           </div>
 
           <div>
-            <label className="text-xs text-white/50 uppercase tracking-widest mb-2 block">Lock-up Period (Phase 1)</label>
+            <label className="text-xs text-white/50 uppercase tracking-widest mb-2 block">Lock-up Duration</label>
             <div className="grid grid-cols-2 gap-2">
               {STAKING_TIERS.map((tier) => (
                 <button
@@ -84,7 +85,7 @@ export function StakingActionForm({ selectedNode, exnBalance, onStake, userStake
                   className={`py-3 px-2 border rounded-md transition-all flex flex-col items-center ${duration === tier.days.toString() ? 'border-[#00f5ff] bg-[#00f5ff]/10 text-[#00f5ff]' : 'border-white/10 text-white/50 hover:border-white/30'}`}
                 >
                   <span className="text-sm font-bold">{tier.label}</span>
-                  <span className="text-[10px] opacity-70">{(tier.multiplier/1000).toFixed(1)}x Rewards</span>
+                  <span className="text-[10px] opacity-70">{(tier.multiplier/1000).toFixed(1)}x Yield</span>
                 </button>
               ))}
             </div>
@@ -97,7 +98,7 @@ export function StakingActionForm({ selectedNode, exnBalance, onStake, userStake
             </div>
             {selectedNode && (
               <div className="flex justify-between text-xs">
-                <span className="text-white/50">Phase 10: Fee</span>
+                <span className="text-white/50">Commission Fee</span>
                 <span className="text-white">{(selectedNode.commission_rate/100).toFixed(1)}%</span>
               </div>
             )}
@@ -119,7 +120,7 @@ export function StakingActionForm({ selectedNode, exnBalance, onStake, userStake
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-xs font-bold text-white">{s.amount.toLocaleString()} EXN</p>
-                      <p className="text-[10px] text-white/40 uppercase">Lock: {(s.lock_multiplier/1000).toFixed(1)}x</p>
+                      <p className="text-[10px] text-white/40 uppercase">Multiplier: {(s.lock_multiplier/1000).toFixed(1)}x</p>
                     </div>
                     <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-black ${isLocked ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
                       {isLocked ? 'Locked' : 'Unlocked'}
@@ -127,14 +128,14 @@ export function StakingActionForm({ selectedNode, exnBalance, onStake, userStake
                   </div>
                   <div className="flex items-center gap-2 text-[10px] text-white/50">
                     <Calendar className="w-3 h-3" />
-                    Ends: {new Date(s.unlock_timestamp).toLocaleDateString()}
+                    Unlock: {new Date(s.unlock_timestamp).toLocaleDateString()}
                   </div>
                   {!isLocked && (
                     <button 
                       onClick={() => onUnstake(s.id)}
                       className="w-full py-2 bg-emerald-500 text-black text-[10px] font-bold rounded uppercase hover:bg-emerald-400"
                     >
-                      Unstake (Phase 2)
+                      Unstake Funds
                     </button>
                   )}
                 </div>
@@ -146,7 +147,7 @@ export function StakingActionForm({ selectedNode, exnBalance, onStake, userStake
 
       <div className="flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
         <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-        <p className="text-[10px] text-red-400">Phase 2 Rule: Unstaking is full-amount only and permitted exclusively after the lock period expires.</p>
+        <p className="text-[10px] text-red-400">Rule: Unstaking is full-amount only and permitted exclusively after the lock period expires.</p>
       </div>
     </div>
   );

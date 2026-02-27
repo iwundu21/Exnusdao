@@ -56,7 +56,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // --- Reward Calculations ---
   const pendingRewardsTotal = useMemo(() => {
     return userStakes
       .filter(s => !s.unstaked && !s.claimed)
@@ -68,8 +67,6 @@ export default function Home() {
         return acc + reward;
       }, 0);
   }, [userStakes, validators]);
-
-  // --- Handlers (Simulating Anchor Transactions) ---
 
   const handleStake = (stakeData: any) => {
     if (globalState.isPaused) return toast({ title: "Protocol Paused", variant: "destructive" });
@@ -135,16 +132,7 @@ export default function Home() {
         global_reward_index: v.global_reward_index + indexIncrease
       };
     }));
-    toast({ title: "Epoch Settled", description: "Rewards distributed to all active nodes." });
-  };
-
-  const handleClaimCommission = (vId: string) => {
-    const validator = validators.find(v => v.id === vId);
-    if (!validator || validator.accrued_node_rewards <= 0) return;
-
-    setGlobalState(prev => ({ ...prev, exnBalance: prev.exnBalance + validator.accrued_node_rewards }));
-    setValidators(prev => prev.map(v => v.id === vId ? { ...v, accrued_node_rewards: 0 } : v));
-    toast({ title: "Commission Claimed", description: `${validator.accrued_node_rewards.toFixed(2)} EXN added to balance.` });
+    toast({ title: "Epoch Settled", description: "Rewards distributed across active nodes." });
   };
 
   const handleRegisterNode = (name: string, description: string) => {
@@ -154,7 +142,7 @@ export default function Home() {
       name,
       description,
       logo_uri: '12',
-      is_active: true, // Auto-active for simulation purposes
+      is_active: true,
       seed_deposited: true,
       total_staked: 0,
       commission_rate: 1000,
@@ -177,7 +165,7 @@ export default function Home() {
 
   const handleExecute = (pId: number) => {
     setProposals(prev => prev.map(p => p.id === pId ? { ...p, executed: true } : p));
-    toast({ title: "Proposal Executed", description: "Changes applied to the protocol configuration." });
+    toast({ title: "Proposal Executed", description: "Changes applied to the protocol." });
   };
 
   if (isLoading) {
@@ -230,10 +218,10 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#34d399]" />
-                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Decentralized Protocol v1.1</span>
+                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Protocol v1.1 Active</span>
                 </div>
                 <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Stake & Earn</h1>
-                <p className="text-white/40 max-w-md">Trustless Solana-based staking. No admin freezing. Full control over your assets and validators.</p>
+                <p className="text-white/40 max-w-md">Trustless Solana-based staking. Zero-trust architecture. Full control over your assets and validators.</p>
               </div>
               
               <div className="flex gap-4">
