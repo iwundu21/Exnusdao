@@ -184,7 +184,7 @@ export default function Home() {
             <DashboardStats 
               totalStaked={state.totalStaked} 
               pendingRewards={pendingRewardsTotal}
-              lockedAmount={state.userStakes.filter(s => Date.now() < s.unlock_timestamp && !s.unstaked).reduce((a, b) => a + b.amount, 0)}
+              treasuryBalance={state.treasuryBalance}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
