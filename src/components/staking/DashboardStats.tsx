@@ -1,29 +1,25 @@
-
 "use client";
 
 import React from 'react';
-import { TrendingUp, Lock, Award, Coins, Ticket } from 'lucide-react';
+import { Lock, Award, Coins } from 'lucide-react';
 
 export function DashboardStats({ 
   totalStaked, 
   pendingRewards, 
-  lockedAmount,
-  licenseCount 
+  lockedAmount 
 }: { 
   totalStaked: number, 
   pendingRewards: number, 
-  lockedAmount: number,
-  licenseCount: number 
+  lockedAmount: number
 }) {
   const stats = [
     { label: 'Total Staked', value: `${totalStaked.toLocaleString()} EXN`, icon: Coins, color: 'text-[#00f5ff]' },
     { label: 'Pending Rewards', value: `${pendingRewards.toFixed(2)} EXN`, icon: Award, color: 'text-[#a855f7]' },
     { label: 'Locked Volume', value: `${lockedAmount.toLocaleString()} EXN`, icon: Lock, color: 'text-blue-400' },
-    { label: 'Active Licenses', value: licenseCount.toString(), icon: Ticket, color: 'text-emerald-400' },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
       {stats.map((stat, i) => (
         <div key={i} className="exn-card p-6 flex items-center gap-4 hover:border-[#00f5ff]/40">
           <div className={`p-3 rounded-xl bg-white/5 ${stat.color}`}>
