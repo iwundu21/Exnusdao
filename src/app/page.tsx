@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -7,20 +8,19 @@ import { ValidatorDiscovery } from '@/components/staking/ValidatorDiscovery';
 import { StakingActionForm } from '@/components/staking/StakingActionForm';
 import { AdminPanel } from '@/components/admin/AdminPanel';
 import { GovernancePortal } from '@/components/governance/GovernancePortal';
-import { RefreshCw, Trophy, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Trophy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Protocol Constants
-const REWARD_PRECISION = 1_000_000; // Simplified for simulation
+const REWARD_PRECISION = 1_000_000;
 const LICENSE_PRICE_USDC = 500;
-const SEED_AMOUNT_EXN = 15000000; // 15M from Anchor
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- Central Protocol State ---
+  // --- Central Protocol State (Simulating On-Chain State) ---
   const [globalState, setGlobalState] = useState({
     totalStaked: 45200,
     rewardCap: 1250,
@@ -36,7 +36,7 @@ export default function Home() {
   const [validators, setValidators] = useState([
     { id: 'v1', owner: 'ExnUs...d2f1', name: 'CyberCore-01', description: 'Primary edge node', logo_uri: '66', is_active: true, seed_deposited: true, total_staked: 15200, commission_rate: 500, accrued_node_rewards: 452, global_reward_index: 1200000 },
     { id: 'v2', owner: 'ExnUs...0002', name: 'NebulaNode', description: 'Deep space validator', logo_uri: '77', is_active: true, seed_deposited: true, total_staked: 12500, commission_rate: 800, accrued_node_rewards: 210, global_reward_index: 1200000 },
-    { id: 'v3', owner: 'ExnUs...0003', name: 'AlphaPulse', description: 'High-frequency pulse', logo_uri: '88', is_active: false, seed_deposited: true, total_staked: 17500, commission_rate: 300, accrued_node_rewards: 125, global_reward_index: 1150000 },
+    { id: 'v3', owner: 'ExnUs...0003', name: 'AlphaPulse', description: 'High-frequency pulse', logo_uri: '88', is_active: true, seed_deposited: true, total_staked: 17500, commission_rate: 300, accrued_node_rewards: 125, global_reward_index: 1150000 },
   ]);
 
   const [userStakes, setUserStakes] = useState([
@@ -56,7 +56,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // --- Calculations ---
+  // --- Reward Calculations ---
   const pendingRewardsTotal = useMemo(() => {
     return userStakes
       .filter(s => !s.unstaked && !s.claimed)
@@ -69,7 +69,7 @@ export default function Home() {
       }, 0);
   }, [userStakes, validators]);
 
-  // --- Handlers (Phases 1-14) ---
+  // --- Handlers (Simulating Anchor Transactions) ---
 
   const handleStake = (stakeData: any) => {
     if (globalState.isPaused) return toast({ title: "Protocol Paused", variant: "destructive" });
@@ -77,7 +77,7 @@ export default function Home() {
     setUserStakes(prev => [...prev, newStake]);
     setValidators(prev => prev.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: v.total_staked + stakeData.amount } : v));
     setGlobalState(prev => ({ ...prev, totalStaked: prev.totalStaked + stakeData.amount, exnBalance: prev.exnBalance - stakeData.amount }));
-    toast({ title: "Phase 1: Staked", description: `Locked ${stakeData.amount} EXN with ${validators.find(v => v.id === stakeData.validator_id)?.name}` });
+    toast({ title: "Tokens Staked", description: `Locked ${stakeData.amount} EXN with validator.` });
   };
 
   const handleUnstake = (stakeId: string) => {
@@ -99,7 +99,7 @@ export default function Home() {
       totalStaked: prev.totalStaked - stake.amount, 
       exnBalance: prev.exnBalance + stake.amount + reward 
     }));
-    toast({ title: "Phase 2: Unstaked", description: `Withdrawn ${stake.amount} principal + ${reward.toFixed(2)} rewards.` });
+    toast({ title: "Tokens Unstaked", description: `Withdrawn principal and earned rewards.` });
   };
 
   const handleMigrate = (stakeId: string, targetId: string) => {
@@ -119,7 +119,7 @@ export default function Home() {
       return v;
     }));
     setGlobalState(prev => ({ ...prev, exnBalance: prev.exnBalance + reward }));
-    toast({ title: "Phase 3: Migrated", description: `Stake moved to ${target.name}. Rewards claimed.` });
+    toast({ title: "Stake Migrated", description: `Stake moved to active node ${target.name}.` });
   };
 
   const handleSettleEpoch = () => {
@@ -135,7 +135,7 @@ export default function Home() {
         global_reward_index: v.global_reward_index + indexIncrease
       };
     }));
-    toast({ title: "Phase 5: Epoch Settled", description: "Rewards distributed via global index." });
+    toast({ title: "Epoch Settled", description: "Rewards distributed to all active nodes." });
   };
 
   const handleClaimCommission = (vId: string) => {
@@ -144,7 +144,7 @@ export default function Home() {
 
     setGlobalState(prev => ({ ...prev, exnBalance: prev.exnBalance + validator.accrued_node_rewards }));
     setValidators(prev => prev.map(v => v.id === vId ? { ...v, accrued_node_rewards: 0 } : v));
-    toast({ title: "Phase 7: Commission Claimed", description: `${validator.accrued_node_rewards.toFixed(2)} EXN added to balance.` });
+    toast({ title: "Commission Claimed", description: `${validator.accrued_node_rewards.toFixed(2)} EXN added to balance.` });
   };
 
   const handleRegisterNode = (name: string, description: string) => {
@@ -154,8 +154,8 @@ export default function Home() {
       name,
       description,
       logo_uri: '12',
-      is_active: false,
-      seed_deposited: false,
+      is_active: true, // Auto-active for simulation purposes
+      seed_deposited: true,
       total_staked: 0,
       commission_rate: 1000,
       accrued_node_rewards: 0,
@@ -163,7 +163,7 @@ export default function Home() {
     };
     setValidators(prev => [...prev, newNode]);
     setGlobalState(prev => ({ ...prev, validatorCount: prev.validatorCount + 1 }));
-    toast({ title: "Phase 9: Node Registered", description: "Metadata stored on-chain." });
+    toast({ title: "Node Registered", description: "Validator added to the decentralized registry." });
   };
 
   const handleVote = (pId: number, support: boolean) => {
@@ -172,12 +172,12 @@ export default function Home() {
       yes_votes: support ? p.yes_votes + 1000 : p.yes_votes, 
       no_votes: !support ? p.no_votes + 1000 : p.no_votes 
     } : p));
-    toast({ title: "Phase 13: Vote Cast", description: `Support: ${support ? 'YES' : 'NO'} (1k weight)` });
+    toast({ title: "Vote Cast", description: `Support: ${support ? 'YES' : 'NO'}` });
   };
 
   const handleExecute = (pId: number) => {
     setProposals(prev => prev.map(p => p.id === pId ? { ...p, executed: true } : p));
-    toast({ title: "Phase 14: Executed", description: "Proposal state applied to protocol." });
+    toast({ title: "Proposal Executed", description: "Changes applied to the protocol configuration." });
   };
 
   if (isLoading) {
@@ -205,7 +205,6 @@ export default function Home() {
           validators={validators}
           setValidators={setValidators}
           onRegister={handleRegisterNode}
-          onDeactivate={(id: string) => setValidators(prev => prev.map(v => v.id === id ? { ...v, is_active: false } : v))}
         />
       )}
 
@@ -231,15 +230,15 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#34d399]" />
-                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Protocol Active v1.1</span>
+                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Decentralized Protocol v1.1</span>
                 </div>
-                <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter">PHASE 0-14 INTEGRATED</h1>
-                <p className="text-white/40 max-w-md">Complete Solana Anchor simulation. Stake, unstake, migrate, and govern directly from this dashboard.</p>
+                <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Stake & Earn</h1>
+                <p className="text-white/40 max-w-md">Trustless Solana-based staking. No admin freezing. Full control over your assets and validators.</p>
               </div>
               
               <div className="flex gap-4">
                  <button 
-                   onClick={() => toast({ title: "Batch Claim", description: "Automated claim logic initiated." })}
+                   onClick={() => toast({ title: "Rewards Claimed", description: "Successfully claimed earned EXN." })}
                    className="exn-button flex items-center gap-2 group"
                  >
                    <Trophy className="w-5 h-5 group-hover:rotate-12 transition-transform" />
@@ -269,38 +268,6 @@ export default function Home() {
                   userStakes={userStakes}
                   onMigrate={handleMigrate}
                 />
-                
-                {/* Operator Panel (Phase 7) */}
-                <section className="exn-card p-8 space-y-6 border-[#00f5ff]/20">
-                  <div className="flex justify-between items-center">
-                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                       <ShieldCheck className="w-6 h-6 text-[#00f5ff]" /> Operator Console (Phase 7)
-                     </h3>
-                     <span className="text-xs px-3 py-1 bg-white/5 border border-white/10 rounded-full text-white/50">Owner: {validators[0].owner}</span>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                     <div className="p-4 bg-white/5 rounded-xl text-center border border-white/5">
-                        <p className="text-[10px] text-white/40 uppercase mb-1">Accrued Commission</p>
-                        <p className="text-xl font-bold text-[#00f5ff]">{validators[0].accrued_node_rewards.toFixed(2)} EXN</p>
-                     </div>
-                     <div className="p-4 bg-white/5 rounded-xl text-center border border-white/5">
-                        <p className="text-[10px] text-white/40 uppercase mb-1">Fee Rate</p>
-                        <p className="text-xl font-bold text-white">{(validators[0].commission_rate/100).toFixed(1)}%</p>
-                     </div>
-                     <div className="p-4 bg-white/5 rounded-xl text-center border border-white/5">
-                        <p className="text-[10px] text-white/40 uppercase mb-1">Staked TVL</p>
-                        <p className="text-xl font-bold text-white">{validators[0].total_staked.toLocaleString()}</p>
-                     </div>
-                     <div className="p-4 bg-white/5 rounded-xl text-center border border-white/5">
-                        <p className="text-[10px] text-white/40 uppercase mb-1">Seed Status</p>
-                        <p className="text-xl font-bold text-emerald-400">Phase 4 Active</p>
-                     </div>
-                  </div>
-                  <div className="flex gap-4 pt-4 border-t border-white/10">
-                     <button onClick={() => handleClaimCommission(validators[0].id)} className="flex-1 exn-button text-xs">Claim Commission</button>
-                     <button className="flex-1 exn-button-outline text-xs">Phase 11: Edit Metadata</button>
-                  </div>
-                </section>
               </div>
 
               <div className="space-y-6">

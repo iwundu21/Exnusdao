@@ -1,10 +1,10 @@
+
 "use client";
 
 import React, { useState } from 'react';
 import { ShieldAlert, RefreshCw, PlusCircle, Banknote, PauseCircle, PlayCircle, CheckCircle } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
-export function AdminPanel({ globalState, setGlobalState, onSettle, validators, onRegister, onDeactivate }: any) {
+export function AdminPanel({ globalState, setGlobalState, onSettle, validators, onRegister }: any) {
   const [newValidator, setNewValidator] = useState({ name: '', description: '' });
 
   return (
@@ -15,7 +15,7 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
             <div className="p-2 bg-[#a855f7]/20 rounded-lg text-[#a855f7]">
               <ShieldAlert className="w-6 h-6" />
             </div>
-            <h2 className="text-3xl font-bold exn-gradient-text uppercase tracking-tighter">Protocol Admin (Simulated)</h2>
+            <h2 className="text-3xl font-bold exn-gradient-text uppercase tracking-tighter">Protocol Management</h2>
           </div>
           <button 
              onClick={() => (window as any).location.reload()} 
@@ -29,10 +29,10 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
           <div className="space-y-8">
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-[#00f5ff] flex items-center gap-2 uppercase tracking-widest">
-                <RefreshCw className="w-5 h-5" /> Epoch Logic
+                <RefreshCw className="w-5 h-5" /> Epoch Settlement
               </h3>
               <div className="p-5 bg-white/5 rounded-xl space-y-4 border border-white/5">
-                <p className="text-[10px] text-white/40 leading-relaxed uppercase">Trigger Phase 5: Settle rewards for all active nodes based on TVL and global reward cap.</p>
+                <p className="text-[10px] text-white/40 leading-relaxed uppercase">Initiate reward distribution for all active network nodes based on current TVL and global inflation cap.</p>
                 <button onClick={onSettle} className="w-full exn-button text-xs py-3">
                    Settle Rewards
                 </button>
@@ -41,21 +41,21 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
 
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-widest">
-                <PlusCircle className="w-5 h-5" /> Registration
+                <PlusCircle className="w-5 h-5" /> Node Registration
               </h3>
               <div className="space-y-3 p-5 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-2">Phase 8: Purchase License (500 USDC) & Phase 9: Register Node.</p>
+                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-2">Simulate validator registration. In a live environment, this requires a license and seed deposit.</p>
                 <input 
                   value={newValidator.name} 
                   onChange={e => setNewValidator({...newValidator, name: e.target.value})}
                   className="exn-input text-xs" 
-                  placeholder="Validator Name..." 
+                  placeholder="Node Identifier..." 
                 />
                 <button 
-                  onClick={() => { onRegister(newValidator.name, "New Node"); setNewValidator({name: '', description: ''}); }} 
+                  onClick={() => { onRegister(newValidator.name, "Community Node"); setNewValidator({name: '', description: ''}); }} 
                   className="w-full exn-button-outline text-[10px] font-black"
                 >
-                  Acquire & Register
+                  Register Node
                 </button>
               </div>
             </section>
@@ -64,11 +64,11 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
           <div className="space-y-8">
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-yellow-400 flex items-center gap-2 uppercase tracking-widest">
-                <Banknote className="w-5 h-5" /> Global Config
+                <Banknote className="w-5 h-5" /> Protocol Parameters
               </h3>
               <div className="space-y-4 p-5 bg-white/5 rounded-xl border border-white/5">
                 <div>
-                   <label className="text-[10px] text-white/40 uppercase block mb-1">Phase 11: Reward Cap</label>
+                   <label className="text-[10px] text-white/40 uppercase block mb-1">Inflation Cap (EXN)</label>
                    <input 
                      type="number" 
                      value={globalState.rewardCap} 
@@ -76,21 +76,22 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
                      className="exn-input text-sm" 
                    />
                 </div>
-                <button className="w-full exn-button text-[10px] font-black">Update On-Chain</button>
+                <button className="w-full exn-button text-[10px] font-black">Update Parameters</button>
               </div>
             </section>
 
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-red-400 flex items-center gap-2 uppercase tracking-widest">
-                <PauseCircle className="w-5 h-5" /> Emergency
+                <PauseCircle className="w-5 h-5" /> Circuit Breaker
               </h3>
               <div className="p-5 bg-white/5 rounded-xl border border-white/5">
+                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-4">Emergency pause stops new staking actions but cannot freeze user funds or deactivate nodes.</p>
                 <button 
                   onClick={() => setGlobalState({...globalState, isPaused: !globalState.isPaused})}
                   className={`w-full flex items-center justify-center gap-2 h-12 rounded-lg font-bold transition-all text-xs ${globalState.isPaused ? 'bg-emerald-500 text-black' : 'bg-red-500 text-black'}`}
                 >
                   {globalState.isPaused ? <PlayCircle className="w-5 h-5" /> : <PauseCircle className="w-5 h-5" />}
-                  {globalState.isPaused ? 'Resume Protocol' : 'Emergency Pause'}
+                  {globalState.isPaused ? 'Resume Staking' : 'Pause Staking'}
                 </button>
               </div>
             </section>
@@ -99,24 +100,16 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
           <div className="space-y-8">
              <section className="space-y-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2 uppercase tracking-widest">
-                <CheckCircle className="w-5 h-5" /> Active Audit
+                <CheckCircle className="w-5 h-5" /> Registry View
               </h3>
               <div className="space-y-2 max-h-[350px] overflow-auto pr-2">
                 {validators.map((v: any) => (
                   <div key={v.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
                     <div className="space-y-1">
                       <span className="text-xs font-bold block">{v.name}</span>
-                      <span className="text-[9px] text-white/40 uppercase">TVL: {v.total_staked.toLocaleString()}</span>
+                      <span className="text-[9px] text-white/40 uppercase">Stake: {v.total_staked.toLocaleString()} EXN</span>
                     </div>
-                    {v.is_active && (
-                      <button 
-                        onClick={() => onDeactivate(v.id)}
-                        className="text-red-400 hover:text-red-300 p-1"
-                        title="Emergency Deactivate"
-                      >
-                         <PauseCircle className="w-4 h-4" />
-                      </button>
-                    )}
+                    <div className={`w-2 h-2 rounded-full ${v.is_active ? 'bg-emerald-400' : 'bg-red-400'}`} />
                   </div>
                 ))}
               </div>
