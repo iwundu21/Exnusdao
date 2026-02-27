@@ -27,7 +27,7 @@ export function StakingActionForm({
     const numAmt = Number(amount);
     if (!amount || isNaN(numAmt) || numAmt <= 0) return toast({ title: "Invalid Amount", variant: "destructive" });
     if (numAmt > exnBalance) return toast({ title: "Insufficient Balance", variant: "destructive" });
-    if (!selectedNode) return toast({ title: "Select Validator", variant: "destructive" });
+    if (!selectedNode) return toast({ title: "Select Validator", description: "Please pick a validator from the list first.", variant: "destructive" });
 
     const tier = STAKING_TIERS.find(t => t.days.toString() === duration);
     onStake({
@@ -60,7 +60,7 @@ export function StakingActionForm({
       </div>
 
       {activeTab === 'stake' && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs text-white/50 uppercase tracking-widest">Amount (EXN)</label>
@@ -97,8 +97,8 @@ export function StakingActionForm({
 
           <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
             <div className="flex justify-between text-xs">
-              <span className="text-white/50">Selected Node</span>
-              <span className="text-white font-medium">{selectedNode ? selectedNode.name : 'Not Selected'}</span>
+              <span className="text-white/50">Target Validator</span>
+              <span className="text-white font-medium">{selectedNode ? selectedNode.name : 'Selection Required'}</span>
             </div>
           </div>
 
@@ -109,20 +109,23 @@ export function StakingActionForm({
       )}
 
       {activeTab === 'my-stakes' && (
-        <div className="space-y-4 max-h-[400px] overflow-auto pr-2">
+        <div className="space-y-4 max-h-[400px] overflow-auto pr-2 animate-in fade-in slide-in-from-right-4 duration-300">
           {userStakes.filter((s: any) => !s.unstaked).length === 0 ? (
-            <p className="text-center text-white/30 text-xs py-10 uppercase font-bold tracking-widest">No active stake records</p>
+            <div className="flex flex-col items-center justify-center py-10 space-y-4 text-white/20">
+               <Coins className="w-12 h-12 opacity-20" />
+               <p className="text-center text-xs uppercase font-bold tracking-widest">No active stake records</p>
+            </div>
           ) : (
             userStakes.filter((s: any) => !s.unstaked).map((s: any) => {
               const isLocked = Date.now() < s.unlock_timestamp;
               return (
-                <div key={s.id} className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                <div key={s.id} className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3 hover:border-white/20 transition-all">
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-xs font-bold text-white">{s.amount.toLocaleString()} EXN</p>
                       <p className="text-[10px] text-white/40 uppercase">Multiplier: {(s.lock_multiplier/1000).toFixed(1)}x</p>
                     </div>
-                    <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-black ${isLocked ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
+                    <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-black ${isLocked ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
                       {isLocked ? 'Locked' : 'Unlocked'}
                     </span>
                   </div>
@@ -133,7 +136,7 @@ export function StakingActionForm({
                   {!isLocked && (
                     <button 
                       onClick={() => onUnstake(s.id)}
-                      className="w-full py-2 bg-emerald-500 text-black text-[10px] font-bold rounded uppercase hover:bg-emerald-400"
+                      className="w-full py-2 bg-emerald-500 text-black text-[10px] font-bold rounded uppercase hover:bg-emerald-400 transition-colors"
                     >
                       Unstake Funds
                     </button>
@@ -147,7 +150,7 @@ export function StakingActionForm({
 
       <div className="flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
         <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-        <p className="text-[10px] text-red-400">Lock periods are strictly enforced by the protocol. Principal cannot be withdrawn prematurely.</p>
+        <p className="text-[10px] text-red-400 leading-tight">Lock periods are strictly enforced by the protocol smart contract. Principal cannot be withdrawn prematurely.</p>
       </div>
     </div>
   );

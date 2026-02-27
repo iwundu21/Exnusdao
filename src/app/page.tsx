@@ -17,21 +17,23 @@ export default function Home() {
   const { state, setState, isLoaded } = useProtocolState();
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
+  const [selectedValidator, setSelectedValidator] = useState<any>(null);
 
+  // Calculate pending rewards for all active user stakes
   const pendingRewardsTotal = useMemo(() => {
+    if (!state.userStakes) return 0;
     return state.userStakes
       .filter(s => !s.unstaked && !s.claimed)
       .reduce((acc, stake) => {
         const validator = state.validators.find(v => v.id === stake.validator_id);
         if (!validator) return acc;
-        const rewardDelta = validator.global_reward_index - stake.reward_checkpoint;
+        const rewardDelta = Math.max(0, validator.global_reward_index - stake.reward_checkpoint);
         const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
         return acc + reward;
       }, 0);
   }, [state.userStakes, state.validators]);
 
-  const [selectedValidator, setSelectedValidator] = useState<any>(null);
-
+  // Phase 1: Staking Action
   const handleStake = (stakeData: any) => {
     const newStake = { ...stakeData, id: `s${Date.now()}` };
     setState(prev => ({
@@ -44,16 +46,19 @@ export default function Home() {
     toast({ title: "Tokens Staked", description: `Locked ${stakeData.amount} EXN with validator.` });
   };
 
+  // Phase 2: Unstaking Action
   const handleUnstake = (stakeId: string) => {
     const stake = state.userStakes.find(s => s.id === stakeId);
     if (!stake || stake.unstaked) return;
+    
+    // Safety check for lock period
     if (Date.now() < stake.unlock_timestamp) {
-      toast({ title: "Lock Period Active", variant: "destructive" });
+      toast({ title: "Lock Period Active", description: "Protocol enforced lock-up in effect.", variant: "destructive" });
       return;
     }
 
     const validator = state.validators.find(v => v.id === stake.validator_id);
-    const rewardDelta = validator ? validator.global_reward_index - stake.reward_checkpoint : 0;
+    const rewardDelta = validator ? Math.max(0, validator.global_reward_index - stake.reward_checkpoint) : 0;
     const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
 
     setState(prev => ({
@@ -63,32 +68,41 @@ export default function Home() {
       totalStaked: prev.totalStaked - stake.amount,
       validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: v.total_staked - stake.amount } : v)
     }));
-    toast({ title: "Tokens Unstaked", description: "Principal and rewards returned to wallet." });
+    toast({ title: "Tokens Unstaked", description: `Principal and ${reward.toFixed(2)} EXN rewards returned.` });
   };
 
+  // Phase 3: Stake Migration (Trustless transition for inactive nodes)
   const handleMigrate = (stakeId: string, targetId: string) => {
     const stake = state.userStakes.find(s => s.id === stakeId);
     const source = state.validators.find(v => v.id === stake?.validator_id);
     const target = state.validators.find(v => v.id === targetId);
 
-    if (!stake || !source || !target || source.is_active || !target.is_active) return;
+    if (!stake || !source || !target || source.is_active || !target.is_active) {
+      toast({ title: "Migration Error", description: "Ensure source is inactive and target is active.", variant: "destructive" });
+      return;
+    }
 
-    const rewardDelta = source.global_reward_index - stake.reward_checkpoint;
+    const rewardDelta = Math.max(0, source.global_reward_index - stake.reward_checkpoint);
     const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
 
     setState(prev => ({
       ...prev,
-      userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, validator_id: targetId, reward_checkpoint: target.global_reward_index } : s),
-      exnBalance: prev.exnBalance + reward,
+      userStakes: prev.userStakes.map(s => s.id === stakeId ? { 
+        ...s, 
+        validator_id: targetId, 
+        reward_checkpoint: target.global_reward_index 
+      } : s),
+      exnBalance: prev.exnBalance + reward, // Claim rewards during migration
       validators: prev.validators.map(v => {
         if (v.id === source.id) return { ...v, total_staked: v.total_staked - stake.amount };
         if (v.id === target.id) return { ...v, total_staked: v.total_staked + stake.amount };
         return v;
       })
     }));
-    toast({ title: "Stake Migrated" });
+    toast({ title: "Stake Migrated", description: "Yield checkpointed and moved to new node." });
   };
 
+  // Phase 5: Reward Settlement Simulation
   const handleSettleEpoch = () => {
     setState(prev => ({
       ...prev,
@@ -104,9 +118,10 @@ export default function Home() {
         };
       })
     }));
-    toast({ title: "Rewards Distributed" });
+    toast({ title: "Epoch Settled", description: "Global indices updated across registry." });
   };
 
+  // Phase 12-14: Governance Logic
   const handleVote = (pId: number, support: boolean) => {
     setState(prev => ({
       ...prev,
@@ -123,7 +138,7 @@ export default function Home() {
       ...prev,
       proposals: prev.proposals.map(p => p.id === pId ? { ...p, executed: true } : p)
     }));
-    toast({ title: "Proposal Executed" });
+    toast({ title: "Proposal Executed", description: "Instruction applied to protocol state." });
   };
 
   if (!isLoaded) {
@@ -176,7 +191,7 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#34d399]" />
-                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Trustless Network Active</span>
+                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Protocol Trustless & Active</span>
                 </div>
               </div>
             </div>
