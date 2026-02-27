@@ -1,11 +1,10 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { SolanaWalletProvider } from '@/components/providers/SolanaWalletProvider';
 
 export const metadata: Metadata = {
-  title: 'EXN Staker | High-Performance Solana Staking',
+  title: 'Exnus protocol | Network',
   description: 'Stake EXN tokens with top-tier validators on Solana.',
 };
 

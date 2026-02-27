@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -21,7 +20,7 @@ export function Navbar({
       <Link href="/" className="flex items-center gap-2 group">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold exn-gradient-text tracking-wider leading-none">EXNUS</h1>
-          <span className="text-[10px] text-white/40 tracking-[0.3em] font-bold uppercase">Decentralized</span>
+          <span className="text-[10px] text-white/40 tracking-[0.3em] font-bold uppercase">Protocol | Network</span>
         </div>
       </Link>
 
