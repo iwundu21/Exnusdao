@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
@@ -44,10 +44,15 @@ export default function PurchaseLicensePage() {
     });
   };
 
-  if (!isLoaded) return null;
+  if (!isLoaded) return (
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#020617] space-y-4">
+      <div className="w-16 h-16 border-4 border-[#00f5ff] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
-  const remainingSlots = state.licenseLimit - state.licenses.length;
   const purchasedCount = state.licenses.length;
+  const totalLimit = state.licenseLimit || 21;
+  const remainingSlots = totalLimit - purchasedCount;
 
   return (
     <main className="min-h-screen pb-20">
@@ -73,6 +78,9 @@ export default function PurchaseLicensePage() {
         <div className="exn-card p-10 space-y-8 border-[#00f5ff]/20">
           <div className="flex justify-between items-center border-b border-white/10 pb-8">
             <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#00f5ff]/10 rounded-xl border border-[#00f5ff]/20">
+                <Ticket className="w-6 h-6 text-[#00f5ff]" />
+              </div>
               <div>
                 <p className="text-sm font-bold text-white uppercase tracking-widest">Protocol License</p>
                 <p className="text-xs text-white/40 uppercase">Unique Identity Token</p>
@@ -94,14 +102,14 @@ export default function PurchaseLicensePage() {
                    </span>
                    <span className="text-white/20">/</span>
                    <span className="text-white/60">
-                     {state.licenseLimit}
+                     {totalLimit}
                    </span>
                  </div>
               </div>
               <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                 <div 
                   className="h-full exn-gradient-bg transition-all duration-500 shadow-[0_0_10px_rgba(0,245,255,0.3)]" 
-                  style={{ width: `${Math.min(100, (purchasedCount / state.licenseLimit) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (purchasedCount / totalLimit) * 100)}%` }}
                 />
               </div>
             </div>
