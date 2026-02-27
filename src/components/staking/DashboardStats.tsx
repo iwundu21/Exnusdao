@@ -16,15 +16,15 @@ export function DashboardStats({
 
   const stats = [
     { 
-      label: 'Total Value Staked', 
-      value: `$${stakedUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
-      subValue: `${(totalStaked || 0).toLocaleString()} EXN`,
+      label: 'Total Staked', 
+      value: `${(totalStaked || 0).toLocaleString()} EXN`, 
+      subValue: `$${stakedUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`,
       color: 'text-[#00f5ff]' 
     },
     { 
-      label: 'Treasury Value', 
-      value: `$${treasuryUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
-      subValue: `${(treasuryBalance || 0).toLocaleString()} EXN`,
+      label: 'Treasury Balance', 
+      value: `${(treasuryBalance || 0).toLocaleString()} EXN`, 
+      subValue: `$${treasuryUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`,
       color: 'text-blue-400' 
     },
   ];
