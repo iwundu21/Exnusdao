@@ -10,11 +10,14 @@ const STAKING_TIERS = [
   { days: 180, multiplier: 10000, label: '180 Days' },
 ];
 
+const REWARD_PRECISION = 1_000_000;
+
 export function StakingActionForm({ 
   selectedNode, 
   exnBalance, 
   onStake, 
   userStakes, 
+  validators,
   onUnstake
 }: any) {
   const [amount, setAmount] = useState('');
@@ -126,12 +129,16 @@ export function StakingActionForm({
           ) : (
             userStakes.filter((s: any) => !s.unstaked).map((s: any) => {
               const isLocked = Date.now() < s.unlock_timestamp;
+              const validator = validators?.find((v: any) => v.id === s.validator_id);
+              const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION : 0;
+              
               return (
                 <div key={s.id} className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3 hover:border-white/20 transition-all">
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-xs font-bold text-white">{s.amount.toLocaleString()} EXN</p>
                       <p className="text-[10px] text-white/40 uppercase">Multiplier: {(s.lock_multiplier/1000).toFixed(1)}x</p>
+                      <p className="text-[10px] text-[#a855f7] font-bold uppercase mt-1">Reward: +{pendingReward.toFixed(2)} EXN</p>
                     </div>
                     <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-black ${isLocked ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
                       {isLocked ? 'Locked' : 'Unlocked'}

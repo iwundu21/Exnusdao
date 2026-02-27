@@ -50,6 +50,36 @@ export default function Home() {
     });
   };
 
+  const handleClaimRewards = () => {
+    if (pendingRewardsTotal <= 0) {
+      toast({ title: "No Rewards", description: "You have no pending rewards to claim.", variant: "destructive" });
+      return;
+    }
+
+    setState(prev => {
+      const newUserStakes = prev.userStakes.map(stake => {
+        if (stake.unstaked || stake.claimed) return stake;
+        const validator = prev.validators.find(v => v.id === stake.validator_id);
+        if (!validator) return stake;
+        return {
+          ...stake,
+          reward_checkpoint: validator.global_reward_index
+        };
+      });
+
+      return {
+        ...prev,
+        exnBalance: prev.exnBalance + pendingRewardsTotal,
+        userStakes: newUserStakes
+      };
+    });
+
+    toast({ 
+      title: "Rewards Claimed", 
+      description: `Successfully claimed ${pendingRewardsTotal.toFixed(2)} EXN rewards.` 
+    });
+  };
+
   const handleUnstake = (stakeId: string) => {
     const stake = state.userStakes.find(s => s.id === stakeId);
     if (!stake || stake.unstaked) return;
@@ -199,6 +229,7 @@ export default function Home() {
               totalStaked={state.totalStaked} 
               pendingRewards={pendingRewardsTotal}
               treasuryBalance={state.treasuryBalance}
+              onClaim={handleClaimRewards}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -218,6 +249,7 @@ export default function Home() {
                   exnBalance={state.exnBalance}
                   onStake={handleStake}
                   userStakes={state.userStakes}
+                  validators={state.validators}
                   onUnstake={handleUnstake}
                 />
               </div>
