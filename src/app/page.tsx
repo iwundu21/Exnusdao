@@ -133,17 +133,6 @@ export default function Home() {
     toast({ title: "Proposal Broadcast", description: "Applied 100 EXN governance fee." });
   };
 
-  const handleAddComment = (pId: number, text: string) => {
-    if (!connected || !text) return;
-    setState(prev => ({
-      ...prev,
-      proposals: prev.proposals.map(p => p.id === pId ? {
-        ...p,
-        comments: [...(p.comments || []), { id: `c${Date.now()}`, author: walletAddress, text, timestamp: Date.now() }]
-      } : p)
-    }));
-  };
-
   if (!isMounted || !isLoaded) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#020617] space-y-4">
@@ -181,7 +170,6 @@ export default function Home() {
             walletAddress={walletAddress}
             onVote={handleVote}
             onCreate={handleCreateProposal}
-            onComment={handleAddComment}
           />
         )}
       </div>

@@ -6,11 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
 import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp, Landmark } from 'lucide-react';
 
-export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onComment }: any) {
+export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate }: any) {
   const [showCreate, setShowCreate] = useState(false);
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
-  const [commentText, setCommentText] = useState('');
   const [votingOn, setVotingOn] = useState<{ id: number; support: boolean } | null>(null);
   const [voteRationale, setVoteRationale] = useState('');
 
@@ -49,7 +48,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">DAO Governance</h2>
-          <p className="text-white/40 text-sm">Propose upgrades. All proposals live for 7 days. Voting locks 4 hours before deadline.</p>
+          <p className="text-white/40 text-sm">Propose upgrades. Voting requires a rationale comment that builds the protocol discussion.</p>
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
@@ -267,11 +266,11 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                       onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
                       className="flex items-center gap-2 text-[10px] text-white/30 uppercase font-black hover:text-white transition-colors"
                     >
-                      <MessageSquare className="w-4 h-4" /> Discussion ({comments.length})
+                      <MessageSquare className="w-4 h-4" /> Voter Rationales ({comments.length})
                       {activeCommentId === prop.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
                     {activeCommentId === prop.id && (
-                       <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest italic">Live Community Debate</span>
+                       <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest italic">Discussion limited to active voters</span>
                     )}
                  </div>
 
@@ -281,7 +280,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                         {comments.length === 0 ? (
                           <div className="flex flex-col items-center justify-center py-10 opacity-20">
                              <MessageSquare className="w-10 h-10 mb-2" />
-                             <p className="text-[10px] uppercase font-black tracking-widest text-center">No discussion entries found</p>
+                             <p className="text-[10px] uppercase font-black tracking-widest text-center">No rationales provided yet</p>
                           </div>
                         ) : (
                           [...comments].sort((a, b) => b.timestamp - a.timestamp).map((c: any) => {
@@ -314,25 +313,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                             );
                           })
                         )}
-                      </div>
-                      <div className="flex gap-3 pt-4 border-t border-white/5">
-                        <input 
-                          value={commentText}
-                          onChange={e => setCommentText(e.target.value)}
-                          className="exn-input h-12 text-sm flex-1 bg-white/5 rounded-xl px-6" 
-                          placeholder="Contribute to the governance discussion..." 
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              onComment(prop.id, commentText);
-                              setCommentText('');
-                            }
-                          }}
-                        />
-                        <button 
-                          onClick={() => { onComment(prop.id, commentText); setCommentText(''); }}
-                          disabled={!commentText.trim()}
-                          className={`h-12 px-8 text-xs font-black uppercase tracking-widest transition-all rounded-xl ${commentText.trim() ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'}`}
-                        >Post</button>
                       </div>
                    </div>
                  )}
