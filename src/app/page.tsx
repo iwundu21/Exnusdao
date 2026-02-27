@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -179,7 +178,6 @@ export default function Home() {
                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#34d399]" />
                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Trustless Network Active</span>
                 </div>
-                <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Decentralized Yield</h1>
                 <p className="text-white/40 max-w-md">Solana-based staking with zero administrative overrides. Your keys, your validators.</p>
               </div>
               
