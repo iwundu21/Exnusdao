@@ -121,13 +121,15 @@ export default function ManageNodePage() {
     const node = state.validators.find(v => v.id === vId);
     if (!node) return;
 
-    if (node.total_staked > (node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0)) {
-       toast({ 
-         title: "Active Delegators", 
-         description: "Please wait for delegators to unstake or migrate before closing.", 
+    // Check for active delegators
+    const delegatorStake = node.total_staked - (node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0);
+
+    if (delegatorStake > 0) {
+       return toast({ 
+         title: "Active Delegators Found", 
+         description: `There are still ${delegatorStake.toLocaleString()} EXN staked by delegators. All stakers must unstake or migrate before you can close this node account.`, 
          variant: "destructive" 
        });
-       // In a demo we allow it anyway, but normally we'd block
     }
 
     const seedRefund = node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0;
@@ -359,7 +361,7 @@ export default function ManageNodePage() {
                             <div className="space-y-1">
                                <p className="text-sm font-bold text-white uppercase">Close Node Account</p>
                                <p className="text-xs text-white/40 leading-relaxed max-w-sm">
-                                 Decommissioning your node is permanent. Any remaining protocol seed and accrued commissions will be returned to your wallet.
+                                 Decommissioning your node is permanent. Account closure is only permitted when there are no active stakers delegating to your node.
                                </p>
                             </div>
                             <button 
