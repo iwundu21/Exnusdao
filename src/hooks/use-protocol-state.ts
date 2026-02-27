@@ -22,6 +22,7 @@ export interface License {
   id: string;
   owner: string;
   is_claimed: boolean;
+  is_burned?: boolean;
 }
 
 export interface UserStake {
@@ -55,7 +56,7 @@ const SEED_AMOUNT = 15000000;
 const INITIAL_STATE: ProtocolState = {
   exnBalance: 25000000, 
   usdcBalance: 2500,
-  totalStaked: 45045200, // (3 * 15M) + 15200 + 12500 + 17500
+  totalStaked: 45045200, 
   treasuryBalance: 250000,
   rewardCap: 1250,
   licenseLimit: 21,
@@ -112,9 +113,9 @@ const INITIAL_STATE: ProtocolState = {
     { id: 's2', validator_id: 'v2', amount: 2500, lock_multiplier: 5000, staked_at: Date.now() - 86400000 * 2, unlock_timestamp: Date.now() + 86400000 * 30, reward_checkpoint: 1100000, claimed: false, unstaked: false },
   ],
   licenses: [
-    { id: 'LIC-DEMO1', owner: 'ExnUs...d2f1', is_claimed: true },
-    { id: 'LIC-DEMO2', owner: 'ExnUs...0002', is_claimed: true },
-    { id: 'LIC-DEMO3', owner: 'ExnUs...0003', is_claimed: true },
+    { id: 'LIC-DEMO1', owner: 'ExnUs...d2f1', is_claimed: true, is_burned: false },
+    { id: 'LIC-DEMO2', owner: 'ExnUs...0002', is_claimed: true, is_burned: false },
+    { id: 'LIC-DEMO3', owner: 'ExnUs...0003', is_claimed: true, is_burned: false },
   ],
   proposals: [
     { id: 0, proposer: 'ExnUs...99d', type: 0, title: 'Upgrade Epoch Length', description: 'Increase epoch from 24h to 48h for stability.', amount: 0, recipient: '', yes_votes: 15000, no_votes: 2000, deadline: Date.now() + 86400000 * 2, executed: false },

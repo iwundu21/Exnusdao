@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -19,7 +18,6 @@ export default function ManageNodePage() {
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>(null);
 
-  // Filter validators owned by the user
   const myNodes = state.validators.filter(v => v.owner === USER_WALLET);
 
   const startEditing = (node: any) => {
@@ -29,7 +27,7 @@ export default function ManageNodePage() {
       location: node.location,
       description: node.description,
       logo_uri: node.logo_uri,
-      commission_rate: node.commission_rate / 100, // Display as percentage 0-30
+      commission_rate: node.commission_rate / 100,
     });
   };
 
@@ -48,7 +46,7 @@ export default function ManageNodePage() {
         location: formData.location,
         description: formData.description,
         logo_uri: formData.logo_uri,
-        commission_rate: formData.commission_rate * 100, // Store as basis points
+        commission_rate: formData.commission_rate * 100,
       } : v)
     }));
 
@@ -81,7 +79,6 @@ export default function ManageNodePage() {
     setState(prev => ({
       ...prev,
       exnBalance: Math.max(0, prev.exnBalance - SEED_DEPOSIT_AMOUNT),
-      totalStaked: prev.totalStaked + SEED_DEPOSIT_AMOUNT,
       validators: prev.validators.map(v => v.id === vId ? { 
         ...v, 
         seed_deposited: true, 
@@ -90,10 +87,7 @@ export default function ManageNodePage() {
       } : v)
     }));
 
-    toast({ 
-      title: "Seed Deposited", 
-      description: "Validator node is now initialized and active." 
-    });
+    toast({ title: "Seed Deposited", description: "Validator node is now initialized and active." });
   };
 
   const handleWithdrawSeed = (vId: string) => {
@@ -103,7 +97,6 @@ export default function ManageNodePage() {
     setState(prev => ({
       ...prev,
       exnBalance: prev.exnBalance + SEED_DEPOSIT_AMOUNT,
-      totalStaked: Math.max(0, prev.totalStaked - SEED_DEPOSIT_AMOUNT),
       validators: prev.validators.map(v => v.id === vId ? { 
         ...v, 
         seed_deposited: false, 
@@ -112,26 +105,20 @@ export default function ManageNodePage() {
       } : v)
     }));
 
-    toast({ 
-      title: "Seed Withdrawn", 
-      description: "Protocol seed returned to wallet. Node is now inactive." 
-    });
+    toast({ title: "Seed Withdrawn", description: "Protocol seed returned to wallet. Node is now inactive." });
   };
 
   const handleCloseAccount = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node) return;
 
-    // Check for active delegators by looking at total stake vs seed
     const delegatorStake = node.total_staked - (node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0);
-    
-    // Check for active delegators by scanning the global stake registry for this validator ID
     const activeDelegators = state.userStakes.filter(s => s.validator_id === vId && !s.unstaked);
 
     if (delegatorStake > 0.01 || activeDelegators.length > 0) {
        return toast({ 
          title: "Active Delegators Found", 
-         description: "You cannot close this node while there is active delegator capital. All stakers must unstake or migrate their positions first.", 
+         description: "You cannot close this node while there is active delegator capital.", 
          variant: "destructive" 
        });
     }
@@ -142,12 +129,12 @@ export default function ManageNodePage() {
     setState(prev => ({
       ...prev,
       exnBalance: prev.exnBalance + seedRefund + rewards,
-      totalStaked: Math.max(0, prev.totalStaked - seedRefund),
       validators: prev.validators.filter(v => v.id !== vId),
-      licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_claimed: false } : l)
+      // Mark license as burned instead of reclaiming it
+      licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_burned: true } : l)
     }));
 
-    toast({ title: "Account Closed", description: "Node decommissioned and license released." });
+    toast({ title: "Account Closed", description: "Node decommissioned. Associated license has been burned." });
     router.push('/');
   };
 
@@ -168,11 +155,7 @@ export default function ManageNodePage() {
 
   return (
     <main className="min-h-screen pb-20">
-      <Navbar 
-        exnBalance={state.exnBalance} 
-        usdcBalance={state.usdcBalance}
-        toggleAdmin={() => {}}
-      />
+      <Navbar exnBalance={state.exnBalance} usdcBalance={state.usdcBalance} />
       
       <div className="max-w-6xl mx-auto px-10 py-20 space-y-12">
         <Link href="/" className="flex items-center gap-2 text-white/40 hover:text-white transition-colors uppercase text-xs font-bold tracking-widest">
@@ -182,7 +165,7 @@ export default function ManageNodePage() {
         <div className="space-y-4">
           <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Node Management</h1>
           <p className="text-white/40 max-w-xl">
-            As a validator operator, you can optimize your node parameters, manage your protocol seed, and harvest performance commissions.
+            Optimize your validator parameters, manage protocol seed, and harvest performance commissions.
           </p>
         </div>
 
@@ -219,7 +202,7 @@ export default function ManageNodePage() {
                             <p className="text-[10px] uppercase font-black tracking-widest">Initialization Required</p>
                           </div>
                           <p className="text-xs text-white/60 leading-relaxed">
-                            A minimum seed deposit of <span className="text-white font-bold">{SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN</span> is required to activate this node.
+                            A minimum seed deposit of <span className="text-white font-bold">{SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN</span> is required.
                           </p>
                           <button 
                             onClick={() => handleDepositSeed(node.id)}
@@ -262,18 +245,17 @@ export default function ManageNodePage() {
                         <button 
                           onClick={() => handleClaimCommission(node.id)}
                           disabled={node.accrued_node_rewards <= 0}
-                          className={`px-6 py-2 rounded-lg text-xs font-black uppercase transition-all ${node.accrued_node_rewards > 0 ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+                          className={`px-6 py-2 rounded-lg text-xs font-black uppercase transition-all ${node.accrued_node_rewards > 0 ? 'bg-emerald-500 text-black' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
                         >
                           Claim
                         </button>
                       </div>
 
                       <div className="space-y-4">
-                        <p className="text-[10px] text-white/40 uppercase font-black">Operating Status</p>
                         <button 
                           onClick={() => toggleNodeStatus(node.id)}
                           disabled={!node.seed_deposited}
-                          className={`w-full py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${!node.seed_deposited ? 'bg-white/5 text-white/20 border-white/10 cursor-not-allowed' : node.is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}
+                          className={`w-full py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${!node.seed_deposited ? 'bg-white/5 text-white/20 cursor-not-allowed' : node.is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}
                         >
                           {node.is_active ? '● Node Active' : node.seed_deposited ? '○ Node Paused' : '○ Pending Seed'}
                         </button>
@@ -318,8 +300,6 @@ export default function ManageNodePage() {
                                   onChange={e => setFormData({...formData, commission_rate: Number(e.target.value)})}
                                   className="exn-input h-12" 
                                   readOnly={!isEditing}
-                                  max="30"
-                                  min="0"
                                 />
                                 <span className="absolute right-4 top-3.5 text-white/30 font-bold">%</span>
                               </div>
@@ -361,12 +341,12 @@ export default function ManageNodePage() {
                             <div className="space-y-1">
                                <p className="text-sm font-bold text-white uppercase">Close Node Account</p>
                                <p className="text-xs text-white/40 leading-relaxed max-w-sm">
-                                 Decommissioning your node is permanent. Account closure is only permitted when there are no active stakers delegating to your node.
+                                 Decommissioning is permanent. The associated license will be burned and cannot be reused.
                                </p>
                             </div>
                             <button 
                               onClick={() => {
-                                if (window.confirm("Are you sure you want to permanently close your node account?")) {
+                                if (window.confirm("Permanent closure will burn your license. Proceed?")) {
                                   handleCloseAccount(node.id);
                                 }
                               }}
