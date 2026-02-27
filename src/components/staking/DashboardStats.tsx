@@ -4,12 +4,12 @@
 import React from 'react';
 import { TrendingUp, Lock, Award, Coins } from 'lucide-react';
 
-export function DashboardStats() {
+export function DashboardStats({ totalStaked, pendingRewards, lockedAmount }: { totalStaked: number, pendingRewards: number, lockedAmount: number }) {
   const stats = [
-    { label: 'Total Staked', value: '45,200 EXN', icon: Coins, color: 'text-[#00f5ff]' },
-    { label: 'Pending Rewards', value: '1,240.50 EXN', icon: Award, color: 'text-[#a855f7]' },
-    { label: 'Locked Amount', value: '25,000 EXN', icon: Lock, color: 'text-blue-400' },
-    { label: 'Estimated APR', value: '12.4%', icon: TrendingUp, color: 'text-emerald-400' },
+    { label: 'Total Staked', value: `${totalStaked.toLocaleString()} EXN`, icon: Coins, color: 'text-[#00f5ff]' },
+    { label: 'Pending Rewards', value: `${pendingRewards.toFixed(2)} EXN`, icon: Award, color: 'text-[#a855f7]' },
+    { label: 'Locked Volume', value: `${lockedAmount.toLocaleString()} EXN`, icon: Lock, color: 'text-blue-400' },
+    { label: 'Estimated APR', value: '14.5%', icon: TrendingUp, color: 'text-emerald-400' },
   ];
 
   return (
@@ -21,7 +21,7 @@ export function DashboardStats() {
           </div>
           <div>
             <p className="text-white/50 text-xs uppercase tracking-widest">{stat.label}</p>
-            <p className="text-2xl font-bold text-white">{stat.value}</p>
+            <p className="text-2xl font-bold text-white tracking-tight">{stat.value}</p>
           </div>
         </div>
       ))}
