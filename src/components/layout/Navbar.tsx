@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Wallet, Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket } from 'lucide-react';
+import { Wallet, Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer } from 'lucide-react';
 import Link from 'next/link';
 
 export function Navbar({ 
@@ -35,7 +35,10 @@ export function Navbar({
             <Ticket className="w-4 h-4" /> Buy License
           </Link>
           <Link href="/register-node" className="flex items-center gap-2 text-white/60 hover:text-[#00f5ff] transition-colors">
-            <LayoutDashboard className="w-4 h-4" /> Register Node
+            <Hammer className="w-4 h-4" /> Register Node
+          </Link>
+          <Link href="/manage-node" className="flex items-center gap-2 text-white/60 hover:text-[#00f5ff] transition-colors">
+            <Settings className="w-4 h-4" /> Manage Node
           </Link>
         </div>
 
