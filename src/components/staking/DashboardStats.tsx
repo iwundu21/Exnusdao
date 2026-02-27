@@ -2,14 +2,24 @@
 "use client";
 
 import React from 'react';
-import { TrendingUp, Lock, Award, Coins } from 'lucide-react';
+import { TrendingUp, Lock, Award, Coins, Ticket } from 'lucide-react';
 
-export function DashboardStats({ totalStaked, pendingRewards, lockedAmount }: { totalStaked: number, pendingRewards: number, lockedAmount: number }) {
+export function DashboardStats({ 
+  totalStaked, 
+  pendingRewards, 
+  lockedAmount,
+  licenseCount 
+}: { 
+  totalStaked: number, 
+  pendingRewards: number, 
+  lockedAmount: number,
+  licenseCount: number 
+}) {
   const stats = [
     { label: 'Total Staked', value: `${totalStaked.toLocaleString()} EXN`, icon: Coins, color: 'text-[#00f5ff]' },
     { label: 'Pending Rewards', value: `${pendingRewards.toFixed(2)} EXN`, icon: Award, color: 'text-[#a855f7]' },
     { label: 'Locked Volume', value: `${lockedAmount.toLocaleString()} EXN`, icon: Lock, color: 'text-blue-400' },
-    { label: 'Estimated APR', value: '14.5%', icon: TrendingUp, color: 'text-emerald-400' },
+    { label: 'Active Licenses', value: licenseCount.toString(), icon: Ticket, color: 'text-emerald-400' },
   ];
 
   return (

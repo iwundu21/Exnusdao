@@ -1,12 +1,10 @@
 
 "use client";
 
-import React, { useState } from 'react';
-import { ShieldAlert, RefreshCw, PlusCircle, Banknote, PauseCircle, PlayCircle, CheckCircle } from 'lucide-react';
+import React from 'react';
+import { ShieldAlert, RefreshCw, Banknote, PauseCircle, PlayCircle, CheckCircle } from 'lucide-react';
 
-export function AdminPanel({ globalState, setGlobalState, onSettle, validators, onRegister }: any) {
-  const [newValidator, setNewValidator] = useState({ name: '', description: '' });
-
+export function AdminPanel({ globalState, setGlobalState, onSettle, validators }: any) {
   return (
     <div className="fixed inset-0 z-[100] bg-[#020617]/98 flex items-center justify-center p-6 backdrop-blur-3xl overflow-y-auto">
       <div className="max-w-5xl w-full exn-card border-[#a855f7]/40 shadow-[0_0_50px_rgba(168,85,247,0.2)]">
@@ -35,27 +33,6 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators, 
                 <p className="text-[10px] text-white/40 leading-relaxed uppercase">Initiate reward distribution for all active network nodes based on current TVL.</p>
                 <button onClick={onSettle} className="w-full exn-button text-xs py-3">
                    Distribute Rewards
-                </button>
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-widest">
-                <PlusCircle className="w-5 h-5" /> Node Setup
-              </h3>
-              <div className="space-y-3 p-5 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-2">Simulate validator registration and initial seed deposit.</p>
-                <input 
-                  value={newValidator.name} 
-                  onChange={e => setNewValidator({...newValidator, name: e.target.value})}
-                  className="exn-input text-xs" 
-                  placeholder="Node Identifier..." 
-                />
-                <button 
-                  onClick={() => { onRegister(newValidator.name, "Community Node"); setNewValidator({name: '', description: ''}); }} 
-                  className="w-full exn-button-outline text-[10px] font-black"
-                >
-                  Confirm Registration
                 </button>
               </div>
             </section>

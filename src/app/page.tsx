@@ -11,7 +11,6 @@ import { GovernancePortal } from '@/components/governance/GovernancePortal';
 import { RefreshCw, Trophy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-// Protocol Constants
 const REWARD_PRECISION = 1_000_000;
 const LICENSE_PRICE_USDC = 500;
 
@@ -20,16 +19,15 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- Central Protocol State (Simulating On-Chain State) ---
   const [globalState, setGlobalState] = useState({
     totalStaked: 45200,
     rewardCap: 1250,
     validatorCount: 3,
     licensePrice: LICENSE_PRICE_USDC,
-    governanceThreshold: 5100, // 51%
+    governanceThreshold: 5100,
     proposalCount: 2,
     exnBalance: 12500,
-    usdcBalance: 2000,
+    usdcBalance: 2500,
     isPaused: false,
   });
 
@@ -43,6 +41,8 @@ export default function Home() {
     { id: 's1', validator_id: 'v1', amount: 5000, lock_multiplier: 10000, unlock_timestamp: Date.now() - 86400000, reward_checkpoint: 1000000, claimed: false, unstaked: false },
     { id: 's2', validator_id: 'v2', amount: 2500, lock_multiplier: 5000, unlock_timestamp: Date.now() + 86400000 * 30, reward_checkpoint: 1100000, claimed: false, unstaked: false },
   ]);
+
+  const [userLicenses, setUserLicenses] = useState<any[]>([]);
 
   const [proposals, setProposals] = useState([
     { id: 0, proposer: 'ExnUs...99d', type: 0, title: 'Upgrade Epoch Length', description: 'Increase epoch from 24h to 48h for stability.', amount: 0, recipient: '', yes_votes: 15000, no_votes: 2000, deadline: Date.now() + 86400000 * 2, executed: false },
@@ -68,6 +68,42 @@ export default function Home() {
       }, 0);
   }, [userStakes, validators]);
 
+  const handlePurchaseLicense = () => {
+    if (globalState.usdcBalance < LICENSE_PRICE_USDC) {
+      return toast({ title: "Insufficient USDC", variant: "destructive" });
+    }
+    const newLicense = { id: `lic-${Date.now()}`, is_claimed: false };
+    setUserLicenses(prev => [...prev, newLicense]);
+    setGlobalState(prev => ({ ...prev, usdcBalance: prev.usdcBalance - LICENSE_PRICE_USDC }));
+    toast({ title: "License Purchased", description: "You can now register a validator node." });
+  };
+
+  const handleRegisterNode = (name: string, description: string) => {
+    const availableLicense = userLicenses.find(l => !l.is_claimed);
+    if (!availableLicense) {
+      return toast({ title: "License Required", description: "Purchase a license first.", variant: "destructive" });
+    }
+
+    const newNode = {
+      id: `v${Date.now()}`,
+      owner: 'ExnUs...d2f1',
+      name,
+      description,
+      logo_uri: Math.floor(Math.random() * 100).toString(),
+      is_active: true,
+      seed_deposited: true,
+      total_staked: 0,
+      commission_rate: 1000,
+      accrued_node_rewards: 0,
+      global_reward_index: 0
+    };
+
+    setValidators(prev => [...prev, newNode]);
+    setUserLicenses(prev => prev.map(l => l.id === availableLicense.id ? { ...l, is_claimed: true } : l));
+    setGlobalState(prev => ({ ...prev, validatorCount: prev.validatorCount + 1 }));
+    toast({ title: "Node Registered", description: "Your validator is now live in the registry." });
+  };
+
   const handleStake = (stakeData: any) => {
     if (globalState.isPaused) return toast({ title: "Protocol Paused", variant: "destructive" });
     const newStake = { ...stakeData, id: `s${Date.now()}` };
@@ -81,7 +117,7 @@ export default function Home() {
     const stake = userStakes.find(s => s.id === stakeId);
     if (!stake || stake.unstaked) return;
     if (Date.now() < stake.unlock_timestamp) {
-      toast({ title: "Lock Period Active", description: "Wait until unlock date.", variant: "destructive" });
+      toast({ title: "Lock Period Active", variant: "destructive" });
       return;
     }
 
@@ -96,7 +132,7 @@ export default function Home() {
       totalStaked: prev.totalStaked - stake.amount, 
       exnBalance: prev.exnBalance + stake.amount + reward 
     }));
-    toast({ title: "Tokens Unstaked", description: `Withdrawn principal and earned rewards.` });
+    toast({ title: "Tokens Unstaked", description: "Principal and rewards returned to wallet." });
   };
 
   const handleMigrate = (stakeId: string, targetId: string) => {
@@ -116,7 +152,7 @@ export default function Home() {
       return v;
     }));
     setGlobalState(prev => ({ ...prev, exnBalance: prev.exnBalance + reward }));
-    toast({ title: "Stake Migrated", description: `Stake moved to active node ${target.name}.` });
+    toast({ title: "Stake Migrated" });
   };
 
   const handleSettleEpoch = () => {
@@ -125,33 +161,13 @@ export default function Home() {
       const commission = (globalState.rewardCap * v.commission_rate) / 10000;
       const delegatorRewards = globalState.rewardCap - commission;
       const indexIncrease = (delegatorRewards * REWARD_PRECISION) / v.total_staked;
-      
       return {
         ...v,
         accrued_node_rewards: v.accrued_node_rewards + commission,
         global_reward_index: v.global_reward_index + indexIncrease
       };
     }));
-    toast({ title: "Epoch Settled", description: "Rewards distributed across active nodes." });
-  };
-
-  const handleRegisterNode = (name: string, description: string) => {
-    const newNode = {
-      id: `v${Date.now()}`,
-      owner: 'ExnUs...d2f1',
-      name,
-      description,
-      logo_uri: '12',
-      is_active: true,
-      seed_deposited: true,
-      total_staked: 0,
-      commission_rate: 1000,
-      accrued_node_rewards: 0,
-      global_reward_index: 0
-    };
-    setValidators(prev => [...prev, newNode]);
-    setGlobalState(prev => ({ ...prev, validatorCount: prev.validatorCount + 1 }));
-    toast({ title: "Node Registered", description: "Validator added to the decentralized registry." });
+    toast({ title: "Rewards Distributed" });
   };
 
   const handleVote = (pId: number, support: boolean) => {
@@ -160,19 +176,18 @@ export default function Home() {
       yes_votes: support ? p.yes_votes + 1000 : p.yes_votes, 
       no_votes: !support ? p.no_votes + 1000 : p.no_votes 
     } : p));
-    toast({ title: "Vote Cast", description: `Support: ${support ? 'YES' : 'NO'}` });
   };
 
   const handleExecute = (pId: number) => {
     setProposals(prev => prev.map(p => p.id === pId ? { ...p, executed: true } : p));
-    toast({ title: "Proposal Executed", description: "Changes applied to the protocol." });
+    toast({ title: "Proposal Executed" });
   };
 
   if (isLoading) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#020617] space-y-4">
         <div className="w-16 h-16 border-4 border-[#00f5ff] border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(0,245,255,0.3)]" />
-        <p className="exn-gradient-text font-bold tracking-[0.2em] animate-pulse uppercase">Synchronizing Exnus Protocol</p>
+        <p className="exn-gradient-text font-bold tracking-[0.2em] animate-pulse uppercase">Synchronizing Network</p>
       </div>
     );
   }
@@ -183,6 +198,7 @@ export default function Home() {
         isAdmin={isAdmin} 
         toggleAdmin={() => setIsAdmin(!isAdmin)} 
         exnBalance={globalState.exnBalance} 
+        usdcBalance={globalState.usdcBalance}
       />
       
       {isAdmin && (
@@ -192,7 +208,6 @@ export default function Home() {
           onSettle={handleSettleEpoch}
           validators={validators}
           setValidators={setValidators}
-          onRegister={handleRegisterNode}
         />
       )}
 
@@ -218,26 +233,19 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#34d399]" />
-                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Protocol v1.1 Active</span>
+                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Trustless Network Active</span>
                 </div>
-                <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Stake & Earn</h1>
-                <p className="text-white/40 max-w-md">Trustless Solana-based staking. Zero-trust architecture. Full control over your assets and validators.</p>
+                <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Decentralized Yield</h1>
+                <p className="text-white/40 max-w-md">Solana-based staking with zero administrative overrides. Your keys, your validators.</p>
               </div>
               
               <div className="flex gap-4">
                  <button 
-                   onClick={() => toast({ title: "Rewards Claimed", description: "Successfully claimed earned EXN." })}
+                   onClick={() => toast({ title: "Rewards Claimed" })}
                    className="exn-button flex items-center gap-2 group"
                  >
                    <Trophy className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                    Claim {pendingRewardsTotal.toFixed(1)} EXN
-                 </button>
-                 <button 
-                   onClick={handleSettleEpoch}
-                   className="exn-button-outline flex items-center gap-2 group"
-                 >
-                   <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-700" />
-                   Settle Epoch
                  </button>
               </div>
             </div>
@@ -246,6 +254,7 @@ export default function Home() {
               totalStaked={globalState.totalStaked} 
               pendingRewards={pendingRewardsTotal}
               lockedAmount={userStakes.filter(s => Date.now() < s.unlock_timestamp && !s.unstaked).reduce((a, b) => a + b.amount, 0)}
+              licenseCount={userLicenses.filter(l => !l.is_claimed).length}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -262,9 +271,13 @@ export default function Home() {
                 <StakingActionForm 
                   selectedNode={selectedValidator} 
                   exnBalance={globalState.exnBalance}
+                  usdcBalance={globalState.usdcBalance}
                   onStake={handleStake}
                   userStakes={userStakes}
                   onUnstake={handleUnstake}
+                  onPurchaseLicense={handlePurchaseLicense}
+                  onRegisterNode={handleRegisterNode}
+                  availableLicenses={userLicenses.filter(l => !l.is_claimed).length}
                 />
               </div>
             </div>

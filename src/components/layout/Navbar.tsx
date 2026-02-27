@@ -2,10 +2,20 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Wallet, ShieldCheck, Settings, Coins } from 'lucide-react';
+import { Wallet, ShieldCheck, Settings, Coins, CircleDollarSign } from 'lucide-react';
 import Link from 'next/link';
 
-export function Navbar({ isAdmin = false, toggleAdmin, exnBalance = 0 }: { isAdmin?: boolean, toggleAdmin: () => void, exnBalance?: number }) {
+export function Navbar({ 
+  isAdmin = false, 
+  toggleAdmin, 
+  exnBalance = 0, 
+  usdcBalance = 0 
+}: { 
+  isAdmin?: boolean, 
+  toggleAdmin: () => void, 
+  exnBalance?: number,
+  usdcBalance?: number
+}) {
   const [connected, setConnected] = useState(true);
 
   return (
@@ -16,14 +26,20 @@ export function Navbar({ isAdmin = false, toggleAdmin, exnBalance = 0 }: { isAdm
         </div>
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold exn-gradient-text tracking-wider leading-none">EXNUS</h1>
-          <span className="text-[10px] text-white/40 tracking-[0.3em] font-bold">STAKING DAPP</span>
+          <span className="text-[10px] text-white/40 tracking-[0.3em] font-bold uppercase">Decentralized</span>
         </div>
       </Link>
 
-      <div className="flex items-center gap-8">
-        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-          <Coins className="w-4 h-4 text-[#00f5ff]" />
-          <span className="text-xs font-bold text-[#00f5ff]">{exnBalance.toLocaleString()} EXN</span>
+      <div className="flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-6">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
+            <Coins className="w-4 h-4 text-[#00f5ff]" />
+            <span className="text-xs font-bold text-[#00f5ff]">{exnBalance.toLocaleString()} EXN</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
+            <CircleDollarSign className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-emerald-400">{usdcBalance.toLocaleString()} USDC</span>
+          </div>
         </div>
 
         <button 
