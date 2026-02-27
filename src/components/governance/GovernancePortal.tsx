@@ -4,21 +4,34 @@
 import React, { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Settings2 } from 'lucide-react';
 
 export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onComment }: any) {
   const [showCreate, setShowCreate] = useState(false);
-  const [newProp, setNewProp] = useState({ title: '', description: '', type: 0 });
+  const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
   const [commentText, setCommentText] = useState('');
   const [votingOn, setVotingOn] = useState<{ id: number; support: boolean } | null>(null);
   const [voteRationale, setVoteRationale] = useState('');
 
   const handleCreate = () => {
-    if (!newProp.title || !newProp.description) return toast({ title: "Fields Required", variant: "destructive" });
-    onCreate(newProp);
+    if (!newProp.title || !newProp.description) {
+      return toast({ title: "Fields Required", description: "Title and description are mandatory.", variant: "destructive" });
+    }
+    
+    if (newProp.type === 1) {
+      if (!newProp.recipient || !newProp.amount || Number(newProp.amount) <= 0) {
+        return toast({ title: "Distribution Details Required", description: "Please specify a valid recipient and amount.", variant: "destructive" });
+      }
+    }
+
+    onCreate({
+      ...newProp,
+      amount: Number(newProp.amount) || 0
+    });
+    
     setShowCreate(false);
-    setNewProp({ title: '', description: '', type: 0 });
+    setNewProp({ title: '', description: '', type: 0, amount: '', recipient: '' });
   };
 
   const handleConfirmVote = () => {
@@ -56,34 +69,76 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
 
       {showCreate && (
         <div className="exn-card p-8 border-[#a855f7]/40 animate-in fade-in slide-in-from-top-4">
-          <h3 className="text-xl font-bold mb-6 uppercase tracking-widest">Submit Proposal (Fee: 100 EXN)</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-               <input 
-                 value={newProp.title}
-                 onChange={e => setNewProp({...newProp, title: e.target.value})}
-                 className="exn-input text-xs" 
-                 placeholder="Proposal Title (PIP-XXX)..." 
-               />
-               <select 
-                 value={newProp.type}
-                 onChange={e => setNewProp({...newProp, type: Number(e.target.value)})}
-                 className="exn-input text-xs"
-               >
-                 <option value={0}>Protocol Parameter Change</option>
-                 <option value={1}>Treasury Distribution</option>
-               </select>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-[#a855f7]/20 rounded-lg">
+              <Landmark className="w-5 h-5 text-[#a855f7]" />
             </div>
-            <textarea 
-              value={newProp.description}
-              onChange={e => setNewProp({...newProp, description: e.target.value})}
-              className="exn-input h-[104px] text-xs" 
-              placeholder="Describe the change and rationale..." 
-            />
+            <h3 className="text-xl font-bold uppercase tracking-widest">Submit Proposal (Fee: 100 EXN)</h3>
           </div>
-          <div className="flex gap-4 mt-8">
-            <button onClick={handleCreate} className="exn-button text-xs">Broadcast Proposal</button>
-            <button onClick={() => setShowCreate(false)} className="exn-button-outline text-xs">Cancel</button>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+               <div className="space-y-2">
+                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Proposal Title</label>
+                 <input 
+                   value={newProp.title}
+                   onChange={e => setNewProp({...newProp, title: e.target.value})}
+                   className="exn-input text-xs" 
+                   placeholder="e.g. PIP-004: Network Expansion" 
+                 />
+               </div>
+
+               <div className="space-y-2">
+                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Proposal Category</label>
+                 <select 
+                   value={newProp.type}
+                   onChange={e => setNewProp({...newProp, type: Number(e.target.value)})}
+                   className="exn-input text-xs"
+                 >
+                   <option value={0}>Protocol Parameter Change</option>
+                   <option value={1}>Treasury Distribution (Transaction)</option>
+                 </select>
+               </div>
+
+               {newProp.type === 1 && (
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white/5 rounded-xl border border-white/5 animate-in slide-in-from-left-2">
+                    <div className="space-y-2">
+                      <label className="text-[10px] text-[#a855f7] uppercase font-black tracking-widest">Recipient Address</label>
+                      <input 
+                        value={newProp.recipient}
+                        onChange={e => setNewProp({...newProp, recipient: e.target.value})}
+                        className="exn-input text-[10px] font-mono" 
+                        placeholder="Solana Address..." 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] text-[#a855f7] uppercase font-black tracking-widest">Amount (EXN)</label>
+                      <input 
+                        type="number"
+                        value={newProp.amount}
+                        onChange={e => setNewProp({...newProp, amount: e.target.value})}
+                        className="exn-input text-[10px]" 
+                        placeholder="0.00" 
+                      />
+                    </div>
+                 </div>
+               )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Rationale & Details</label>
+              <textarea 
+                value={newProp.description}
+                onChange={e => setNewProp({...newProp, description: e.target.value})}
+                className="exn-input h-[210px] text-xs py-4" 
+                placeholder="Describe the change, the technical impact, and the rationale for community voting..." 
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-10">
+            <button onClick={handleCreate} className="exn-button px-10 text-[10px]">Broadcast to Network</button>
+            <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 text-[10px]">Cancel</button>
           </div>
         </div>
       )}
@@ -110,6 +165,20 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                   </div>
                   <p className="text-white/60 text-sm leading-relaxed">{prop.description}</p>
                   
+                  {prop.type === 1 && prop.recipient && (
+                    <div className="flex items-center gap-6 p-4 bg-white/5 rounded-xl border border-white/5 w-fit">
+                      <div className="space-y-1">
+                        <p className="text-[8px] text-white/20 uppercase font-black">Recipient</p>
+                        <p className="text-xs font-mono text-[#a855f7]">{prop.recipient.slice(0, 8)}...{prop.recipient.slice(-8)}</p>
+                      </div>
+                      <div className="w-px h-8 bg-white/10" />
+                      <div className="space-y-1">
+                        <p className="text-[8px] text-white/20 uppercase font-black">Transfer Amount</p>
+                        <p className="text-sm font-bold text-[#a855f7]">{prop.amount.toLocaleString()} EXN</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap gap-6 pt-2">
                     <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase font-black">
                       <History className="w-3 h-3" />
