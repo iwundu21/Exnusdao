@@ -1,11 +1,12 @@
+
 "use client";
 
 import React from 'react';
-import { ShieldCheck, ArrowRightLeft, MapPin } from 'lucide-react';
+import { ShieldCheck, ArrowRightLeft, MapPin, Check } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
 
-export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate }: any) {
+export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate, selectedId }: any) {
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
@@ -21,9 +22,10 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
           // Resolve logo URI: if it's a URL, use it; otherwise, use our picsum seed system
           const isUrl = validator.logo_uri?.startsWith('http') || validator.logo_uri?.startsWith('data:');
           const logoUrl = isUrl ? validator.logo_uri : `https://picsum.photos/seed/${validator.logo_uri}/800/400`;
+          const isSelected = selectedId === validator.id;
 
           return (
-            <div key={validator.id} className={`exn-card group border ${!validator.is_active ? 'border-red-500/20 opacity-80' : 'border-white/10'}`}>
+            <div key={validator.id} className={`exn-card group border transition-all duration-300 ${isSelected ? 'border-[#00f5ff] ring-1 ring-[#00f5ff] shadow-[0_0_30px_rgba(0,245,255,0.15)]' : !validator.is_active ? 'border-red-500/20 opacity-80' : 'border-white/10'}`}>
               <div className="relative h-32 w-full overflow-hidden">
                  <Image 
                   src={logoUrl}
@@ -39,6 +41,11 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                 <div className="absolute bottom-4 left-6 flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${validator.is_active ? 'bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]' : 'bg-red-400'}`} />
                   <span className="text-white font-bold text-lg tracking-tight">{validator.name}</span>
+                  {isSelected && (
+                    <div className="flex items-center gap-1 ml-2 bg-[#00f5ff] text-black text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
+                      <Check className="w-2.5 h-2.5" /> Selected
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -60,11 +67,11 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
 
                 <div className="flex gap-3">
                   <button 
-                    disabled={!validator.is_active}
+                    disabled={!validator.is_active || isSelected}
                     onClick={() => onSelect(validator)}
-                    className={`flex-1 text-[10px] py-2.5 uppercase font-black tracking-widest rounded-md transition-all ${validator.is_active ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+                    className={`flex-1 text-[10px] py-2.5 uppercase font-black tracking-widest rounded-md transition-all ${validator.is_active ? (isSelected ? 'bg-[#00f5ff]/20 text-[#00f5ff] border border-[#00f5ff]/40' : 'exn-button') : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
                   >
-                    {validator.is_active ? 'Stake Now' : 'Node Inactive'}
+                    {isSelected ? 'Target Locked' : (validator.is_active ? 'Stake Now' : 'Node Inactive')}
                   </button>
                   
                   {!validator.is_active && userStakes.some((s: any) => s.validator_id === validator.id && !s.unstaked) && (

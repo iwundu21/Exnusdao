@@ -209,6 +209,7 @@ export default function Home() {
                   onSelect={setSelectedValidator}
                   userStakes={state.userStakes}
                   onMigrate={handleMigrate}
+                  selectedId={selectedValidator?.id}
                 />
               </div>
 

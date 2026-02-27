@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Coins, ArrowRightLeft, AlertCircle, Calendar } from 'lucide-react';
+import { Coins, ArrowRightLeft, AlertCircle, Calendar, Target } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const STAKING_TIERS = [
@@ -96,13 +96,21 @@ export function StakingActionForm({
           </div>
 
           <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-white/50">Target Validator</span>
-              <span className="text-white font-medium">{selectedNode ? selectedNode.name : 'Selection Required'}</span>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-white/50 uppercase tracking-tighter flex items-center gap-2">
+                <Target className="w-3 h-3 text-[#00f5ff]" /> Target Node
+              </span>
+              <span className={`font-bold uppercase ${selectedNode ? 'text-[#00f5ff]' : 'text-red-400 animate-pulse'}`}>
+                {selectedNode ? selectedNode.name : 'Selection Required'}
+              </span>
             </div>
           </div>
 
-          <button onClick={handleAction} className="w-full h-12 exn-button uppercase tracking-widest flex items-center justify-center gap-2">
+          <button 
+            onClick={handleAction} 
+            disabled={!selectedNode}
+            className={`w-full h-12 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${selectedNode ? 'exn-button' : 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'}`}
+          >
             <ArrowRightLeft className="w-5 h-5" /> Confirm Stake
           </button>
         </div>
