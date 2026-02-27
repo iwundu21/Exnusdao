@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -251,6 +252,8 @@ export default function Home() {
                   userStakes={state.userStakes}
                   validators={state.validators}
                   onUnstake={handleUnstake}
+                  onClaim={handleClaimRewards}
+                  totalPendingRewards={pendingRewardsTotal}
                 />
               </div>
             </div>

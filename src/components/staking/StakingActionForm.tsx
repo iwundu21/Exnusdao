@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -18,7 +19,9 @@ export function StakingActionForm({
   onStake, 
   userStakes, 
   validators,
-  onUnstake
+  onUnstake,
+  onClaim,
+  totalPendingRewards = 0
 }: any) {
   const [amount, setAmount] = useState('');
   const [duration, setDuration] = useState('30');
@@ -43,6 +46,8 @@ export function StakingActionForm({
     setAmount('');
   };
 
+  const activeUserStakes = userStakes.filter((s: any) => !s.unstaked);
+
   return (
     <div className="exn-card p-8 space-y-6 sticky top-28 border-[#00f5ff]/10">
       <div className="flex gap-1 p-1 bg-white/5 rounded-lg">
@@ -56,7 +61,7 @@ export function StakingActionForm({
           onClick={() => setActiveTab('my-stakes')}
           className={`flex-1 py-2 text-[10px] font-bold rounded-md transition-all uppercase ${activeTab === 'my-stakes' ? 'exn-gradient-bg text-black' : 'text-white/40 hover:bg-white/5'}`}
         >
-          My Stakes
+          My Stakes & Rewards
         </button>
       </div>
 
@@ -121,49 +126,73 @@ export function StakingActionForm({
       )}
 
       {activeTab === 'my-stakes' && (
-        <div className="space-y-4 max-h-[400px] overflow-auto pr-2 animate-in fade-in slide-in-from-right-4 duration-300">
-          {userStakes.filter((s: any) => !s.unstaked).length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 space-y-4 text-white/20">
-               <p className="text-center text-xs uppercase font-bold tracking-widest">No active stake records</p>
+        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="flex justify-between items-center p-4 bg-[#a855f7]/10 border border-[#a855f7]/20 rounded-xl">
+            <div>
+              <p className="text-[10px] text-white/50 uppercase font-black">Claimable Rewards</p>
+              <p className="text-xl font-bold text-[#a855f7]">{totalPendingRewards.toFixed(2)} EXN</p>
             </div>
-          ) : (
-            userStakes.filter((s: any) => !s.unstaked).map((s: any) => {
-              const isLocked = Date.now() < s.unlock_timestamp;
-              const validator = validators?.find((v: any) => v.id === s.validator_id);
-              const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION : 0;
-              
-              return (
-                <div key={s.id} className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3 hover:border-white/20 transition-all">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-xs font-bold text-white">{s.amount.toLocaleString()} EXN</p>
-                      <p className="text-[10px] text-white/40 uppercase">Multiplier: {(s.lock_multiplier/1000).toFixed(1)}x</p>
-                      <p className="text-[10px] text-[#a855f7] font-bold uppercase mt-1">Reward: +{pendingReward.toFixed(2)} EXN</p>
+            <button 
+              onClick={onClaim}
+              disabled={totalPendingRewards <= 0}
+              className={`px-4 py-2 rounded text-[10px] font-black uppercase transition-all ${totalPendingRewards > 0 ? 'bg-[#a855f7] text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+            >
+              Claim All
+            </button>
+          </div>
+
+          <div className="space-y-3 max-h-[350px] overflow-auto pr-2">
+            <div className="grid grid-cols-3 text-[9px] font-black text-white/20 uppercase px-2 mb-1">
+              <span>Amount</span>
+              <span className="text-center">Node</span>
+              <span className="text-right">Earnings</span>
+            </div>
+            
+            {activeUserStakes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 space-y-4 text-white/10 border border-dashed border-white/5 rounded-xl">
+                 <p className="text-center text-[10px] uppercase font-bold tracking-widest">No active positions</p>
+              </div>
+            ) : (
+              activeUserStakes.map((s: any) => {
+                const isLocked = Date.now() < s.unlock_timestamp;
+                const validator = validators?.find((v: any) => v.id === s.validator_id);
+                const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION : 0;
+                
+                return (
+                  <div key={s.id} className="p-3 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 transition-all">
+                    <div className="grid grid-cols-3 items-center">
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-bold text-white">{s.amount.toLocaleString()}</p>
+                        <p className="text-[8px] text-white/30 uppercase">{(s.lock_multiplier/1000).toFixed(1)}x</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] font-bold text-[#00f5ff] uppercase truncate">{validator?.name || 'Unknown'}</p>
+                        <p className={`text-[8px] font-black uppercase ${isLocked ? 'text-amber-500' : 'text-emerald-400'}`}>
+                          {isLocked ? 'Locked' : 'Available'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-emerald-400">+{pendingReward.toFixed(2)}</p>
+                        {!isLocked && (
+                          <button 
+                            onClick={() => onUnstake(s.id)}
+                            className="text-[8px] text-[#00f5ff] font-black uppercase hover:underline mt-1"
+                          >
+                            Unstake
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-black ${isLocked ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                      {isLocked ? 'Locked' : 'Unlocked'}
-                    </span>
                   </div>
-                  <div className="text-[10px] text-white/50 uppercase">
-                    Unlock: {new Date(s.unlock_timestamp).toLocaleDateString()}
-                  </div>
-                  {!isLocked && (
-                    <button 
-                      onClick={() => onUnstake(s.id)}
-                      className="w-full py-2 bg-emerald-500 text-black text-[10px] font-bold rounded uppercase hover:bg-emerald-400 transition-colors"
-                    >
-                      Unstake Funds
-                    </button>
-                  )}
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </div>
       )}
 
       <div className="flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-        <p className="text-[10px] text-red-400 leading-tight uppercase font-bold">Lock periods are strictly enforced by the protocol smart contract. Principal cannot be withdrawn prematurely.</p>
+        <p className="text-[10px] text-red-400 leading-tight uppercase font-bold">Protocol lock periods are immutable once confirmed. Verify your selection before broadcasting.</p>
       </div>
     </div>
   );
