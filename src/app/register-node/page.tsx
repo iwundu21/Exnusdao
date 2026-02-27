@@ -109,7 +109,8 @@ export default function RegisterNodePage() {
       total_staked: 0,
       commission_rate: formData.commission * 100,
       accrued_node_rewards: 0,
-      global_reward_index: 0
+      global_reward_index: 0,
+      license_id: formData.licenseId
     };
 
     setState(prev => ({

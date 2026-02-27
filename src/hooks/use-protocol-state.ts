@@ -15,6 +15,7 @@ export interface Validator {
   commission_rate: number;
   accrued_node_rewards: number;
   global_reward_index: number;
+  license_id?: string;
 }
 
 export interface License {
@@ -50,7 +51,7 @@ export interface ProtocolState {
 }
 
 const INITIAL_STATE: ProtocolState = {
-  exnBalance: 25000000, // Bumped to allow for 15M seed deposit testing
+  exnBalance: 25000000, 
   usdcBalance: 2500,
   totalStaked: 45200,
   treasuryBalance: 250000,
@@ -58,15 +59,19 @@ const INITIAL_STATE: ProtocolState = {
   licenseLimit: 21,
   isPaused: false,
   validators: [
-    { id: 'v1', owner: 'ExnUs...d2f1', name: 'CyberCore-01', description: 'Primary edge node', logo_uri: '66', location: 'Singapore', is_active: true, seed_deposited: true, total_staked: 15200, commission_rate: 500, accrued_node_rewards: 452, global_reward_index: 1200000 },
-    { id: 'v2', owner: 'ExnUs...0002', name: 'NebulaNode', description: 'Deep space validator', logo_uri: '77', location: 'Mars Alpha', is_active: true, seed_deposited: true, total_staked: 12500, commission_rate: 800, accrued_node_rewards: 210, global_reward_index: 1200000 },
-    { id: 'v3', owner: 'ExnUs...0003', name: 'AlphaPulse', description: 'High-frequency pulse', logo_uri: '88', location: 'London', is_active: true, seed_deposited: true, total_staked: 17500, commission_rate: 300, accrued_node_rewards: 125, global_reward_index: 1150000 },
+    { id: 'v1', owner: 'ExnUs...d2f1', name: 'CyberCore-01', description: 'Primary edge node', logo_uri: '66', location: 'Singapore', is_active: true, seed_deposited: true, total_staked: 15200, commission_rate: 500, accrued_node_rewards: 452, global_reward_index: 1200000, license_id: 'LIC-DEMO1' },
+    { id: 'v2', owner: 'ExnUs...0002', name: 'NebulaNode', description: 'Deep space validator', logo_uri: '77', location: 'Mars Alpha', is_active: true, seed_deposited: true, total_staked: 12500, commission_rate: 800, accrued_node_rewards: 210, global_reward_index: 1200000, license_id: 'LIC-DEMO2' },
+    { id: 'v3', owner: 'ExnUs...0003', name: 'AlphaPulse', description: 'High-frequency pulse', logo_uri: '88', location: 'London', is_active: true, seed_deposited: true, total_staked: 17500, commission_rate: 300, accrued_node_rewards: 125, global_reward_index: 1150000, license_id: 'LIC-DEMO3' },
   ],
   userStakes: [
     { id: 's1', validator_id: 'v1', amount: 5000, lock_multiplier: 10000, staked_at: Date.now() - 86400000 * 7, unlock_timestamp: Date.now() - 86400000, reward_checkpoint: 1000000, claimed: false, unstaked: false },
     { id: 's2', validator_id: 'v2', amount: 2500, lock_multiplier: 5000, staked_at: Date.now() - 86400000 * 2, unlock_timestamp: Date.now() + 86400000 * 30, reward_checkpoint: 1100000, claimed: false, unstaked: false },
   ],
-  licenses: [],
+  licenses: [
+    { id: 'LIC-DEMO1', owner: 'ExnUs...d2f1', is_claimed: true },
+    { id: 'LIC-DEMO2', owner: 'ExnUs...0002', is_claimed: true },
+    { id: 'LIC-DEMO3', owner: 'ExnUs...0003', is_claimed: true },
+  ],
   proposals: [
     { id: 0, proposer: 'ExnUs...99d', type: 0, title: 'Upgrade Epoch Length', description: 'Increase epoch from 24h to 48h for stability.', amount: 0, recipient: '', yes_votes: 15000, no_votes: 2000, deadline: Date.now() + 86400000 * 2, executed: false },
     { id: 1, proposer: 'ExnUs...Admin', type: 1, title: 'Treasury Grant: AI Integration', description: 'Release 50,000 EXN for ecosystem development.', amount: 50000, recipient: 'ExnUs...abc', yes_votes: 45000, no_votes: 1200, deadline: Date.now() - 86400000, executed: false },

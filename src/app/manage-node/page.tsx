@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ArrowLeft, Save, ShieldCheck, AlertTriangle, LogOut } from 'lucide-react';
+import { ArrowLeft, Save, ShieldCheck, AlertTriangle, LogOut, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const USER_WALLET = 'ExnUs...d2f1';
 const SEED_DEPOSIT_AMOUNT = 15000000;
 
 export default function ManageNodePage() {
+  const router = useRouter();
   const { state, setState, isLoaded } = useProtocolState();
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>(null);
@@ -113,6 +115,34 @@ export default function ManageNodePage() {
       title: "Seed Withdrawn", 
       description: "Protocol seed returned to wallet. Node is now inactive." 
     });
+  };
+
+  const handleCloseAccount = (vId: string) => {
+    const node = state.validators.find(v => v.id === vId);
+    if (!node) return;
+
+    if (node.total_staked > (node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0)) {
+       toast({ 
+         title: "Active Delegators", 
+         description: "Please wait for delegators to unstake or migrate before closing.", 
+         variant: "destructive" 
+       });
+       // In a demo we allow it anyway, but normally we'd block
+    }
+
+    const seedRefund = node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0;
+    const rewards = node.accrued_node_rewards;
+
+    setState(prev => ({
+      ...prev,
+      exnBalance: prev.exnBalance + seedRefund + rewards,
+      totalStaked: prev.totalStaked - seedRefund,
+      validators: prev.validators.filter(v => v.id !== vId),
+      licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_claimed: false } : l)
+    }));
+
+    toast({ title: "Account Closed", description: "Node decommissioned and license released." });
+    router.push('/');
   };
 
   const toggleNodeStatus = (vId: string) => {
@@ -246,78 +276,103 @@ export default function ManageNodePage() {
                       </div>
                     </div>
 
-                    {/* Right Side: Edit Form */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-sm font-black text-white/40 uppercase tracking-widest">Metadata & Parameters</h3>
-                        {!isEditing && (
-                          <button onClick={() => startEditing(node)} className="exn-button-outline px-4 py-2 text-[10px]">Edit Details</button>
-                        )}
-                      </div>
-
-                      <div className={`space-y-6 transition-opacity ${isEditing ? 'opacity-100' : 'opacity-60 pointer-events-none'}`}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Node Name</label>
-                            <input 
-                              value={isEditing ? formData.name : node.name}
-                              onChange={e => setFormData({...formData, name: e.target.value})}
-                              className="exn-input h-12" 
-                              readOnly={!isEditing}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Location</label>
-                            <input 
-                              value={isEditing ? formData.location : node.location}
-                              onChange={e => setFormData({...formData, location: e.target.value})}
-                              className="exn-input h-12" 
-                              readOnly={!isEditing}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Commission % (Max 30%)</label>
-                            <div className="relative">
-                              <input 
-                                type="number"
-                                value={isEditing ? formData.commission_rate : (node.commission_rate / 100)}
-                                onChange={e => setFormData({...formData, commission_rate: Number(e.target.value)})}
-                                className="exn-input h-12" 
-                                readOnly={!isEditing}
-                                max="30"
-                                min="0"
-                              />
-                              <span className="absolute right-4 top-3.5 text-white/30 font-bold">%</span>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Logo Seed/URI</label>
-                            <input 
-                              value={isEditing ? formData.logo_uri : node.logo_uri}
-                              onChange={e => setFormData({...formData, logo_uri: e.target.value})}
-                              className="exn-input h-12 font-mono text-xs" 
-                              readOnly={!isEditing}
-                            />
-                          </div>
-                          <div className="md:col-span-2 space-y-2">
-                            <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Bio / Description</label>
-                            <textarea 
-                              value={isEditing ? formData.description : node.description}
-                              onChange={e => setFormData({...formData, description: e.target.value})}
-                              className="exn-input min-h-[100px] py-4" 
-                              readOnly={!isEditing}
-                            />
-                          </div>
+                    {/* Right Side: Edit Form & Danger Zone */}
+                    <div className="flex-1 space-y-12">
+                      <div>
+                        <div className="flex justify-between items-center mb-6">
+                          <h3 className="text-sm font-black text-white/40 uppercase tracking-widest">Metadata & Parameters</h3>
+                          {!isEditing && (
+                            <button onClick={() => startEditing(node)} className="exn-button-outline px-4 py-2 text-[10px]">Edit Details</button>
+                          )}
                         </div>
 
-                        {isEditing && (
-                          <div className="flex gap-4 pt-4">
-                            <button onClick={handleUpdate} className="exn-button flex-1 py-4 flex items-center justify-center gap-2">
-                               <Save className="w-4 h-4" /> Save Network Updates
-                            </button>
-                            <button onClick={() => setEditingNodeId(null)} className="exn-button-outline px-10">Cancel</button>
+                        <div className={`space-y-6 transition-opacity ${isEditing ? 'opacity-100' : 'opacity-60 pointer-events-none'}`}>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Node Name</label>
+                              <input 
+                                value={isEditing ? formData.name : node.name}
+                                onChange={e => setFormData({...formData, name: e.target.value})}
+                                className="exn-input h-12" 
+                                readOnly={!isEditing}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Location</label>
+                              <input 
+                                value={isEditing ? formData.location : node.location}
+                                onChange={e => setFormData({...formData, location: e.target.value})}
+                                className="exn-input h-12" 
+                                readOnly={!isEditing}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Commission % (Max 30%)</label>
+                              <div className="relative">
+                                <input 
+                                  type="number"
+                                  value={isEditing ? formData.commission_rate : (node.commission_rate / 100)}
+                                  onChange={e => setFormData({...formData, commission_rate: Number(e.target.value)})}
+                                  className="exn-input h-12" 
+                                  readOnly={!isEditing}
+                                  max="30"
+                                  min="0"
+                                />
+                                <span className="absolute right-4 top-3.5 text-white/30 font-bold">%</span>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Logo Seed/URI</label>
+                              <input 
+                                value={isEditing ? formData.logo_uri : node.logo_uri}
+                                onChange={e => setFormData({...formData, logo_uri: e.target.value})}
+                                className="exn-input h-12 font-mono text-xs" 
+                                readOnly={!isEditing}
+                              />
+                            </div>
+                            <div className="md:col-span-2 space-y-2">
+                              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Bio / Description</label>
+                              <textarea 
+                                value={isEditing ? formData.description : node.description}
+                                onChange={e => setFormData({...formData, description: e.target.value})}
+                                className="exn-input min-h-[100px] py-4" 
+                                readOnly={!isEditing}
+                              />
+                            </div>
                           </div>
-                        )}
+
+                          {isEditing && (
+                            <div className="flex gap-4 pt-4">
+                              <button onClick={handleUpdate} className="exn-button flex-1 py-4 flex items-center justify-center gap-2">
+                                 <Save className="w-4 h-4" /> Save Network Updates
+                              </button>
+                              <button onClick={() => setEditingNodeId(null)} className="exn-button-outline px-10">Cancel</button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Danger Zone */}
+                      <div className="pt-10 border-t border-red-500/20">
+                         <h3 className="text-xs font-black text-red-500 uppercase tracking-[0.3em] mb-6">Danger Zone</h3>
+                         <div className="p-8 bg-red-500/5 border border-red-500/10 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="space-y-1">
+                               <p className="text-sm font-bold text-white uppercase">Close Node Account</p>
+                               <p className="text-xs text-white/40 leading-relaxed max-w-sm">
+                                 Decommissioning your node is permanent. Any remaining protocol seed and accrued commissions will be returned to your wallet.
+                               </p>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to permanently close your node account?")) {
+                                  handleCloseAccount(node.id);
+                                }
+                              }}
+                              className="px-8 py-3 bg-red-500/10 text-red-500 border border-red-500/40 rounded-lg text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
+                            >
+                              <Trash2 className="w-4 h-4" /> Terminate Node Account
+                            </button>
+                         </div>
                       </div>
                     </div>
                   </div>
