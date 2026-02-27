@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -10,7 +9,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold exn-gradient-text uppercase tracking-widest">Active Node Registry</h2>
+        <h2 className="text-2xl font-bold exn-gradient-text uppercase tracking-widest">Active Validators</h2>
         <div className="flex gap-2">
           <span className="bg-[#00f5ff]/10 text-[#00f5ff] text-xs px-3 py-1 rounded-full border border-[#00f5ff]/20">{validators.length} Total</span>
           <span className="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/20">{validators.filter((v: any) => v.is_active).length} Online</span>
