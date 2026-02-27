@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -121,13 +122,16 @@ export default function ManageNodePage() {
     const node = state.validators.find(v => v.id === vId);
     if (!node) return;
 
-    // Check for active delegators
+    // Check for active delegators by looking at total stake vs seed
     const delegatorStake = node.total_staked - (node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0);
+    
+    // Check for active delegators by scanning the global stake registry for this validator ID
+    const activeDelegators = state.userStakes.filter(s => s.validator_id === vId && !s.unstaked);
 
-    if (delegatorStake > 0) {
+    if (delegatorStake > 0.01 || activeDelegators.length > 0) {
        return toast({ 
          title: "Active Delegators Found", 
-         description: `There are still ${Math.max(0, delegatorStake).toLocaleString()} EXN staked by delegators. All stakers must unstake or migrate before you can close this node account.`, 
+         description: "You cannot close this node while there is active delegator capital. All stakers must unstake or migrate their positions first.", 
          variant: "destructive" 
        });
     }
@@ -197,7 +201,6 @@ export default function ManageNodePage() {
               return (
                 <div key={node.id} className="exn-card p-10 space-y-10 border-[#00f5ff]/20">
                   <div className="flex flex-col lg:flex-row justify-between gap-10">
-                    {/* Left Side: Stats & Status */}
                     <div className="w-full lg:w-1/3 space-y-8">
                       <div className="flex items-center gap-6">
                         <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-white/10">
@@ -209,7 +212,6 @@ export default function ManageNodePage() {
                         </div>
                       </div>
 
-                      {/* Seed Deposit Status */}
                       {!node.seed_deposited ? (
                         <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-4">
                           <div className="flex items-center gap-3 text-amber-500">
@@ -278,7 +280,6 @@ export default function ManageNodePage() {
                       </div>
                     </div>
 
-                    {/* Right Side: Edit Form & Danger Zone */}
                     <div className="flex-1 space-y-12">
                       <div>
                         <div className="flex justify-between items-center mb-6">
@@ -354,7 +355,6 @@ export default function ManageNodePage() {
                         </div>
                       </div>
 
-                      {/* Danger Zone */}
                       <div className="pt-10 border-t border-red-500/20">
                          <h3 className="text-xs font-black text-red-500 uppercase tracking-[0.3em] mb-6">Danger Zone</h3>
                          <div className="p-8 bg-red-500/5 border border-red-500/10 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
