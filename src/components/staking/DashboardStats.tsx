@@ -35,7 +35,7 @@ export function DashboardStats({
         <div key={i} className="exn-card p-8 flex flex-col justify-center hover:border-[#00f5ff]/40 transition-all group">
           <p className="text-white/50 text-xs uppercase font-black tracking-[0.2em] mb-2">{stat.label}</p>
           <div className="flex flex-col gap-1">
-            <p className={`text-4xl font-bold tracking-tighter ${stat.color}`}>{stat.value}</p>
+            <p className={`text-3xl font-bold tracking-tighter ${stat.color}`}>{stat.value}</p>
             <p className="text-[10px] text-white/30 font-mono uppercase tracking-widest group-hover:text-white/60 transition-colors">
               {stat.subValue}
             </p>
