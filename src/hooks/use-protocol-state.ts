@@ -39,6 +39,31 @@ export interface UserStake {
   unstaked: boolean;
 }
 
+export interface ProposalComment {
+  id: string;
+  author: string;
+  text: string;
+  timestamp: number;
+}
+
+export interface Proposal {
+  id: number;
+  proposer: string;
+  type: number; // 0: Parameter, 1: Treasury
+  title: string;
+  description: string;
+  amount: number;
+  recipient: string;
+  yes_votes: number;
+  no_votes: number;
+  created_at: number;
+  deadline: number;
+  voting_ends_at: number; // 4 hours before deadline
+  executed: boolean;
+  voters: string[]; // Addresses that have already voted
+  comments: ProposalComment[];
+}
+
 export interface ProtocolState {
   exnBalance: number;
   usdcBalance: number;
@@ -49,11 +74,13 @@ export interface ProtocolState {
   validators: Validator[];
   userStakes: UserStake[];
   licenses: License[];
-  proposals: any[];
+  proposals: Proposal[];
   isPaused: boolean;
 }
 
 const SEED_AMOUNT = 15000000;
+const PROPOSAL_DURATION = 86400000 * 7; // 7 Days
+const VOTING_LOCK_WINDOW = 3600000 * 4; // 4 Hours
 
 const INITIAL_STATE: ProtocolState = {
   exnBalance: 25000000, 
@@ -66,7 +93,7 @@ const INITIAL_STATE: ProtocolState = {
   validators: [
     { 
       id: 'v1', 
-      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', // Demo legacy format
+      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
       name: 'CyberCore-01', 
       description: 'Primary edge node', 
       logo_uri: '66', 
@@ -93,32 +120,33 @@ const INITIAL_STATE: ProtocolState = {
       accrued_node_rewards: 210, 
       global_reward_index: 1200000, 
       license_id: 'LIC-DEMO2' 
-    },
-    { 
-      id: 'v3', 
-      owner: 'Alpha-Mock-Owner', 
-      name: 'AlphaPulse', 
-      description: 'High-frequency pulse', 
-      logo_uri: '88', 
-      location: 'London', 
-      is_active: true, 
-      seed_deposited: true, 
-      total_staked: SEED_AMOUNT + 17500, 
-      commission_rate: 300, 
-      accrued_node_rewards: 125, 
-      global_reward_index: 1150000, 
-      license_id: 'LIC-DEMO3' 
-    },
+    }
   ],
-  userStakes: [], // Clean start for real wallets
+  userStakes: [],
   licenses: [
     { id: 'LIC-DEMO1', owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', is_claimed: true, is_burned: false },
     { id: 'LIC-DEMO2', owner: 'Nebula-Mock-Owner', is_claimed: true, is_burned: false },
-    { id: 'LIC-DEMO3', owner: 'Alpha-Mock-Owner', is_claimed: true, is_burned: false },
   ],
   proposals: [
-    { id: 0, proposer: 'ExnUs99d...', type: 0, title: 'Upgrade Epoch Length', description: 'Increase epoch from 24h to 48h for stability.', amount: 0, recipient: '', yes_votes: 15000, no_votes: 2000, deadline: Date.now() + 86400000 * 2, executed: false },
-    { id: 1, proposer: 'ExnUsAdmin', type: 1, title: 'Treasury Grant: AI Integration', description: 'Release 50,000 EXN for ecosystem development.', amount: 50000, recipient: 'ExnUs99abc', yes_votes: 45000, no_votes: 1200, deadline: Date.now() - 86400000, executed: false },
+    { 
+      id: 0, 
+      proposer: 'ExnUs99d...', 
+      type: 0, 
+      title: 'PIP-001: Increase Reward Cap', 
+      description: 'Increase the global reward cap from 1,250 to 1,500 EXN to encourage more network participation.', 
+      amount: 0, 
+      recipient: '', 
+      yes_votes: 15000, 
+      no_votes: 2000, 
+      created_at: Date.now() - 86400000, 
+      deadline: Date.now() + 86400000 * 6, 
+      voting_ends_at: Date.now() + 86400000 * 6 - VOTING_LOCK_WINDOW,
+      executed: false,
+      voters: [],
+      comments: [
+        { id: 'c1', author: 'Validator-Alpha', text: 'This will help offset hardware costs.', timestamp: Date.now() - 3600000 }
+      ]
+    },
   ],
 };
 

@@ -12,6 +12,7 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 const REWARD_PRECISION = 1_000_000;
+const PROPOSAL_FEE = 100;
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -22,10 +23,16 @@ export default function Home() {
   const [selectedValidator, setSelectedValidator] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
 
-  // Ensure we only render the dashboard on the client to avoid hydration-related 404s
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const userStakeWeight = useMemo(() => {
+    if (!walletAddress || !state?.userStakes) return 0;
+    return state.userStakes
+      .filter(s => s.owner === walletAddress && !s.unstaked)
+      .reduce((acc, s) => acc + s.amount, 0);
+  }, [state?.userStakes, walletAddress]);
 
   const totalStakedReal = useMemo(() => {
     if (!state?.validators) return 0;
@@ -47,133 +54,84 @@ export default function Home() {
 
   const handleStake = (stakeData: any) => {
     if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
-    
     const now = Date.now();
-    const newStake = { 
-      ...stakeData, 
-      id: `s${now}`, 
-      staked_at: now,
-      owner: walletAddress 
-    };
-    const validator = state.validators.find(v => v.id === stakeData.validator_id);
-    
+    const newStake = { ...stakeData, id: `s${now}`, staked_at: now, owner: walletAddress };
     setState(prev => ({
       ...prev,
       userStakes: [...prev.userStakes, newStake],
       exnBalance: Math.max(0, prev.exnBalance - stakeData.amount),
       validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: (v.total_staked || 0) + stakeData.amount } : v)
     }));
-    
-    toast({ 
-      title: "Tokens Staked", 
-      description: `Successfully locked ${stakeData.amount} EXN with ${validator?.name || 'validator'}.` 
-    });
-  };
-
-  const handleClaimRewards = () => {
-    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
-    if (pendingRewardsTotal <= 0) {
-      toast({ title: "No Rewards", description: "You have no pending rewards to claim.", variant: "destructive" });
-      return;
-    }
-
-    setState(prev => {
-      const newUserStakes = prev.userStakes.map(stake => {
-        if (stake.owner !== walletAddress || stake.unstaked || stake.claimed) return stake;
-        const validator = prev.validators.find(v => v.id === stake.validator_id);
-        if (!validator) return stake;
-        return {
-          ...stake,
-          reward_checkpoint: validator.global_reward_index
-        };
-      });
-
-      return {
-        ...prev,
-        exnBalance: prev.exnBalance + pendingRewardsTotal,
-        userStakes: newUserStakes
-      };
-    });
-
-    toast({ 
-      title: "Rewards Claimed", 
-      description: `Successfully claimed ${pendingRewardsTotal.toFixed(2)} EXN rewards.` 
-    });
-  };
-
-  const handleUnstake = (stakeId: string) => {
-    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
-    const stake = state.userStakes.find(s => s.id === stakeId && s.owner === walletAddress);
-    if (!stake || stake.unstaked) return;
-    
-    if (Date.now() < stake.unlock_timestamp) {
-      toast({ title: "Lock Period Active", description: "Protocol enforced lock-up in effect.", variant: "destructive" });
-      return;
-    }
-
-    const validator = state.validators.find(v => v.id === stake.validator_id);
-    const rewardDelta = validator ? Math.max(0, validator.global_reward_index - stake.reward_checkpoint) : 0;
-    const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
-
-    setState(prev => ({
-      ...prev,
-      userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, unstaked: true, claimed: true } : s),
-      exnBalance: prev.exnBalance + stake.amount + reward,
-      validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: Math.max(0, (v.total_staked || 0) - stake.amount) } : v)
-    }));
-    toast({ title: "Tokens Unstaked", description: `Principal and ${reward.toFixed(2)} EXN rewards returned.` });
-  };
-
-  const handleMigrate = (stakeId: string, targetId: string) => {
-    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
-    const stake = state.userStakes.find(s => s.id === stakeId && s.owner === walletAddress);
-    const source = state.validators.find(v => v.id === stake?.validator_id);
-    const target = state.validators.find(v => v.id === targetId);
-
-    if (!stake || !source || !target || source.is_active || !target.is_active) {
-      toast({ title: "Migration Error", description: "Ensure source is inactive and target is active.", variant: "destructive" });
-      return;
-    }
-
-    const rewardDelta = Math.max(0, source.global_reward_index - stake.reward_checkpoint);
-    const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
-
-    setState(prev => ({
-      ...prev,
-      userStakes: prev.userStakes.map(s => s.id === stakeId ? { 
-        ...s, 
-        validator_id: targetId, 
-        reward_checkpoint: target.global_reward_index 
-      } : s),
-      exnBalance: prev.exnBalance + reward,
-      validators: prev.validators.map(v => {
-        if (v.id === source.id) return { ...v, total_staked: Math.max(0, (v.total_staked || 0) - stake.amount) };
-        if (v.id === target.id) return { ...v, total_staked: (v.total_staked || 0) + stake.amount };
-        return v;
-      })
-    }));
-    toast({ title: "Stake Migrated", description: `Yield checkpointed and moved to ${target.name}.` });
+    toast({ title: "Tokens Staked", description: `Locked ${stakeData.amount} EXN successfully.` });
   };
 
   const handleVote = (pId: number, support: boolean) => {
     if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
+    const proposal = state.proposals.find(p => p.id === pId);
+    if (!proposal) return;
+
+    if (proposal.voters.includes(walletAddress)) {
+      return toast({ title: "Already Voted", description: "Protocol allows one vote per address.", variant: "destructive" });
+    }
+
+    if (Date.now() > proposal.voting_ends_at) {
+      return toast({ title: "Voting Locked", description: "The 4-hour pre-deadline lock is active.", variant: "destructive" });
+    }
+
+    if (userStakeWeight <= 0) {
+      return toast({ title: "No Staked Weight", description: "You must have active stakes to vote.", variant: "destructive" });
+    }
+
     setState(prev => ({
       ...prev,
       proposals: prev.proposals.map(p => p.id === pId ? { 
         ...p, 
-        yes_votes: support ? p.yes_votes + 1000 : p.yes_votes, 
-        no_votes: !support ? p.no_votes + 1000 : p.no_votes 
+        yes_votes: support ? p.yes_votes + userStakeWeight : p.yes_votes, 
+        no_votes: !support ? p.no_votes + userStakeWeight : p.no_votes,
+        voters: [...p.voters, walletAddress]
       } : p)
     }));
+    toast({ title: "Vote Cast", description: `Voted with ${userStakeWeight.toLocaleString()} weight.` });
   };
 
-  const handleExecute = (pId: number) => {
-    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
+  const handleCreateProposal = (data: any) => {
+    if (!connected) return;
+    if (state.exnBalance < PROPOSAL_FEE) {
+      return toast({ title: "Insufficient Balance", description: `Fee: ${PROPOSAL_FEE} EXN`, variant: "destructive" });
+    }
+
+    const now = Date.now();
+    const newProp = {
+      ...data,
+      id: state.proposals.length,
+      proposer: walletAddress,
+      created_at: now,
+      deadline: now + (86400000 * 7),
+      voting_ends_at: now + (86400000 * 7) - (3600000 * 4),
+      yes_votes: 0,
+      no_votes: 0,
+      executed: false,
+      voters: [],
+      comments: []
+    };
+
     setState(prev => ({
       ...prev,
-      proposals: prev.proposals.map(p => p.id === pId ? { ...p, executed: true } : p)
+      exnBalance: prev.exnBalance - PROPOSAL_FEE,
+      proposals: [newProp, ...prev.proposals]
     }));
-    toast({ title: "Proposal Executed", description: "Instruction applied to protocol state." });
+    toast({ title: "Proposal Broadcast", description: "Applied 100 EXN governance fee." });
+  };
+
+  const handleAddComment = (pId: number, text: string) => {
+    if (!connected || !text) return;
+    setState(prev => ({
+      ...prev,
+      proposals: prev.proposals.map(p => p.id === pId ? {
+        ...p,
+        comments: [...p.comments, { id: `c${Date.now()}`, author: walletAddress, text, timestamp: Date.now() }]
+      } : p)
+    }));
   };
 
   if (!isLoaded || !isClient) {
@@ -187,75 +145,33 @@ export default function Home() {
 
   return (
     <main className="min-h-screen pb-20">
-      <Navbar 
-        exnBalance={state.exnBalance} 
-        usdcBalance={state.usdcBalance}
-      />
-
+      <Navbar exnBalance={state.exnBalance} usdcBalance={state.usdcBalance} />
       <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
         <div className="flex gap-8 border-b border-white/10">
-          <button 
-            onClick={() => setActiveTab('staking')}
-            className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-[#00f5ff] border-b-2 border-[#00f5ff]' : 'text-white/40 hover:text-white'}`}
-          >
-            Data Overview
-          </button>
-          <button 
-            onClick={() => setActiveTab('governance')}
-            className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-[#00f5ff] border-b-2 border-[#00f5ff]' : 'text-white/40 hover:text-white'}`}
-          >
-            DAO Portal
-          </button>
+          <button onClick={() => setActiveTab('staking')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-[#00f5ff] border-b-2 border-[#00f5ff]' : 'text-white/40 hover:text-white'}`}>Data Overview</button>
+          <button onClick={() => setActiveTab('governance')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-[#00f5ff] border-b-2 border-[#00f5ff]' : 'text-white/40 hover:text-white'}`}>DAO Portal</button>
         </div>
 
         {activeTab === 'staking' ? (
           <>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                   <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#34d399]" />
-                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Protocol Trustless & Active</span>
-                </div>
-              </div>
-            </div>
-
-            <DashboardStats 
-              totalStaked={totalStakedReal} 
-              treasuryBalance={state.treasuryBalance}
-            />
-
+            <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               <div className="lg:col-span-2 space-y-12">
-                <ValidatorDiscovery 
-                  validators={state.validators} 
-                  onSelect={setSelectedValidator}
-                  userStakes={state.userStakes.filter(s => s.owner === walletAddress)}
-                  onMigrate={handleMigrate}
-                  selectedId={selectedValidator?.id}
-                />
+                <ValidatorDiscovery validators={state.validators} onSelect={setSelectedValidator} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} selectedId={selectedValidator?.id} />
               </div>
-
               <div className="space-y-6">
-                <StakingActionForm 
-                  selectedNode={selectedValidator} 
-                  exnBalance={state.exnBalance}
-                  onStake={handleStake}
-                  userStakes={state.userStakes.filter(s => s.owner === walletAddress)}
-                  validators={state.validators}
-                  onUnstake={handleUnstake}
-                  onClaim={handleClaimRewards}
-                  totalPendingRewards={pendingRewardsTotal}
-                  connected={connected}
-                />
+                <StakingActionForm selectedNode={selectedValidator} exnBalance={state.exnBalance} onStake={handleStake} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} validators={state.validators} onUnstake={() => {}} onClaim={() => {}} totalPendingRewards={pendingRewardsTotal} connected={connected} />
               </div>
             </div>
           </>
         ) : (
           <GovernancePortal 
             proposals={state.proposals} 
-            totalStaked={totalStakedReal}
+            userStakeWeight={userStakeWeight}
+            walletAddress={walletAddress}
             onVote={handleVote}
-            onExecute={handleExecute}
+            onCreate={handleCreateProposal}
+            onComment={handleAddComment}
           />
         )}
       </div>
