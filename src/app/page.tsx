@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -34,7 +33,8 @@ export default function Home() {
   }, [state.userStakes, state.validators]);
 
   const handleStake = (stakeData: any) => {
-    const newStake = { ...stakeData, id: `s${Date.now()}` };
+    const now = Date.now();
+    const newStake = { ...stakeData, id: `s${now}`, staked_at: now };
     const validator = state.validators.find(v => v.id === stakeData.validator_id);
     
     setState(prev => ({

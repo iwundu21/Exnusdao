@@ -28,6 +28,7 @@ export interface UserStake {
   validator_id: string;
   amount: number;
   lock_multiplier: number;
+  staked_at: number;
   unlock_timestamp: number;
   reward_checkpoint: number;
   claimed: boolean;
@@ -60,8 +61,8 @@ const INITIAL_STATE: ProtocolState = {
     { id: 'v3', owner: 'ExnUs...0003', name: 'AlphaPulse', description: 'High-frequency pulse', logo_uri: '88', location: 'London', is_active: true, seed_deposited: true, total_staked: 17500, commission_rate: 300, accrued_node_rewards: 125, global_reward_index: 1150000 },
   ],
   userStakes: [
-    { id: 's1', validator_id: 'v1', amount: 5000, lock_multiplier: 10000, unlock_timestamp: Date.now() - 86400000, reward_checkpoint: 1000000, claimed: false, unstaked: false },
-    { id: 's2', validator_id: 'v2', amount: 2500, lock_multiplier: 5000, unlock_timestamp: Date.now() + 86400000 * 30, reward_checkpoint: 1100000, claimed: false, unstaked: false },
+    { id: 's1', validator_id: 'v1', amount: 5000, lock_multiplier: 10000, staked_at: Date.now() - 86400000 * 7, unlock_timestamp: Date.now() - 86400000, reward_checkpoint: 1000000, claimed: false, unstaked: false },
+    { id: 's2', validator_id: 'v2', amount: 2500, lock_multiplier: 5000, staked_at: Date.now() - 86400000 * 2, unlock_timestamp: Date.now() + 86400000 * 30, reward_checkpoint: 1100000, claimed: false, unstaked: false },
   ],
   licenses: [],
   proposals: [
