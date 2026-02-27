@@ -5,13 +5,9 @@ import { Wallet, Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Ham
 import Link from 'next/link';
 
 export function Navbar({ 
-  isAdmin = false, 
-  toggleAdmin, 
   exnBalance = 0, 
   usdcBalance = 0 
 }: { 
-  isAdmin?: boolean, 
-  toggleAdmin: () => void, 
   exnBalance?: number,
   usdcBalance?: number
 }) {
@@ -52,13 +48,6 @@ export function Navbar({
             <span className="text-xs font-bold text-emerald-400">{usdcBalance.toLocaleString()} USDC</span>
           </div>
         </div>
-
-        <button 
-          onClick={toggleAdmin}
-          className="flex items-center gap-2 text-white/70 hover:text-[#00f5ff] transition-colors"
-        >
-          <Settings className="w-5 h-5" />
-        </button>
         
         <button 
           onClick={() => setConnected(!connected)}

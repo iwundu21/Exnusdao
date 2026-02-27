@@ -5,7 +5,6 @@ import { Navbar } from '@/components/layout/Navbar';
 import { DashboardStats } from '@/components/staking/DashboardStats';
 import { ValidatorDiscovery } from '@/components/staking/ValidatorDiscovery';
 import { StakingActionForm } from '@/components/staking/StakingActionForm';
-import { AdminPanel } from '@/components/admin/AdminPanel';
 import { GovernancePortal } from '@/components/governance/GovernancePortal';
 import { toast } from '@/hooks/use-toast';
 import { useProtocolState } from '@/hooks/use-protocol-state';
@@ -14,7 +13,6 @@ const REWARD_PRECISION = 1_000_000;
 
 export default function Home() {
   const { state, setState, isLoaded } = useProtocolState();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
   const [selectedValidator, setSelectedValidator] = useState<any>(null);
 
@@ -139,24 +137,6 @@ export default function Home() {
     toast({ title: "Stake Migrated", description: `Yield checkpointed and moved to ${target.name}.` });
   };
 
-  const handleSettleEpoch = () => {
-    setState(prev => ({
-      ...prev,
-      validators: prev.validators.map(v => {
-        if (!v.is_active || v.total_staked === 0) return v;
-        const commission = (prev.rewardCap * v.commission_rate) / 10000;
-        const delegatorRewards = prev.rewardCap - commission;
-        const indexIncrease = (delegatorRewards * REWARD_PRECISION) / v.total_staked;
-        return {
-          ...v,
-          accrued_node_rewards: v.accrued_node_rewards + commission,
-          global_reward_index: v.global_reward_index + indexIncrease
-        };
-      })
-    }));
-    toast({ title: "Epoch Settled", description: "Global indices updated across registry." });
-  };
-
   const handleVote = (pId: number, support: boolean) => {
     setState(prev => ({
       ...prev,
@@ -188,19 +168,9 @@ export default function Home() {
   return (
     <main className="min-h-screen pb-20">
       <Navbar 
-        isAdmin={isAdmin} 
-        toggleAdmin={() => setIsAdmin(!isAdmin)} 
         exnBalance={state.exnBalance} 
         usdcBalance={state.usdcBalance}
       />
-      
-      {isAdmin && (
-        <AdminPanel 
-          globalState={state} 
-          setGlobalState={setState} 
-          onSettle={handleSettleEpoch}
-        />
-      )}
 
       <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
         <div className="flex gap-8 border-b border-white/10">
