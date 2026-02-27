@@ -13,7 +13,9 @@ export default function PurchaseLicensePage() {
   const { state, setState, isLoaded } = useProtocolState();
 
   const handlePurchase = () => {
-    if (state.licenses.length >= state.licenseLimit) {
+    // A license can be purchased if the total number of ACTIVE (non-burned) licenses is under the limit
+    const activeLicenseObjects = state.licenses.filter(l => !l.is_burned).length;
+    if (activeLicenseObjects >= state.licenseLimit) {
       return toast({ 
         title: "Registration Capped", 
         description: "All protocol license slots have been filled.", 
@@ -44,7 +46,7 @@ export default function PurchaseLicensePage() {
 
   if (!isLoaded) return null;
 
-  // Dynamically calculate active nodes against total slot limit
+  // Dynamically calculate active nodes (current validator registry)
   const activeNodeCount = state.validators.length;
   const totalLimit = state.licenseLimit || 21;
   const remainingSlots = totalLimit - activeNodeCount;
@@ -103,8 +105,8 @@ export default function PurchaseLicensePage() {
             
             <button 
               onClick={handlePurchase}
-              disabled={state.licenses.length >= totalLimit}
-              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${state.licenses.length < totalLimit ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+              disabled={state.licenses.filter(l => !l.is_burned).length >= totalLimit}
+              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${state.licenses.filter(l => !l.is_burned).length < totalLimit ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
             >
               Purchase License
             </button>
