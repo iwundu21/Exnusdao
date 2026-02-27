@@ -46,15 +46,17 @@ export interface ProtocolState {
   userStakes: UserStake[];
   licenses: License[];
   proposals: any[];
+  isPaused: boolean;
 }
 
 const INITIAL_STATE: ProtocolState = {
-  exnBalance: 12500,
+  exnBalance: 25000000, // Bumped to allow for 15M seed deposit testing
   usdcBalance: 2500,
   totalStaked: 45200,
   treasuryBalance: 250000,
   rewardCap: 1250,
   licenseLimit: 21,
+  isPaused: false,
   validators: [
     { id: 'v1', owner: 'ExnUs...d2f1', name: 'CyberCore-01', description: 'Primary edge node', logo_uri: '66', location: 'Singapore', is_active: true, seed_deposited: true, total_staked: 15200, commission_rate: 500, accrued_node_rewards: 452, global_reward_index: 1200000 },
     { id: 'v2', owner: 'ExnUs...0002', name: 'NebulaNode', description: 'Deep space validator', logo_uri: '77', location: 'Mars Alpha', is_active: true, seed_deposited: true, total_staked: 12500, commission_rate: 800, accrued_node_rewards: 210, global_reward_index: 1200000 },

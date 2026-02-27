@@ -90,8 +90,8 @@ export default function RegisterNodePage() {
       description: formData.description,
       logo_uri: formData.logo_uri || "default-seed",
       location: formData.location,
-      is_active: true,
-      seed_deposited: true,
+      is_active: false,
+      seed_deposited: false,
       total_staked: 0,
       commission_rate: formData.commission * 100,
       accrued_node_rewards: 0,
@@ -104,8 +104,8 @@ export default function RegisterNodePage() {
       licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
     }));
 
-    toast({ title: "Node Registered", description: "Validator successfully initialized on-chain." });
-    setTimeout(() => router.push('/'), 1500);
+    toast({ title: "Node Registered", description: "Validator successfully initialized on-chain. Go to Node Management to deposit protocol seed." });
+    setTimeout(() => router.push('/manage-node'), 1500);
   };
 
   if (!isLoaded) return null;

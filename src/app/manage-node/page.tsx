@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
 const USER_WALLET = 'ExnUs...d2f1';
-const SEED_DEPOSIT_AMOUNT = 5000;
+const SEED_DEPOSIT_AMOUNT = 15000000;
 
 export default function ManageNodePage() {
   const { state, setState, isLoaded } = useProtocolState();
@@ -70,7 +70,7 @@ export default function ManageNodePage() {
     if (state.exnBalance < SEED_DEPOSIT_AMOUNT) {
       return toast({ 
         title: "Insufficient Balance", 
-        description: `You need ${SEED_DEPOSIT_AMOUNT} EXN to deposit protocol seed.`, 
+        description: `You need ${SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN to deposit protocol seed.`, 
         variant: "destructive" 
       });
     }
@@ -163,7 +163,7 @@ export default function ManageNodePage() {
                             <p className="text-[10px] uppercase font-black tracking-widest">Initialization Required</p>
                           </div>
                           <p className="text-xs text-white/60 leading-relaxed">
-                            A seed deposit of <span className="text-white font-bold">{SEED_DEPOSIT_AMOUNT} EXN</span> is required to activate this node.
+                            A minimum seed deposit of <span className="text-white font-bold">{SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN</span> is required to activate this node.
                           </p>
                           <button 
                             onClick={() => handleDepositSeed(node.id)}
