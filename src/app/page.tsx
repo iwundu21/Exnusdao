@@ -21,10 +21,10 @@ export default function Home() {
   const { state, setState, isLoaded } = useProtocolState();
   const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
   const [selectedValidator, setSelectedValidator] = useState<any>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    setIsMounted(true);
   }, []);
 
   const userStakeWeight = useMemo(() => {
@@ -70,7 +70,8 @@ export default function Home() {
     const proposal = state.proposals.find(p => p.id === pId);
     if (!proposal) return;
 
-    if (proposal.voters.includes(walletAddress)) {
+    const voters = proposal.voters || [];
+    if (voters.includes(walletAddress)) {
       return toast({ title: "Already Voted", description: "Protocol allows one vote per address.", variant: "destructive" });
     }
 
@@ -86,9 +87,9 @@ export default function Home() {
       ...prev,
       proposals: prev.proposals.map(p => p.id === pId ? { 
         ...p, 
-        yes_votes: support ? p.yes_votes + userStakeWeight : p.yes_votes, 
-        no_votes: !support ? p.no_votes + userStakeWeight : p.no_votes,
-        voters: [...p.voters, walletAddress]
+        yes_votes: support ? (p.yes_votes || 0) + userStakeWeight : p.yes_votes, 
+        no_votes: !support ? (p.no_votes || 0) + userStakeWeight : p.no_votes,
+        voters: [...voters, walletAddress]
       } : p)
     }));
     toast({ title: "Vote Cast", description: `Voted with ${userStakeWeight.toLocaleString()} weight.` });
@@ -129,12 +130,12 @@ export default function Home() {
       ...prev,
       proposals: prev.proposals.map(p => p.id === pId ? {
         ...p,
-        comments: [...p.comments, { id: `c${Date.now()}`, author: walletAddress, text, timestamp: Date.now() }]
+        comments: [...(p.comments || []), { id: `c${Date.now()}`, author: walletAddress, text, timestamp: Date.now() }]
       } : p)
     }));
   };
 
-  if (!isLoaded || !isClient) {
+  if (!isMounted || !isLoaded) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#020617] space-y-4">
         <div className="w-16 h-16 border-4 border-[#00f5ff] border-t-transparent rounded-full animate-spin" />

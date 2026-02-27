@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
 import { MessageSquare, ShieldAlert, History, User } from 'lucide-react';
 
-export function GovernancePortal({ proposals, userStakeWeight, walletAddress, onVote, onCreate, onComment }: any) {
+export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onComment }: any) {
   const [showCreate, setShowCreate] = useState(false);
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0 });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
@@ -78,11 +78,12 @@ export function GovernancePortal({ proposals, userStakeWeight, walletAddress, on
 
       <div className="grid grid-cols-1 gap-8">
         {proposals.map((prop: any) => {
-          const totalVotes = prop.yes_votes + prop.no_votes;
+          const totalVotes = (prop.yes_votes || 0) + (prop.no_votes || 0);
           const yesPercent = totalVotes > 0 ? (prop.yes_votes / totalVotes) * 100 : 0;
           const isExpired = Date.now() > prop.deadline;
-          const isLocked = Date.now() > prop.voting_ends_at && !isExpired;
-          const hasVoted = prop.voters.includes(walletAddress);
+          const isLocked = Date.now() > (prop.voting_ends_at || prop.deadline - 14400000) && !isExpired;
+          const hasVoted = prop.voters?.includes(walletAddress) || false;
+          const comments = prop.comments || [];
 
           return (
             <div key={prop.id} className="exn-card p-0 border-white/5 overflow-hidden">
@@ -151,24 +152,28 @@ export function GovernancePortal({ proposals, userStakeWeight, walletAddress, on
                   onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
                   className="flex items-center gap-2 text-[10px] text-white/30 uppercase font-black hover:text-white transition-colors"
                  >
-                   <MessageSquare className="w-4 h-4" /> Discussion ({prop.comments.length})
+                   <MessageSquare className="w-4 h-4" /> Discussion ({comments.length})
                  </button>
 
                  {activeCommentId === prop.id && (
                    <div className="mt-6 space-y-6 animate-in slide-in-from-top-2">
                       <div className="space-y-4 max-h-40 overflow-y-auto pr-2">
-                        {prop.comments.map((c: any) => (
-                          <div key={c.id} className="flex gap-3">
-                             <div className="w-8 h-8 rounded-full bg-white/10 flex-shrink-0" />
-                             <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[9px] font-mono text-[#00f5ff]">{c.author.slice(0, 6)}...</span>
-                                  <span className="text-[8px] text-white/20">{new Date(c.timestamp).toLocaleTimeString()}</span>
-                                </div>
-                                <p className="text-xs text-white/60">{c.text}</p>
-                             </div>
-                          </div>
-                        ))}
+                        {comments.length === 0 ? (
+                          <p className="text-[10px] text-white/20 uppercase font-black text-center py-4">No comments yet</p>
+                        ) : (
+                          comments.map((c: any) => (
+                            <div key={c.id} className="flex gap-3">
+                               <div className="w-8 h-8 rounded-full bg-white/10 flex-shrink-0" />
+                               <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-mono text-[#00f5ff]">{c.author.slice(0, 6)}...</span>
+                                    <span className="text-[8px] text-white/20">{new Date(c.timestamp).toLocaleTimeString()}</span>
+                                  </div>
+                                  <p className="text-xs text-white/60">{c.text}</p>
+                               </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                       <div className="flex gap-2">
                         <input 
