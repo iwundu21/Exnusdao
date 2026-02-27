@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -20,6 +21,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
           const isUrl = validator.logo_uri?.startsWith('http') || validator.logo_uri?.startsWith('data:');
           const logoUrl = isUrl ? validator.logo_uri : `https://picsum.photos/seed/${validator.logo_uri}/800/400`;
           const isSelected = selectedId === validator.id;
+          const isUserStaked = userStakes.some((s: any) => s.validator_id === validator.id && !s.unstaked);
           const stakerCount = userStakes.filter((s: any) => s.validator_id === validator.id && !s.unstaked).length;
 
           return (
@@ -33,9 +35,18 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                   data-ai-hint="validator tech"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] to-transparent" />
-                <div className="absolute top-4 right-6 flex items-center gap-1 text-[9px] text-white/60 font-black uppercase tracking-widest bg-black/40 px-2 py-1 rounded backdrop-blur-md">
-                   {validator.location}
+                
+                <div className="absolute top-4 right-6 flex items-center gap-2">
+                   {isUserStaked && (
+                     <div className="flex items-center gap-1 bg-emerald-500 text-black text-[8px] px-1.5 py-0.5 rounded font-black uppercase shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                       Your Stake Active
+                     </div>
+                   )}
+                   <div className="flex items-center gap-1 text-[9px] text-white/60 font-black uppercase tracking-widest bg-black/40 px-2 py-1 rounded backdrop-blur-md">
+                      {validator.location}
+                   </div>
                 </div>
+
                 <div className="absolute bottom-4 left-6 flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${validator.is_active ? 'bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]' : 'bg-red-400'}`} />
                   <span className="text-white font-bold text-lg tracking-tight">{validator.name}</span>
