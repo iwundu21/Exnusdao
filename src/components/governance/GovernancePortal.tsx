@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { MessageSquare, ShieldAlert, History, User } from 'lucide-react';
+import { MessageSquare, ShieldAlert, History, User, CheckCircle2 } from 'lucide-react';
 
 export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onComment }: any) {
   const [showCreate, setShowCreate] = useState(false);
@@ -147,44 +147,71 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                 </div>
               </div>
 
-              <div className="bg-white/2 p-6">
-                 <button 
-                  onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
-                  className="flex items-center gap-2 text-[10px] text-white/30 uppercase font-black hover:text-white transition-colors"
-                 >
-                   <MessageSquare className="w-4 h-4" /> Discussion ({comments.length})
-                 </button>
+              <div className="bg-white/[0.02] p-6">
+                 <div className="flex items-center justify-between mb-6">
+                    <button 
+                      onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
+                      className="flex items-center gap-2 text-[10px] text-white/30 uppercase font-black hover:text-white transition-colors"
+                    >
+                      <MessageSquare className="w-4 h-4" /> Discussion ({comments.length})
+                    </button>
+                    {activeCommentId === prop.id && (
+                       <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest italic">Live Community Debate</span>
+                    )}
+                 </div>
 
                  {activeCommentId === prop.id && (
-                   <div className="mt-6 space-y-6 animate-in slide-in-from-top-2">
-                      <div className="space-y-4 max-h-40 overflow-y-auto pr-2">
+                   <div className="space-y-8 animate-in slide-in-from-top-2">
+                      <div className="space-y-6 max-h-[300px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-white/10">
                         {comments.length === 0 ? (
-                          <p className="text-[10px] text-white/20 uppercase font-black text-center py-4">No comments yet</p>
+                          <div className="flex flex-col items-center justify-center py-10 opacity-20">
+                             <MessageSquare className="w-10 h-10 mb-2" />
+                             <p className="text-[10px] uppercase font-black tracking-widest text-center">No discussion entries found</p>
+                          </div>
                         ) : (
-                          comments.map((c: any) => (
-                            <div key={c.id} className="flex gap-3">
-                               <div className="w-8 h-8 rounded-full bg-white/10 flex-shrink-0" />
-                               <div className="space-y-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-mono text-[#00f5ff]">{c.author.slice(0, 6)}...</span>
-                                    <span className="text-[8px] text-white/20">{new Date(c.timestamp).toLocaleTimeString()}</span>
-                                  </div>
-                                  <p className="text-xs text-white/60">{c.text}</p>
-                               </div>
-                            </div>
-                          ))
+                          comments.map((c: any) => {
+                            const commenterHasVoted = prop.voters?.includes(c.author);
+                            return (
+                              <div key={c.id} className="flex gap-4 items-start group">
+                                 <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border transition-colors ${commenterHasVoted ? 'bg-[#00f5ff]/10 border-[#00f5ff]/30 text-[#00f5ff]' : 'bg-white/5 border-white/10 text-white/20'}`}>
+                                    <User className="w-5 h-5" />
+                                 </div>
+                                 <div className="flex-1 space-y-1.5 bg-white/5 p-4 rounded-2xl border border-white/5 group-hover:border-white/10 transition-colors">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-[10px] font-mono font-bold text-[#00f5ff]">{c.author.slice(0, 8)}...{c.author.slice(-4)}</span>
+                                        {commenterHasVoted && (
+                                          <span className="flex items-center gap-1 text-[8px] bg-[#00f5ff] text-black px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
+                                            <CheckCircle2 className="w-2.5 h-2.5" /> Voter
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="text-[9px] text-white/20 font-bold">{new Date(c.timestamp).toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-sm text-white/70 leading-relaxed">{c.text}</p>
+                                 </div>
+                              </div>
+                            );
+                          })
                         )}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3 pt-4 border-t border-white/5">
                         <input 
                           value={commentText}
                           onChange={e => setCommentText(e.target.value)}
-                          className="exn-input h-10 text-xs flex-1" 
-                          placeholder="Share your thoughts..." 
+                          className="exn-input h-12 text-sm flex-1 bg-white/5 rounded-xl px-6" 
+                          placeholder="Contribute to the governance discussion..." 
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              onComment(prop.id, commentText);
+                              setCommentText('');
+                            }
+                          }}
                         />
                         <button 
                           onClick={() => { onComment(prop.id, commentText); setCommentText(''); }}
-                          className="exn-button h-10 px-4 text-[10px]"
+                          disabled={!commentText.trim()}
+                          className={`h-12 px-8 text-xs font-black uppercase tracking-widest transition-all rounded-xl ${commentText.trim() ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'}`}
                         >Post</button>
                       </div>
                    </div>
