@@ -1,9 +1,8 @@
-
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ShieldCheck, ArrowLeft, MapPin, Percent, Image as ImageIcon, FileText, Upload, Link as LinkIcon } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, MapPin, Percent, Image as ImageIcon, FileText, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
@@ -12,6 +11,7 @@ import Image from 'next/image';
 
 export default function RegisterNodePage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, setState, isLoaded } = useProtocolState();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
@@ -24,10 +24,8 @@ export default function RegisterNodePage() {
     licenseId: ''
   });
 
-  // Update preview when logo_uri changes
   useEffect(() => {
     if (formData.logo_uri) {
-      // If it looks like a URL, use it, otherwise treat it as a seed for our placeholder system
       const isUrl = formData.logo_uri.startsWith('http') || formData.logo_uri.startsWith('data:');
       const url = isUrl ? formData.logo_uri : `https://picsum.photos/seed/${formData.logo_uri}/400/400`;
       setPreviewUrl(url);
@@ -36,15 +34,37 @@ export default function RegisterNodePage() {
     }
   }, [formData.logo_uri]);
 
-  const handleSimulateUpload = () => {
-    // In a real dApp, this would upload to IPFS/Arweave and return a CID/URI
-    // For this prototype, we generate a unique seed and simulate the "pinning" process
-    const mockCid = Math.floor(Math.random() * 1000).toString();
-    setFormData(prev => ({ ...prev, logo_uri: mockCid }));
-    toast({ 
-      title: "Metadata Pinned", 
-      description: "Logo uploaded to decentralized storage (Simulation)." 
-    });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      return toast({ title: "Invalid File", description: "Please upload an image file.", variant: "destructive" });
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      return toast({ title: "File Too Large", description: "Maximum image size is 2MB.", variant: "destructive" });
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setFormData(prev => ({ ...prev, logo_uri: result }));
+      toast({ 
+        title: "Logo Processed", 
+        description: "Image successfully encoded for registration." 
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeLogo = () => {
+    setFormData(prev => ({ ...prev, logo_uri: '' }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRegister = () => {
@@ -70,8 +90,8 @@ export default function RegisterNodePage() {
       description: formData.description,
       logo_uri: formData.logo_uri || "default-seed",
       location: formData.location,
-      is_active: false,
-      seed_deposited: false,
+      is_active: true,
+      seed_deposited: true,
       total_staked: 0,
       commission_rate: formData.commission * 100,
       accrued_node_rewards: 0,
@@ -84,7 +104,7 @@ export default function RegisterNodePage() {
       licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
     }));
 
-    toast({ title: "Node Registered", description: "Redirecting to staking registry..." });
+    toast({ title: "Node Registered", description: "Validator successfully initialized on-chain." });
     setTimeout(() => router.push('/'), 1500);
   };
 
@@ -106,7 +126,7 @@ export default function RegisterNodePage() {
         <div className="space-y-4">
           <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Validator Registration</h1>
           <p className="text-white/40 max-w-xl">
-            Register your high-performance node. Once registered, you must deposit the 15M EXN seed to activate rewards.
+            Register your high-performance node. Each registration requires a valid protocol license.
           </p>
         </div>
 
@@ -139,26 +159,43 @@ export default function RegisterNodePage() {
 
               <div className="md:col-span-2 space-y-4">
                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                  <ImageIcon className="w-3 h-3 text-purple-400" /> Logo Metadata (URI or Upload)
+                  <ImageIcon className="w-3 h-3 text-purple-400" /> Validator Logo
                 </label>
                 <div className="flex gap-4">
+                  <input 
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
                   <div className="relative flex-1">
                     <input 
-                      value={formData.logo_uri}
-                      onChange={e => setFormData({...formData, logo_uri: e.target.value})}
-                      className="exn-input h-12 text-sm pl-10" 
-                      placeholder="IPFS CID or Image URL" 
+                      value={formData.logo_uri.startsWith('data:') ? '[Uploaded Image File]' : formData.logo_uri}
+                      readOnly
+                      className="exn-input h-12 text-sm pl-10 cursor-default" 
+                      placeholder="No image selected" 
                     />
                     <LinkIcon className="absolute left-3 top-3.5 w-4 h-4 text-white/30" />
                   </div>
-                  <button 
-                    onClick={handleSimulateUpload}
-                    className="exn-button-outline px-6 flex items-center gap-2 whitespace-nowrap"
-                  >
-                    <Upload className="w-4 h-4" /> Upload Logo
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={triggerFileUpload}
+                      className="exn-button-outline px-6 flex items-center gap-2 whitespace-nowrap"
+                    >
+                      <Upload className="w-4 h-4" /> Select Image
+                    </button>
+                    {formData.logo_uri && (
+                      <button 
+                        onClick={removeLogo}
+                        className="p-3 border border-red-500/40 text-red-400 hover:bg-red-500/10 rounded-md transition-all"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <p className="text-[9px] text-white/20 uppercase">Provide a direct URL or use the upload tool to pin metadata to decentralized storage.</p>
+                <p className="text-[9px] text-white/20 uppercase">Upload a standard image file (PNG, JPG, SVG). Max size: 2MB.</p>
               </div>
 
               <div className="space-y-2">
@@ -210,7 +247,7 @@ export default function RegisterNodePage() {
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Metadata Preview</h3>
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Registration Preview</h3>
             <div className="exn-card aspect-square relative flex items-center justify-center overflow-hidden border-dashed border-white/10">
               {previewUrl ? (
                 <div className="relative w-full h-full">
@@ -231,12 +268,12 @@ export default function RegisterNodePage() {
               ) : (
                 <div className="flex flex-col items-center gap-4 text-white/10">
                   <ImageIcon className="w-16 h-16" />
-                  <p className="text-[10px] uppercase font-black tracking-widest">No Metadata Loaded</p>
+                  <p className="text-[10px] uppercase font-black tracking-widest">Awaiting Logo</p>
                 </div>
               )}
             </div>
             <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-               <h4 className="text-[10px] font-black text-white/40 uppercase mb-2">Protocol Validation</h4>
+               <h4 className="text-[10px] font-black text-white/40 uppercase mb-2">Registration Status</h4>
                <ul className="space-y-2">
                  <li className={`flex items-center gap-2 text-[10px] ${formData.name ? 'text-emerald-400' : 'text-white/20'}`}>
                     <ShieldCheck className="w-3 h-3" /> Identity String Set
@@ -245,7 +282,7 @@ export default function RegisterNodePage() {
                     <ShieldCheck className="w-3 h-3" /> License Key Linked
                  </li>
                  <li className={`flex items-center gap-2 text-[10px] ${formData.logo_uri ? 'text-emerald-400' : 'text-white/20'}`}>
-                    <ShieldCheck className="w-3 h-3" /> Metadata Hash Generated
+                    <ShieldCheck className="w-3 h-3" /> Image Data Encoded
                  </li>
                </ul>
             </div>
