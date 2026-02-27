@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -33,7 +32,6 @@ export default function Home() {
       }, 0);
   }, [state.userStakes, state.validators]);
 
-  // Phase 1: Staking Action
   const handleStake = (stakeData: any) => {
     const newStake = { ...stakeData, id: `s${Date.now()}` };
     const validator = state.validators.find(v => v.id === stakeData.validator_id);
@@ -52,12 +50,10 @@ export default function Home() {
     });
   };
 
-  // Phase 2: Unstaking Action
   const handleUnstake = (stakeId: string) => {
     const stake = state.userStakes.find(s => s.id === stakeId);
     if (!stake || stake.unstaked) return;
     
-    // Safety check for lock period
     if (Date.now() < stake.unlock_timestamp) {
       toast({ title: "Lock Period Active", description: "Protocol enforced lock-up in effect.", variant: "destructive" });
       return;
@@ -77,7 +73,6 @@ export default function Home() {
     toast({ title: "Tokens Unstaked", description: `Principal and ${reward.toFixed(2)} EXN rewards returned.` });
   };
 
-  // Phase 3: Stake Migration (Trustless transition for inactive nodes)
   const handleMigrate = (stakeId: string, targetId: string) => {
     const stake = state.userStakes.find(s => s.id === stakeId);
     const source = state.validators.find(v => v.id === stake?.validator_id);
@@ -98,7 +93,7 @@ export default function Home() {
         validator_id: targetId, 
         reward_checkpoint: target.global_reward_index 
       } : s),
-      exnBalance: prev.exnBalance + reward, // Claim rewards during migration
+      exnBalance: prev.exnBalance + reward,
       validators: prev.validators.map(v => {
         if (v.id === source.id) return { ...v, total_staked: v.total_staked - stake.amount };
         if (v.id === target.id) return { ...v, total_staked: v.total_staked + stake.amount };
@@ -108,7 +103,6 @@ export default function Home() {
     toast({ title: "Stake Migrated", description: `Yield checkpointed and moved to ${target.name}.` });
   };
 
-  // Phase 5: Reward Settlement Simulation
   const handleSettleEpoch = () => {
     setState(prev => ({
       ...prev,
@@ -127,7 +121,6 @@ export default function Home() {
     toast({ title: "Epoch Settled", description: "Global indices updated across registry." });
   };
 
-  // Phase 12-14: Governance Logic
   const handleVote = (pId: number, support: boolean) => {
     setState(prev => ({
       ...prev,
@@ -181,7 +174,7 @@ export default function Home() {
             onClick={() => setActiveTab('staking')}
             className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-[#00f5ff] border-b-2 border-[#00f5ff]' : 'text-white/40 hover:text-white'}`}
           >
-            Network Registry
+            Data Overview
           </button>
           <button 
             onClick={() => setActiveTab('governance')}
