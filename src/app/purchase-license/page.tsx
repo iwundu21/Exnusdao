@@ -1,21 +1,28 @@
+
 "use client";
 
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ArrowLeft, Ticket, Flame } from 'lucide-react';
+import { ArrowLeft, Ticket, Flame, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 const LICENSE_PRICE = 500;
 
 export default function PurchaseLicensePage() {
+  const { publicKey, connected } = useWallet();
+  const walletAddress = publicKey?.toBase58() || '';
+  
   const { state, setState, isLoaded } = useProtocolState();
 
   const handlePurchase = () => {
-    // A license can be purchased if the total number of ACTIVE (non-burned) licenses is under the limit
-    const activeLicenseObjects = state.licenses.filter(l => !l.is_burned).length;
-    if (activeLicenseObjects >= state.licenseLimit) {
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
+
+    // A license can be purchased if the total number of ACTIVE (non-burned) nodes is under the limit
+    const activeNodes = state.validators.length;
+    if (activeNodes >= state.licenseLimit) {
       return toast({ 
         title: "Registration Capped", 
         description: "All protocol license slots have been filled.", 
@@ -30,7 +37,7 @@ export default function PurchaseLicensePage() {
     const uniqueId = `LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
     const newLicense = {
       id: uniqueId,
-      owner: 'ExnUs...d2f1',
+      owner: walletAddress,
       is_claimed: false,
       is_burned: false,
     };
@@ -45,6 +52,23 @@ export default function PurchaseLicensePage() {
   };
 
   if (!isLoaded) return null;
+
+  if (!connected) {
+    return (
+      <main className="min-h-screen">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-10 py-40 flex flex-col items-center justify-center text-center space-y-8">
+           <div className="p-6 bg-[#00f5ff]/10 rounded-full border border-[#00f5ff]/20">
+             <Wallet className="w-12 h-12 text-[#00f5ff]" />
+           </div>
+           <div className="space-y-4">
+             <h1 className="text-4xl font-bold uppercase tracking-tight text-white">Wallet Connection Required</h1>
+             <p className="text-white/40 max-w-md mx-auto">Please connect your Solana wallet to purchase a protocol node license.</p>
+           </div>
+        </div>
+      </main>
+    );
+  }
 
   // Dynamically calculate active nodes (current validator registry)
   const activeNodeCount = state.validators.length;
@@ -63,7 +87,7 @@ export default function PurchaseLicensePage() {
         <div className="space-y-4">
           <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Node Licensing</h1>
           <p className="text-white/40 max-w-xl">
-            Register your validator on Exnus. Each license is for one-time use and is burned upon node decommissioning.
+            Register your validator for wallet <span className="text-white font-mono text-[10px] bg-white/5 px-2 py-1 rounded">{walletAddress}</span>. Each license is for one-time use and is burned upon node decommissioning.
           </p>
         </div>
 
@@ -105,8 +129,8 @@ export default function PurchaseLicensePage() {
             
             <button 
               onClick={handlePurchase}
-              disabled={state.licenses.filter(l => !l.is_burned).length >= totalLimit}
-              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${state.licenses.filter(l => !l.is_burned).length < totalLimit ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+              disabled={activeNodeCount >= totalLimit}
+              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
             >
               Purchase License
             </button>
@@ -115,10 +139,10 @@ export default function PurchaseLicensePage() {
           <div className="p-4 bg-white/5 rounded-xl border border-white/10">
             <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-4">Your Purchased Licenses</h3>
             <div className="space-y-3">
-              {state.licenses.length === 0 ? (
-                <p className="text-[10px] text-white/20 uppercase text-center py-4">No licenses found</p>
+              {state.licenses.filter(l => l.owner === walletAddress).length === 0 ? (
+                <p className="text-[10px] text-white/20 uppercase text-center py-4">No licenses found for this wallet</p>
               ) : (
-                state.licenses.map((lic) => (
+                state.licenses.filter(l => l.owner === walletAddress).map((lic) => (
                   <div key={lic.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5">
                     <span className="font-mono text-xs text-[#00f5ff]">{lic.id}</span>
                     <div className="flex items-center gap-2">

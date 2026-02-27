@@ -1,7 +1,9 @@
+
 "use client";
 
 import React, { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { Wallet } from 'lucide-react';
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -20,13 +22,15 @@ export function StakingActionForm({
   validators,
   onUnstake,
   onClaim,
-  totalPendingRewards = 0
+  totalPendingRewards = 0,
+  connected = false
 }: any) {
   const [amount, setAmount] = useState('');
   const [duration, setDuration] = useState('30');
   const [activeTab, setActiveTab] = useState<'stake' | 'my-stakes'>('stake');
 
   const handleAction = () => {
+    if (!connected) return toast({ title: "Wallet Connection Required", variant: "destructive" });
     const numAmt = Number(amount);
     if (!amount || isNaN(numAmt) || numAmt <= 0) return toast({ title: "Invalid Amount", variant: "destructive" });
     if (numAmt > exnBalance) return toast({ title: "Insufficient Balance", variant: "destructive" });
@@ -46,6 +50,17 @@ export function StakingActionForm({
   };
 
   const activeUserStakes = userStakes.filter((s: any) => !s.unstaked);
+
+  if (!connected) {
+    return (
+      <div className="exn-card p-8 space-y-6 sticky top-28 border-[#00f5ff]/10 flex flex-col items-center justify-center text-center py-20">
+        <Wallet className="w-10 h-10 text-white/20 mb-4" />
+        <p className="text-xs text-white/40 uppercase font-black tracking-widest leading-relaxed">
+          Connect your Solana wallet <br/> to start staking
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="exn-card p-8 space-y-6 sticky top-28 border-[#00f5ff]/10">

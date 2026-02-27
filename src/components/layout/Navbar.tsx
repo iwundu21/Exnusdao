@@ -1,8 +1,11 @@
+
 "use client";
 
-import React, { useState } from 'react';
-import { Wallet, Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer } from 'lucide-react';
+import React from 'react';
+import { Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer } from 'lucide-react';
 import Link from 'next/link';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 export function Navbar({ 
   exnBalance = 0, 
@@ -11,7 +14,7 @@ export function Navbar({
   exnBalance?: number,
   usdcBalance?: number
 }) {
-  const [connected, setConnected] = useState(true);
+  const { connected } = useWallet();
 
   return (
     <nav className="flex items-center justify-between px-10 py-6 border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
@@ -38,25 +41,41 @@ export function Navbar({
           </Link>
         </div>
 
-        <div className="hidden lg:flex items-center gap-6">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
-            <Coins className="w-4 h-4 text-[#00f5ff]" />
-            <span className="text-xs font-bold text-[#00f5ff]">{exnBalance.toLocaleString()} EXN</span>
+        {connected && (
+          <div className="hidden lg:flex items-center gap-6">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
+              <Coins className="w-4 h-4 text-[#00f5ff]" />
+              <span className="text-xs font-bold text-[#00f5ff]">{exnBalance.toLocaleString()} EXN</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
+              <CircleDollarSign className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-400">{usdcBalance.toLocaleString()} USDC</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
-            <CircleDollarSign className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs font-bold text-emerald-400">{usdcBalance.toLocaleString()} USDC</span>
-          </div>
-        </div>
+        )}
         
-        <button 
-          onClick={() => setConnected(!connected)}
-          className={`exn-button flex items-center gap-2 ${connected ? 'opacity-90' : ''}`}
-        >
-          <Wallet className="w-5 h-5" />
-          {connected ? 'ExnUs...d2f1' : 'Connect Wallet'}
-        </button>
+        <WalletMultiButton className="exn-wallet-button" />
       </div>
+
+      <style jsx global>{`
+        .exn-wallet-button {
+          background: linear-gradient(to right, #00f5ff, #a855f7) !important;
+          color: black !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+          font-size: 10px !important;
+          letter-spacing: 0.1em !important;
+          height: 40px !important;
+          line-height: 40px !important;
+          border-radius: 8px !important;
+          padding: 0 20px !important;
+          transition: all 0.3s ease !important;
+        }
+        .exn-wallet-button:hover {
+          opacity: 0.9 !important;
+          transform: scale(0.98) !important;
+        }
+      `}</style>
     </nav>
   );
 }

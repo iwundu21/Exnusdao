@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { DashboardStats } from '@/components/staking/DashboardStats';
 import { ValidatorDiscovery } from '@/components/staking/ValidatorDiscovery';
@@ -8,44 +9,59 @@ import { StakingActionForm } from '@/components/staking/StakingActionForm';
 import { GovernancePortal } from '@/components/governance/GovernancePortal';
 import { toast } from '@/hooks/use-toast';
 import { useProtocolState } from '@/hooks/use-protocol-state';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 const REWARD_PRECISION = 1_000_000;
 
 export default function Home() {
+  const { connected, publicKey } = useWallet();
+  const walletAddress = publicKey?.toBase58() || '';
+  
   const { state, setState, isLoaded } = useProtocolState();
   const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
   const [selectedValidator, setSelectedValidator] = useState<any>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  // Derive total staked from validators for absolute accuracy
+  // Ensure we only render the dashboard on the client to avoid hydration-related 404s
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const totalStakedReal = useMemo(() => {
-    return state.validators.reduce((acc, v) => acc + v.total_staked, 0);
-  }, [state.validators]);
+    if (!state?.validators) return 0;
+    return state.validators.reduce((acc, v) => acc + (v.total_staked || 0), 0);
+  }, [state?.validators]);
 
-  // Calculate pending rewards for all active user stakes
   const pendingRewardsTotal = useMemo(() => {
-    if (!state.userStakes) return 0;
+    if (!state?.userStakes || !state?.validators || !walletAddress) return 0;
     return state.userStakes
-      .filter(s => !s.unstaked && !s.claimed)
+      .filter(s => s.owner === walletAddress && !s.unstaked && !s.claimed)
       .reduce((acc, stake) => {
         const validator = state.validators.find(v => v.id === stake.validator_id);
         if (!validator) return acc;
-        const rewardDelta = Math.max(0, validator.global_reward_index - stake.reward_checkpoint);
+        const rewardDelta = Math.max(0, (validator.global_reward_index || 0) - (stake.reward_checkpoint || 0));
         const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
         return acc + reward;
       }, 0);
-  }, [state.userStakes, state.validators]);
+  }, [state?.userStakes, state?.validators, walletAddress]);
 
   const handleStake = (stakeData: any) => {
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
+    
     const now = Date.now();
-    const newStake = { ...stakeData, id: `s${now}`, staked_at: now };
+    const newStake = { 
+      ...stakeData, 
+      id: `s${now}`, 
+      staked_at: now,
+      owner: walletAddress 
+    };
     const validator = state.validators.find(v => v.id === stakeData.validator_id);
     
     setState(prev => ({
       ...prev,
       userStakes: [...prev.userStakes, newStake],
       exnBalance: Math.max(0, prev.exnBalance - stakeData.amount),
-      totalStaked: prev.totalStaked + stakeData.amount,
-      validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: v.total_staked + stakeData.amount } : v)
+      validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: (v.total_staked || 0) + stakeData.amount } : v)
     }));
     
     toast({ 
@@ -55,6 +71,7 @@ export default function Home() {
   };
 
   const handleClaimRewards = () => {
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
     if (pendingRewardsTotal <= 0) {
       toast({ title: "No Rewards", description: "You have no pending rewards to claim.", variant: "destructive" });
       return;
@@ -62,7 +79,7 @@ export default function Home() {
 
     setState(prev => {
       const newUserStakes = prev.userStakes.map(stake => {
-        if (stake.unstaked || stake.claimed) return stake;
+        if (stake.owner !== walletAddress || stake.unstaked || stake.claimed) return stake;
         const validator = prev.validators.find(v => v.id === stake.validator_id);
         if (!validator) return stake;
         return {
@@ -85,7 +102,8 @@ export default function Home() {
   };
 
   const handleUnstake = (stakeId: string) => {
-    const stake = state.userStakes.find(s => s.id === stakeId);
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
+    const stake = state.userStakes.find(s => s.id === stakeId && s.owner === walletAddress);
     if (!stake || stake.unstaked) return;
     
     if (Date.now() < stake.unlock_timestamp) {
@@ -101,14 +119,14 @@ export default function Home() {
       ...prev,
       userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, unstaked: true, claimed: true } : s),
       exnBalance: prev.exnBalance + stake.amount + reward,
-      totalStaked: Math.max(0, prev.totalStaked - stake.amount),
-      validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) } : v)
+      validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: Math.max(0, (v.total_staked || 0) - stake.amount) } : v)
     }));
     toast({ title: "Tokens Unstaked", description: `Principal and ${reward.toFixed(2)} EXN rewards returned.` });
   };
 
   const handleMigrate = (stakeId: string, targetId: string) => {
-    const stake = state.userStakes.find(s => s.id === stakeId);
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
+    const stake = state.userStakes.find(s => s.id === stakeId && s.owner === walletAddress);
     const source = state.validators.find(v => v.id === stake?.validator_id);
     const target = state.validators.find(v => v.id === targetId);
 
@@ -129,8 +147,8 @@ export default function Home() {
       } : s),
       exnBalance: prev.exnBalance + reward,
       validators: prev.validators.map(v => {
-        if (v.id === source.id) return { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) };
-        if (v.id === target.id) return { ...v, total_staked: v.total_staked + stake.amount };
+        if (v.id === source.id) return { ...v, total_staked: Math.max(0, (v.total_staked || 0) - stake.amount) };
+        if (v.id === target.id) return { ...v, total_staked: (v.total_staked || 0) + stake.amount };
         return v;
       })
     }));
@@ -138,6 +156,7 @@ export default function Home() {
   };
 
   const handleVote = (pId: number, support: boolean) => {
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
     setState(prev => ({
       ...prev,
       proposals: prev.proposals.map(p => p.id === pId ? { 
@@ -149,6 +168,7 @@ export default function Home() {
   };
 
   const handleExecute = (pId: number) => {
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
     setState(prev => ({
       ...prev,
       proposals: prev.proposals.map(p => p.id === pId ? { ...p, executed: true } : p)
@@ -156,7 +176,7 @@ export default function Home() {
     toast({ title: "Proposal Executed", description: "Instruction applied to protocol state." });
   };
 
-  if (!isLoaded) {
+  if (!isLoaded || !isClient) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#020617] space-y-4">
         <div className="w-16 h-16 border-4 border-[#00f5ff] border-t-transparent rounded-full animate-spin" />
@@ -209,7 +229,7 @@ export default function Home() {
                 <ValidatorDiscovery 
                   validators={state.validators} 
                   onSelect={setSelectedValidator}
-                  userStakes={state.userStakes}
+                  userStakes={state.userStakes.filter(s => s.owner === walletAddress)}
                   onMigrate={handleMigrate}
                   selectedId={selectedValidator?.id}
                 />
@@ -220,11 +240,12 @@ export default function Home() {
                   selectedNode={selectedValidator} 
                   exnBalance={state.exnBalance}
                   onStake={handleStake}
-                  userStakes={state.userStakes}
+                  userStakes={state.userStakes.filter(s => s.owner === walletAddress)}
                   validators={state.validators}
                   onUnstake={handleUnstake}
                   onClaim={handleClaimRewards}
                   totalPendingRewards={pendingRewardsTotal}
+                  connected={connected}
                 />
               </div>
             </div>

@@ -1,18 +1,21 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ArrowLeft, AlertCircle, Upload, Flame } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Upload, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-const USER_WALLET = 'ExnUs...d2f1';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 export default function RegisterNodePage() {
   const router = useRouter();
+  const { publicKey, connected } = useWallet();
+  const walletAddress = publicKey?.toBase58() || '';
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, setState, isLoaded } = useProtocolState();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export default function RegisterNodePage() {
     licenseId: ''
   });
 
-  const existingNode = state.validators.find(v => v.owner === USER_WALLET);
+  const existingNode = state.validators.find(v => v.owner === walletAddress);
   const hasExistingNode = !!existingNode;
 
   useEffect(() => {
@@ -57,6 +60,7 @@ export default function RegisterNodePage() {
   };
 
   const handleRegister = () => {
+    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
     if (hasExistingNode) {
       return toast({ title: "Registration Denied", description: "One node limit per wallet reached.", variant: "destructive" });
     }
@@ -82,7 +86,7 @@ export default function RegisterNodePage() {
 
     const newNode = {
       id: `v${Date.now()}`,
-      owner: USER_WALLET,
+      owner: walletAddress,
       name: formData.name,
       description: formData.description,
       logo_uri: formData.logo_uri || "default-seed",
@@ -108,7 +112,24 @@ export default function RegisterNodePage() {
 
   if (!isLoaded) return null;
 
-  const userLicenses = state.licenses.filter(l => l.owner === USER_WALLET && !l.is_claimed && !l.is_burned);
+  if (!connected) {
+    return (
+      <main className="min-h-screen">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-10 py-40 flex flex-col items-center justify-center text-center space-y-8">
+           <div className="p-6 bg-[#00f5ff]/10 rounded-full border border-[#00f5ff]/20">
+             <Wallet className="w-12 h-12 text-[#00f5ff]" />
+           </div>
+           <div className="space-y-4">
+             <h1 className="text-4xl font-bold uppercase tracking-tight text-white">Wallet Connection Required</h1>
+             <p className="text-white/40 max-w-md mx-auto">Please connect your Solana wallet to register as a network validator.</p>
+           </div>
+        </div>
+      </main>
+    );
+  }
+
+  const userLicenses = state.licenses.filter(l => l.owner === walletAddress && !l.is_claimed && !l.is_burned);
 
   return (
     <main className="min-h-screen pb-20">
@@ -122,7 +143,7 @@ export default function RegisterNodePage() {
         <div className="space-y-4">
           <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Validator Registration</h1>
           <p className="text-white/40 max-w-xl">
-            Provision high-performance infrastructure on the Exnus network. A single-use protocol license is required.
+            Provision high-performance infrastructure for wallet <span className="text-white font-mono text-[10px] bg-white/5 px-2 py-1 rounded">{walletAddress}</span>. A single-use protocol license is required.
           </p>
         </div>
 
@@ -180,7 +201,7 @@ export default function RegisterNodePage() {
                     {userLicenses.map(l => (
                       <option key={l.id} value={l.id}>{l.id}</option>
                     ))}
-                    {state.licenses.filter(l => l.owner === USER_WALLET && l.is_burned).map(l => (
+                    {state.licenses.filter(l => l.owner === walletAddress && l.is_burned).map(l => (
                       <option key={l.id} disabled value={l.id}>{l.id} (BURNED 🔥)</option>
                     ))}
                   </select>

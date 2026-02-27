@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -27,6 +28,7 @@ export interface License {
 
 export interface UserStake {
   id: string;
+  owner: string;
   validator_id: string;
   amount: number;
   lock_multiplier: number;
@@ -64,7 +66,7 @@ const INITIAL_STATE: ProtocolState = {
   validators: [
     { 
       id: 'v1', 
-      owner: 'ExnUs...d2f1', 
+      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', // Demo legacy format
       name: 'CyberCore-01', 
       description: 'Primary edge node', 
       logo_uri: '66', 
@@ -79,7 +81,7 @@ const INITIAL_STATE: ProtocolState = {
     },
     { 
       id: 'v2', 
-      owner: 'ExnUs...0002', 
+      owner: 'Nebula-Mock-Owner', 
       name: 'NebulaNode', 
       description: 'Deep space validator', 
       logo_uri: '77', 
@@ -94,7 +96,7 @@ const INITIAL_STATE: ProtocolState = {
     },
     { 
       id: 'v3', 
-      owner: 'ExnUs...0003', 
+      owner: 'Alpha-Mock-Owner', 
       name: 'AlphaPulse', 
       description: 'High-frequency pulse', 
       logo_uri: '88', 
@@ -108,18 +110,15 @@ const INITIAL_STATE: ProtocolState = {
       license_id: 'LIC-DEMO3' 
     },
   ],
-  userStakes: [
-    { id: 's1', validator_id: 'v1', amount: 5000, lock_multiplier: 10000, staked_at: Date.now() - 86400000 * 7, unlock_timestamp: Date.now() - 86400000, reward_checkpoint: 1000000, claimed: false, unstaked: false },
-    { id: 's2', validator_id: 'v2', amount: 2500, lock_multiplier: 5000, staked_at: Date.now() - 86400000 * 2, unlock_timestamp: Date.now() + 86400000 * 30, reward_checkpoint: 1100000, claimed: false, unstaked: false },
-  ],
+  userStakes: [], // Clean start for real wallets
   licenses: [
-    { id: 'LIC-DEMO1', owner: 'ExnUs...d2f1', is_claimed: true, is_burned: false },
-    { id: 'LIC-DEMO2', owner: 'ExnUs...0002', is_claimed: true, is_burned: false },
-    { id: 'LIC-DEMO3', owner: 'ExnUs...0003', is_claimed: true, is_burned: false },
+    { id: 'LIC-DEMO1', owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', is_claimed: true, is_burned: false },
+    { id: 'LIC-DEMO2', owner: 'Nebula-Mock-Owner', is_claimed: true, is_burned: false },
+    { id: 'LIC-DEMO3', owner: 'Alpha-Mock-Owner', is_claimed: true, is_burned: false },
   ],
   proposals: [
-    { id: 0, proposer: 'ExnUs...99d', type: 0, title: 'Upgrade Epoch Length', description: 'Increase epoch from 24h to 48h for stability.', amount: 0, recipient: '', yes_votes: 15000, no_votes: 2000, deadline: Date.now() + 86400000 * 2, executed: false },
-    { id: 1, proposer: 'ExnUs...Admin', type: 1, title: 'Treasury Grant: AI Integration', description: 'Release 50,000 EXN for ecosystem development.', amount: 50000, recipient: 'ExnUs...abc', yes_votes: 45000, no_votes: 1200, deadline: Date.now() - 86400000, executed: false },
+    { id: 0, proposer: 'ExnUs99d...', type: 0, title: 'Upgrade Epoch Length', description: 'Increase epoch from 24h to 48h for stability.', amount: 0, recipient: '', yes_votes: 15000, no_votes: 2000, deadline: Date.now() + 86400000 * 2, executed: false },
+    { id: 1, proposer: 'ExnUsAdmin', type: 1, title: 'Treasury Grant: AI Integration', description: 'Release 50,000 EXN for ecosystem development.', amount: 50000, recipient: 'ExnUs99abc', yes_votes: 45000, no_votes: 1200, deadline: Date.now() - 86400000, executed: false },
   ],
 };
 

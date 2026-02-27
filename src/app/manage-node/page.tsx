@@ -1,24 +1,28 @@
+
 "use client";
 
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ArrowLeft, Save, ShieldCheck, AlertTriangle, LogOut, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, ShieldCheck, AlertTriangle, LogOut, Trash2, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useWallet } from '@solana/wallet-adapter-react';
 
-const USER_WALLET = 'ExnUs...d2f1';
 const SEED_DEPOSIT_AMOUNT = 15000000;
 
 export default function ManageNodePage() {
   const router = useRouter();
+  const { publicKey, connected } = useWallet();
+  const walletAddress = publicKey?.toBase58() || '';
+  
   const { state, setState, isLoaded } = useProtocolState();
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>(null);
 
-  const myNodes = state.validators.filter(v => v.owner === USER_WALLET);
+  const myNodes = state.validators.filter(v => v.owner === walletAddress);
 
   const startEditing = (node: any) => {
     setEditingNodeId(node.id);
@@ -130,7 +134,7 @@ export default function ManageNodePage() {
       ...prev,
       exnBalance: prev.exnBalance + seedRefund + rewards,
       validators: prev.validators.filter(v => v.id !== vId),
-      licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_burned: true } : l)
+      licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_burned: true, is_claimed: false } : l)
     }));
 
     toast({ title: "Account Closed", description: "Node decommissioned. Associated license has been burned 🔥." });
@@ -152,6 +156,23 @@ export default function ManageNodePage() {
 
   if (!isLoaded) return null;
 
+  if (!connected) {
+    return (
+      <main className="min-h-screen">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-10 py-40 flex flex-col items-center justify-center text-center space-y-8">
+           <div className="p-6 bg-[#00f5ff]/10 rounded-full border border-[#00f5ff]/20">
+             <Wallet className="w-12 h-12 text-[#00f5ff]" />
+           </div>
+           <div className="space-y-4">
+             <h1 className="text-4xl font-bold uppercase tracking-tight text-white">Wallet Connection Required</h1>
+             <p className="text-white/40 max-w-md mx-auto">Please connect your Solana wallet to manage your validator nodes and harvest commissions.</p>
+           </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen pb-20">
       <Navbar exnBalance={state.exnBalance} usdcBalance={state.usdcBalance} />
@@ -164,7 +185,7 @@ export default function ManageNodePage() {
         <div className="space-y-4">
           <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Node Management</h1>
           <p className="text-white/40 max-w-xl">
-            Optimize your validator parameters, manage protocol seed, and harvest performance commissions.
+            Optimize your validator parameters, manage protocol seed, and harvest performance commissions for address <span className="text-white font-mono text-[10px] bg-white/5 px-2 py-1 rounded">{walletAddress}</span>.
           </p>
         </div>
 
