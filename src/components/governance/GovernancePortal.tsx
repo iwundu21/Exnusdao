@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Settings2 } from 'lucide-react';
+import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp, Landmark } from 'lucide-react';
 
 export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onComment }: any) {
   const [showCreate, setShowCreate] = useState(false);
@@ -147,6 +147,8 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
         {proposals.map((prop: any) => {
           const totalVotes = (prop.yes_votes || 0) + (prop.no_votes || 0);
           const yesPercent = totalVotes > 0 ? (prop.yes_votes / totalVotes) * 100 : 0;
+          const noPercent = totalVotes > 0 ? (prop.no_votes / totalVotes) * 100 : 0;
+          
           const isExpired = Date.now() > prop.deadline;
           const isLocked = Date.now() > (prop.voting_ends_at || prop.deadline - 14400000) && !isExpired;
           const hasVoted = prop.voters?.includes(walletAddress) || false;
@@ -194,12 +196,24 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                 </div>
 
                 <div className="w-full md:w-80 space-y-6 bg-white/5 p-6 rounded-2xl">
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-xs font-bold uppercase">
-                      <span className="text-emerald-400">YES ({yesPercent.toFixed(1)}%)</span>
-                      <span className="text-red-400">NO</span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start text-[10px] font-black uppercase tracking-widest">
+                      <div className="flex flex-col items-start gap-1">
+                        <span className="text-emerald-400">YES {yesPercent.toFixed(1)}%</span>
+                        <span className="text-white/40 text-[8px] font-mono">{(prop.yes_votes || 0).toLocaleString()} EXN</span>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 text-right">
+                        <span className="text-red-400">NO {noPercent.toFixed(1)}%</span>
+                        <span className="text-white/40 text-[8px] font-mono">{(prop.no_votes || 0).toLocaleString()} EXN</span>
+                      </div>
                     </div>
+                    
                     <Progress value={yesPercent} className="h-2 bg-red-400/20" />
+                    
+                    <div className="flex justify-between items-center px-1">
+                       <p className="text-[8px] text-white/20 uppercase font-bold">Quorum Requirement: 10%</p>
+                       <p className="text-[8px] text-white/20 uppercase font-bold">Total: {totalVotes.toLocaleString()} EXN</p>
+                    </div>
                   </div>
 
                   {!isExpired && !isLocked && !hasVoted && !isVotingForThis && (
