@@ -1,17 +1,20 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ShieldCheck, ArrowLeft, MapPin, Percent, Image as ImageIcon, FileText } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, MapPin, Percent, Image as ImageIcon, FileText, Upload, Link as LinkIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function RegisterNodePage() {
   const router = useRouter();
   const { state, setState, isLoaded } = useProtocolState();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -20,6 +23,29 @@ export default function RegisterNodePage() {
     commission: 10,
     licenseId: ''
   });
+
+  // Update preview when logo_uri changes
+  useEffect(() => {
+    if (formData.logo_uri) {
+      // If it looks like a URL, use it, otherwise treat it as a seed for our placeholder system
+      const isUrl = formData.logo_uri.startsWith('http') || formData.logo_uri.startsWith('data:');
+      const url = isUrl ? formData.logo_uri : `https://picsum.photos/seed/${formData.logo_uri}/400/400`;
+      setPreviewUrl(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [formData.logo_uri]);
+
+  const handleSimulateUpload = () => {
+    // In a real dApp, this would upload to IPFS/Arweave and return a CID/URI
+    // For this prototype, we generate a unique seed and simulate the "pinning" process
+    const mockCid = Math.floor(Math.random() * 1000).toString();
+    setFormData(prev => ({ ...prev, logo_uri: mockCid }));
+    toast({ 
+      title: "Metadata Pinned", 
+      description: "Logo uploaded to decentralized storage (Simulation)." 
+    });
+  };
 
   const handleRegister = () => {
     const license = state.licenses.find(l => l.id === formData.licenseId);
@@ -42,7 +68,7 @@ export default function RegisterNodePage() {
       owner: 'ExnUs...d2f1',
       name: formData.name,
       description: formData.description,
-      logo_uri: formData.logo_uri || (Math.floor(Math.random() * 100).toString()),
+      logo_uri: formData.logo_uri || "default-seed",
       location: formData.location,
       is_active: false,
       seed_deposited: false,
@@ -72,7 +98,7 @@ export default function RegisterNodePage() {
         toggleAdmin={() => {}}
       />
       
-      <div className="max-w-3xl mx-auto px-10 py-20 space-y-12">
+      <div className="max-w-4xl mx-auto px-10 py-20 space-y-12">
         <Link href="/" className="flex items-center gap-2 text-white/40 hover:text-white transition-colors uppercase text-xs font-bold tracking-widest">
           <ArrowLeft className="w-4 h-4" /> Back to Dashboard
         </Link>
@@ -84,91 +110,146 @@ export default function RegisterNodePage() {
           </p>
         </div>
 
-        <div className="exn-card p-10 space-y-8 border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                <FileText className="w-3 h-3 text-[#00f5ff]" /> Node Name
-              </label>
-              <input 
-                value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
-                className="exn-input h-12 text-sm" 
-                placeholder="e.g. CyberCore-01" 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                <MapPin className="w-3 h-3 text-red-400" /> Physical Location
-              </label>
-              <input 
-                value={formData.location}
-                onChange={e => setFormData({...formData, location: e.target.value})}
-                className="exn-input h-12 text-sm" 
-                placeholder="e.g. Frankfurt, DE" 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                <ImageIcon className="w-3 h-3 text-purple-400" /> Logo Seed ID
-              </label>
-              <input 
-                value={formData.logo_uri}
-                onChange={e => setFormData({...formData, logo_uri: e.target.value})}
-                className="exn-input h-12 text-sm" 
-                placeholder="e.g. 42 (random if empty)" 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                <Percent className="w-3 h-3 text-yellow-400" /> Commission (0-30%)
-              </label>
-              <div className="relative">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 exn-card p-8 space-y-8 border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
+                  <FileText className="w-3 h-3 text-[#00f5ff]" /> Node Name
+                </label>
                 <input 
-                  type="number"
-                  value={formData.commission}
-                  onChange={e => setFormData({...formData, commission: Number(e.target.value)})}
-                  className="exn-input h-12 text-sm pr-10" 
-                  max="30"
-                  min="0"
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
+                  className="exn-input h-12 text-sm" 
+                  placeholder="e.g. CyberCore-01" 
                 />
-                <span className="absolute right-3 top-3.5 text-white/40 font-bold">%</span>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
+                  <MapPin className="w-3 h-3 text-red-400" /> Physical Location
+                </label>
+                <input 
+                  value={formData.location}
+                  onChange={e => setFormData({...formData, location: e.target.value})}
+                  className="exn-input h-12 text-sm" 
+                  placeholder="e.g. Frankfurt, DE" 
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-4">
+                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
+                  <ImageIcon className="w-3 h-3 text-purple-400" /> Logo Metadata (URI or Upload)
+                </label>
+                <div className="flex gap-4">
+                  <div className="relative flex-1">
+                    <input 
+                      value={formData.logo_uri}
+                      onChange={e => setFormData({...formData, logo_uri: e.target.value})}
+                      className="exn-input h-12 text-sm pl-10" 
+                      placeholder="IPFS CID or Image URL" 
+                    />
+                    <LinkIcon className="absolute left-3 top-3.5 w-4 h-4 text-white/30" />
+                  </div>
+                  <button 
+                    onClick={handleSimulateUpload}
+                    className="exn-button-outline px-6 flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <Upload className="w-4 h-4" /> Upload Logo
+                  </button>
+                </div>
+                <p className="text-[9px] text-white/20 uppercase">Provide a direct URL or use the upload tool to pin metadata to decentralized storage.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
+                  <Percent className="w-3 h-3 text-yellow-400" /> Commission (0-30%)
+                </label>
+                <div className="relative">
+                  <input 
+                    type="number"
+                    value={formData.commission}
+                    onChange={e => setFormData({...formData, commission: Math.min(30, Math.max(0, Number(e.target.value)))})}
+                    className="exn-input h-12 text-sm pr-10" 
+                    max="30"
+                    min="0"
+                  />
+                  <span className="absolute right-3 top-3.5 text-white/40 font-bold">%</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
+                  <ShieldCheck className="w-3 h-3 text-emerald-400" /> Unique License ID
+                </label>
+                <input 
+                  value={formData.licenseId}
+                  onChange={e => setFormData({...formData, licenseId: e.target.value})}
+                  className="exn-input h-12 text-sm font-mono tracking-wider border-[#00f5ff]/40" 
+                  placeholder="LIC-XXXXXXX" 
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Node Description</label>
+                <textarea 
+                  value={formData.description}
+                  onChange={e => setFormData({...formData, description: e.target.value})}
+                  className="exn-input min-h-[100px] py-4 text-sm" 
+                  placeholder="Hardware specs, reliability guarantees..." 
+                />
               </div>
             </div>
 
-            <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" /> Unique License ID
-              </label>
-              <input 
-                value={formData.licenseId}
-                onChange={e => setFormData({...formData, licenseId: e.target.value})}
-                className="exn-input h-12 text-sm font-mono tracking-wider border-[#00f5ff]/40" 
-                placeholder="LIC-XXXXXXX" 
-              />
-              <p className="text-[9px] text-white/20 uppercase">Must correspond to an unused license in your wallet.</p>
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Node Description</label>
-              <textarea 
-                value={formData.description}
-                onChange={e => setFormData({...formData, description: e.target.value})}
-                className="exn-input min-h-[100px] py-4 text-sm" 
-                placeholder="Hardware specs, reliability guarantees..." 
-              />
-            </div>
+            <button 
+              onClick={handleRegister}
+              className="w-full h-14 exn-button text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3"
+            >
+              <ShieldCheck className="w-6 h-6" /> Initialize Validator Node
+            </button>
           </div>
 
-          <button 
-            onClick={handleRegister}
-            className="w-full h-14 exn-button text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3"
-          >
-            <ShieldCheck className="w-6 h-6" /> Initialize Validator Node
-          </button>
+          <div className="space-y-6">
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Metadata Preview</h3>
+            <div className="exn-card aspect-square relative flex items-center justify-center overflow-hidden border-dashed border-white/10">
+              {previewUrl ? (
+                <div className="relative w-full h-full">
+                  <Image 
+                    src={previewUrl} 
+                    alt="Logo Preview" 
+                    fill 
+                    className="object-cover" 
+                    data-ai-hint="validator logo"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                    <div>
+                      <p className="text-sm font-bold text-white">{formData.name || 'Untitled Node'}</p>
+                      <p className="text-[10px] text-[#00f5ff] uppercase">{formData.location || 'Unknown Location'}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-4 text-white/10">
+                  <ImageIcon className="w-16 h-16" />
+                  <p className="text-[10px] uppercase font-black tracking-widest">No Metadata Loaded</p>
+                </div>
+              )}
+            </div>
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+               <h4 className="text-[10px] font-black text-white/40 uppercase mb-2">Protocol Validation</h4>
+               <ul className="space-y-2">
+                 <li className={`flex items-center gap-2 text-[10px] ${formData.name ? 'text-emerald-400' : 'text-white/20'}`}>
+                    <ShieldCheck className="w-3 h-3" /> Identity String Set
+                 </li>
+                 <li className={`flex items-center gap-2 text-[10px] ${formData.licenseId ? 'text-emerald-400' : 'text-white/20'}`}>
+                    <ShieldCheck className="w-3 h-3" /> License Key Linked
+                 </li>
+                 <li className={`flex items-center gap-2 text-[10px] ${formData.logo_uri ? 'text-emerald-400' : 'text-white/20'}`}>
+                    <ShieldCheck className="w-3 h-3" /> Metadata Hash Generated
+                 </li>
+               </ul>
+            </div>
+          </div>
         </div>
       </div>
     </main>
