@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { ShieldCheck, ArrowRightLeft, MapPin, Check } from 'lucide-react';
+import { ShieldCheck, ArrowRightLeft, MapPin, Check, Users, Database } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,6 +23,9 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
           const isUrl = validator.logo_uri?.startsWith('http') || validator.logo_uri?.startsWith('data:');
           const logoUrl = isUrl ? validator.logo_uri : `https://picsum.photos/seed/${validator.logo_uri}/800/400`;
           const isSelected = selectedId === validator.id;
+
+          // Calculate active stakers for this node
+          const stakerCount = userStakes.filter((s: any) => s.validator_id === validator.id && !s.unstaked).length;
 
           return (
             <div key={validator.id} className={`exn-card group border transition-all duration-300 ${isSelected ? 'border-[#00f5ff] ring-1 ring-[#00f5ff] shadow-[0_0_30px_rgba(0,245,255,0.15)]' : !validator.is_active ? 'border-red-500/20 opacity-80' : 'border-white/10'}`}>
@@ -49,15 +52,35 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                 </div>
               </div>
               
-              <div className="p-6 space-y-4">
-                <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-6 space-y-5">
+                <div className="space-y-2">
+                  <p className="text-[10px] text-white/30 uppercase font-black tracking-widest">Node Description</p>
+                  <p className="text-xs text-white/60 leading-relaxed italic line-clamp-2">
+                    {validator.description || "High-performance decentralized validator node serving the Exnus network protocol with guaranteed uptime."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/5 space-y-1">
+                    <div className="flex items-center gap-2 text-white/40">
+                      <Database className="w-3 h-3 text-[#00f5ff]" />
+                      <p className="text-[9px] uppercase font-bold">Total Staked</p>
+                    </div>
+                    <p className="text-white font-bold text-sm tracking-tight">{validator.total_staked.toLocaleString()} EXN</p>
+                  </div>
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/5 space-y-1">
+                    <div className="flex items-center gap-2 text-white/40">
+                      <Users className="w-3 h-3 text-purple-400" />
+                      <p className="text-[9px] uppercase font-bold">Total Stakers</p>
+                    </div>
+                    <p className="text-white font-bold text-sm tracking-tight">{stakerCount} Active</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-center">
                   <div className="p-2 bg-white/5 rounded-lg border border-white/5">
                     <p className="text-white/40 text-[9px] uppercase">Node Fee</p>
                     <p className="text-white font-bold text-xs">{(validator.commission_rate / 100).toFixed(1)}%</p>
-                  </div>
-                  <div className="p-2 bg-white/5 rounded-lg border border-white/5">
-                    <p className="text-white/40 text-[9px] uppercase">TVL</p>
-                    <p className="text-white font-bold text-xs">{validator.total_staked.toLocaleString()}</p>
                   </div>
                   <div className="p-2 bg-white/5 rounded-lg border border-white/5">
                     <p className="text-white/40 text-[9px] uppercase">R-Index</p>
