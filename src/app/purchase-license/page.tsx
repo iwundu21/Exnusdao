@@ -1,9 +1,8 @@
-
 "use client";
 
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { Ticket, ShieldCheck, ArrowLeft, CircleDollarSign } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
@@ -63,12 +62,9 @@ export default function PurchaseLicensePage() {
         <div className="exn-card p-10 space-y-8 border-[#00f5ff]/20">
           <div className="flex justify-between items-center border-b border-white/10 pb-8">
             <div className="flex items-center gap-4">
-              <div className="p-4 bg-[#00f5ff]/10 rounded-2xl">
-                <Ticket className="w-8 h-8 text-[#00f5ff]" />
-              </div>
               <div>
                 <p className="text-sm font-bold text-white uppercase tracking-widest">Protocol License</p>
-                <p className="text-xs text-white/40">Unique Identity Token</p>
+                <p className="text-xs text-white/40 uppercase">Unique Identity Token</p>
               </div>
             </div>
             <div className="text-right">
@@ -87,7 +83,7 @@ export default function PurchaseLicensePage() {
               onClick={handlePurchase}
               className="w-full h-14 exn-button text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3"
             >
-              <CircleDollarSign className="w-6 h-6" /> Purchase License
+              Purchase License
             </button>
           </div>
 

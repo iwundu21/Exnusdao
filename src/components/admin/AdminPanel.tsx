@@ -1,8 +1,6 @@
-
 "use client";
 
 import React from 'react';
-import { ShieldAlert, RefreshCw, Banknote, PauseCircle, PlayCircle, CheckCircle } from 'lucide-react';
 
 export function AdminPanel({ globalState, setGlobalState, onSettle, validators }: any) {
   return (
@@ -10,9 +8,6 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators }
       <div className="max-w-5xl w-full exn-card border-[#a855f7]/40 shadow-[0_0_50px_rgba(168,85,247,0.2)]">
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#a855f7]/20 rounded-lg text-[#a855f7]">
-              <ShieldAlert className="w-6 h-6" />
-            </div>
             <h2 className="text-3xl font-bold exn-gradient-text uppercase tracking-tighter">Protocol Configuration</h2>
           </div>
           <button 
@@ -26,8 +21,8 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators }
         <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           <div className="space-y-8">
             <section className="space-y-4">
-              <h3 className="text-lg font-bold text-[#00f5ff] flex items-center gap-2 uppercase tracking-widest">
-                <RefreshCw className="w-5 h-5" /> Epoch Settlement
+              <h3 className="text-lg font-bold text-[#00f5ff] uppercase tracking-widest">
+                Epoch Settlement
               </h3>
               <div className="p-5 bg-white/5 rounded-xl space-y-4 border border-white/5">
                 <p className="text-[10px] text-white/40 leading-relaxed uppercase">Initiate reward distribution for all active network nodes based on current TVL.</p>
@@ -40,8 +35,8 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators }
 
           <div className="space-y-8">
             <section className="space-y-4">
-              <h3 className="text-lg font-bold text-yellow-400 flex items-center gap-2 uppercase tracking-widest">
-                <Banknote className="w-5 h-5" /> Financial Parameters
+              <h3 className="text-lg font-bold text-yellow-400 uppercase tracking-widest">
+                Financial Parameters
               </h3>
               <div className="space-y-4 p-5 bg-white/5 rounded-xl border border-white/5">
                 <div>
@@ -58,8 +53,8 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators }
             </section>
 
             <section className="space-y-4">
-              <h3 className="text-lg font-bold text-red-400 flex items-center gap-2 uppercase tracking-widest">
-                <PauseCircle className="w-5 h-5" /> Circuit Breaker
+              <h3 className="text-lg font-bold text-red-400 uppercase tracking-widest">
+                Circuit Breaker
               </h3>
               <div className="p-5 bg-white/5 rounded-xl border border-white/5">
                 <p className="text-[10px] text-white/40 leading-relaxed uppercase mb-4">Emergency pause stops new staking actions. Cannot freeze user funds.</p>
@@ -67,7 +62,6 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators }
                   onClick={() => setGlobalState({...globalState, isPaused: !globalState.isPaused})}
                   className={`w-full flex items-center justify-center gap-2 h-12 rounded-lg font-bold transition-all text-xs ${globalState.isPaused ? 'bg-emerald-500 text-black' : 'bg-red-500 text-black'}`}
                 >
-                  {globalState.isPaused ? <PlayCircle className="w-5 h-5" /> : <PauseCircle className="w-5 h-5" />}
                   {globalState.isPaused ? 'Resume Staking' : 'Pause Staking'}
                 </button>
               </div>
@@ -76,8 +70,8 @@ export function AdminPanel({ globalState, setGlobalState, onSettle, validators }
 
           <div className="space-y-8">
              <section className="space-y-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2 uppercase tracking-widest">
-                <CheckCircle className="w-5 h-5" /> Network Health
+              <h3 className="text-lg font-bold text-white uppercase tracking-widest">
+                Network Health
               </h3>
               <div className="space-y-2 max-h-[350px] overflow-auto pr-2">
                 {validators.map((v: any) => (

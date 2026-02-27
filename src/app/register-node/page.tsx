@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ShieldCheck, ArrowLeft, MapPin, Percent, Image as ImageIcon, FileText, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
@@ -135,7 +135,7 @@ export default function RegisterNodePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                  <FileText className="w-3 h-3 text-[#00f5ff]" /> Node Name
+                  Node Name
                 </label>
                 <input 
                   value={formData.name}
@@ -147,7 +147,7 @@ export default function RegisterNodePage() {
 
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                  <MapPin className="w-3 h-3 text-red-400" /> Physical Location
+                  Physical Location
                 </label>
                 <input 
                   value={formData.location}
@@ -159,7 +159,7 @@ export default function RegisterNodePage() {
 
               <div className="md:col-span-2 space-y-4">
                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                  <ImageIcon className="w-3 h-3 text-purple-400" /> Validator Logo
+                  Validator Logo
                 </label>
                 <div className="flex gap-4">
                   <input 
@@ -173,24 +173,23 @@ export default function RegisterNodePage() {
                     <input 
                       value={formData.logo_uri.startsWith('data:') ? '[Uploaded Image File]' : formData.logo_uri}
                       readOnly
-                      className="exn-input h-12 text-sm pl-10 cursor-default" 
+                      className="exn-input h-12 text-sm pl-4 cursor-default" 
                       placeholder="No image selected" 
                     />
-                    <LinkIcon className="absolute left-3 top-3.5 w-4 h-4 text-white/30" />
                   </div>
                   <div className="flex gap-2">
                     <button 
                       onClick={triggerFileUpload}
-                      className="exn-button-outline px-6 flex items-center gap-2 whitespace-nowrap"
+                      className="exn-button-outline px-6 flex items-center gap-2 whitespace-nowrap text-[10px] font-black uppercase"
                     >
-                      <Upload className="w-4 h-4" /> Select Image
+                      Select Image
                     </button>
                     {formData.logo_uri && (
                       <button 
                         onClick={removeLogo}
-                        className="p-3 border border-red-500/40 text-red-400 hover:bg-red-500/10 rounded-md transition-all"
+                        className="p-3 border border-red-500/40 text-red-400 hover:bg-red-500/10 rounded-md transition-all text-[10px] font-black uppercase"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        Remove
                       </button>
                     )}
                   </div>
@@ -200,7 +199,7 @@ export default function RegisterNodePage() {
 
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                  <Percent className="w-3 h-3 text-yellow-400" /> Commission (0-30%)
+                  Commission (0-30%)
                 </label>
                 <div className="relative">
                   <input 
@@ -217,7 +216,7 @@ export default function RegisterNodePage() {
 
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
-                  <ShieldCheck className="w-3 h-3 text-emerald-400" /> Unique License ID
+                  Unique License ID
                 </label>
                 <input 
                   value={formData.licenseId}
@@ -242,7 +241,7 @@ export default function RegisterNodePage() {
               onClick={handleRegister}
               className="w-full h-14 exn-button text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3"
             >
-              <ShieldCheck className="w-6 h-6" /> Initialize Validator Node
+              Initialize Validator Node
             </button>
           </div>
 
@@ -267,7 +266,6 @@ export default function RegisterNodePage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4 text-white/10">
-                  <ImageIcon className="w-16 h-16" />
                   <p className="text-[10px] uppercase font-black tracking-widest">Awaiting Logo</p>
                 </div>
               )}
@@ -275,14 +273,14 @@ export default function RegisterNodePage() {
             <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                <h4 className="text-[10px] font-black text-white/40 uppercase mb-2">Registration Status</h4>
                <ul className="space-y-2">
-                 <li className={`flex items-center gap-2 text-[10px] ${formData.name ? 'text-emerald-400' : 'text-white/20'}`}>
-                    <ShieldCheck className="w-3 h-3" /> Identity String Set
+                 <li className={`flex items-center gap-2 text-[10px] uppercase font-bold ${formData.name ? 'text-emerald-400' : 'text-white/20'}`}>
+                    Identity String Set
                  </li>
-                 <li className={`flex items-center gap-2 text-[10px] ${formData.licenseId ? 'text-emerald-400' : 'text-white/20'}`}>
-                    <ShieldCheck className="w-3 h-3" /> License Key Linked
+                 <li className={`flex items-center gap-2 text-[10px] uppercase font-bold ${formData.licenseId ? 'text-emerald-400' : 'text-white/20'}`}>
+                    License Key Linked
                  </li>
-                 <li className={`flex items-center gap-2 text-[10px] ${formData.logo_uri ? 'text-emerald-400' : 'text-white/20'}`}>
-                    <ShieldCheck className="w-3 h-3" /> Image Data Encoded
+                 <li className={`flex items-center gap-2 text-[10px] uppercase font-bold ${formData.logo_uri ? 'text-emerald-400' : 'text-white/20'}`}>
+                    Image Data Encoded
                  </li>
                </ul>
             </div>

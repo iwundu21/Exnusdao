@@ -1,8 +1,6 @@
-
 "use client";
 
 import React, { useState } from 'react';
-import { Coins, ArrowRightLeft, AlertCircle, Calendar, Target } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const STAKING_TIERS = [
@@ -72,9 +70,8 @@ export function StakingActionForm({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="exn-input pl-10 h-12"
+                className="exn-input h-12"
               />
-              <Coins className="absolute left-3 top-3.5 w-5 h-5 text-[#00f5ff]/60" />
               <button onClick={() => setAmount(exnBalance.toString())} className="absolute right-3 top-2.5 text-xs text-[#00f5ff] font-bold hover:underline">MAX</button>
             </div>
           </div>
@@ -97,9 +94,7 @@ export function StakingActionForm({
 
           <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-white/50 uppercase tracking-tighter flex items-center gap-2">
-                <Target className="w-3 h-3 text-[#00f5ff]" /> Target Node
-              </span>
+              <span className="text-white/50 uppercase tracking-tighter">Target Node</span>
               <span className={`font-bold uppercase ${selectedNode ? 'text-[#00f5ff]' : 'text-red-400 animate-pulse'}`}>
                 {selectedNode ? selectedNode.name : 'Selection Required'}
               </span>
@@ -117,7 +112,6 @@ export function StakingActionForm({
             disabled={!selectedNode}
             className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${selectedNode ? 'exn-button' : 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'}`}
           >
-            <ArrowRightLeft className="w-5 h-5" /> 
             {selectedNode ? `Confirm Stake with ${selectedNode.name}` : 'Confirm Stake'}
           </button>
         </div>
@@ -127,7 +121,6 @@ export function StakingActionForm({
         <div className="space-y-4 max-h-[400px] overflow-auto pr-2 animate-in fade-in slide-in-from-right-4 duration-300">
           {userStakes.filter((s: any) => !s.unstaked).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 space-y-4 text-white/20">
-               <Coins className="w-12 h-12 opacity-20" />
                <p className="text-center text-xs uppercase font-bold tracking-widest">No active stake records</p>
             </div>
           ) : (
@@ -144,8 +137,7 @@ export function StakingActionForm({
                       {isLocked ? 'Locked' : 'Unlocked'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-white/50">
-                    <Calendar className="w-3 h-3" />
+                  <div className="text-[10px] text-white/50 uppercase">
                     Unlock: {new Date(s.unlock_timestamp).toLocaleDateString()}
                   </div>
                   {!isLocked && (
@@ -164,8 +156,7 @@ export function StakingActionForm({
       )}
 
       <div className="flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-        <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-        <p className="text-[10px] text-red-400 leading-tight">Lock periods are strictly enforced by the protocol smart contract. Principal cannot be withdrawn prematurely.</p>
+        <p className="text-[10px] text-red-400 leading-tight uppercase font-bold">Lock periods are strictly enforced by the protocol smart contract. Principal cannot be withdrawn prematurely.</p>
       </div>
     </div>
   );

@@ -1,8 +1,6 @@
-
 "use client";
 
 import React, { useState } from 'react';
-import { Vote, Send, Clock, CheckCircle, FileText } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
 
@@ -18,16 +16,16 @@ export function GovernancePortal({ proposals, onVote, onExecute }: any) {
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
-          className="exn-button flex items-center gap-2"
+          className="exn-button uppercase tracking-widest text-xs font-black"
         >
-          <Send className="w-5 h-5" /> New Proposal
+          New Proposal
         </button>
       </div>
 
       {showCreate && (
         <div className="exn-card p-8 border-[#a855f7]/40 animate-in fade-in slide-in-from-top-4">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <FileText className="w-6 h-6 text-[#a855f7]" /> Create New Proposal
+          <h3 className="text-xl font-bold mb-6 uppercase tracking-widest">
+            Create New Proposal
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -61,16 +59,16 @@ export function GovernancePortal({ proposals, onVote, onExecute }: any) {
                     <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${prop.type === 1 ? 'bg-[#a855f7]/20 text-[#a855f7]' : 'bg-[#00f5ff]/20 text-[#00f5ff]'}`}>
                       {prop.type === 1 ? 'Treasury' : 'Parameter'}
                     </span>
-                    <h3 className="text-2xl font-bold text-white tracking-tight">{prop.title}</h3>
+                    <h3 className="text-2xl font-bold text-white tracking-tight uppercase">{prop.title}</h3>
                   </div>
                   <p className="text-white/60 text-sm leading-relaxed">{prop.description}</p>
                   
                   <div className="flex gap-8 pt-4">
-                    <div className="flex items-center gap-2 text-xs text-white/40">
-                      <Clock className="w-4 h-4" /> {isClosed ? 'Voting Closed' : `Ends: ${new Date(prop.deadline).toLocaleDateString()}`}
+                    <div className="text-xs text-white/40 uppercase font-bold tracking-widest">
+                      {isClosed ? 'Voting Closed' : `Ends: ${new Date(prop.deadline).toLocaleDateString()}`}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-white/40">
-                      <Vote className="w-4 h-4" /> Threshold: 51%
+                    <div className="text-xs text-white/40 uppercase font-bold tracking-widest">
+                      Threshold: 51%
                     </div>
                   </div>
                 </div>
@@ -99,11 +97,11 @@ export function GovernancePortal({ proposals, onVote, onExecute }: any) {
                          {passed ? 'Passed' : 'Failed'}
                        </div>
                        {passed && !prop.executed && (
-                         <button onClick={() => onExecute(prop.id)} className="w-full exn-button text-[10px] font-black h-10">Execute Changes</button>
+                         <button onClick={() => onExecute(prop.id)} className="w-full exn-button text-[10px] font-black h-10 uppercase">Execute Changes</button>
                        )}
                        {prop.executed && (
                          <div className="flex items-center justify-center gap-2 text-emerald-400 text-xs font-bold uppercase pt-2">
-                           <CheckCircle className="w-4 h-4" /> Applied On-Chain
+                           Applied On-Chain
                          </div>
                        )}
                     </div>

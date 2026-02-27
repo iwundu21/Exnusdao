@@ -1,8 +1,6 @@
-
 "use client";
 
 import React from 'react';
-import { ShieldCheck, ArrowRightLeft, MapPin, Check, Users, Database } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
 
@@ -19,12 +17,9 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {validators.map((validator: any) => {
-          // Resolve logo URI: if it's a URL, use it; otherwise, use our picsum seed system
           const isUrl = validator.logo_uri?.startsWith('http') || validator.logo_uri?.startsWith('data:');
           const logoUrl = isUrl ? validator.logo_uri : `https://picsum.photos/seed/${validator.logo_uri}/800/400`;
           const isSelected = selectedId === validator.id;
-
-          // Calculate active stakers for this node
           const stakerCount = userStakes.filter((s: any) => s.validator_id === validator.id && !s.unstaked).length;
 
           return (
@@ -39,14 +34,14 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] to-transparent" />
                 <div className="absolute top-4 right-6 flex items-center gap-1 text-[9px] text-white/60 font-black uppercase tracking-widest bg-black/40 px-2 py-1 rounded backdrop-blur-md">
-                  <MapPin className="w-3 h-3 text-red-400" /> {validator.location}
+                   {validator.location}
                 </div>
                 <div className="absolute bottom-4 left-6 flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${validator.is_active ? 'bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]' : 'bg-red-400'}`} />
                   <span className="text-white font-bold text-lg tracking-tight">{validator.name}</span>
                   {isSelected && (
                     <div className="flex items-center gap-1 ml-2 bg-[#00f5ff] text-black text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                      <Check className="w-2.5 h-2.5" /> Selected
+                      Selected
                     </div>
                   )}
                 </div>
@@ -62,17 +57,11 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-white/5 rounded-xl border border-white/5 space-y-1">
-                    <div className="flex items-center gap-2 text-white/40">
-                      <Database className="w-3 h-3 text-[#00f5ff]" />
-                      <p className="text-[9px] uppercase font-bold">Total Staked</p>
-                    </div>
+                    <p className="text-[9px] uppercase font-bold text-white/40">Total Staked</p>
                     <p className="text-white font-bold text-sm tracking-tight">{validator.total_staked.toLocaleString()} EXN</p>
                   </div>
                   <div className="p-3 bg-white/5 rounded-xl border border-white/5 space-y-1">
-                    <div className="flex items-center gap-2 text-white/40">
-                      <Users className="w-3 h-3 text-purple-400" />
-                      <p className="text-[9px] uppercase font-bold">Total Stakers</p>
-                    </div>
+                    <p className="text-[9px] uppercase font-bold text-white/40">Total Stakers</p>
                     <p className="text-white font-bold text-sm tracking-tight">{stakerCount} Active</p>
                   </div>
                 </div>
@@ -107,7 +96,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                        }}
                        className="px-4 exn-button-outline border-emerald-500 text-emerald-400 flex items-center justify-center gap-2 text-[10px] font-black uppercase"
                      >
-                       <ArrowRightLeft className="w-4 h-4" /> Migrate
+                       Migrate
                      </button>
                   )}
                 </div>
