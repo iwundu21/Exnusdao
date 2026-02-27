@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "validator-1",
+      "description": "Cyberpunk server rack",
+      "imageUrl": "https://picsum.photos/seed/66/400/300",
+      "imageHint": "server tech"
+    },
+    {
+      "id": "validator-2",
+      "description": "Abstract digital network",
+      "imageUrl": "https://picsum.photos/seed/77/400/300",
+      "imageHint": "network digital"
+    },
+    {
+      "id": "validator-3",
+      "description": "Glowing circuit board",
+      "imageUrl": "https://picsum.photos/seed/88/400/300",
+      "imageHint": "circuit glow"
+    },
+    {
+      "id": "hero-bg",
+      "description": "Deep space nebula",
+      "imageUrl": "https://picsum.photos/seed/99/1920/1080",
+      "imageHint": "abstract space"
+    }
+  ]
+}
