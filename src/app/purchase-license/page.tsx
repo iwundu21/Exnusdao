@@ -13,6 +13,14 @@ export default function PurchaseLicensePage() {
   const { state, setState, isLoaded } = useProtocolState();
 
   const handlePurchase = () => {
+    if (state.licenses.length >= state.licenseLimit) {
+      return toast({ 
+        title: "Registration Capped", 
+        description: "All protocol license slots have been filled for this epoch.", 
+        variant: "destructive" 
+      });
+    }
+
     if (state.usdcBalance < LICENSE_PRICE) {
       return toast({ title: "Insufficient USDC", variant: "destructive" });
     }
@@ -37,6 +45,8 @@ export default function PurchaseLicensePage() {
   };
 
   if (!isLoaded) return null;
+
+  const remainingSlots = state.licenseLimit - state.licenses.length;
 
   return (
     <main className="min-h-screen pb-20">
@@ -73,7 +83,22 @@ export default function PurchaseLicensePage() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
+                 <span className="text-white/40">Network Capacity</span>
+                 <span className={remainingSlots > 0 ? "text-[#00f5ff]" : "text-red-400"}>
+                   {remainingSlots} / {state.licenseLimit} Slots Left
+                 </span>
+              </div>
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <div 
+                  className="h-full exn-gradient-bg transition-all duration-500" 
+                  style={{ width: `${(remainingSlots / state.licenseLimit) * 100}%` }}
+                />
+              </div>
+            </div>
+
             <div className="flex justify-between text-sm">
               <span className="text-white/40 uppercase tracking-widest">Available Balance:</span>
               <span className="text-white font-bold">{state.usdcBalance.toLocaleString()} USDC</span>
@@ -81,9 +106,10 @@ export default function PurchaseLicensePage() {
             
             <button 
               onClick={handlePurchase}
-              className="w-full h-14 exn-button text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3"
+              disabled={remainingSlots <= 0}
+              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${remainingSlots > 0 ? 'exn-button' : 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'}`}
             >
-              Purchase License
+              {remainingSlots > 0 ? 'Purchase License' : 'Registration Capped'}
             </button>
           </div>
 
