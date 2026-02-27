@@ -85,17 +85,23 @@ export default function PurchaseLicensePage() {
           </div>
 
           <div className="space-y-6">
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
                  <span className="text-white/40">License Availability</span>
-                 <span className={remainingSlots > 0 ? "text-[#00f5ff]" : "text-red-400"}>
-                   {purchasedCount} / {state.licenseLimit}
-                 </span>
+                 <div className="flex items-center gap-1.5 font-black">
+                   <span className={remainingSlots > 0 ? "text-[#00f5ff]" : "text-red-400"}>
+                     {purchasedCount}
+                   </span>
+                   <span className="text-white/20">/</span>
+                   <span className="text-white/60">
+                     {state.licenseLimit}
+                   </span>
+                 </div>
               </div>
-              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                 <div 
-                  className="h-full exn-gradient-bg transition-all duration-500" 
-                  style={{ width: `${(purchasedCount / state.licenseLimit) * 100}%` }}
+                  className="h-full exn-gradient-bg transition-all duration-500 shadow-[0_0_10px_rgba(0,245,255,0.3)]" 
+                  style={{ width: `${Math.min(100, (purchasedCount / state.licenseLimit) * 100)}%` }}
                 />
               </div>
             </div>
