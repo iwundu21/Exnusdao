@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ArrowLeft, Save, TrendingUp, User, Globe, FileText, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, ShieldCheck, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
 const USER_WALLET = 'ExnUs...d2f1';
+const SEED_DEPOSIT_AMOUNT = 5000;
 
 export default function ManageNodePage() {
   const { state, setState, isLoaded } = useProtocolState();
@@ -65,7 +66,39 @@ export default function ManageNodePage() {
     toast({ title: "Commission Claimed", description: `Successfully withdrew ${reward.toFixed(2)} EXN.` });
   };
 
+  const handleDepositSeed = (vId: string) => {
+    if (state.exnBalance < SEED_DEPOSIT_AMOUNT) {
+      return toast({ 
+        title: "Insufficient Balance", 
+        description: `You need ${SEED_DEPOSIT_AMOUNT} EXN to deposit protocol seed.`, 
+        variant: "destructive" 
+      });
+    }
+
+    setState(prev => ({
+      ...prev,
+      exnBalance: prev.exnBalance - SEED_DEPOSIT_AMOUNT,
+      totalStaked: prev.totalStaked + SEED_DEPOSIT_AMOUNT,
+      validators: prev.validators.map(v => v.id === vId ? { 
+        ...v, 
+        seed_deposited: true, 
+        is_active: true,
+        total_staked: v.total_staked + SEED_DEPOSIT_AMOUNT 
+      } : v)
+    }));
+
+    toast({ 
+      title: "Seed Deposited", 
+      description: "Validator node is now initialized and active." 
+    });
+  };
+
   const toggleNodeStatus = (vId: string) => {
+    const node = state.validators.find(v => v.id === vId);
+    if (!node?.seed_deposited) {
+      return toast({ title: "Seed Required", description: "You must deposit seed before activating node.", variant: "destructive" });
+    }
+
     setState(prev => ({
       ...prev,
       validators: prev.validators.map(v => v.id === vId ? { ...v, is_active: !v.is_active } : v)
@@ -91,7 +124,7 @@ export default function ManageNodePage() {
         <div className="space-y-4">
           <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Node Management</h1>
           <p className="text-white/40 max-w-xl">
-            As a validator operator, you can optimize your node parameters and harvest performance commissions.
+            As a validator operator, you can optimize your node parameters, manage your protocol seed, and harvest performance commissions.
           </p>
         </div>
 
@@ -122,6 +155,30 @@ export default function ManageNodePage() {
                         </div>
                       </div>
 
+                      {/* Seed Deposit Status */}
+                      {!node.seed_deposited ? (
+                        <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-4">
+                          <div className="flex items-center gap-3 text-amber-500">
+                            <AlertTriangle className="w-5 h-5" />
+                            <p className="text-[10px] uppercase font-black tracking-widest">Initialization Required</p>
+                          </div>
+                          <p className="text-xs text-white/60 leading-relaxed">
+                            A seed deposit of <span className="text-white font-bold">{SEED_DEPOSIT_AMOUNT} EXN</span> is required to activate this node.
+                          </p>
+                          <button 
+                            onClick={() => handleDepositSeed(node.id)}
+                            className="w-full py-3 bg-amber-500 text-black text-[10px] font-black uppercase rounded-lg hover:bg-amber-400 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)]"
+                          >
+                            Deposit Protocol Seed
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3 text-emerald-400">
+                          <ShieldCheck className="w-5 h-5" />
+                          <p className="text-[10px] uppercase font-black tracking-widest">Protocol Seed Active</p>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-2 gap-4">
                          <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                             <p className="text-[10px] text-white/40 uppercase font-black mb-1">Total Stake</p>
@@ -151,9 +208,10 @@ export default function ManageNodePage() {
                         <p className="text-[10px] text-white/40 uppercase font-black">Operating Status</p>
                         <button 
                           onClick={() => toggleNodeStatus(node.id)}
-                          className={`w-full py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${node.is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}
+                          disabled={!node.seed_deposited}
+                          className={`w-full py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${!node.seed_deposited ? 'bg-white/5 text-white/20 border-white/10 cursor-not-allowed' : node.is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}
                         >
-                          {node.is_active ? '● Node Active' : '○ Node Paused'}
+                          {node.is_active ? '● Node Active' : node.seed_deposited ? '○ Node Paused' : '○ Pending Seed'}
                         </button>
                       </div>
                     </div>
