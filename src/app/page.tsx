@@ -228,9 +228,7 @@ export default function Home() {
 
             <DashboardStats 
               totalStaked={state.totalStaked} 
-              pendingRewards={pendingRewardsTotal}
               treasuryBalance={state.treasuryBalance}
-              onClaim={handleClaimRewards}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
