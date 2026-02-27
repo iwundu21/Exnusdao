@@ -96,7 +96,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">DAO Governance</h2>
-          <p className="text-white/40 text-sm">Propose upgrades. Voting requires a rationale comment that builds the protocol discussion.</p>
+          <p className="text-white/40 text-sm">Direct stake-weighted voting. Outcomes are determined by majority consensus of cast votes.</p>
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
@@ -255,7 +255,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                     <Progress value={yesPercent} className="h-2 bg-red-400/20" />
                     
                     <div className="flex justify-between items-center px-1">
-                       <p className="text-[8px] text-white/20 uppercase font-bold">Quorum Requirement: 10%</p>
+                       <p className="text-[8px] text-white/20 uppercase font-bold">Direct Weight Consensus</p>
                        <p className="text-[8px] text-white/20 uppercase font-bold">Total: {totalVotes.toLocaleString()} EXN</p>
                     </div>
                   </div>
@@ -298,8 +298,8 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                   )}
 
                   {isExpired && (
-                    <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 51 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {yesPercent >= 51 ? 'Passed' : 'Failed'}
+                    <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 50 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                      {yesPercent >= 50 ? 'Passed' : 'Failed'}
                     </div>
                   )}
                 </div>
