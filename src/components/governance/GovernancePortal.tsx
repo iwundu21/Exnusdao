@@ -1,10 +1,58 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp, Landmark } from 'lucide-react';
+import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock } from 'lucide-react';
+
+function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votingEndsAt: number }) {
+  const [timeLeft, setTimeLeft] = useState<{ label: string; value: string; isLock: boolean }>({
+    label: 'Loading...',
+    value: '',
+    isLock: false
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      let target = votingEndsAt;
+      let label = 'Voting Ends: ';
+      let isLock = false;
+
+      if (now > deadline) {
+        setTimeLeft({ label: 'Proposal Concluded', value: '', isLock: false });
+        clearInterval(timer);
+        return;
+      }
+
+      if (now > votingEndsAt) {
+        target = deadline;
+        label = 'Results In: ';
+        isLock = true;
+      }
+
+      const diff = target - now;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      const value = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      setTimeLeft({ label, value, isLock });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [deadline, votingEndsAt]);
+
+  return (
+    <div className={`flex items-center gap-2 text-[10px] uppercase font-black tracking-widest ${timeLeft.isLock ? 'text-amber-500' : 'text-white/40'}`}>
+      <Clock className="w-3 h-3" />
+      <span>{timeLeft.label}</span>
+      <span className="font-mono text-white">{timeLeft.value}</span>
+    </div>
+  );
+}
 
 export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate }: any) {
   const [showCreate, setShowCreate] = useState(false);
@@ -181,10 +229,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                   )}
 
                   <div className="flex flex-wrap gap-6 pt-2">
-                    <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase font-black">
-                      <History className="w-3 h-3" />
-                      Ends: {new Date(prop.deadline).toLocaleDateString()}
-                    </div>
+                    <ProposalCountdown deadline={prop.deadline} votingEndsAt={prop.voting_ends_at} />
                     {isLocked && (
                       <div className="flex items-center gap-2 text-[10px] text-amber-500 uppercase font-black">
                         <ShieldAlert className="w-3 h-3" />
