@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useState } from 'react';
-import { Wallet, ShieldCheck, Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket } from 'lucide-react';
+import { Wallet, Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket } from 'lucide-react';
 import Link from 'next/link';
 
 export function Navbar({ 
@@ -21,9 +20,6 @@ export function Navbar({
   return (
     <nav className="flex items-center justify-between px-10 py-6 border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2 group">
-        <div className="w-10 h-10 exn-gradient-bg rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,245,255,0.4)] group-hover:scale-110 transition-transform">
-          <ShieldCheck className="text-black w-6 h-6" />
-        </div>
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold exn-gradient-text tracking-wider leading-none">EXNUS</h1>
           <span className="text-[10px] text-white/40 tracking-[0.3em] font-bold uppercase">Decentralized</span>
@@ -39,7 +35,7 @@ export function Navbar({
             <Ticket className="w-4 h-4" /> Buy License
           </Link>
           <Link href="/register-node" className="flex items-center gap-2 text-white/60 hover:text-[#00f5ff] transition-colors">
-            <ShieldCheck className="w-4 h-4" /> Register Node
+            <LayoutDashboard className="w-4 h-4" /> Register Node
           </Link>
         </div>
 
