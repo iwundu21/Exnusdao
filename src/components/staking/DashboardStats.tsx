@@ -5,18 +5,18 @@ import React from 'react';
 import { Award, Coins, Landmark } from 'lucide-react';
 
 export function DashboardStats({ 
-  totalStaked, 
-  pendingRewards, 
-  treasuryBalance 
+  totalStaked = 0, 
+  pendingRewards = 0, 
+  treasuryBalance = 0 
 }: { 
-  totalStaked: number, 
-  pendingRewards: number, 
-  treasuryBalance: number
+  totalStaked?: number, 
+  pendingRewards?: number, 
+  treasuryBalance?: number
 }) {
   const stats = [
-    { label: 'Total Staked', value: `${totalStaked.toLocaleString()} EXN`, icon: Coins, color: 'text-[#00f5ff]' },
-    { label: 'Pending Rewards', value: `${pendingRewards.toFixed(2)} EXN`, icon: Award, color: 'text-[#a855f7]' },
-    { label: 'Treasury Balance', value: `${treasuryBalance.toLocaleString()} EXN`, icon: Landmark, color: 'text-blue-400' },
+    { label: 'Total Staked', value: `${(totalStaked || 0).toLocaleString()} EXN`, icon: Coins, color: 'text-[#00f5ff]' },
+    { label: 'Pending Rewards', value: `${(pendingRewards || 0).toFixed(2)} EXN`, icon: Award, color: 'text-[#a855f7]' },
+    { label: 'Treasury Balance', value: `${(treasuryBalance || 0).toLocaleString()} EXN`, icon: Landmark, color: 'text-blue-400' },
   ];
 
   return (
