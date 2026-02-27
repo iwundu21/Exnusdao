@@ -47,6 +47,7 @@ export default function PurchaseLicensePage() {
   if (!isLoaded) return null;
 
   const remainingSlots = state.licenseLimit - state.licenses.length;
+  const purchasedCount = state.licenses.length;
 
   return (
     <main className="min-h-screen pb-20">
@@ -86,15 +87,15 @@ export default function PurchaseLicensePage() {
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
-                 <span className="text-white/40">Network Capacity</span>
+                 <span className="text-white/40">License Availability</span>
                  <span className={remainingSlots > 0 ? "text-[#00f5ff]" : "text-red-400"}>
-                   {remainingSlots} / {state.licenseLimit} Slots Left
+                   {purchasedCount} / {state.licenseLimit}
                  </span>
               </div>
               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                 <div 
                   className="h-full exn-gradient-bg transition-all duration-500" 
-                  style={{ width: `${(remainingSlots / state.licenseLimit) * 100}%` }}
+                  style={{ width: `${(purchasedCount / state.licenseLimit) * 100}%` }}
                 />
               </div>
             </div>
