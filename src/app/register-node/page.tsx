@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
-import { ArrowLeft, AlertCircle, ExternalLink, Flame } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Upload, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
@@ -43,18 +43,22 @@ export default function RegisterNodePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 500000) {
+      return toast({ title: "File too large", description: "Logo must be under 500KB", variant: "destructive" });
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result as string;
       setFormData(prev => ({ ...prev, logo_uri: result }));
-      toast({ title: "Logo Processed" });
+      toast({ title: "Logo Processed", description: "Custom identity loaded." });
     };
     reader.readAsDataURL(file);
   };
 
   const handleRegister = () => {
     if (hasExistingNode) {
-      return toast({ title: "Registration Denied", variant: "destructive" });
+      return toast({ title: "Registration Denied", description: "One node limit per wallet reached.", variant: "destructive" });
     }
 
     const license = state.licenses.find(l => l.id === formData.licenseId);
@@ -73,7 +77,7 @@ export default function RegisterNodePage() {
       return toast({ title: "License Already Used", variant: "destructive" });
     }
     if (!formData.name || !formData.location) {
-      return toast({ title: "Missing Fields", variant: "destructive" });
+      return toast({ title: "Missing Fields", description: "Node name and location are required.", variant: "destructive" });
     }
 
     const newNode = {
@@ -98,11 +102,13 @@ export default function RegisterNodePage() {
       licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
     }));
 
-    toast({ title: "Node Registered", description: "Initialization successful." });
+    toast({ title: "Node Registered", description: "Broadcasting initialization to network." });
     setTimeout(() => router.push('/manage-node'), 1500);
   };
 
   if (!isLoaded) return null;
+
+  const userLicenses = state.licenses.filter(l => l.owner === USER_WALLET && !l.is_claimed && !l.is_burned);
 
   return (
     <main className="min-h-screen pb-20">
@@ -116,14 +122,17 @@ export default function RegisterNodePage() {
         <div className="space-y-4">
           <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Validator Registration</h1>
           <p className="text-white/40 max-w-xl">
-            Register your node using a unique protocol license. Each license is single-use and non-reusable.
+            Provision high-performance infrastructure on the Exnus network. A single-use protocol license is required.
           </p>
         </div>
 
         {hasExistingNode ? (
           <div className="exn-card p-12 flex flex-col items-center justify-center text-center space-y-8 border-amber-500/20 bg-amber-500/5">
              <AlertCircle className="w-12 h-12 text-amber-500" />
-             <h2 className="text-2xl font-bold text-white uppercase">Active Node Detected</h2>
+             <div className="space-y-2">
+               <h2 className="text-2xl font-bold text-white uppercase">Active Node Detected</h2>
+               <p className="text-xs text-white/40 uppercase tracking-widest">Protocol policy allows only one node per wallet address.</p>
+             </div>
              <Link href="/manage-node" className="exn-button">Manage Existing Node</Link>
           </div>
         ) : (
@@ -132,27 +141,100 @@ export default function RegisterNodePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Node Name</label>
-                  <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 text-sm" placeholder="e.g. CyberCore-01" />
+                  <input 
+                    value={formData.name} 
+                    onChange={e => setFormData({...formData, name: e.target.value})} 
+                    className="exn-input h-12 text-sm" 
+                    placeholder="e.g. CyberCore-01" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Location</label>
-                  <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-12 text-sm" placeholder="e.g. Frankfurt, DE" />
+                  <input 
+                    value={formData.location} 
+                    onChange={e => setFormData({...formData, location: e.target.value})} 
+                    className="exn-input h-12 text-sm" 
+                    placeholder="e.g. Frankfurt, DE" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Commission (0-30%)</label>
-                  <input type="number" value={formData.commission} onChange={e => setFormData({...formData, commission: Math.min(30, Math.max(0, Number(e.target.value)))})} className="exn-input h-12 text-sm" />
+                  <div className="relative">
+                    <input 
+                      type="number" 
+                      value={formData.commission} 
+                      onChange={e => setFormData({...formData, commission: Math.min(30, Math.max(0, Number(e.target.value)))})} 
+                      className="exn-input h-12 text-sm" 
+                    />
+                    <span className="absolute right-4 top-3.5 text-white/30 font-bold">%</span>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">License ID</label>
-                  <input value={formData.licenseId} onChange={e => setFormData({...formData, licenseId: e.target.value})} className="exn-input h-12 text-sm font-mono" placeholder="LIC-XXXXXXX" />
+                  <select 
+                    value={formData.licenseId} 
+                    onChange={e => setFormData({...formData, licenseId: e.target.value})} 
+                    className="exn-input h-12 text-xs font-mono"
+                  >
+                    <option value="">Select a License</option>
+                    {userLicenses.map(l => (
+                      <option key={l.id} value={l.id}>{l.id}</option>
+                    ))}
+                    {state.licenses.filter(l => l.owner === USER_WALLET && l.is_burned).map(l => (
+                      <option key={l.id} disabled value={l.id}>{l.id} (BURNED 🔥)</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-[10px] text-white/40 uppercase font-black tracking-widest">Validator Bio</label>
+                  <textarea 
+                    value={formData.description} 
+                    onChange={e => setFormData({...formData, description: e.target.value})} 
+                    className="exn-input min-h-[100px] py-4 text-xs" 
+                    placeholder="Briefly describe your hardware specs and uptime commitment..."
+                  />
                 </div>
               </div>
-              <button onClick={handleRegister} className="w-full h-14 exn-button text-sm font-black uppercase tracking-widest">Initialize Node</button>
+              <button 
+                onClick={handleRegister} 
+                disabled={!formData.licenseId || !formData.name}
+                className={`w-full h-14 uppercase tracking-widest font-black transition-all ${(!formData.licenseId || !formData.name) ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'exn-button'}`}
+              >
+                Initialize Node
+              </button>
             </div>
 
             <div className="space-y-6">
-              <div className="exn-card aspect-square relative flex items-center justify-center overflow-hidden">
-                {previewUrl ? <Image src={previewUrl} alt="Logo" fill className="object-cover" /> : <p className="text-[10px] uppercase font-black text-white/10">Preview</p>}
+              <div className="exn-card aspect-square relative flex items-center justify-center overflow-hidden border-[#00f5ff]/20">
+                {previewUrl ? (
+                  <Image src={previewUrl} alt="Logo" fill className="object-cover" />
+                ) : (
+                  <div className="text-center space-y-2 p-6">
+                    <Upload className="w-8 h-8 text-white/10 mx-auto" />
+                    <p className="text-[10px] uppercase font-black text-white/20">Logo Preview</p>
+                  </div>
+                )}
+              </div>
+              
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                accept="image/*" 
+              />
+              
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-3 border border-[#00f5ff]/20 text-[#00f5ff] text-[10px] font-black uppercase rounded-lg hover:bg-[#00f5ff]/10 transition-all flex items-center justify-center gap-2"
+              >
+                <Upload className="w-4 h-4" /> Upload Identity Logo
+              </button>
+              
+              <div className="p-4 bg-white/5 rounded-xl border border-white/5 space-y-2">
+                <p className="text-[9px] text-white/40 uppercase font-bold text-center leading-tight">
+                  Images are stored as on-chain Data URIs. <br/> Max recommended size: 500KB.
+                </p>
               </div>
             </div>
           </div>
