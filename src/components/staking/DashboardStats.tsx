@@ -18,13 +18,13 @@ export function DashboardStats({
     { 
       label: 'Total Staked', 
       value: `${(totalStaked || 0).toLocaleString()} EXN`, 
-      subValue: `$${stakedUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`,
+      subValue: `$${stakedUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       color: 'text-[#00f5ff]' 
     },
     { 
       label: 'Treasury Balance', 
       value: `${(treasuryBalance || 0).toLocaleString()} EXN`, 
-      subValue: `$${treasuryUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`,
+      subValue: `$${treasuryUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       color: 'text-blue-400' 
     },
   ];
@@ -37,7 +37,7 @@ export function DashboardStats({
           <div className="flex flex-col gap-1">
             <p className={`text-4xl font-bold tracking-tighter ${stat.color}`}>{stat.value}</p>
             <p className="text-[10px] text-white/30 font-mono uppercase tracking-widest group-hover:text-white/60 transition-colors">
-              {stat.subValue} @ ${EXN_PRICE.toFixed(2)}
+              {stat.subValue}
             </p>
           </div>
         </div>
