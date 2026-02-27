@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Wallet, ShieldCheck, Settings, Coins, CircleDollarSign } from 'lucide-react';
+import { Wallet, ShieldCheck, Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket } from 'lucide-react';
 import Link from 'next/link';
 
 export function Navbar({ 
@@ -30,7 +30,19 @@ export function Navbar({
         </div>
       </Link>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6 text-xs uppercase font-bold tracking-widest">
+          <Link href="/" className="flex items-center gap-2 text-white/60 hover:text-[#00f5ff] transition-colors">
+            <LayoutDashboard className="w-4 h-4" /> Dashboard
+          </Link>
+          <Link href="/purchase-license" className="flex items-center gap-2 text-white/60 hover:text-[#00f5ff] transition-colors">
+            <Ticket className="w-4 h-4" /> Buy License
+          </Link>
+          <Link href="/register-node" className="flex items-center gap-2 text-white/60 hover:text-[#00f5ff] transition-colors">
+            <ShieldCheck className="w-4 h-4" /> Register Node
+          </Link>
+        </div>
+
         <div className="hidden lg:flex items-center gap-6">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
             <Coins className="w-4 h-4 text-[#00f5ff]" />
@@ -47,7 +59,6 @@ export function Navbar({
           className="flex items-center gap-2 text-white/70 hover:text-[#00f5ff] transition-colors"
         >
           <Settings className="w-5 h-5" />
-          <span className="text-sm font-medium">Protocol Controls</span>
         </button>
         
         <button 
