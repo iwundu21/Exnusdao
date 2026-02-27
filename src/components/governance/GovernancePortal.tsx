@@ -4,19 +4,31 @@
 import React, { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { MessageSquare, ShieldAlert, History, User, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 
 export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onComment }: any) {
   const [showCreate, setShowCreate] = useState(false);
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0 });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
   const [commentText, setCommentText] = useState('');
+  const [votingOn, setVotingOn] = useState<{ id: number; support: boolean } | null>(null);
+  const [voteRationale, setVoteRationale] = useState('');
 
   const handleCreate = () => {
     if (!newProp.title || !newProp.description) return toast({ title: "Fields Required", variant: "destructive" });
     onCreate(newProp);
     setShowCreate(false);
     setNewProp({ title: '', description: '', type: 0 });
+  };
+
+  const handleConfirmVote = () => {
+    if (!votingOn) return;
+    if (!voteRationale.trim()) {
+      return toast({ title: "Rationale Required", description: "You must provide a comment explaining your vote.", variant: "destructive" });
+    }
+    onVote(votingOn.id, votingOn.support, voteRationale);
+    setVotingOn(null);
+    setVoteRationale('');
   };
 
   return (
@@ -84,6 +96,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
           const isLocked = Date.now() > (prop.voting_ends_at || prop.deadline - 14400000) && !isExpired;
           const hasVoted = prop.voters?.includes(walletAddress) || false;
           const comments = prop.comments || [];
+          const isVotingForThis = votingOn?.id === prop.id;
 
           return (
             <div key={prop.id} className="exn-card p-0 border-white/5 overflow-hidden">
@@ -120,10 +133,28 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                     <Progress value={yesPercent} className="h-2 bg-red-400/20" />
                   </div>
 
-                  {!isExpired && !isLocked && !hasVoted && (
+                  {!isExpired && !isLocked && !hasVoted && !isVotingForThis && (
                     <div className="grid grid-cols-2 gap-3">
-                      <button onClick={() => onVote(prop.id, true)} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold py-3 rounded-lg border border-emerald-500/20 text-[10px] uppercase">Vote Yes</button>
-                      <button onClick={() => onVote(prop.id, false)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold py-3 rounded-lg border border-red-500/20 text-[10px] uppercase">Vote No</button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold py-3 rounded-lg border border-emerald-500/20 text-[10px] uppercase">Vote Yes</button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold py-3 rounded-lg border border-red-500/20 text-[10px] uppercase">Vote No</button>
+                    </div>
+                  )}
+
+                  {isVotingForThis && (
+                    <div className="space-y-4 animate-in zoom-in-95">
+                      <div className={`p-3 rounded-lg text-center text-[10px] font-black uppercase ${votingOn.support ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                        Stance: {votingOn.support ? 'YES' : 'NO'}
+                      </div>
+                      <textarea 
+                        value={voteRationale}
+                        onChange={e => setVoteRationale(e.target.value)}
+                        placeholder="State your rationale (required)..."
+                        className="exn-input h-24 text-xs bg-[#0f172a]"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={handleConfirmVote} className="exn-button py-2 text-[10px]">Submit Vote</button>
+                        <button onClick={() => setVotingOn(null)} className="exn-button-outline py-2 text-[10px]">Cancel</button>
+                      </div>
                     </div>
                   )}
 
@@ -154,6 +185,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                       className="flex items-center gap-2 text-[10px] text-white/30 uppercase font-black hover:text-white transition-colors"
                     >
                       <MessageSquare className="w-4 h-4" /> Discussion ({comments.length})
+                      {activeCommentId === prop.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
                     {activeCommentId === prop.id && (
                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest italic">Live Community Debate</span>
@@ -162,14 +194,14 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
 
                  {activeCommentId === prop.id && (
                    <div className="space-y-8 animate-in slide-in-from-top-2">
-                      <div className="space-y-6 max-h-[300px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-white/10">
+                      <div className="space-y-6 max-h-[400px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-white/10">
                         {comments.length === 0 ? (
                           <div className="flex flex-col items-center justify-center py-10 opacity-20">
                              <MessageSquare className="w-10 h-10 mb-2" />
                              <p className="text-[10px] uppercase font-black tracking-widest text-center">No discussion entries found</p>
                           </div>
                         ) : (
-                          comments.map((c: any) => {
+                          [...comments].sort((a, b) => b.timestamp - a.timestamp).map((c: any) => {
                             const commenterHasVoted = prop.voters?.includes(c.author);
                             return (
                               <div key={c.id} className="flex gap-4 items-start group">
@@ -183,6 +215,11 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                                         {commenterHasVoted && (
                                           <span className="flex items-center gap-1 text-[8px] bg-[#00f5ff] text-black px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
                                             <CheckCircle2 className="w-2.5 h-2.5" /> Voter
+                                          </span>
+                                        )}
+                                        {c.vote_stance && (
+                                          <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase ${c.vote_stance === 'YES' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                                            Stance: {c.vote_stance}
                                           </span>
                                         )}
                                       </div>

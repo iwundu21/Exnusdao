@@ -65,7 +65,7 @@ export default function Home() {
     toast({ title: "Tokens Staked", description: `Locked ${stakeData.amount} EXN successfully.` });
   };
 
-  const handleVote = (pId: number, support: boolean) => {
+  const handleVote = (pId: number, support: boolean, comment: string) => {
     if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
     const proposal = state.proposals.find(p => p.id === pId);
     if (!proposal) return;
@@ -83,16 +83,25 @@ export default function Home() {
       return toast({ title: "No Staked Weight", description: "You must have active stakes to vote.", variant: "destructive" });
     }
 
+    const newComment = {
+      id: `c${Date.now()}`,
+      author: walletAddress,
+      text: comment,
+      timestamp: Date.now(),
+      vote_stance: support ? 'YES' : 'NO'
+    };
+
     setState(prev => ({
       ...prev,
       proposals: prev.proposals.map(p => p.id === pId ? { 
         ...p, 
         yes_votes: support ? (p.yes_votes || 0) + userStakeWeight : p.yes_votes, 
         no_votes: !support ? (p.no_votes || 0) + userStakeWeight : p.no_votes,
-        voters: [...voters, walletAddress]
+        voters: [...voters, walletAddress],
+        comments: [...(p.comments || []), newComment]
       } : p)
     }));
-    toast({ title: "Vote Cast", description: `Voted with ${userStakeWeight.toLocaleString()} weight.` });
+    toast({ title: "Vote Cast", description: `Voted with ${userStakeWeight.toLocaleString()} weight and rationale.` });
   };
 
   const handleCreateProposal = (data: any) => {
