@@ -50,18 +50,62 @@ export interface ProtocolState {
   isPaused: boolean;
 }
 
+const SEED_AMOUNT = 15000000;
+
 const INITIAL_STATE: ProtocolState = {
   exnBalance: 25000000, 
   usdcBalance: 2500,
-  totalStaked: 45200,
+  totalStaked: 45045200, // (3 * 15M) + 15200 + 12500 + 17500
   treasuryBalance: 250000,
   rewardCap: 1250,
   licenseLimit: 21,
   isPaused: false,
   validators: [
-    { id: 'v1', owner: 'ExnUs...d2f1', name: 'CyberCore-01', description: 'Primary edge node', logo_uri: '66', location: 'Singapore', is_active: true, seed_deposited: true, total_staked: 15200, commission_rate: 500, accrued_node_rewards: 452, global_reward_index: 1200000, license_id: 'LIC-DEMO1' },
-    { id: 'v2', owner: 'ExnUs...0002', name: 'NebulaNode', description: 'Deep space validator', logo_uri: '77', location: 'Mars Alpha', is_active: true, seed_deposited: true, total_staked: 12500, commission_rate: 800, accrued_node_rewards: 210, global_reward_index: 1200000, license_id: 'LIC-DEMO2' },
-    { id: 'v3', owner: 'ExnUs...0003', name: 'AlphaPulse', description: 'High-frequency pulse', logo_uri: '88', location: 'London', is_active: true, seed_deposited: true, total_staked: 17500, commission_rate: 300, accrued_node_rewards: 125, global_reward_index: 1150000, license_id: 'LIC-DEMO3' },
+    { 
+      id: 'v1', 
+      owner: 'ExnUs...d2f1', 
+      name: 'CyberCore-01', 
+      description: 'Primary edge node', 
+      logo_uri: '66', 
+      location: 'Singapore', 
+      is_active: true, 
+      seed_deposited: true, 
+      total_staked: SEED_AMOUNT + 15200, 
+      commission_rate: 500, 
+      accrued_node_rewards: 452, 
+      global_reward_index: 1200000, 
+      license_id: 'LIC-DEMO1' 
+    },
+    { 
+      id: 'v2', 
+      owner: 'ExnUs...0002', 
+      name: 'NebulaNode', 
+      description: 'Deep space validator', 
+      logo_uri: '77', 
+      location: 'Mars Alpha', 
+      is_active: true, 
+      seed_deposited: true, 
+      total_staked: SEED_AMOUNT + 12500, 
+      commission_rate: 800, 
+      accrued_node_rewards: 210, 
+      global_reward_index: 1200000, 
+      license_id: 'LIC-DEMO2' 
+    },
+    { 
+      id: 'v3', 
+      owner: 'ExnUs...0003', 
+      name: 'AlphaPulse', 
+      description: 'High-frequency pulse', 
+      logo_uri: '88', 
+      location: 'London', 
+      is_active: true, 
+      seed_deposited: true, 
+      total_staked: SEED_AMOUNT + 17500, 
+      commission_rate: 300, 
+      accrued_node_rewards: 125, 
+      global_reward_index: 1150000, 
+      license_id: 'LIC-DEMO3' 
+    },
   ],
   userStakes: [
     { id: 's1', validator_id: 'v1', amount: 5000, lock_multiplier: 10000, staked_at: Date.now() - 86400000 * 7, unlock_timestamp: Date.now() - 86400000, reward_checkpoint: 1000000, claimed: false, unstaked: false },

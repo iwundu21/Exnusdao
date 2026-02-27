@@ -79,7 +79,7 @@ export default function ManageNodePage() {
 
     setState(prev => ({
       ...prev,
-      exnBalance: prev.exnBalance - SEED_DEPOSIT_AMOUNT,
+      exnBalance: Math.max(0, prev.exnBalance - SEED_DEPOSIT_AMOUNT),
       totalStaked: prev.totalStaked + SEED_DEPOSIT_AMOUNT,
       validators: prev.validators.map(v => v.id === vId ? { 
         ...v, 
@@ -102,7 +102,7 @@ export default function ManageNodePage() {
     setState(prev => ({
       ...prev,
       exnBalance: prev.exnBalance + SEED_DEPOSIT_AMOUNT,
-      totalStaked: prev.totalStaked - SEED_DEPOSIT_AMOUNT,
+      totalStaked: Math.max(0, prev.totalStaked - SEED_DEPOSIT_AMOUNT),
       validators: prev.validators.map(v => v.id === vId ? { 
         ...v, 
         seed_deposited: false, 
@@ -127,7 +127,7 @@ export default function ManageNodePage() {
     if (delegatorStake > 0) {
        return toast({ 
          title: "Active Delegators Found", 
-         description: `There are still ${delegatorStake.toLocaleString()} EXN staked by delegators. All stakers must unstake or migrate before you can close this node account.`, 
+         description: `There are still ${Math.max(0, delegatorStake).toLocaleString()} EXN staked by delegators. All stakers must unstake or migrate before you can close this node account.`, 
          variant: "destructive" 
        });
     }
@@ -138,7 +138,7 @@ export default function ManageNodePage() {
     setState(prev => ({
       ...prev,
       exnBalance: prev.exnBalance + seedRefund + rewards,
-      totalStaked: prev.totalStaked - seedRefund,
+      totalStaked: Math.max(0, prev.totalStaked - seedRefund),
       validators: prev.validators.filter(v => v.id !== vId),
       licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_claimed: false } : l)
     }));

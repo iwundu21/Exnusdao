@@ -18,6 +18,11 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
   const [selectedValidator, setSelectedValidator] = useState<any>(null);
 
+  // Derive total staked from validators for absolute accuracy
+  const totalStakedReal = useMemo(() => {
+    return state.validators.reduce((acc, v) => acc + v.total_staked, 0);
+  }, [state.validators]);
+
   // Calculate pending rewards for all active user stakes
   const pendingRewardsTotal = useMemo(() => {
     if (!state.userStakes) return 0;
@@ -40,7 +45,7 @@ export default function Home() {
     setState(prev => ({
       ...prev,
       userStakes: [...prev.userStakes, newStake],
-      exnBalance: prev.exnBalance - stakeData.amount,
+      exnBalance: Math.max(0, prev.exnBalance - stakeData.amount),
       totalStaked: prev.totalStaked + stakeData.amount,
       validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: v.total_staked + stakeData.amount } : v)
     }));
@@ -98,8 +103,8 @@ export default function Home() {
       ...prev,
       userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, unstaked: true, claimed: true } : s),
       exnBalance: prev.exnBalance + stake.amount + reward,
-      totalStaked: prev.totalStaked - stake.amount,
-      validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: v.total_staked - stake.amount } : v)
+      totalStaked: Math.max(0, prev.totalStaked - stake.amount),
+      validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) } : v)
     }));
     toast({ title: "Tokens Unstaked", description: `Principal and ${reward.toFixed(2)} EXN rewards returned.` });
   };
@@ -126,7 +131,7 @@ export default function Home() {
       } : s),
       exnBalance: prev.exnBalance + reward,
       validators: prev.validators.map(v => {
-        if (v.id === source.id) return { ...v, total_staked: v.total_staked - stake.amount };
+        if (v.id === source.id) return { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) };
         if (v.id === target.id) return { ...v, total_staked: v.total_staked + stake.amount };
         return v;
       })
@@ -225,7 +230,7 @@ export default function Home() {
             </div>
 
             <DashboardStats 
-              totalStaked={state.totalStaked} 
+              totalStaked={totalStakedReal} 
               treasuryBalance={state.treasuryBalance}
             />
 
@@ -257,7 +262,7 @@ export default function Home() {
         ) : (
           <GovernancePortal 
             proposals={state.proposals} 
-            totalStaked={state.totalStaked}
+            totalStaked={totalStakedReal}
             onVote={handleVote}
             onExecute={handleExecute}
           />
