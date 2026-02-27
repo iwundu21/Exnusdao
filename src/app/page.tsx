@@ -152,6 +152,27 @@ export default function Home() {
     toast({ title: "Epoch Settled", description: "Global indices updated across registry." });
   };
 
+  const handleToggleValidator = (vId: string) => {
+    setState(prev => ({
+      ...prev,
+      validators: prev.validators.map(v => v.id === vId ? { ...v, is_active: !v.is_active } : v)
+    }));
+    toast({ title: "Validator Updated", description: "Network status broadcast successfully." });
+  };
+
+  const handleClaimCommission = (vId: string) => {
+    const validator = state.validators.find(v => v.id === vId);
+    if (!validator || validator.accrued_node_rewards <= 0) return;
+
+    const reward = validator.accrued_node_rewards;
+    setState(prev => ({
+      ...prev,
+      exnBalance: prev.exnBalance + reward,
+      validators: prev.validators.map(v => v.id === vId ? { ...v, accrued_node_rewards: 0 } : v)
+    }));
+    toast({ title: "Commission Claimed", description: `Successfully withdrew ${reward.toFixed(2)} EXN rewards.` });
+  };
+
   const handleVote = (pId: number, support: boolean) => {
     setState(prev => ({
       ...prev,
@@ -194,8 +215,9 @@ export default function Home() {
           globalState={state} 
           setGlobalState={setState} 
           onSettle={handleSettleEpoch}
+          onToggleValidator={handleToggleValidator}
+          onClaimCommission={handleClaimCommission}
           validators={state.validators}
-          setValidators={(v: any) => setState((prev: any) => ({ ...prev, validators: v }))}
         />
       )}
 
