@@ -104,14 +104,21 @@ export function StakingActionForm({
                 {selectedNode ? selectedNode.name : 'Selection Required'}
               </span>
             </div>
+            {selectedNode && (
+               <div className="flex justify-between items-center text-[9px] uppercase font-bold text-white/30">
+                 <span>Location</span>
+                 <span>{selectedNode.location}</span>
+               </div>
+            )}
           </div>
 
           <button 
             onClick={handleAction} 
             disabled={!selectedNode}
-            className={`w-full h-12 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${selectedNode ? 'exn-button' : 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'}`}
+            className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${selectedNode ? 'exn-button' : 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'}`}
           >
-            <ArrowRightLeft className="w-5 h-5" /> Confirm Stake
+            <ArrowRightLeft className="w-5 h-5" /> 
+            {selectedNode ? `Confirm Stake with ${selectedNode.name}` : 'Confirm Stake'}
           </button>
         </div>
       )}

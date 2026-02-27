@@ -36,6 +36,8 @@ export default function Home() {
   // Phase 1: Staking Action
   const handleStake = (stakeData: any) => {
     const newStake = { ...stakeData, id: `s${Date.now()}` };
+    const validator = state.validators.find(v => v.id === stakeData.validator_id);
+    
     setState(prev => ({
       ...prev,
       userStakes: [...prev.userStakes, newStake],
@@ -43,7 +45,11 @@ export default function Home() {
       totalStaked: prev.totalStaked + stakeData.amount,
       validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: v.total_staked + stakeData.amount } : v)
     }));
-    toast({ title: "Tokens Staked", description: `Locked ${stakeData.amount} EXN with validator.` });
+    
+    toast({ 
+      title: "Tokens Staked", 
+      description: `Successfully locked ${stakeData.amount} EXN with ${validator?.name || 'validator'}.` 
+    });
   };
 
   // Phase 2: Unstaking Action
@@ -99,7 +105,7 @@ export default function Home() {
         return v;
       })
     }));
-    toast({ title: "Stake Migrated", description: "Yield checkpointed and moved to new node." });
+    toast({ title: "Stake Migrated", description: `Yield checkpointed and moved to ${target.name}.` });
   };
 
   // Phase 5: Reward Settlement Simulation
