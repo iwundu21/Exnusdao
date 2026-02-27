@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -7,7 +8,6 @@ import { ValidatorDiscovery } from '@/components/staking/ValidatorDiscovery';
 import { StakingActionForm } from '@/components/staking/StakingActionForm';
 import { AdminPanel } from '@/components/admin/AdminPanel';
 import { GovernancePortal } from '@/components/governance/GovernancePortal';
-import { Trophy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 
@@ -178,16 +178,6 @@ export default function Home() {
                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#34d399]" />
                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Trustless Network Active</span>
                 </div>
-              </div>
-              
-              <div className="flex gap-4">
-                 <button 
-                   onClick={() => toast({ title: "Rewards Claimed" })}
-                   className="exn-button flex items-center gap-2 group"
-                 >
-                   <Trophy className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                   Claim {pendingRewardsTotal.toFixed(1)} EXN
-                 </button>
               </div>
             </div>
 
