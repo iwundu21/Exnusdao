@@ -7,6 +7,7 @@ import { DashboardStats } from '@/components/staking/DashboardStats';
 import { ValidatorDiscovery } from '@/components/staking/ValidatorDiscovery';
 import { StakingActionForm } from '@/components/staking/StakingActionForm';
 import { GovernancePortal } from '@/components/governance/GovernancePortal';
+import { CrankTerminal } from '@/components/admin/CrankTerminal';
 import { toast } from '@/hooks/use-toast';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -19,7 +20,7 @@ export default function Home() {
   const walletAddress = publicKey?.toBase58() || '';
   
   const { state, setState, isLoaded } = useProtocolState();
-  const [activeTab, setActiveTab] = useState<'staking' | 'governance'>('staking');
+  const [activeTab, setActiveTab] = useState<'staking' | 'governance' | 'crank'>('staking');
   const [selectedValidator, setSelectedValidator] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -133,6 +134,57 @@ export default function Home() {
     toast({ title: "Proposal Broadcast", description: "Applied 100 EXN governance fee." });
   };
 
+  const handleCrank = () => {
+    const now = Date.now();
+    let finalizedCount = 0;
+
+    setState(prev => {
+      let treasuryDelta = 0;
+      let userExnDelta = 0;
+
+      const newProposals = prev.proposals.map(p => {
+        if (!p.executed && now > p.deadline) {
+          finalizedCount++;
+          if (p.yes_votes > p.no_votes) {
+            if (p.type === 1) { 
+              treasuryDelta -= p.amount;
+              if (p.recipient === walletAddress) {
+                userExnDelta += p.amount;
+              }
+            }
+          }
+          return { ...p, executed: true };
+        }
+        return p;
+      });
+
+      const newValidators = prev.validators.map(v => {
+        if (!v.is_active) return v;
+        const crankReward = v.total_staked * 0.0001; 
+        const commission = (crankReward * (v.commission_rate / 10000));
+        const stakerPool = crankReward - commission;
+        return {
+          ...v,
+          accrued_node_rewards: (v.accrued_node_rewards || 0) + commission,
+          global_reward_index: (v.global_reward_index || 0) + (stakerPool * 1_000_000 / v.total_staked)
+        };
+      });
+
+      return {
+        ...prev,
+        validators: newValidators,
+        proposals: newProposals,
+        treasuryBalance: prev.treasuryBalance + treasuryDelta,
+        exnBalance: prev.exnBalance + userExnDelta
+      };
+    });
+
+    toast({ 
+      title: "Network Cranked", 
+      description: `Synchronized rewards and finalized ${finalizedCount} proposals.` 
+    });
+  };
+
   if (!isMounted || !isLoaded) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
@@ -150,9 +202,10 @@ export default function Home() {
           <div className="flex gap-8 border-b border-border">
             <button onClick={() => setActiveTab('staking')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Data Overview</button>
             <button onClick={() => setActiveTab('governance')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>DAO Portal</button>
+            <button onClick={() => setActiveTab('crank')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Network Crank</button>
           </div>
 
-          {activeTab === 'staking' ? (
+          {activeTab === 'staking' && (
             <>
               <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -160,17 +213,28 @@ export default function Home() {
                   <ValidatorDiscovery validators={state.validators} onSelect={setSelectedValidator} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} selectedId={selectedValidator?.id} />
                 </div>
                 <div className="space-y-6">
-                  <StakingActionForm selectedNode={selectedValidator} exnBalance={state.exnBalance} onStake={handleStake} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} validators={state.validators} onUnstake={() => {}} onClaim={() => {}} totalPendingRewards={pendingRewardsTotal} connected={connected} />
+                  <StakingActionForm selectedNode={selectedValidator} exnBalance={state.exnBalance} onStake={handleStake} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} validators={state.validators} totalPendingRewards={pendingRewardsTotal} connected={connected} />
                 </div>
               </div>
             </>
-          ) : (
+          )}
+
+          {activeTab === 'governance' && (
             <GovernancePortal 
               proposals={state.proposals} 
               userStakeWeight={userStakeWeight}
               walletAddress={walletAddress}
               onVote={handleVote}
               onCreate={handleCreateProposal}
+            />
+          )}
+
+          {activeTab === 'crank' && (
+            <CrankTerminal 
+              validators={state.validators} 
+              proposals={state.proposals} 
+              onCrank={handleCrank}
+              connected={connected}
             />
           )}
         </div>
