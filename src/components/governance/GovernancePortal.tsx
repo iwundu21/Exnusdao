@@ -1,9 +1,7 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { toast } from '@/hooks/use-toast';
 import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap } from 'lucide-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
@@ -55,7 +53,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   );
 }
 
-export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onExecute }: any) {
+export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onExecute, setFeedback }: any) {
   const [showCreate, setShowCreate] = useState(false);
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
@@ -64,12 +62,12 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
 
   const handleCreate = () => {
     if (!newProp.title || !newProp.description) {
-      return toast({ title: "Fields Required", description: "Title and description are mandatory.", variant: "destructive" });
+      return setFeedback('error', 'Mandatory Fields Missing: Title and rationale are required for network broadcasting.');
     }
     
     if (newProp.type === 1) {
       if (!newProp.recipient || !newProp.amount || Number(newProp.amount) <= 0) {
-        return toast({ title: "Distribution Details Required", description: "Please specify a valid recipient and amount.", variant: "destructive" });
+        return setFeedback('error', 'Invalid Distribution: Recipient address and positive amount are required.');
       }
     }
 
@@ -85,7 +83,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
   const handleConfirmVote = () => {
     if (!votingOn) return;
     if (!voteRationale.trim()) {
-      return toast({ title: "Rationale Required", description: "You must provide a comment explaining your vote.", variant: "destructive" });
+      return setFeedback('warning', 'Rationale Required: Please provide context for your consensus decision.');
     }
     onVote(votingOn.id, votingOn.support, voteRationale);
     setVotingOn(null);

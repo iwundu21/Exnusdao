@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -220,6 +219,22 @@ export default function Home() {
     setFeedback('success', `Unstaked ${stake.amount.toLocaleString()} EXN plus ${reward.toFixed(2)} rewards.`);
   };
 
+  const handleMigrate = (stakeId: string, newValidatorId: string) => {
+    const stake = state.userStakes.find(s => s.id === stakeId);
+    if (!stake || stake.unstaked) return;
+
+    setState(prev => ({
+      ...prev,
+      userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, validator_id: newValidatorId, reward_checkpoint: prev.validators.find(v => v.id === newValidatorId)?.global_reward_index || 0 } : s),
+      validators: prev.validators.map(v => {
+        if (v.id === stake.validator_id) return { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) };
+        if (v.id === newValidatorId) return { ...v, total_staked: v.total_staked + stake.amount };
+        return v;
+      })
+    }));
+    setFeedback('success', 'Stake weight migrated to high-performance node.');
+  };
+
   if (!isMounted || !isLoaded) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
@@ -242,7 +257,13 @@ export default function Home() {
           <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-12">
-              <ValidatorDiscovery validators={state.validators} onSelect={setSelectedValidator} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} selectedId={selectedValidator?.id} />
+              <ValidatorDiscovery 
+                validators={state.validators} 
+                onSelect={setSelectedValidator} 
+                userStakes={state.userStakes.filter(s => s.owner === walletAddress)} 
+                selectedId={selectedValidator?.id}
+                onMigrate={handleMigrate}
+              />
             </div>
             <div className="space-y-6">
               <StakingActionForm 
@@ -255,6 +276,7 @@ export default function Home() {
                 connected={connected}
                 onClaim={handleClaim}
                 onUnstake={handleUnstake}
+                setFeedback={setFeedback}
               />
             </div>
           </div>
@@ -269,6 +291,7 @@ export default function Home() {
           onVote={handleVote}
           onCreate={handleCreateProposal}
           onExecute={handleExecuteProposal}
+          setFeedback={setFeedback}
         />
       )}
 

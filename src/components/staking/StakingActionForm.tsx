@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { Wallet, Info } from 'lucide-react';
 
 const STAKING_TIERS = [
@@ -22,18 +21,19 @@ export function StakingActionForm({
   onUnstake,
   onClaim,
   totalPendingRewards = 0,
-  connected = false
+  connected = false,
+  setFeedback
 }: any) {
   const [amount, setAmount] = useState('');
   const [duration, setDuration] = useState('30');
   const [activeTab, setActiveTab] = useState<'stake' | 'my-stakes'>('stake');
 
   const handleAction = () => {
-    if (!connected) return toast({ title: "Wallet Connection Required", variant: "destructive" });
+    if (!connected) return setFeedback('error', 'Wallet Connection Required');
     const numAmt = Number(amount);
-    if (!amount || isNaN(numAmt) || numAmt <= 0) return toast({ title: "Invalid Amount", variant: "destructive" });
-    if (numAmt > exnBalance) return toast({ title: "Insufficient Balance", variant: "destructive" });
-    if (!selectedNode) return toast({ title: "Select Validator", description: "Please pick a validator from the list first.", variant: "destructive" });
+    if (!amount || isNaN(numAmt) || numAmt <= 0) return setFeedback('error', 'Invalid amount specified for protocol lock.');
+    if (numAmt > exnBalance) return setFeedback('error', 'Insufficient EXN balance for this staking weight.');
+    if (!selectedNode) return setFeedback('warning', 'Target validator selection required to initiate stake.');
 
     const tier = STAKING_TIERS.find(t => t.days.toString() === duration);
     onStake({
@@ -116,7 +116,7 @@ export function StakingActionForm({
           <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
             <div className="flex justify-between items-center text-xs">
               <span className="text-foreground/50 uppercase tracking-tighter">Target Node</span>
-              <span className={`font-bold uppercase ${selectedNode ? 'text-primary' : 'text-destructive animate-pulse'}`}>
+              <span className={`font-bold uppercase ${selectedNode ? 'text-primary' : 'text-foreground/20'}`}>
                 {selectedNode ? selectedNode.name : 'Selection Required'}
               </span>
             </div>
@@ -187,13 +187,13 @@ export function StakingActionForm({
                        <div className="space-y-0.5">
                           <p className="text-[8px] text-foreground/20 uppercase font-black">Staked On</p>
                           <p className="text-[10px] text-foreground/60 font-medium">
-                            {new Date(s.staked_at).toLocaleDateString()} {new Date(s.staked_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(s.staked_at).toLocaleDateString()}
                           </p>
                        </div>
                        <div className="space-y-0.5 text-right">
                           <p className="text-[8px] text-foreground/20 uppercase font-black">Unlocks At</p>
                           <p className="text-[10px] text-foreground/60 font-medium">
-                            {new Date(s.unlock_timestamp).toLocaleDateString()} {new Date(s.unlock_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(s.unlock_timestamp).toLocaleDateString()}
                           </p>
                        </div>
                     </div>
@@ -216,7 +216,7 @@ export function StakingActionForm({
 
       <div className="flex items-start gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
         <Info className="w-3.5 h-3.5 text-primary/60 mt-0.5 flex-shrink-0" />
-        <p className="text-[10px] text-muted-foreground leading-tight uppercase font-bold">Protocol lock periods are immutable once confirmed. Verify your selection before broadcasting.</p>
+        <p className="text-[10px] text-primary/60 leading-tight uppercase font-bold">Protocol lock periods are immutable once confirmed. Verify your selection before broadcasting.</p>
       </div>
     </div>
   );
