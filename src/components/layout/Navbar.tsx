@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -6,7 +5,6 @@ import { Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer } fr
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { ThemeToggle } from './ThemeToggle';
 
 export function Navbar({ 
   exnBalance = 0, 
@@ -56,7 +54,6 @@ export function Navbar({
         )}
         
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <WalletMultiButton className="exn-wallet-button" />
         </div>
       </div>

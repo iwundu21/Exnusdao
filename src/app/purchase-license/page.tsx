@@ -1,8 +1,8 @@
-
 "use client";
 
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 import { ArrowLeft, Ticket, Flame, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
@@ -20,7 +20,6 @@ export default function PurchaseLicensePage() {
   const handlePurchase = () => {
     if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
 
-    // A license can be purchased if the total number of ACTIVE (non-burned) nodes is under the limit
     const activeNodes = state.validators.length;
     if (activeNodes >= state.licenseLimit) {
       return toast({ 
@@ -55,114 +54,116 @@ export default function PurchaseLicensePage() {
 
   if (!connected) {
     return (
-      <main className="min-h-screen">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="max-w-4xl mx-auto px-10 py-40 flex flex-col items-center justify-center text-center space-y-8">
-           <div className="p-6 bg-[#00f5ff]/10 rounded-full border border-[#00f5ff]/20">
-             <Wallet className="w-12 h-12 text-[#00f5ff]" />
+        <main className="flex-grow flex flex-col items-center justify-center text-center px-10 py-40 space-y-8">
+           <div className="p-6 bg-primary/10 rounded-full border border-primary/20">
+             <Wallet className="w-12 h-12 text-primary" />
            </div>
            <div className="space-y-4">
-             <h1 className="text-4xl font-bold uppercase tracking-tight text-white">Wallet Connection Required</h1>
-             <p className="text-white/40 max-w-md mx-auto">Please connect your Solana wallet to purchase a protocol node license.</p>
+             <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Connection Required</h1>
+             <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to purchase a protocol node license.</p>
            </div>
-        </div>
-      </main>
+        </main>
+        <Footer />
+      </div>
     );
   }
 
-  // Dynamically calculate active nodes (current validator registry)
   const activeNodeCount = state.validators.length;
   const totalLimit = state.licenseLimit || 21;
   const remainingSlots = totalLimit - activeNodeCount;
 
   return (
-    <main className="min-h-screen pb-20">
+    <div className="min-h-screen flex flex-col">
       <Navbar exnBalance={state.exnBalance} usdcBalance={state.usdcBalance} />
-      
-      <div className="max-w-3xl mx-auto px-10 py-20 space-y-12">
-        <Link href="/" className="flex items-center gap-2 text-white/40 hover:text-white transition-colors uppercase text-xs font-bold tracking-widest">
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </Link>
+      <main className="flex-grow">
+        <div className="max-w-3xl mx-auto px-10 py-20 space-y-12">
+          <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors uppercase text-xs font-bold tracking-widest">
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </Link>
 
-        <div className="space-y-4">
-          <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase">Node Licensing</h1>
-          <p className="text-white/40 max-w-xl">
-            Register your validator for wallet <span className="text-white font-mono text-[10px] bg-white/5 px-2 py-1 rounded">{walletAddress}</span>. Each license is for one-time use and is burned upon node decommissioning.
-          </p>
-        </div>
-
-        <div className="exn-card p-10 space-y-8 border-[#00f5ff]/20">
-          <div className="flex justify-between items-center border-b border-white/10 pb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#00f5ff]/10 rounded-xl border border-[#00f5ff]/20">
-                <Ticket className="w-6 h-6 text-[#00f5ff]" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white uppercase tracking-widest">Protocol License</p>
-                <p className="text-xs text-white/40 uppercase">Unique Identity Token</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-emerald-400">500 USDC</p>
-            </div>
+          <div className="space-y-4">
+            <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Licensing</h1>
+            <p className="text-muted-foreground max-w-xl">
+              Register your validator for wallet <span className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded">{walletAddress}</span>. Each license is for one-time use and is burned upon node decommissioning.
+            </p>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
-                 <span className="text-white/40">Active Nodes / Total Slots</span>
-                 <div className="flex items-center gap-1.5 font-black">
-                   <span className={remainingSlots > 0 ? "text-[#00f5ff]" : "text-red-400"}>
-                     {activeNodeCount}
-                   </span>
-                   <span className="text-white/20">/</span>
-                   <span className="text-white/60">{totalLimit}</span>
-                 </div>
+          <div className="exn-card p-10 space-y-8 border-primary/20">
+            <div className="flex justify-between items-center border-b border-border pb-8">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                  <Ticket className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">Protocol License</p>
+                  <p className="text-xs text-muted-foreground uppercase">Unique Identity Token</p>
+                </div>
               </div>
-              <div className="w-full h-1.5 bg-white/5 rounded-full">
-                <div 
-                  className="h-full exn-gradient-bg transition-all duration-500" 
-                  style={{ width: `${Math.min(100, (activeNodeCount / totalLimit) * 100)}%` }}
-                />
+              <div className="text-right">
+                <p className="text-2xl font-bold text-emerald-500">500 USDC</p>
               </div>
             </div>
-            
-            <button 
-              onClick={handlePurchase}
-              disabled={activeNodeCount >= totalLimit}
-              className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit ? 'exn-button' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
-            >
-              Purchase License
-            </button>
-          </div>
 
-          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-            <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-4">Your Purchased Licenses</h3>
-            <div className="space-y-3">
-              {state.licenses.filter(l => l.owner === walletAddress).length === 0 ? (
-                <p className="text-[10px] text-white/20 uppercase text-center py-4">No licenses found for this wallet</p>
-              ) : (
-                state.licenses.filter(l => l.owner === walletAddress).map((lic) => (
-                  <div key={lic.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5">
-                    <span className="font-mono text-xs text-[#00f5ff]">{lic.id}</span>
-                    <div className="flex items-center gap-2">
-                      {lic.is_burned ? (
-                        <span className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-black uppercase bg-red-900/30 text-red-500">
-                          <Flame className="w-3 h-3" /> Burned 🔥
-                        </span>
-                      ) : (
-                        <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase ${lic.is_claimed ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                          {lic.is_claimed ? 'Claimed' : 'Active'}
-                        </span>
-                      )}
+            <div className="space-y-6">
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
+                   <span className="text-muted-foreground">Active Nodes / Total Slots</span>
+                   <div className="flex items-center gap-1.5 font-black">
+                     <span className={remainingSlots > 0 ? "text-primary" : "text-destructive"}>
+                       {activeNodeCount}
+                     </span>
+                     <span className="text-muted-foreground/40">/</span>
+                     <span className="text-muted-foreground">{totalLimit}</span>
+                   </div>
+                </div>
+                <div className="w-full h-1.5 bg-foreground/5 rounded-full">
+                  <div 
+                    className="h-full exn-gradient-bg transition-all duration-500" 
+                    style={{ width: `${Math.min(100, (activeNodeCount / totalLimit) * 100)}%` }}
+                  />
+                </div>
+              </div>
+              
+              <button 
+                onClick={handlePurchase}
+                disabled={activeNodeCount >= totalLimit}
+                className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+              >
+                Purchase License
+              </button>
+            </div>
+
+            <div className="p-4 bg-foreground/5 rounded-xl border border-border">
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-4">Your Purchased Licenses</h3>
+              <div className="space-y-3">
+                {state.licenses.filter(l => l.owner === walletAddress).length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground uppercase text-center py-4">No licenses found for this wallet</p>
+                ) : (
+                  state.licenses.filter(l => l.owner === walletAddress).map((lic) => (
+                    <div key={lic.id} className="flex items-center justify-between p-3 bg-foreground/5 rounded-lg border border-border">
+                      <span className="font-mono text-xs text-primary">{lic.id}</span>
+                      <div className="flex items-center gap-2">
+                        {lic.is_burned ? (
+                          <span className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-black uppercase bg-destructive/10 text-destructive border border-destructive/20">
+                            <Flame className="w-3 h-3" /> Burned 🔥
+                          </span>
+                        ) : (
+                          <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase border ${lic.is_claimed ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                            {lic.is_claimed ? 'Claimed' : 'Active'}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 }

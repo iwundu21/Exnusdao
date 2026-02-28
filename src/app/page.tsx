@@ -1,8 +1,8 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 import { DashboardStats } from '@/components/staking/DashboardStats';
 import { ValidatorDiscovery } from '@/components/staking/ValidatorDiscovery';
 import { StakingActionForm } from '@/components/staking/StakingActionForm';
@@ -31,7 +31,7 @@ export default function Home() {
     if (!walletAddress || !state?.userStakes) return 0;
     return state.userStakes
       .filter(s => s.owner === walletAddress && !s.unstaked)
-      .reduce((acc, s) => acc + s.amount, 0);
+      .reduce((acc, s) => acc + (s.amount || 0), 0);
   }, [state?.userStakes, walletAddress]);
 
   const totalStakedReal = useMemo(() => {
@@ -47,7 +47,7 @@ export default function Home() {
         const validator = state.validators.find(v => v.id === stake.validator_id);
         if (!validator) return acc;
         const rewardDelta = Math.max(0, (validator.global_reward_index || 0) - (stake.reward_checkpoint || 0));
-        const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
+        const reward = (rewardDelta * (stake.amount || 0)) / REWARD_PRECISION;
         return acc + reward;
       }, 0);
   }, [state?.userStakes, state?.validators, walletAddress]);
@@ -59,8 +59,8 @@ export default function Home() {
     setState(prev => ({
       ...prev,
       userStakes: [...prev.userStakes, newStake],
-      exnBalance: Math.max(0, prev.exnBalance - stakeData.amount),
-      validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: (v.total_staked || 0) + stakeData.amount } : v)
+      exnBalance: Math.max(0, prev.exnBalance - (stakeData.amount || 0)),
+      validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: (v.total_staked || 0) + (stakeData.amount || 0) } : v)
     }));
     toast({ title: "Tokens Staked", description: `Locked ${stakeData.amount} EXN successfully.` });
   };
@@ -135,44 +135,47 @@ export default function Home() {
 
   if (!isMounted || !isLoaded) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#020617] space-y-4">
-        <div className="w-16 h-16 border-4 border-[#00f5ff] border-t-transparent rounded-full animate-spin" />
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="exn-gradient-text font-bold uppercase tracking-widest animate-pulse">Syncing Network State</p>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen pb-20">
+    <div className="min-h-screen flex flex-col">
       <Navbar exnBalance={state.exnBalance} usdcBalance={state.usdcBalance} />
-      <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
-        <div className="flex gap-8 border-b border-white/10">
-          <button onClick={() => setActiveTab('staking')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-[#00f5ff] border-b-2 border-[#00f5ff]' : 'text-white/40 hover:text-white'}`}>Data Overview</button>
-          <button onClick={() => setActiveTab('governance')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-[#00f5ff] border-b-2 border-[#00f5ff]' : 'text-white/40 hover:text-white'}`}>DAO Portal</button>
-        </div>
+      <main className="flex-grow">
+        <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
+          <div className="flex gap-8 border-b border-border">
+            <button onClick={() => setActiveTab('staking')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Data Overview</button>
+            <button onClick={() => setActiveTab('governance')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>DAO Portal</button>
+          </div>
 
-        {activeTab === 'staking' ? (
-          <>
-            <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              <div className="lg:col-span-2 space-y-12">
-                <ValidatorDiscovery validators={state.validators} onSelect={setSelectedValidator} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} selectedId={selectedValidator?.id} />
+          {activeTab === 'staking' ? (
+            <>
+              <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="lg:col-span-2 space-y-12">
+                  <ValidatorDiscovery validators={state.validators} onSelect={setSelectedValidator} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} selectedId={selectedValidator?.id} />
+                </div>
+                <div className="space-y-6">
+                  <StakingActionForm selectedNode={selectedValidator} exnBalance={state.exnBalance} onStake={handleStake} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} validators={state.validators} onUnstake={() => {}} onClaim={() => {}} totalPendingRewards={pendingRewardsTotal} connected={connected} />
+                </div>
               </div>
-              <div className="space-y-6">
-                <StakingActionForm selectedNode={selectedValidator} exnBalance={state.exnBalance} onStake={handleStake} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} validators={state.validators} onUnstake={() => {}} onClaim={() => {}} totalPendingRewards={pendingRewardsTotal} connected={connected} />
-              </div>
-            </div>
-          </>
-        ) : (
-          <GovernancePortal 
-            proposals={state.proposals} 
-            userStakeWeight={userStakeWeight}
-            walletAddress={walletAddress}
-            onVote={handleVote}
-            onCreate={handleCreateProposal}
-          />
-        )}
-      </div>
-    </main>
+            </>
+          ) : (
+            <GovernancePortal 
+              proposals={state.proposals} 
+              userStakeWeight={userStakeWeight}
+              walletAddress={walletAddress}
+              onVote={handleVote}
+              onCreate={handleCreateProposal}
+            />
+          )}
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }
