@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -14,6 +15,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 
 const REWARD_PRECISION = 1_000_000;
 const PROPOSAL_FEE = 100;
+const EPOCH_REWARD_RATE = 0.0001; // 0.01% per crank
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -137,11 +139,13 @@ export default function Home() {
   const handleCrank = () => {
     const now = Date.now();
     let finalizedCount = 0;
+    let totalRewardsDistributed = 0;
 
     setState(prev => {
       let treasuryDelta = 0;
       let userExnDelta = 0;
 
+      // Finalize eligible proposals
       const newProposals = prev.proposals.map(p => {
         if (!p.executed && now > p.deadline) {
           finalizedCount++;
@@ -158,15 +162,21 @@ export default function Home() {
         return p;
       });
 
+      // Distribute rewards based on dynamic validator weights
       const newValidators = prev.validators.map(v => {
-        if (!v.is_active) return v;
-        const crankReward = v.total_staked * 0.0001; 
+        if (!v.is_active || v.total_staked <= 0) return v;
+        
+        // Calculate dynamic reward based on this validator's share of network weight
+        const crankReward = v.total_staked * EPOCH_REWARD_RATE; 
+        totalRewardsDistributed += crankReward;
+
         const commission = (crankReward * (v.commission_rate / 10000));
         const stakerPool = crankReward - commission;
+        
         return {
           ...v,
           accrued_node_rewards: (v.accrued_node_rewards || 0) + commission,
-          global_reward_index: (v.global_reward_index || 0) + (stakerPool * 1_000_000 / v.total_staked)
+          global_reward_index: (v.global_reward_index || 0) + Math.floor(stakerPool * REWARD_PRECISION / v.total_staked)
         };
       });
 
@@ -180,8 +190,8 @@ export default function Home() {
     });
 
     toast({ 
-      title: "Network Cranked", 
-      description: `Synchronized rewards and finalized ${finalizedCount} proposals.` 
+      title: "Protocol Synchronized", 
+      description: `Distributed ${totalRewardsDistributed.toFixed(2)} EXN to delegators and finalized ${finalizedCount} proposals.` 
     });
   };
 
