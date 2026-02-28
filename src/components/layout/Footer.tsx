@@ -3,7 +3,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Twitter, MessageSquare, ExternalLink, ShieldCheck, Globe } from 'lucide-react';
+import { Twitter, MessageSquare, ExternalLink, Globe } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 export function Footer() {
@@ -38,7 +38,6 @@ export function Footer() {
           
           <div className="flex items-center gap-4 border-l border-border pl-6">
             <div className="flex items-center gap-2 text-[9px] text-muted-foreground uppercase font-bold">
-              <ShieldCheck className="w-3 h-3 text-primary" />
               Audited
             </div>
             <ThemeToggle />

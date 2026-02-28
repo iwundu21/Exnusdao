@@ -2,12 +2,10 @@
 "use client";
 
 import React from 'react';
-import { Zap, ShieldCheck, Clock, AlertCircle, BarChart3, Database, Coins } from 'lucide-react';
+import { Zap, Clock, AlertCircle, BarChart3, Database, Coins } from 'lucide-react';
 
 export function CrankTerminal({ validators = [], proposals = [], onCrank, connected = false }: any) {
   const activeValidators = validators.filter((v: any) => v.is_active);
-  const pendingFinalization = proposals.filter((p: any) => !p.executed && Date.now() > p.deadline);
-  
   const totalNetworkWeight = validators.reduce((acc: number, v: any) => acc + (v.total_staked || 0), 0);
   const projectedEpochReward = totalNetworkWeight * 0.0001;
 
@@ -23,7 +21,6 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="exn-card p-6 border-primary/20 bg-primary/5">
           <div className="flex items-center gap-3 mb-4">
-            <ShieldCheck className="w-5 h-5 text-primary" />
             <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Active Nodes</h3>
           </div>
           <p className="text-3xl font-bold text-primary">{activeValidators.length}</p>
