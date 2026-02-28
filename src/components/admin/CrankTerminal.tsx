@@ -2,7 +2,6 @@
 "use client";
 
 import React from 'react';
-import { Zap, AlertCircle, BarChart3, Database } from 'lucide-react';
 
 export function CrankTerminal({ validators = [], proposals = [], onCrank, connected = false }: any) {
   const activeValidators = validators.filter((v: any) => v.is_active);
@@ -37,7 +36,6 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
 
         <div className="exn-card p-6 border-emerald-500/20 bg-emerald-500/5">
           <div className="flex items-center gap-3 mb-4">
-            <BarChart3 className="w-5 h-5 text-emerald-500" />
             <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Reward Multiplier</h3>
           </div>
           <p className="text-3xl font-bold text-emerald-500">0.01%</p>
@@ -58,12 +56,11 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
           disabled={!connected}
           className={`px-12 py-4 rounded-xl font-black uppercase text-sm tracking-[0.2em] transition-all flex items-center gap-3 ${connected ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
         >
-          <Zap className="w-5 h-5 fill-current" /> {connected ? 'Trigger Reward Crank' : 'Wallet Required'}
+          {connected ? 'Trigger Reward Crank' : 'Wallet Required'}
         </button>
 
         {!connected && (
           <div className="flex items-center gap-2 text-destructive">
-            <AlertCircle className="w-4 h-4" />
             <p className="text-[10px] uppercase font-black tracking-widest">Authorized Wallet Signature Required</p>
           </div>
         )}
@@ -71,7 +68,6 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
 
       <div className="exn-card p-0 border-border overflow-hidden">
         <div className="p-4 bg-foreground/5 border-b border-border flex items-center gap-2">
-           <Database className="w-4 h-4 text-muted-foreground" />
            <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Network Weight Details</p>
         </div>
         <div className="divide-y divide-border">
