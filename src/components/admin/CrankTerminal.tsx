@@ -46,13 +46,6 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
       </div>
 
       <div className="exn-card p-10 border-primary/30 flex flex-col items-center justify-center text-center space-y-8">
-        <div className="relative">
-          <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse" />
-          <div className="relative p-8 bg-primary/10 rounded-full border border-primary/30">
-            <Zap className="w-16 h-16 text-primary fill-current" />
-          </div>
-        </div>
-
         <div className="max-w-md space-y-4">
           <h3 className="text-2xl font-bold uppercase tracking-widest">Distribute Delegator Rewards</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
