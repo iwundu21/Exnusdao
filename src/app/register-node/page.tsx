@@ -1,6 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'export default function RegisterNodePage() {
+import React, { useState, useEffect, useRef } from 'react';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+import { ArrowLeft, Upload, AlertCircle, ExternalLink, Wallet } from 'lucide-react';
+import Link from 'next/link';
+import { useProtocolState } from '@/hooks/use-protocol-state';
+import { toast } from '@/hooks/use-toast';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { shortenAddress, getExplorerLink } from '@/lib/utils';
+
+export default function RegisterNodePage() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
@@ -190,9 +202,6 @@ import React, { useState, useEffect, useRef } from 'export default function Regi
                       <option value="">Select a License</option>
                       {userLicenses.map(l => (
                         <option key={l.id} value={l.id}>{l.id}</option>
-                      ))}
-                      {state.licenses.filter(l => l.owner === walletAddress && l.is_burned).map(l => (
-                        <option key={l.id} disabled value={l.id}>{l.id} (BURNED 🔥)</option>
                       ))}
                     </select>
                   </div>
