@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Wallet } from 'lucide-react';
+import { Wallet, Info } from 'lucide-react';
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -214,8 +214,9 @@ export function StakingActionForm({
         </div>
       )}
 
-      <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-        <p className="text-[10px] text-destructive leading-tight uppercase font-bold">Protocol lock periods are immutable once confirmed. Verify your selection before broadcasting.</p>
+      <div className="flex items-start gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+        <Info className="w-3.5 h-3.5 text-primary/60 mt-0.5 flex-shrink-0" />
+        <p className="text-[10px] text-muted-foreground leading-tight uppercase font-bold">Protocol lock periods are immutable once confirmed. Verify your selection before broadcasting.</p>
       </div>
     </div>
   );
