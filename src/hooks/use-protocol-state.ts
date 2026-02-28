@@ -44,6 +44,7 @@ export interface ProposalComment {
   author: string;
   text: string;
   timestamp: number;
+  vote_stance?: 'YES' | 'NO';
 }
 
 export interface Proposal {
@@ -64,6 +65,14 @@ export interface Proposal {
   comments: ProposalComment[];
 }
 
+export interface TransactionFeedback {
+  id: string;
+  status: 'success' | 'error' | 'warning';
+  message: string;
+  txHash: string;
+  timestamp: number;
+}
+
 export interface ProtocolState {
   exnBalance: number;
   usdcBalance: number;
@@ -76,6 +85,7 @@ export interface ProtocolState {
   licenses: License[];
   proposals: Proposal[];
   isPaused: boolean;
+  lastTransaction: TransactionFeedback | null;
 }
 
 const SEED_AMOUNT = 15000000;
@@ -90,6 +100,7 @@ const INITIAL_STATE: ProtocolState = {
   rewardCap: 1250,
   licenseLimit: 21,
   isPaused: false,
+  lastTransaction: null,
   validators: [
     { 
       id: 'v1', 
@@ -144,7 +155,7 @@ const INITIAL_STATE: ProtocolState = {
       executed: false,
       voters: [],
       comments: [
-        { id: 'c1', author: 'Validator-Alpha', text: 'This will help offset hardware costs.', timestamp: Date.now() - 3600000 }
+        { id: 'c1', author: 'Validator-Alpha', text: 'This will help offset hardware costs.', timestamp: Date.now() - 3600000, vote_stance: 'YES' }
       ]
     },
   ],
@@ -172,5 +183,23 @@ export function useProtocolState() {
     }
   }, [state, isLoaded]);
 
-  return { state, setState, isLoaded };
+  const setFeedback = (status: 'success' | 'error' | 'warning', message: string) => {
+    const txHash = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    setState(prev => ({
+      ...prev,
+      lastTransaction: {
+        id: `tx-${Date.now()}`,
+        status,
+        message,
+        txHash,
+        timestamp: Date.now()
+      }
+    }));
+  };
+
+  const clearFeedback = () => {
+    setState(prev => ({ ...prev, lastTransaction: null }));
+  };
+
+  return { state, setState, isLoaded, setFeedback, clearFeedback };
 }

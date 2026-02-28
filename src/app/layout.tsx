@@ -6,6 +6,7 @@ import { SolanaWalletProvider } from '@/components/providers/SolanaWalletProvide
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { TransactionStatus } from '@/components/layout/TransactionStatus';
 
 export const metadata: Metadata = {
   title: 'Exnus protocol | Network',
@@ -31,6 +32,7 @@ export default function RootLayout({
               <main className="flex-grow pb-24 lg:pb-32">
                 {children}
               </main>
+              <TransactionStatus />
               <Footer />
             </div>
           </SolanaWalletProvider>

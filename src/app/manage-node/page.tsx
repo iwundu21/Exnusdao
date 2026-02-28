@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, AlertTriangle, LogOut, Trash2, Wallet, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
-import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -18,7 +17,7 @@ export default function ManageNodePage() {
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
   
-  const { state, setState, isLoaded } = useProtocolState();
+  const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
@@ -43,7 +42,7 @@ export default function ManageNodePage() {
   const handleUpdate = () => {
     if (!editingNodeId || !formData) return;
     if (formData.commission_rate < 0 || formData.commission_rate > 30) {
-      return toast({ title: "Invalid Commission", description: "Range: 0% to 30%.", variant: "destructive" });
+      return setFeedback('error', 'Invalid commission rate. Range: 0% to 30%.');
     }
     setState(prev => ({
       ...prev,
@@ -57,7 +56,7 @@ export default function ManageNodePage() {
       } : v)
     }));
     setEditingNodeId(null);
-    toast({ title: "Node Updated", description: "Changes broadcast to network successfully." });
+    setFeedback('success', 'Node metadata synchronized with network.');
   };
 
   const handleClaimCommission = (vId: string) => {
@@ -69,16 +68,12 @@ export default function ManageNodePage() {
       exnBalance: prev.exnBalance + reward,
       validators: prev.validators.map(v => v.id === vId ? { ...v, accrued_node_rewards: 0 } : v)
     }));
-    toast({ title: "Commission Claimed", description: `Successfully withdrew ${reward.toFixed(2)} EXN.` });
+    setFeedback('success', `Withdrew ${reward.toFixed(2)} EXN performance commission.`);
   };
 
   const handleDepositSeed = (vId: string) => {
     if (state.exnBalance < SEED_DEPOSIT_AMOUNT) {
-      return toast({ 
-        title: "Insufficient Balance", 
-        description: `You need ${SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN to deposit protocol seed.`, 
-        variant: "destructive" 
-      });
+      return setFeedback('error', `Insufficient EXN. Seed deposit: ${SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN.`);
     }
     setState(prev => ({
       ...prev,
@@ -90,7 +85,7 @@ export default function ManageNodePage() {
         total_staked: (v.total_staked || 0) + SEED_DEPOSIT_AMOUNT 
       } : v)
     }));
-    toast({ title: "Seed Deposited", description: "Validator node is now initialized and active." });
+    setFeedback('success', 'Protocol seed deposited. Validator node initialized.');
   };
 
   const handleWithdrawSeed = (vId: string) => {
@@ -106,7 +101,7 @@ export default function ManageNodePage() {
         total_staked: Math.max(0, (v.total_staked || 0) - SEED_DEPOSIT_AMOUNT) 
       } : v)
     }));
-    toast({ title: "Seed Withdrawn", description: "Protocol seed returned to wallet. Node is now inactive." });
+    setFeedback('success', 'Protocol seed returned to wallet. Node deactivated.');
   };
 
   const handleCloseAccount = (vId: string) => {
@@ -115,7 +110,7 @@ export default function ManageNodePage() {
     const delegatorStake = (node.total_staked || 0) - (node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0);
     const activeDelegators = state.userStakes.filter(s => s.validator_id === vId && !s.unstaked);
     if (delegatorStake > 0.01 || activeDelegators.length > 0) {
-       return toast({ title: "Active Delegators Found", description: "You cannot close this node while there is active delegator capital.", variant: "destructive" });
+       return setFeedback('error', 'Active delegator capital found. Cannot decommission.');
     }
     const seedRefund = node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0;
     const rewards = node.accrued_node_rewards || 0;
@@ -125,20 +120,20 @@ export default function ManageNodePage() {
       validators: prev.validators.filter(v => v.id !== vId),
       licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_burned: true, is_claimed: false } : l)
     }));
-    toast({ title: "Account Closed", description: "Node decommissioned. Associated license has been burned 🔥." });
+    setFeedback('success', 'Node account terminated. Associated license burned.');
     router.push('/');
   };
 
   const toggleNodeStatus = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node?.seed_deposited) {
-      return toast({ title: "Seed Required", description: "You must deposit seed before activating node.", variant: "destructive" });
+      return setFeedback('warning', 'Seed deposit required to activate node.');
     }
     setState(prev => ({
       ...prev,
       validators: prev.validators.map(v => v.id === vId ? { ...v, is_active: !v.is_active } : v)
     }));
-    toast({ title: "Status Changed", description: "Node operational status updated." });
+    setFeedback('success', `Node operational status updated: ${!node.is_active ? 'ONLINE' : 'PAUSED'}.`);
   };
 
   if (!mounted || !isLoaded) return (
@@ -171,7 +166,10 @@ export default function ManageNodePage() {
       <div className="space-y-4">
         <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Management</h1>
         <p className="text-muted-foreground max-w-xl">
-          Optimize your validator parameters, manage protocol seed, and harvest performance commissions for address <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">{shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" /></a>.
+          Optimize your validator parameters, manage protocol seed, and harvest performance commissions for address 
+          <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 ml-2 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">
+            {shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" />
+          </a>.
         </p>
       </div>
 
@@ -216,8 +214,8 @@ export default function ManageNodePage() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3 text-emerald-500">
-                          <p className="text-[10px] uppercase font-black tracking-widest">Protocol Seed Active</p>
+                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3 text-emerald-500 text-[10px] uppercase font-black tracking-widest">
+                          Protocol Seed Active
                         </div>
                         <button onClick={() => handleWithdrawSeed(node.id)} className="w-full py-2 border border-destructive/20 text-destructive text-[10px] font-black uppercase rounded-lg hover:bg-destructive/10 transition-all flex items-center justify-center gap-2">
                           <LogOut className="w-3 h-3" /> Withdraw Protocol Seed

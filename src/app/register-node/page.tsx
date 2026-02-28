@@ -5,7 +5,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Upload, AlertCircle, ExternalLink, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
-import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -16,7 +15,7 @@ export default function RegisterNodePage() {
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { state, setState, isLoaded } = useProtocolState();
+  const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   
@@ -49,24 +48,24 @@ export default function RegisterNodePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 500000) return toast({ title: "File too large", description: "Logo must be under 500KB", variant: "destructive" });
+    if (file.size > 500000) return setFeedback('error', 'Identity logo must be under 500KB.');
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result as string;
       setFormData(prev => ({ ...prev, logo_uri: result }));
-      toast({ title: "Logo Processed", description: "Custom identity loaded." });
+      setFeedback('success', 'Custom identity logo processed.');
     };
     reader.readAsDataURL(file);
   };
 
   const handleRegister = () => {
-    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
-    if (hasExistingNode) return toast({ title: "Registration Denied", description: "One node limit per wallet reached.", variant: "destructive" });
+    if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    if (hasExistingNode) return setFeedback('warning', 'Only one node registration permitted per wallet.');
     const license = state.licenses.find(l => l.id === formData.licenseId);
-    if (!license) return toast({ title: "Invalid License ID", variant: "destructive" });
-    if (license.is_burned) return toast({ title: "Burned License", description: "This license has been permanently burned 🔥.", variant: "destructive" });
-    if (license.is_claimed) return toast({ title: "License Already Used", variant: "destructive" });
-    if (!formData.name || !formData.location) return toast({ title: "Missing Fields", description: "Node name and location are required.", variant: "destructive" });
+    if (!license) return setFeedback('error', 'Invalid license ID provided.');
+    if (license.is_burned) return setFeedback('error', 'License has been permanently burned.');
+    if (license.is_claimed) return setFeedback('error', 'License already active on network.');
+    if (!formData.name || !formData.location) return setFeedback('error', 'Node name and location required.');
 
     const newNode = {
       id: `v${Date.now()}`,
@@ -89,7 +88,7 @@ export default function RegisterNodePage() {
       validators: [...prev.validators, newNode],
       licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
     }));
-    toast({ title: "Node Registered", description: "Broadcasting initialization to network." });
+    setFeedback('success', 'Validator registration successful. Initializing account.');
     setTimeout(() => router.push('/manage-node'), 1500);
   };
 
@@ -124,7 +123,12 @@ export default function RegisterNodePage() {
 
       <div className="space-y-4">
         <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Validator Registration</h1>
-        <p className="text-muted-foreground max-w-xl">Provision high-performance infrastructure for wallet <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">{shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" /></a>.</p>
+        <p className="text-muted-foreground max-w-xl flex items-center gap-2 flex-wrap">
+          Provision high-performance infrastructure for wallet 
+          <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">
+            {shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" />
+          </a>.
+        </p>
       </div>
 
       {hasExistingNode ? (

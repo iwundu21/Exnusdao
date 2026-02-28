@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { Ticket, Flame, Wallet, ExternalLink, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
-import { toast } from '@/hooks/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
@@ -14,7 +13,7 @@ const LICENSE_PRICE = 500;
 export default function PurchaseLicensePage() {
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const { state, setState, isLoaded } = useProtocolState();
+  const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -22,13 +21,13 @@ export default function PurchaseLicensePage() {
   }, []);
 
   const handlePurchase = () => {
-    if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
+    if (!connected) return setFeedback('error', 'Wallet Connection Required');
     const activeNodes = state.validators.length;
     if (activeNodes >= state.licenseLimit) {
-      return toast({ title: "Registration Capped", description: "All protocol license slots have been filled.", variant: "destructive" });
+      return setFeedback('warning', 'Protocol registration cap reached.');
     }
     if (state.usdcBalance < LICENSE_PRICE) {
-      return toast({ title: "Insufficient USDC", variant: "destructive" });
+      return setFeedback('error', 'Insufficient USDC balance for purchase.');
     }
     const uniqueId = `LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
     const newLicense = { id: uniqueId, owner: walletAddress, is_claimed: false, is_burned: false };
@@ -37,7 +36,7 @@ export default function PurchaseLicensePage() {
       usdcBalance: prev.usdcBalance - LICENSE_PRICE,
       licenses: [...prev.licenses, newLicense]
     }));
-    toast({ title: "License Generated", description: `Your ID: ${uniqueId}` });
+    setFeedback('success', `License ${uniqueId} generated successfully.`);
   };
 
   if (!mounted || !isLoaded) return (
@@ -73,8 +72,11 @@ export default function PurchaseLicensePage() {
 
       <div className="space-y-4">
         <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Licensing</h1>
-        <p className="text-muted-foreground max-w-xl">
-          Register your validator for wallet <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">{shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" /></a>.
+        <p className="text-muted-foreground max-xl flex items-center gap-2 flex-wrap">
+          Register your validator for wallet 
+          <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">
+            {shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" />
+          </a>.
         </p>
       </div>
 
@@ -125,7 +127,7 @@ export default function PurchaseLicensePage() {
                   <div className="flex items-center gap-2">
                     {lic.is_burned ? (
                       <span className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-black uppercase bg-destructive/10 text-destructive border border-destructive/20">
-                        <Flame className="w-3 h-3" /> Burned 🔥
+                        Burned 🔥
                       </span>
                     ) : (
                       <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase border ${lic.is_claimed ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
