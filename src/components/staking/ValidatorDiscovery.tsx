@@ -1,10 +1,10 @@
+
 "use client";
 
 import React from 'react';
 import Image from 'next/image';
-import { toast } from '@/hooks/use-toast';
 
-export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate, selectedId }: any) {
+export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate, selectedId, setFeedback }: any) {
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                           const activeNode = validators.find((v: any) => v.is_active);
                           const stake = userStakes.find((s: any) => s.validator_id === validator.id && !s.unstaked);
                           if (activeNode && stake) onMigrate(stake.id, activeNode.id);
-                          else toast({ title: "No Active Target", variant: "destructive" });
+                          else setFeedback('error', 'Protocol Migration Failed: No active target node available.');
                        }}
                        className="px-4 exn-button-outline border-emerald-500 text-emerald-500 flex items-center justify-center gap-2 text-[10px] font-black uppercase"
                      >

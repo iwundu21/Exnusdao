@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -263,6 +264,7 @@ export default function Home() {
                 userStakes={state.userStakes.filter(s => s.owner === walletAddress)} 
                 selectedId={selectedValidator?.id}
                 onMigrate={handleMigrate}
+                setFeedback={setFeedback}
               />
             </div>
             <div className="space-y-6">

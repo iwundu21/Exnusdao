@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -165,6 +166,9 @@ export function StakingActionForm({
                 const validator = validators?.find((v: any) => v.id === s.validator_id);
                 const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION : 0;
                 
+                const unlockDate = new Date(s.unlock_timestamp);
+                const unlockFormatted = `${unlockDate.toLocaleDateString()} ${unlockDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
                 return (
                   <div key={s.id} className="p-4 bg-foreground/5 rounded-lg border border-border/10 hover:border-border transition-all space-y-3">
                     <div className="flex justify-between items-start">
@@ -193,7 +197,7 @@ export function StakingActionForm({
                        <div className="space-y-0.5 text-right">
                           <p className="text-[8px] text-foreground/20 uppercase font-black">Unlocks At</p>
                           <p className="text-[10px] text-foreground/60 font-medium">
-                            {new Date(s.unlock_timestamp).toLocaleDateString()}
+                            {unlockFormatted}
                           </p>
                        </div>
                     </div>
