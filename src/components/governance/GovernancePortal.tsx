@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -54,7 +55,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   );
 }
 
-export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate }: any) {
+export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onExecute }: any) {
   const [showCreate, setShowCreate] = useState(false);
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
@@ -246,7 +247,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                     {prop.executed && (
                       <div className="flex items-center gap-2 text-[10px] text-primary uppercase font-black">
                         <Zap className="w-3 h-3 fill-current" />
-                        Finalized by Crank
+                        Finalized & Executed
                       </div>
                     )}
                   </div>
@@ -310,9 +311,23 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                     </div>
                   )}
 
-                  {isExpired && (
-                    <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 50 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
-                      {prop.executed ? (yesPercent >= 50 ? 'Passed & Finalized' : 'Failed & Finalized') : 'Pending Crank Tally'}
+                  {isExpired && !prop.executed && (
+                    <div className="space-y-3">
+                      <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 50 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
+                        {yesPercent >= 50 ? 'Proposal Passed' : 'Proposal Failed'}
+                      </div>
+                      <button 
+                        onClick={() => onExecute(prop.id)}
+                        className="w-full h-12 exn-button uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2"
+                      >
+                        <Zap className="w-4 h-4 fill-current" /> Execute Protocol Action
+                      </button>
+                    </div>
+                  )}
+
+                  {prop.executed && (
+                    <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 50 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-foreground/10 text-muted-foreground'}`}>
+                      {yesPercent >= 50 ? 'Passed & Finalized' : 'Failed & Archived'}
                     </div>
                   )}
                 </div>
@@ -327,9 +342,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                       <MessageSquare className="w-4 h-4" /> Voter Rationales ({comments.length})
                       {activeCommentId === prop.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
-                    {activeCommentId === prop.id && (
-                       <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest italic">Discussion limited to active voters</span>
-                    )}
                  </div>
 
                  {activeCommentId === prop.id && (
@@ -342,21 +354,15 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                           </div>
                         ) : (
                           [...comments].sort((a, b) => b.timestamp - a.timestamp).map((c: any) => {
-                            const commenterHasVoted = prop.voters?.includes(c.author);
                             return (
                               <div key={c.id} className="flex gap-4 items-start group">
-                                 <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border transition-colors ${commenterHasVoted ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-foreground/5 border-border text-muted-foreground'}`}>
+                                 <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border bg-primary/10 border-primary/30 text-primary">
                                     <User className="w-5 h-5" />
                                  </div>
                                  <div className="flex-1 space-y-1.5 bg-foreground/5 p-4 rounded-2xl border border-border group-hover:border-primary/10 transition-colors">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-3">
                                         <a href={getExplorerLink(c.author)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-mono font-bold text-primary hover:underline flex items-center gap-1">{shortenAddress(c.author)} <ExternalLink className="w-2.5 h-2.5" /></a>
-                                        {commenterHasVoted && (
-                                          <span className="flex items-center gap-1 text-[8px] bg-primary text-black px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
-                                            <CheckCircle2 className="w-2.5 h-2.5" /> Voter
-                                          </span>
-                                        )}
                                         {c.vote_stance && (
                                           <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase ${c.vote_stance === 'YES' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
                                             Stance: {c.vote_stance}

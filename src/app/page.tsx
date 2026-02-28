@@ -55,15 +55,14 @@ export default function Home() {
 
   const handleStake = (stakeData: any) => {
     if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
-    const now = Date.now();
-    const newStake = { ...stakeData, id: `s${now}`, staked_at: now, owner: walletAddress };
+    const numAmt = Number(stakeData.amount);
     setState(prev => ({
       ...prev,
-      userStakes: [...prev.userStakes, newStake],
-      exnBalance: Math.max(0, prev.exnBalance - (stakeData.amount || 0)),
-      validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: (v.total_staked || 0) + (stakeData.amount || 0) } : v)
+      userStakes: [...prev.userStakes, { ...stakeData, id: `s${Date.now()}`, staked_at: Date.now(), owner: walletAddress }],
+      exnBalance: Math.max(0, prev.exnBalance - numAmt),
+      validators: prev.validators.map(v => v.id === stakeData.validator_id ? { ...v, total_staked: (v.total_staked || 0) + numAmt } : v)
     }));
-    toast({ title: "Tokens Staked", description: `Locked ${stakeData.amount} EXN successfully.` });
+    toast({ title: "Tokens Staked", description: `Locked ${numAmt} EXN successfully.` });
   };
 
   const handleVote = (pId: number, support: boolean, comment: string) => {
@@ -102,7 +101,7 @@ export default function Home() {
         comments: [...(p.comments || []), newComment]
       } : p)
     }));
-    toast({ title: "Vote Cast", description: `Voted with ${userStakeWeight.toLocaleString()} weight and rationale.` });
+    toast({ title: "Vote Cast", description: `Voted with ${userStakeWeight.toLocaleString()} weight.` });
   };
 
   const handleCreateProposal = (data: any) => {
@@ -114,7 +113,7 @@ export default function Home() {
     const now = Date.now();
     const newProp = {
       ...data,
-      id: state.proposals.length,
+      id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: now,
       deadline: now + (86400000 * 7),
@@ -134,31 +133,42 @@ export default function Home() {
     toast({ title: "Proposal Broadcast", description: "Applied 100 EXN governance fee." });
   };
 
-  const handleCrank = () => {
-    const now = Date.now();
-    let finalizedCount = 0;
-    let totalRewardsDistributed = 0;
+  const handleExecuteProposal = (pId: number) => {
+    const proposal = state.proposals.find(p => p.id === pId);
+    if (!proposal || proposal.executed) return;
+    if (Date.now() < proposal.deadline) return toast({ title: "Deadline Not Reached", variant: "destructive" });
 
+    const passed = (proposal.yes_votes || 0) > (proposal.no_votes || 0);
+    
     setState(prev => {
       let treasuryDelta = 0;
       let userExnDelta = 0;
 
-      const newProposals = prev.proposals.map(p => {
-        if (!p.executed && now > p.deadline) {
-          finalizedCount++;
-          if (p.yes_votes > p.no_votes) {
-            if (p.type === 1) { 
-              treasuryDelta -= p.amount;
-              if (p.recipient === walletAddress) {
-                userExnDelta += p.amount;
-              }
-            }
-          }
-          return { ...p, executed: true };
+      if (passed && proposal.type === 1) {
+        treasuryDelta = -proposal.amount;
+        if (proposal.recipient === walletAddress) {
+          userExnDelta = proposal.amount;
         }
-        return p;
-      });
+      }
 
+      return {
+        ...prev,
+        treasuryBalance: prev.treasuryBalance + treasuryDelta,
+        exnBalance: prev.exnBalance + userExnDelta,
+        proposals: prev.proposals.map(p => p.id === pId ? { ...p, executed: true } : p)
+      };
+    });
+
+    toast({ 
+      title: "Proposal Executed", 
+      description: passed ? "The action has been finalized on-chain." : "The proposal failed and has been archived." 
+    });
+  };
+
+  const handleCrank = () => {
+    let totalRewardsDistributed = 0;
+
+    setState(prev => {
       const newValidators = prev.validators.map(v => {
         if (!v.is_active || v.total_staked <= 0) return v;
         const crankReward = v.total_staked * EPOCH_REWARD_RATE; 
@@ -174,16 +184,13 @@ export default function Home() {
 
       return {
         ...prev,
-        validators: newValidators,
-        proposals: newProposals,
-        treasuryBalance: prev.treasuryBalance + treasuryDelta,
-        exnBalance: prev.exnBalance + userExnDelta
+        validators: newValidators
       };
     });
 
     toast({ 
       title: "Protocol Synchronized", 
-      description: `Distributed ${totalRewardsDistributed.toFixed(2)} EXN to delegators and finalized ${finalizedCount} proposals.` 
+      description: `Distributed ${totalRewardsDistributed.toFixed(2)} EXN to delegators.` 
     });
   };
 
@@ -225,6 +232,7 @@ export default function Home() {
           walletAddress={walletAddress}
           onVote={handleVote}
           onCreate={handleCreateProposal}
+          onExecute={handleExecuteProposal}
         />
       )}
 
