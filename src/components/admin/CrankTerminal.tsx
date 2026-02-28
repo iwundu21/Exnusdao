@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Zap, Clock, AlertCircle, BarChart3, Database, Coins } from 'lucide-react';
+import { Zap, AlertCircle, BarChart3, Database } from 'lucide-react';
 
 export function CrankTerminal({ validators = [], proposals = [], onCrank, connected = false }: any) {
   const activeValidators = validators.filter((v: any) => v.is_active);
@@ -29,7 +29,6 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
 
         <div className="exn-card p-6 border-secondary/20 bg-secondary/5">
           <div className="flex items-center gap-3 mb-4">
-            <Coins className="w-5 h-5 text-secondary" />
             <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Epoch Distribution</h3>
           </div>
           <p className="text-3xl font-bold text-secondary">{projectedEpochReward.toLocaleString()}</p>
