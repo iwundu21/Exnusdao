@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { SolanaWalletProvider } from '@/components/providers/SolanaWalletProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { ProtocolProvider } from '@/hooks/use-protocol-state';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { TransactionStatus } from '@/components/layout/TransactionStatus';
@@ -26,16 +27,18 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased selection:bg-[#00f5ff] selection:text-black">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <SolanaWalletProvider>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-grow pb-24 lg:pb-32">
-                {children}
-              </main>
-              <TransactionStatus />
-              <Footer />
-            </div>
-          </SolanaWalletProvider>
+          <ProtocolProvider>
+            <SolanaWalletProvider>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-grow pb-24 lg:pb-32">
+                  {children}
+                </main>
+                <TransactionStatus />
+                <Footer />
+              </div>
+            </SolanaWalletProvider>
+          </ProtocolProvider>
           <Toaster />
         </ThemeProvider>
       </body>
