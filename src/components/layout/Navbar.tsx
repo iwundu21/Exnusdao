@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -7,21 +8,15 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 
-export function Navbar({ 
-  exnBalance: propsExnBalance = 0, 
-  usdcBalance: propsUsdcBalance = 0 
-}: { 
-  exnBalance?: number,
-  usdcBalance?: number
-}) {
+export function Navbar() {
   const { connected } = useWallet();
   const { state, isLoaded } = useProtocolState();
 
-  const currentExn = isLoaded ? state.exnBalance : propsExnBalance;
-  const currentUsdc = isLoaded ? state.usdcBalance : propsUsdcBalance;
+  const currentExn = isLoaded ? state.exnBalance : 0;
+  const currentUsdc = isLoaded ? state.usdcBalance : 0;
 
   return (
-    <nav className="flex items-center justify-between px-10 py-6 border-b border-border backdrop-blur-md sticky top-0 z-50 bg-background/80">
+    <nav className="flex items-center justify-between px-10 py-6 border-b border-border backdrop-blur-md fixed top-0 left-0 w-full z-50 bg-background/80">
       <Link href="/" className="flex items-center gap-2 group">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold exn-gradient-text tracking-wider leading-none">EXNUS</h1>
@@ -45,7 +40,7 @@ export function Navbar({
           </Link>
         </div>
 
-        {connected && (
+        {connected && isLoaded && (
           <div className="hidden lg:flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/5 rounded-full border border-border">
               <Coins className="w-4 h-4 text-primary" />

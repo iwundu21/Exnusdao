@@ -2,8 +2,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { DashboardStats } from '@/components/staking/DashboardStats';
 import { ValidatorDiscovery } from '@/components/staking/ValidatorDiscovery';
 import { StakingActionForm } from '@/components/staking/StakingActionForm';
@@ -145,7 +143,6 @@ export default function Home() {
       let treasuryDelta = 0;
       let userExnDelta = 0;
 
-      // Finalize eligible proposals
       const newProposals = prev.proposals.map(p => {
         if (!p.executed && now > p.deadline) {
           finalizedCount++;
@@ -162,17 +159,12 @@ export default function Home() {
         return p;
       });
 
-      // Distribute rewards based on dynamic validator weights
       const newValidators = prev.validators.map(v => {
         if (!v.is_active || v.total_staked <= 0) return v;
-        
-        // Calculate dynamic reward based on this validator's share of network weight
         const crankReward = v.total_staked * EPOCH_REWARD_RATE; 
         totalRewardsDistributed += crankReward;
-
         const commission = (crankReward * (v.commission_rate / 10000));
         const stakerPool = crankReward - commission;
-        
         return {
           ...v,
           accrued_node_rewards: (v.accrued_node_rewards || 0) + commission,
@@ -205,51 +197,45 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar exnBalance={state.exnBalance} usdcBalance={state.usdcBalance} />
-      <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
-          <div className="flex gap-8 border-b border-border">
-            <button onClick={() => setActiveTab('staking')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Data Overview</button>
-            <button onClick={() => setActiveTab('governance')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>DAO Portal</button>
-            <button onClick={() => setActiveTab('crank')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Network Crank</button>
+    <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
+      <div className="flex gap-8 border-b border-border">
+        <button onClick={() => setActiveTab('staking')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Data Overview</button>
+        <button onClick={() => setActiveTab('governance')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>DAO Portal</button>
+        <button onClick={() => setActiveTab('crank')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Network Crank</button>
+      </div>
+
+      {activeTab === 'staking' && (
+        <>
+          <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-2 space-y-12">
+              <ValidatorDiscovery validators={state.validators} onSelect={setSelectedValidator} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} selectedId={selectedValidator?.id} />
+            </div>
+            <div className="space-y-6">
+              <StakingActionForm selectedNode={selectedValidator} exnBalance={state.exnBalance} onStake={handleStake} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} validators={state.validators} totalPendingRewards={pendingRewardsTotal} connected={connected} />
+            </div>
           </div>
+        </>
+      )}
 
-          {activeTab === 'staking' && (
-            <>
-              <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                <div className="lg:col-span-2 space-y-12">
-                  <ValidatorDiscovery validators={state.validators} onSelect={setSelectedValidator} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} selectedId={selectedValidator?.id} />
-                </div>
-                <div className="space-y-6">
-                  <StakingActionForm selectedNode={selectedValidator} exnBalance={state.exnBalance} onStake={handleStake} userStakes={state.userStakes.filter(s => s.owner === walletAddress)} validators={state.validators} totalPendingRewards={pendingRewardsTotal} connected={connected} />
-                </div>
-              </div>
-            </>
-          )}
+      {activeTab === 'governance' && (
+        <GovernancePortal 
+          proposals={state.proposals} 
+          userStakeWeight={userStakeWeight}
+          walletAddress={walletAddress}
+          onVote={handleVote}
+          onCreate={handleCreateProposal}
+        />
+      )}
 
-          {activeTab === 'governance' && (
-            <GovernancePortal 
-              proposals={state.proposals} 
-              userStakeWeight={userStakeWeight}
-              walletAddress={walletAddress}
-              onVote={handleVote}
-              onCreate={handleCreateProposal}
-            />
-          )}
-
-          {activeTab === 'crank' && (
-            <CrankTerminal 
-              validators={state.validators} 
-              proposals={state.proposals} 
-              onCrank={handleCrank}
-              connected={connected}
-            />
-          )}
-        </div>
-      </main>
-      <Footer />
+      {activeTab === 'crank' && (
+        <CrankTerminal 
+          validators={state.validators} 
+          proposals={state.proposals} 
+          onCrank={handleCrank}
+          connected={connected}
+        />
+      )}
     </div>
   );
 }

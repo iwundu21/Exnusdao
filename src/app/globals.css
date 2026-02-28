@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -54,7 +55,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground min-h-screen font-body;
+    @apply bg-background text-foreground min-h-screen font-body pt-24;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   

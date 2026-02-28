@@ -4,6 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { SolanaWalletProvider } from '@/components/providers/SolanaWalletProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'Exnus protocol | Network',
@@ -24,7 +26,13 @@ export default function RootLayout({
       <body className="font-body antialiased selection:bg-[#00f5ff] selection:text-black">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <SolanaWalletProvider>
-            {children}
+            <div className="min-h-screen flex flex-col">
+              <Navbar />
+              <main className="flex-grow pb-24 lg:pb-32">
+                {children}
+              </main>
+              <Footer />
+            </div>
           </SolanaWalletProvider>
           <Toaster />
         </ThemeProvider>
