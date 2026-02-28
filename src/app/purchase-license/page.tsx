@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Ticket, Flame, Wallet, ExternalLink, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
@@ -15,6 +15,11 @@ export default function PurchaseLicensePage() {
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const { state, setState, isLoaded } = useProtocolState();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handlePurchase = () => {
     if (!connected) return toast({ title: "Wallet Disconnected", variant: "destructive" });
@@ -35,11 +40,16 @@ export default function PurchaseLicensePage() {
     toast({ title: "License Generated", description: `Your ID: ${uniqueId}` });
   };
 
-  if (!isLoaded) return null;
+  if (!mounted || !isLoaded) return (
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
+      <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="exn-gradient-text font-bold uppercase tracking-widest animate-pulse">Syncing Network State</p>
+    </div>
+  );
 
   if (!connected) {
     return (
-      <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8">
+      <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
          <div className="p-6 bg-primary/10 rounded-full border border-primary/20">
            <Wallet className="w-12 h-12 text-primary" />
          </div>
@@ -56,7 +66,7 @@ export default function PurchaseLicensePage() {
   const remainingSlots = totalLimit - activeNodeCount;
 
   return (
-    <div className="max-w-3xl mx-auto px-10 py-20 space-y-12">
+    <div className="max-w-3xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
       <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors uppercase text-xs font-bold tracking-widest">
         <ArrowLeft className="w-4 h-4" /> Back to Dashboard
       </Link>

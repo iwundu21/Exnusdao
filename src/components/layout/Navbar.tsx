@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer } from 'lucide-react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -11,6 +11,11 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 export function Navbar() {
   const { connected } = useWallet();
   const { state, isLoaded } = useProtocolState();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentExn = isLoaded ? state.exnBalance : 0;
   const currentUsdc = isLoaded ? state.usdcBalance : 0;
@@ -40,8 +45,8 @@ export function Navbar() {
           </Link>
         </div>
 
-        {connected && isLoaded && (
-          <div className="hidden lg:flex items-center gap-4">
+        {mounted && connected && isLoaded && (
+          <div className="hidden lg:flex items-center gap-4 animate-in fade-in duration-300">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/5 rounded-full border border-border">
               <Coins className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-primary">{currentExn.toLocaleString()} EXN</span>
@@ -54,7 +59,11 @@ export function Navbar() {
         )}
         
         <div className="flex items-center gap-3">
-          <WalletMultiButton className="exn-wallet-button" />
+          {mounted ? (
+            <WalletMultiButton className="exn-wallet-button" />
+          ) : (
+            <div className="h-10 w-32 bg-foreground/5 rounded-lg animate-pulse" />
+          )}
         </div>
       </div>
 
