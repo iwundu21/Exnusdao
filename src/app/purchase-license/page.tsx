@@ -3,11 +3,12 @@
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { ArrowLeft, Ticket, Flame, Wallet } from 'lucide-react';
+import { ArrowLeft, Ticket, Flame, Wallet, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
 const LICENSE_PRICE = 500;
 
@@ -86,7 +87,7 @@ export default function PurchaseLicensePage() {
           <div className="space-y-4">
             <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Licensing</h1>
             <p className="text-muted-foreground max-w-xl">
-              Register your validator for wallet <span className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded">{walletAddress}</span>. Each license is for one-time use and is burned upon node decommissioning.
+              Register your validator for wallet <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">{shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" /></a>. Each license is for one-time use and is burned upon node decommissioning.
             </p>
           </div>
 

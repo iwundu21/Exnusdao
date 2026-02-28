@@ -1,10 +1,10 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { MessageSquare, ShieldAlert, History, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock } from 'lucide-react';
+import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink } from 'lucide-react';
+import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
 function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votingEndsAt: number }) {
   const [timeLeft, setTimeLeft] = useState<{ label: string; value: string; isLock: boolean }>({
@@ -214,19 +214,25 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                   </div>
                   <p className="text-white/60 text-sm leading-relaxed">{prop.description}</p>
                   
-                  {prop.type === 1 && prop.recipient && (
-                    <div className="flex items-center gap-6 p-4 bg-white/5 rounded-xl border border-white/5 w-fit">
-                      <div className="space-y-1">
-                        <p className="text-[8px] text-white/20 uppercase font-black">Recipient</p>
-                        <p className="text-xs font-mono text-[#a855f7]">{prop.recipient.slice(0, 8)}...{prop.recipient.slice(-8)}</p>
-                      </div>
-                      <div className="w-px h-8 bg-white/10" />
-                      <div className="space-y-1">
-                        <p className="text-[8px] text-white/20 uppercase font-black">Transfer Amount</p>
-                        <p className="text-sm font-bold text-[#a855f7]">{prop.amount.toLocaleString()} EXN</p>
-                      </div>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex flex-col gap-1">
+                      <p className="text-[8px] text-white/20 uppercase font-black">Proposer</p>
+                      <a href={getExplorerLink(prop.proposer)} target="_blank" rel="noopener noreferrer" className="text-xs font-mono text-[#00f5ff] hover:underline flex items-center gap-1">{shortenAddress(prop.proposer)} <ExternalLink className="w-2.5 h-2.5" /></a>
                     </div>
-                  )}
+                    {prop.type === 1 && prop.recipient && (
+                      <div className="flex items-center gap-6 p-4 bg-white/5 rounded-xl border border-white/5 w-fit">
+                        <div className="space-y-1">
+                          <p className="text-[8px] text-white/20 uppercase font-black">Recipient</p>
+                          <a href={getExplorerLink(prop.recipient)} target="_blank" rel="noopener noreferrer" className="text-xs font-mono text-[#a855f7] hover:underline flex items-center gap-1">{shortenAddress(prop.recipient)} <ExternalLink className="w-2.5 h-2.5" /></a>
+                        </div>
+                        <div className="w-px h-8 bg-white/10" />
+                        <div className="space-y-1">
+                          <p className="text-[8px] text-white/20 uppercase font-black">Transfer Amount</p>
+                          <p className="text-sm font-bold text-[#a855f7]">{prop.amount.toLocaleString()} EXN</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="flex flex-wrap gap-6 pt-2">
                     <ProposalCountdown deadline={prop.deadline} votingEndsAt={prop.voting_ends_at} />
@@ -338,7 +344,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                                  <div className="flex-1 space-y-1.5 bg-white/5 p-4 rounded-2xl border border-white/5 group-hover:border-white/10 transition-colors">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-3">
-                                        <span className="text-[10px] font-mono font-bold text-[#00f5ff]">{c.author.slice(0, 8)}...{c.author.slice(-4)}</span>
+                                        <a href={getExplorerLink(c.author)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-mono font-bold text-[#00f5ff] hover:underline flex items-center gap-1">{shortenAddress(c.author)} <ExternalLink className="w-2.5 h-2.5" /></a>
                                         {commenterHasVoted && (
                                           <span className="flex items-center gap-1 text-[8px] bg-[#00f5ff] text-black px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
                                             <CheckCircle2 className="w-2.5 h-2.5" /> Voter

@@ -1,17 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
-import { ArrowLeft, AlertCircle, Upload, Wallet } from 'lucide-react';
-import Link from 'next/link';
-import { useProtocolState } from '@/hooks/use-protocol-state';
-import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { useWallet } from '@solana/wallet-adapter-react';
-
-export default function RegisterNodePage() {
+import React, { useState, useEffect, useRef } from 'export default function RegisterNodePage() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
@@ -144,7 +133,7 @@ export default function RegisterNodePage() {
           <div className="space-y-4">
             <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Validator Registration</h1>
             <p className="text-muted-foreground max-w-xl">
-              Provision high-performance infrastructure for wallet <span className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded">{walletAddress}</span>. A single-use protocol license is required.
+              Provision high-performance infrastructure for wallet <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">{shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" /></a>. A single-use protocol license is required.
             </p>
           </div>
 

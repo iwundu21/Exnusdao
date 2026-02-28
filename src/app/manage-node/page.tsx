@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { ArrowLeft, Save, ShieldCheck, AlertTriangle, LogOut, Trash2, Wallet } from 'lucide-react';
+import { ArrowLeft, Save, ShieldCheck, AlertTriangle, LogOut, Trash2, Wallet, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
 const SEED_DEPOSIT_AMOUNT = 15000000;
 
@@ -186,7 +187,7 @@ export default function ManageNodePage() {
           <div className="space-y-4">
             <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Management</h1>
             <p className="text-muted-foreground max-w-xl">
-              Optimize your validator parameters, manage protocol seed, and harvest performance commissions for address <span className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded">{walletAddress}</span>.
+              Optimize your validator parameters, manage protocol seed, and harvest performance commissions for address <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">{shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" /></a>.
             </p>
           </div>
 
