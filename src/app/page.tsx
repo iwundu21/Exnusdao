@@ -12,6 +12,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 
 const REWARD_PRECISION = 1_000_000;
 const PROPOSAL_FEE = 100;
+const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 Days
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -114,8 +115,8 @@ export default function Home() {
       id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: now,
-      deadline: now + (86400000 * 7),
-      voting_ends_at: now + (86400000 * 7) - (3600000 * 4),
+      deadline: now + EPOCH_DURATION_MS,
+      voting_ends_at: now + EPOCH_DURATION_MS - (3600000 * 4),
       yes_votes: 0,
       no_votes: 0,
       executed: false,
@@ -128,7 +129,7 @@ export default function Home() {
       exnBalance: prev.exnBalance - PROPOSAL_FEE,
       proposals: [newProp, ...prev.proposals]
     }));
-    setFeedback('success', 'Proposal broadcast to network. Governance fee applied.');
+    setFeedback('success', 'Proposal broadcast to network. 14-day consensus window active.');
   };
 
   const handleExecuteProposal = (pId: number) => {
@@ -173,7 +174,6 @@ export default function Home() {
       const newValidators = prev.validators.map(v => {
         if (!v.is_active || v.total_staked <= 0) return v;
         
-        // Dynamic share of the pool based on weight
         const validatorPoolShare = (v.total_staked / totalActiveWeight) * totalPool;
         const commission = (validatorPoolShare * (v.commission_rate / 10000));
         const stakerPool = validatorPoolShare - commission;

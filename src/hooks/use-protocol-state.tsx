@@ -59,9 +59,9 @@ export interface Proposal {
   no_votes: number;
   created_at: number;
   deadline: number;
-  voting_ends_at: number; // 4 hours before deadline
+  voting_ends_at: number;
   executed: boolean;
-  voters: string[]; // Addresses that have already voted
+  voters: string[];
   comments: ProposalComment[];
 }
 
@@ -89,7 +89,8 @@ export interface ProtocolState {
 }
 
 const SEED_AMOUNT = 15000000;
-const VOTING_LOCK_WINDOW = 3600000 * 4; // 4 Hours
+const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+const VOTING_LOCK_WINDOW = 3600000 * 4;
 
 const INITIAL_STATE: ProtocolState = {
   exnBalance: 25000000, 
@@ -149,8 +150,8 @@ const INITIAL_STATE: ProtocolState = {
       yes_votes: 15000, 
       no_votes: 2000, 
       created_at: Date.now() - 86400000, 
-      deadline: Date.now() + 86400000 * 6, 
-      voting_ends_at: Date.now() + 86400000 * 6 - VOTING_LOCK_WINDOW,
+      deadline: Date.now() + EPOCH_DURATION_MS - 86400000, 
+      voting_ends_at: Date.now() + EPOCH_DURATION_MS - 86400000 - VOTING_LOCK_WINDOW,
       executed: false,
       voters: [],
       comments: [
