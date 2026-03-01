@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -12,7 +11,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 
 const REWARD_PRECISION = 1_000_000;
 const PROPOSAL_FEE = 100;
-const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 Days
+const PROPOSAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 Days for DAO
+const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 Days for Rewards
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -115,8 +115,8 @@ export default function Home() {
       id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: now,
-      deadline: now + EPOCH_DURATION_MS,
-      voting_ends_at: now + EPOCH_DURATION_MS - (3600000 * 4),
+      deadline: now + PROPOSAL_DURATION_MS,
+      voting_ends_at: now + PROPOSAL_DURATION_MS - (3600000 * 4),
       yes_votes: 0,
       no_votes: 0,
       executed: false,
@@ -129,7 +129,7 @@ export default function Home() {
       exnBalance: prev.exnBalance - PROPOSAL_FEE,
       proposals: [newProp, ...prev.proposals]
     }));
-    setFeedback('success', 'Proposal broadcast to network. 14-day consensus window active.');
+    setFeedback('success', 'Proposal broadcast to network. 7-day consensus window active.');
   };
 
   const handleExecuteProposal = (pId: number) => {

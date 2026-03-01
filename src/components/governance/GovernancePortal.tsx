@@ -95,7 +95,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">DAO Governance</h2>
-          <p className="text-muted-foreground text-sm">Direct stake-weighted voting. Outcomes are determined by majority consensus of cast votes.</p>
+          <p className="text-muted-foreground text-sm">Direct stake-weighted voting. Outcomes are determined by majority consensus over a 7-day window.</p>
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
@@ -177,7 +177,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                 value={newProp.description}
                 onChange={e => setNewProp({...newProp, description: e.target.value})}
                 className="exn-input h-[210px] text-xs py-4" 
-                placeholder="Describe the change, the technical impact, and the rationale for community voting..." 
+                placeholder="Describe the change, the technical impact, and the rationale for a 7-day consensus window..." 
               />
             </div>
           </div>

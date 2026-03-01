@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -90,6 +89,7 @@ export interface ProtocolState {
 
 const SEED_AMOUNT = 15000000;
 const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+const PROPOSAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const VOTING_LOCK_WINDOW = 3600000 * 4;
 
 const INITIAL_STATE: ProtocolState = {
@@ -150,8 +150,8 @@ const INITIAL_STATE: ProtocolState = {
       yes_votes: 15000, 
       no_votes: 2000, 
       created_at: Date.now() - 86400000, 
-      deadline: Date.now() + EPOCH_DURATION_MS - 86400000, 
-      voting_ends_at: Date.now() + EPOCH_DURATION_MS - 86400000 - VOTING_LOCK_WINDOW,
+      deadline: Date.now() + PROPOSAL_DURATION_MS - 86400000, 
+      voting_ends_at: Date.now() + PROPOSAL_DURATION_MS - 86400000 - VOTING_LOCK_WINDOW,
       executed: false,
       voters: [],
       comments: [
