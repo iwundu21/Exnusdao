@@ -42,7 +42,7 @@ export default function Home() {
   const pendingRewardsTotal = useMemo(() => {
     if (!state?.userStakes || !state?.validators || !walletAddress) return 0;
     return state.userStakes
-      .filter(s => s.owner === walletAddress && !s.unstaked && !s.claimed)
+      .filter(s => s.owner === walletAddress && !s.unstaked)
       .reduce((acc, stake) => {
         const validator = state.validators.find(v => v.id === stake.validator_id);
         if (!validator) return acc;
@@ -189,16 +189,26 @@ export default function Home() {
 
   const handleClaim = () => {
     if (pendingRewardsTotal <= 0) return;
-    setState(prev => ({
-      ...prev,
-      exnBalance: prev.exnBalance + pendingRewardsTotal,
-      userStakes: prev.userStakes.map(s => {
-        if (s.owner === walletAddress && !s.claimed && !s.unstaked) {
-          return { ...s, claimed: true, reward_checkpoint: state.validators.find(v => v.id === s.validator_id)?.global_reward_index || 0 };
+    
+    setState(prev => {
+      const newUserStakes = prev.userStakes.map(s => {
+        if (s.owner === walletAddress && !s.unstaked) {
+          const validator = prev.validators.find(v => v.id === s.validator_id);
+          return { 
+            ...s, 
+            reward_checkpoint: validator?.global_reward_index || s.reward_checkpoint 
+          };
         }
         return s;
-      })
-    }));
+      });
+
+      return {
+        ...prev,
+        exnBalance: prev.exnBalance + pendingRewardsTotal,
+        userStakes: newUserStakes
+      };
+    });
+    
     setFeedback('success', `Claimed ${pendingRewardsTotal.toFixed(2)} EXN staking rewards.`);
   };
 
