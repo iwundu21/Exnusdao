@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -154,7 +153,7 @@ export function StakingActionForm({
               disabled={totalPendingRewards <= 0}
               className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${totalPendingRewards > 0 ? 'bg-secondary text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:opacity-90 active:scale-95' : 'bg-foreground/5 text-foreground/20 cursor-not-allowed'}`}
             >
-              Harvest All
+              Claim All
             </button>
           </div>
 
@@ -214,7 +213,9 @@ export function StakingActionForm({
       )}
 
       <div className="flex items-start gap-2 p-4 bg-primary/5 border border-primary/10 rounded-xl">
-        <Info className="w-4 h-4 text-primary/40 mt-0.5 flex-shrink-0" />
+        <div className="w-4 h-4 text-primary/40 mt-0.5 flex-shrink-0">
+          <Info className="w-full h-full" />
+        </div>
         <p className="text-[10px] text-primary/40 leading-tight uppercase font-black tracking-tighter">
           Protocol lock periods are immutable once broadcast. Rewards are settled on every network pulse. Verify selection before signature.
         </p>
