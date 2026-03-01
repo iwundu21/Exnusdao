@@ -1,13 +1,29 @@
-
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Twitter, MessageSquare, ExternalLink, Globe } from 'lucide-react';
+import { Twitter, MessageSquare, ExternalLink } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+
+const EPOCH_DURATION = 14 * 24 * 60 * 60 * 1000;
+const GENESIS_TIME = 1704067200000;
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const [currentEpoch, setCurrentEpoch] = useState(700);
+
+  useEffect(() => {
+    const updateEpoch = () => {
+      const now = Date.now();
+      const elapsed = now - GENESIS_TIME;
+      const epoch = Math.floor(elapsed / EPOCH_DURATION) + 700;
+      setCurrentEpoch(epoch);
+    };
+
+    updateEpoch();
+    const timer = setInterval(updateEpoch, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <footer className="fixed bottom-0 left-0 w-full z-40 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
@@ -26,7 +42,7 @@ export function Footer() {
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[9px] font-black text-emerald-500 uppercase">Mainnet-Beta</span>
             </div>
-            <span className="text-[9px] text-muted-foreground uppercase font-black">Epoch 732</span>
+            <span className="text-[9px] text-muted-foreground uppercase font-black">Epoch {currentEpoch}</span>
           </div>
         </div>
 
