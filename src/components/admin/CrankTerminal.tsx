@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { Clock, Zap, Info } from 'lucide-react';
 const EPOCH_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days in ms
 const GENESIS_TIME = 1704067200000; // Reference point: Jan 1, 2024
 
-export function CrankTerminal({ validators = [], proposals = [], onCrank, connected = false }: any) {
+export function CrankTerminal({ validators = [], rewardCap = 0, onCrank, connected = false }: any) {
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [currentEpoch, setCurrentEpoch] = useState(0);
 
@@ -32,7 +33,9 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
 
   const activeValidators = validators.filter((v: any) => v.is_active);
   const totalNetworkWeight = validators.reduce((acc: number, v: any) => acc + (v.total_staked || 0), 0);
-  const projectedEpochReward = totalNetworkWeight * 0.0001;
+  
+  // Dynamic pool distribution is based on the Reward Cap
+  const projectedEpochReward = rewardCap;
 
   return (
     <div className="space-y-10 animate-in fade-in duration-500">
@@ -40,7 +43,7 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">Network Crank Terminal</h2>
           <p className="text-muted-foreground text-sm max-w-xl">
-            Authorize protocol reward distribution. The network cycle settles every 14 days, distributing EXN to delegators based on validator stake weight.
+            Authorize protocol reward distribution. The network cycle settles every 14 days, distributing the dynamic reward pool to delegators based on weight.
           </p>
         </div>
         <div className="px-6 py-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center gap-6">
@@ -72,15 +75,15 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
             <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Epoch Distribution</h3>
           </div>
           <p className="text-3xl font-bold text-secondary">{projectedEpochReward.toLocaleString()}</p>
-          <p className="text-[10px] text-muted-foreground uppercase mt-2 font-bold tracking-tight">Projected EXN Rewards</p>
+          <p className="text-[10px] text-muted-foreground uppercase mt-2 font-bold tracking-tight">Dynamic Reward Pool</p>
         </div>
 
         <div className="exn-card p-6 border-emerald-500/20 bg-emerald-500/5">
           <div className="flex items-center gap-3 mb-4">
-            <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Reward Multiplier</h3>
+            <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Pool Multiplier</h3>
           </div>
-          <p className="text-3xl font-bold text-emerald-500">0.01%</p>
-          <p className="text-[10px] text-muted-foreground uppercase mt-2 font-bold tracking-tight">Per Node Pulse</p>
+          <p className="text-3xl font-bold text-emerald-500">Fixed</p>
+          <p className="text-[10px] text-muted-foreground uppercase mt-2 font-bold tracking-tight">Per Epoch Pulse</p>
         </div>
       </div>
 
@@ -92,7 +95,7 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
         <div className="max-w-md space-y-4 relative z-10">
           <h3 className="text-2xl font-bold uppercase tracking-widest">Execute Network Crank</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Triggering the crank synchronizes global reward indices across all validator shards. This action ensures stakers receive their yield for the current sub-epoch.
+            Triggering the crank synchronizes the {rewardCap.toLocaleString()} EXN dynamic reward pool across all active validator shards.
           </p>
         </div>
 
@@ -152,7 +155,7 @@ export function CrankTerminal({ validators = [], proposals = [], onCrank, connec
       <div className="flex items-start gap-3 p-4 bg-foreground/5 border border-border rounded-xl">
         <Info className="w-4 h-4 text-muted-foreground mt-0.5" />
         <p className="text-[10px] text-muted-foreground uppercase font-bold leading-tight tracking-tight">
-          Crank authorization is permissionless in mainnet-beta, however the underlying reward index update is protected by weight-based verification logic. Multiple cranks per sub-epoch do not inflate total emission.
+          Rewards are dynamically calculated based on the global {rewardCap.toLocaleString()} EXN epoch cap. More network weight increases protocol security but adjusts individual node yield proportionally.
         </p>
       </div>
     </div>

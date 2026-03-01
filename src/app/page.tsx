@@ -12,7 +12,6 @@ import { useWallet } from '@solana/wallet-adapter-react';
 
 const REWARD_PRECISION = 1_000_000;
 const PROPOSAL_FEE = 100;
-const EPOCH_REWARD_RATE = 0.0001; // 0.01% per crank
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -162,15 +161,23 @@ export default function Home() {
   };
 
   const handleCrank = () => {
-    let totalRewardsDistributed = 0;
+    const totalPool = state.rewardCap;
+    const activeValidators = state.validators.filter(v => v.is_active && v.total_staked > 0);
+    const totalActiveWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
+
+    if (totalActiveWeight <= 0) {
+      return setFeedback('warning', 'No active network weight detected for distribution.');
+    }
 
     setState(prev => {
       const newValidators = prev.validators.map(v => {
         if (!v.is_active || v.total_staked <= 0) return v;
-        const crankReward = v.total_staked * EPOCH_REWARD_RATE; 
-        totalRewardsDistributed += crankReward;
-        const commission = (crankReward * (v.commission_rate / 10000));
-        const stakerPool = crankReward - commission;
+        
+        // Dynamic share of the pool based on weight
+        const validatorPoolShare = (v.total_staked / totalActiveWeight) * totalPool;
+        const commission = (validatorPoolShare * (v.commission_rate / 10000));
+        const stakerPool = validatorPoolShare - commission;
+        
         return {
           ...v,
           accrued_node_rewards: (v.accrued_node_rewards || 0) + commission,
@@ -184,7 +191,7 @@ export default function Home() {
       };
     });
 
-    setFeedback('success', `Network crank successful. Distributed ${totalRewardsDistributed.toFixed(2)} EXN rewards.`);
+    setFeedback('success', `Network crank successful. Distributed ${totalPool} EXN dynamic pool rewards.`);
   };
 
   const handleClaim = () => {
@@ -310,7 +317,7 @@ export default function Home() {
       {activeTab === 'crank' && (
         <CrankTerminal 
           validators={state.validators} 
-          proposals={state.proposals} 
+          rewardCap={state.rewardCap}
           onCrank={handleCrank}
           connected={connected}
         />
