@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap } from 'lucide-react';
+import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap, Info } from 'lucide-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
 function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votingEndsAt: number }) {
@@ -61,6 +61,10 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
   const [voteRationale, setVoteRationale] = useState('');
 
   const handleCreate = () => {
+    if (userStakeWeight < 1000000) {
+      return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum staked weight required to propose network changes.');
+    }
+    
     if (!newProp.title || !newProp.description) {
       return setFeedback('error', 'Mandatory Fields Missing: Title and rationale are required for network broadcasting.');
     }
@@ -82,6 +86,9 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
 
   const handleConfirmVote = () => {
     if (!votingOn) return;
+    if (userStakeWeight < 10000) {
+      return setFeedback('error', 'Staking Requirement: 10,000 EXN minimum weight required to participate in DAO consensus.');
+    }
     if (!voteRationale.trim()) {
       return setFeedback('warning', 'Rationale Required: Please provide context for your consensus decision.');
     }
@@ -95,7 +102,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">DAO Governance</h2>
-          <p className="text-muted-foreground text-sm">Direct stake-weighted voting. Outcomes are determined by majority consensus over a 7-day window.</p>
+          <p className="text-muted-foreground text-sm">Direct stake-weighted voting. Outcomes determined by majority consensus over a 7-day window.</p>
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
@@ -105,12 +112,21 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
         </button>
       </div>
 
-      <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between">
-         <div className="flex items-center gap-3">
-           <User className="w-4 h-4 text-primary" />
-           <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Your Current Voting Weight</p>
-         </div>
-         <p className="text-xl font-bold text-primary">{userStakeWeight.toLocaleString()} EXN</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between">
+           <div className="flex items-center gap-3">
+             <User className="w-4 h-4 text-primary" />
+             <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Your Voting Weight</p>
+           </div>
+           <p className="text-xl font-bold text-primary">{userStakeWeight.toLocaleString()} EXN</p>
+        </div>
+        <div className="p-4 bg-foreground/5 border border-border rounded-xl flex items-center gap-4">
+           <Info className="w-4 h-4 text-muted-foreground" />
+           <p className="text-[10px] text-muted-foreground uppercase font-black leading-tight tracking-tight">
+             PROPOSAL: 1M EXN STAKE + 10 EXN FEE <br/>
+             VOTING: 10K EXN STAKE + 3 EXN FEE
+           </p>
+        </div>
       </div>
 
       {showCreate && (
@@ -119,7 +135,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
             <div className="p-2 bg-secondary/20 rounded-lg">
               <Landmark className="w-5 h-5 text-secondary" />
             </div>
-            <h3 className="text-xl font-bold uppercase tracking-widest">Submit Proposal (Fee: 100 EXN)</h3>
+            <h3 className="text-xl font-bold uppercase tracking-widest">Submit Proposal (Fee: 10 EXN)</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -177,13 +193,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                 value={newProp.description}
                 onChange={e => setNewProp({...newProp, description: e.target.value})}
                 className="exn-input h-[210px] text-xs py-4" 
-                placeholder="Describe the change, the technical impact, and the rationale for a 7-day consensus window..." 
+                placeholder="Describe the change and rationale for a 7-day consensus window. Required stake: 1M EXN." 
               />
             </div>
           </div>
 
           <div className="flex gap-4 mt-10">
-            <button onClick={handleCreate} className="exn-button px-10 text-[10px]">Broadcast to Network</button>
+            <button onClick={handleCreate} className="exn-button px-10 text-[10px]">Broadcast (10 EXN Fee)</button>
             <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 text-[10px]">Cancel</button>
           </div>
         </div>
@@ -267,7 +283,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                     <Progress value={yesPercent} className="h-2 bg-destructive/20" />
                     
                     <div className="flex justify-between items-center px-1">
-                       <p className="text-[8px] text-muted-foreground uppercase font-bold">Direct Weight Consensus</p>
+                       <p className="text-[8px] text-muted-foreground uppercase font-bold">Consensus Weight</p>
                        <p className="text-[8px] text-muted-foreground uppercase font-bold">Total: {totalVotes.toLocaleString()} EXN</p>
                     </div>
                   </div>
@@ -282,16 +298,16 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                   {isVotingForThis && (
                     <div className="space-y-4 animate-in zoom-in-95">
                       <div className={`p-3 rounded-lg text-center text-[10px] font-black uppercase ${votingOn.support ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
-                        Stance: {votingOn.support ? 'YES' : 'NO'}
+                        Stance: {votingOn.support ? 'YES' : 'NO'} (3 EXN Fee)
                       </div>
                       <textarea 
                         value={voteRationale}
                         onChange={e => setVoteRationale(e.target.value)}
-                        placeholder="State your rationale (required)..."
+                        placeholder="State your rationale. Required stake: 10K EXN."
                         className="exn-input h-24 text-xs bg-background"
                       />
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={handleConfirmVote} className="exn-button py-2 text-[10px]">Submit Vote</button>
+                        <button onClick={handleConfirmVote} className="exn-button py-2 text-[10px]">Confirm Vote</button>
                         <button onClick={() => setVotingOn(null)} className="exn-button-outline py-2 text-[10px]">Cancel</button>
                       </div>
                     </div>

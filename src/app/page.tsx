@@ -10,7 +10,10 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 const REWARD_PRECISION = 1_000_000;
-const PROPOSAL_FEE = 100;
+const PROPOSAL_FEE = 10;
+const VOTE_FEE = 3;
+const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
+const MIN_STAKE_FOR_VOTE = 10_000;
 const PROPOSAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 Days for DAO
 const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 Days for Rewards
 
@@ -66,6 +69,15 @@ export default function Home() {
 
   const handleVote = (pId: number, support: boolean, comment: string) => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    
+    if (userStakeWeight < MIN_STAKE_FOR_VOTE) {
+      return setFeedback('error', `Minimum Staking Requirement: ${MIN_STAKE_FOR_VOTE.toLocaleString()} EXN required to participate in consensus.`);
+    }
+
+    if (state.exnBalance < VOTE_FEE) {
+      return setFeedback('error', `Insufficient EXN. Voting processing fee: ${VOTE_FEE} EXN.`);
+    }
+
     const proposal = state.proposals.find(p => p.id === pId);
     if (!proposal) return;
 
@@ -78,10 +90,6 @@ export default function Home() {
       return setFeedback('error', 'Proposal is currently in voting lock window.');
     }
 
-    if (userStakeWeight <= 0) {
-      return setFeedback('error', 'Active staking weight required to cast vote.');
-    }
-
     const newComment = {
       id: `c${Date.now()}`,
       author: walletAddress,
@@ -92,6 +100,8 @@ export default function Home() {
 
     setState(prev => ({
       ...prev,
+      exnBalance: prev.exnBalance - VOTE_FEE,
+      treasuryBalance: prev.treasuryBalance + VOTE_FEE,
       proposals: prev.proposals.map(p => p.id === pId ? { 
         ...p, 
         yes_votes: support ? (p.yes_votes || 0) + userStakeWeight : p.yes_votes, 
@@ -100,13 +110,18 @@ export default function Home() {
         comments: [...(p.comments || []), newComment]
       } : p)
     }));
-    setFeedback('success', `Vote cast successfully with ${userStakeWeight.toLocaleString()} weight.`);
+    setFeedback('success', `Vote cast successfully with ${userStakeWeight.toLocaleString()} weight. Processing fee of ${VOTE_FEE} EXN routed to treasury.`);
   };
 
   const handleCreateProposal = (data: any) => {
     if (!connected) return;
+
+    if (userStakeWeight < MIN_STAKE_FOR_PROPOSAL) {
+      return setFeedback('error', `Proposal Creation Denied: Minimum ${MIN_STAKE_FOR_PROPOSAL.toLocaleString()} EXN stake required to propose network changes.`);
+    }
+
     if (state.exnBalance < PROPOSAL_FEE) {
-      return setFeedback('error', `Insufficient EXN. Fee: ${PROPOSAL_FEE} EXN`);
+      return setFeedback('error', `Insufficient EXN. Proposal broadcast fee: ${PROPOSAL_FEE} EXN.`);
     }
 
     const now = Date.now();
@@ -127,9 +142,10 @@ export default function Home() {
     setState(prev => ({
       ...prev,
       exnBalance: prev.exnBalance - PROPOSAL_FEE,
+      treasuryBalance: prev.treasuryBalance + PROPOSAL_FEE,
       proposals: [newProp, ...prev.proposals]
     }));
-    setFeedback('success', 'Proposal broadcast to network. 7-day consensus window active.');
+    setFeedback('success', `Proposal broadcast to network. 7-day consensus window active. Protocol fee of ${PROPOSAL_FEE} EXN settled to treasury.`);
   };
 
   const handleExecuteProposal = (pId: number) => {
