@@ -15,7 +15,8 @@ import {
   Lock,
   ExternalLink,
   Zap,
-  Ticket
+  TrendingUp,
+  Banknote
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -39,7 +40,7 @@ export default function AdminPage() {
   const isAdmin = state.adminWallet === walletAddress;
 
   const handleInitialize = () => {
-    if (!connected) return setFeedback('error', 'Wallet connection required for initialization.');
+    if (!connected) return setFeedback('error', 'Wallet connection required for protocol initialization.');
     
     // Derived PDA Mock addresses (Program Derived Addresses)
     const rewardVaultPda = `RVD-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
@@ -55,7 +56,8 @@ export default function AdminPage() {
       rewardVaultPda,
       treasuryVaultPda,
       usdcVaultPda,
-      licensePrice: 500 // Initial default
+      licensePrice: 500, // Initial default
+      rewardCap: 1250 // Initial default
     }));
     setFeedback('success', 'Protocol smart contract initialized. Authority anchored to active wallet.');
   };
@@ -63,20 +65,20 @@ export default function AdminPage() {
   const handleFundRewardVault = () => {
     const amt = Number(funding.reward);
     if (!amt || amt <= 0) return setFeedback('error', 'Specify valid EXN amount to fund rewards.');
-    if (state.exnBalance < amt) return setFeedback('error', 'Insufficient EXN in admin wallet.');
+    if (state.exnBalance < amt) return setFeedback('error', 'Insufficient EXN in admin wallet to fund vault.');
 
     setState(prev => ({
       ...prev,
       exnBalance: prev.exnBalance - amt,
-      rewardVaultBalance: prev.rewardVaultBalance + amt
+      rewardVaultBalance: (prev.rewardVaultBalance || 0) + amt
     }));
     setFunding({ ...funding, reward: '' });
-    setFeedback('success', `Injected ${amt.toLocaleString()} EXN into the Reward Vault.`);
+    setFeedback('success', `Successfully injected ${amt.toLocaleString()} EXN into the Reward Vault.`);
   };
 
   const handleFundTreasury = () => {
     const amt = Number(funding.treasury);
-    if (!amt || amt <= 0) return setFeedback('error', 'Specify valid EXN amount for treasury.');
+    if (!amt || amt <= 0) return setFeedback('error', 'Specify valid EXN amount for treasury funding.');
     if (state.exnBalance < amt) return setFeedback('error', 'Insufficient EXN in admin wallet.');
 
     setState(prev => ({
@@ -85,7 +87,7 @@ export default function AdminPage() {
       treasuryBalance: prev.treasuryBalance + amt
     }));
     setFunding({ ...funding, treasury: '' });
-    setFeedback('success', `Injected ${amt.toLocaleString()} EXN into the Treasury Vault.`);
+    setFeedback('success', `Injected ${amt.toLocaleString()} EXN into the Global Treasury Vault.`);
   };
 
   const handleUpdateCap = () => {
@@ -93,7 +95,7 @@ export default function AdminPage() {
     if (!cap || cap <= 0) return setFeedback('error', 'Invalid distribution cap.');
     setState(prev => ({ ...prev, rewardCap: cap }));
     setNewCap('');
-    setFeedback('success', `Network 14-day distribution cap updated to ${cap.toLocaleString()} EXN.`);
+    setFeedback('success', `Protocol 14-day distribution cap updated to ${cap.toLocaleString()} EXN.`);
   };
 
   const handleUpdateLicensePrice = () => {
@@ -101,7 +103,7 @@ export default function AdminPage() {
     if (!price || price <= 0) return setFeedback('error', 'Invalid license price.');
     setState(prev => ({ ...prev, licensePrice: price }));
     setNewLicensePrice('');
-    setFeedback('success', `Protocol node license price updated to ${price.toLocaleString()} USDC.`);
+    setFeedback('success', `Dynamic node license price updated to ${price.toLocaleString()} USDC.`);
   };
 
   const handleWithdrawUsdc = () => {
@@ -143,7 +145,7 @@ export default function AdminPage() {
           </div>
           <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Command Center</h1>
           <p className="text-muted-foreground text-sm max-w-xl">
-            Configure on-chain protocol parameters, manage decentralized vaults, and authorize global initialization. 
+            Configure on-chain protocol parameters, manage decentralized liquidity vaults, and authorize global initialization. 
             {state.isInitialized && (
               <span className="block mt-2 font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded w-fit">
                 Current Authority: {shortenAddress(state.adminWallet || '')}
@@ -180,7 +182,7 @@ export default function AdminPage() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">EXN Token Mint</label>
+                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">EXN Token Mint Address</label>
                  <input 
                   value={mints.exn} 
                   onChange={e => setMints({...mints, exn: e.target.value})} 
@@ -188,7 +190,7 @@ export default function AdminPage() {
                 />
               </div>
               <div className="space-y-2">
-                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">USDC Token Mint</label>
+                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">USDC Token Mint Address</label>
                  <input 
                   value={mints.usdc} 
                   onChange={e => setMints({...mints, usdc: e.target.value})} 
@@ -199,10 +201,10 @@ export default function AdminPage() {
 
            <div className="p-6 bg-background/50 rounded-2xl border border-border/10 space-y-4">
               <p className="text-[10px] text-muted-foreground uppercase font-black leading-relaxed">
-                Initialization will automatically derive PDAs for the Reward, Treasury, and USDC vaults based on the provided mints. The wallet currently connected ({shortenAddress(walletAddress)}) will be set as the Permanent Protocol Admin and authorize all global state accounting.
+                Initialization will derive PDAs for the Reward, Treasury, and License vaults. The currently connected wallet ({shortenAddress(walletAddress)}) will be permanently registered as the Protocol Admin and granted settlement authority over all global vaults.
               </p>
               <button onClick={handleInitialize} className="exn-button w-full h-14 uppercase tracking-[0.3em] text-xs font-black">
-                Authorize Global Initialization
+                Initialize Global Protocol State
               </button>
            </div>
         </div>
@@ -211,22 +213,34 @@ export default function AdminPage() {
            {/* Vault Balances */}
            <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="exn-card p-6 border-primary/20 bg-primary/5">
-                 <p className="text-[10px] uppercase font-black tracking-widest text-primary mb-3">Reward Vault (EXN)</p>
+                 <div className="flex justify-between items-start mb-3">
+                    <p className="text-[10px] uppercase font-black tracking-widest text-primary">Reward Vault (EXN)</p>
+                    <TrendingUp className="w-4 h-4 text-primary/40" />
+                 </div>
                  <p className="text-2xl font-bold text-foreground">{(state.rewardVaultBalance || 0).toLocaleString()}</p>
                  <p className="text-[8px] font-mono text-muted-foreground mt-2 truncate">{state.rewardVaultPda}</p>
               </div>
               <div className="exn-card p-6 border-secondary/20 bg-secondary/5">
-                 <p className="text-[10px] uppercase font-black tracking-widest text-secondary mb-3">Treasury Vault (EXN)</p>
+                 <div className="flex justify-between items-start mb-3">
+                    <p className="text-[10px] uppercase font-black tracking-widest text-secondary">Treasury Vault (EXN)</p>
+                    <Zap className="w-4 h-4 text-secondary/40" />
+                 </div>
                  <p className="text-2xl font-bold text-foreground">{(state.treasuryBalance || 0).toLocaleString()}</p>
                  <p className="text-[8px] font-mono text-muted-foreground mt-2 truncate">{state.treasuryVaultPda}</p>
               </div>
               <div className="exn-card p-6 border-emerald-500/20 bg-emerald-500/5">
-                 <p className="text-[10px] uppercase font-black tracking-widest text-emerald-500 mb-3">License Vault (USDC)</p>
+                 <div className="flex justify-between items-start mb-3">
+                    <p className="text-[10px] uppercase font-black tracking-widest text-emerald-500">License Vault (USDC)</p>
+                    <CircleDollarSign className="w-4 h-4 text-emerald-500/40" />
+                 </div>
                  <p className="text-2xl font-bold text-foreground">{(state.usdcVaultBalance || 0).toLocaleString()}</p>
                  <p className="text-[8px] font-mono text-muted-foreground mt-2 truncate">{state.usdcVaultPda}</p>
               </div>
               <div className="exn-card p-6 border-border bg-foreground/5">
-                 <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-3">Current License Price</p>
+                 <div className="flex justify-between items-start mb-3">
+                    <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">License Price</p>
+                    <Settings className="w-4 h-4 text-muted-foreground/40" />
+                 </div>
                  <p className="text-2xl font-bold text-foreground">{(state.licensePrice || 0).toLocaleString()} <span className="text-sm">USDC</span></p>
                  <p className="text-[8px] uppercase font-bold text-muted-foreground mt-2">Dynamic Parameter</p>
               </div>
@@ -242,7 +256,7 @@ export default function AdminPage() {
                  
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">Fund Reward Vault</p>
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">Fund Reward Vault (EXN)</p>
                        <div className="relative">
                           <input 
                             type="number" 
@@ -251,13 +265,13 @@ export default function AdminPage() {
                             placeholder="Amount EXN" 
                             className="exn-input h-12" 
                           />
-                          <button onClick={handleFundRewardVault} className="absolute right-2 top-2 h-8 px-4 bg-primary text-black text-[9px] font-black uppercase rounded">Fund</button>
+                          <button onClick={handleFundRewardVault} className="absolute right-2 top-2 h-8 px-4 bg-primary text-black text-[9px] font-black uppercase rounded">Inject</button>
                        </div>
-                       <p className="text-[9px] text-muted-foreground uppercase">Admin Balance: {state.exnBalance.toLocaleString()} EXN</p>
+                       <p className="text-[9px] text-muted-foreground uppercase font-bold">Admin Balance: {state.exnBalance.toLocaleString()} EXN</p>
                     </div>
 
                     <div className="space-y-4">
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">Fund Treasury Vault</p>
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">Fund Treasury Vault (EXN)</p>
                        <div className="relative">
                           <input 
                             type="number" 
@@ -266,7 +280,7 @@ export default function AdminPage() {
                             placeholder="Amount EXN" 
                             className="exn-input h-12" 
                           />
-                          <button onClick={handleFundTreasury} className="absolute right-2 top-2 h-8 px-4 bg-secondary text-white text-[9px] font-black uppercase rounded">Fund</button>
+                          <button onClick={handleFundTreasury} className="absolute right-2 top-2 h-8 px-4 bg-secondary text-white text-[9px] font-black uppercase rounded">Inject</button>
                        </div>
                     </div>
                  </div>
@@ -313,11 +327,11 @@ export default function AdminPage() {
            <div className="space-y-8">
               <div className="exn-card p-8 border-emerald-500/30 bg-emerald-500/5 space-y-6">
                  <div className="flex items-center gap-3">
-                    <CircleDollarSign className="w-5 h-5 text-emerald-500" />
-                    <h3 className="text-lg font-bold uppercase tracking-widest">License Revenue</h3>
+                    <Banknote className="w-5 h-5 text-emerald-500" />
+                    <h3 className="text-lg font-bold uppercase tracking-widest">License Settlement</h3>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase font-bold">Withdraw Collected Capital</p>
+                    <p className="text-xs text-muted-foreground uppercase font-bold">Withdraw Collected Revenue</p>
                     <p className="text-3xl font-bold text-foreground">{(state.usdcVaultBalance || 0).toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
                  </div>
                  <button 
@@ -325,10 +339,10 @@ export default function AdminPage() {
                   disabled={!isAdmin || state.usdcVaultBalance <= 0}
                   className={`w-full h-12 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${isAdmin && state.usdcVaultBalance > 0 ? 'bg-emerald-500 text-black hover:opacity-90' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
                 >
-                  Withdraw to Admin <ArrowUpRight className="w-4 h-4" />
+                  Withdraw to Admin Wallet <ArrowUpRight className="w-4 h-4" />
                 </button>
                 {!isAdmin && (
-                  <p className="text-[9px] text-destructive text-center uppercase font-black mt-2">Restricted: Non-Admin Access</p>
+                  <p className="text-[9px] text-destructive text-center uppercase font-black mt-2">Restricted: Not the protocol authority</p>
                 )}
               </div>
 
