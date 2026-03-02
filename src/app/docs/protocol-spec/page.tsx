@@ -34,34 +34,45 @@ export default function ProtocolSpecPage() {
         <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.0</h1>
         <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
           Technical architecture and state machine behavior for the Exnus Network Solana Program. 
-          Use this specification to implement the core smart contract logic.
+          Use this specification to implement the core smart contract logic and multi-vault accounting.
         </p>
       </div>
 
       {/* 1. Global Initialization */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
-          <Cpu className="w-8 h-8 text-secondary" />
+          <div className="p-3 bg-secondary/10 rounded-xl">
+             <Cpu className="w-8 h-8 text-secondary" />
+          </div>
           <h2 className="text-3xl font-bold uppercase tracking-widest">1. Global Initialization</h2>
         </div>
-        <div className="exn-card p-8 border-secondary/20 bg-secondary/5 space-y-6">
-          <p className="text-sm text-foreground/80 leading-relaxed">
-            The `initialize` instruction sets the protocol's permanent authority and establishes the token accounting framework.
-          </p>
+        <div className="exn-card p-8 border-secondary/20 bg-secondary/5 space-y-8">
           <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase text-secondary tracking-widest">Step-by-Step Behavior:</h4>
-            <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-              <li>Receive `admin_wallet` as the permanent protocol authority.</li>
-              <li>Register `exn_mint` and `usdc_mint` public keys.</li>
-              <li>Derive and initialize 3 Global PDAs (Program Derived Addresses):
-                <ul className="mt-2 space-y-2 pl-4 border-l border-border">
-                  <li><span className="text-foreground font-bold font-mono">GlobalRewardVault</span>: Holds EXN for emissions.</li>
-                  <li><span className="text-foreground font-bold font-mono">GlobalTreasuryVault</span>: Holds EXN from governance fees.</li>
-                  <li><span className="text-foreground font-bold font-mono">GlobalLicenseVault</span>: Holds USDC from license sales.</li>
-                </ul>
-              </li>
-              <li>Initialize global state account with `reward_cap`, `license_limit`, and `epoch_index`.</li>
-            </ol>
+            <h4 className="text-xs font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">initialize(ctx)</span></h4>
+            <p className="text-sm text-foreground/80 leading-relaxed">
+              The entry point for anchoring the protocol. This must be a one-time operation authorized by the Deployer.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h5 className="text-[10px] font-black uppercase text-muted-foreground">Step-by-Step Behavior</h5>
+              <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+                <li>Assign <span className="text-foreground font-bold">Admin Authority</span> to the caller's public key.</li>
+                <li>Store the <span className="text-foreground font-bold">EXN Mint</span> and <span className="text-foreground font-bold">USDC Mint</span> addresses in the Global State account.</li>
+                <li>Derive and initialize the three Global PDAs (described in section 2).</li>
+                <li>Set initial protocol parameters: <span className="text-primary">Reward Cap</span>, <span className="text-primary">License Limit</span>, and <span className="text-primary">Epoch Index</span>.</li>
+              </ol>
+            </div>
+            <div className="p-6 bg-background/50 rounded-2xl border border-border space-y-4">
+               <div className="flex items-center gap-2 text-secondary">
+                 <Lock className="w-4 h-4" />
+                 <p className="text-[10px] font-black uppercase">Authority Constraint</p>
+               </div>
+               <p className="text-[11px] text-muted-foreground leading-relaxed italic">
+                 "Only the address set during initialization can authorize USDC withdrawals from the License Vault or update global network parameters."
+               </p>
+            </div>
           </div>
         </div>
       </section>
@@ -69,170 +80,182 @@ export default function ProtocolSpecPage() {
       {/* 2. PDA & Vault Architecture */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
-          <Layers className="w-8 h-8 text-primary" />
-          <h2 className="text-3xl font-bold uppercase tracking-widest">2. Vault Architecture</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="exn-card p-8 border-primary/20 space-y-4">
-            <h3 className="text-lg font-bold uppercase text-primary tracking-widest">Program PDAs</h3>
-            <div className="space-y-3">
-              <div className="p-4 bg-foreground/5 rounded-xl border border-border">
-                <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Validator Seed PDA</p>
-                <p className="text-xs font-mono text-foreground">Seeds: ["validator", validator_id]</p>
-                <p className="text-[9px] mt-2 text-muted-foreground italic">Purpose: Isolates 15M EXN mandatory seed per node.</p>
-              </div>
-              <div className="p-4 bg-foreground/5 rounded-xl border border-border">
-                <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Stake Account PDA</p>
-                <p className="text-xs font-mono text-foreground">Seeds: ["stake", user_pubkey, stake_id]</p>
-                <p className="text-[9px] mt-2 text-muted-foreground italic">Purpose: Unique isolated vault for individual delegator principal.</p>
-              </div>
-            </div>
+          <div className="p-3 bg-primary/10 rounded-xl">
+            <Layers className="w-8 h-8 text-primary" />
           </div>
-          <div className="exn-card p-8 border-border space-y-6">
-            <h3 className="text-lg font-bold uppercase tracking-widest">Vault Totals</h3>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-border pb-2">
-                <span className="text-xs font-bold uppercase text-muted-foreground">3 Global Vaults</span>
-                <span className="text-xs font-mono text-primary">Constant</span>
-              </div>
-              <div className="flex items-center justify-between border-b border-border pb-2">
-                <span className="text-xs font-bold uppercase text-muted-foreground">Validator Seeds</span>
-                <span className="text-xs font-mono text-primary">N Nodes</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase text-muted-foreground">Stake PDAs</span>
-                <span className="text-xs font-mono text-primary">M Positions</span>
-              </div>
-            </div>
-            <p className="text-[10px] text-muted-foreground italic uppercase font-black leading-tight">
-              Total system vaults = 3 + N + M. This ensures zero commingling of staker principal with protocol rewards.
-            </p>
-          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">2. Vault & PDA Architecture</h2>
         </div>
-      </section>
-
-      {/* 3. Staking & Unstaking Logic */}
-      <section className="space-y-10">
-        <div className="flex items-center gap-4">
-          <ArrowRightLeft className="w-8 h-8 text-emerald-500" />
-          <h2 className="text-3xl font-bold uppercase tracking-widest">3. Staking & Maturity</h2>
-        </div>
-        <div className="exn-card p-10 space-y-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="space-y-6">
-              <h4 className="text-sm font-black uppercase text-emerald-500 tracking-[0.2em]">Staking Instruction</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground list-disc pl-5">
-                <li>Create unique `Stake PDA`.</li>
-                <li>Transfer `amount` from User Wallet to `Stake PDA`.</li>
-                <li>Record `unlock_timestamp` based on tier (30-180 days).</li>
-                <li>Capture Validator's current `global_reward_index`.</li>
-                <li>Increase Validator's `total_staked` global counter.</li>
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-sm font-black uppercase text-amber-500 tracking-[0.2em]">Maturity Enforcement</h4>
-              <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-4">
-                <div className="flex items-center gap-2 text-amber-500">
-                  <ShieldAlert className="w-4 h-4" />
-                  <p className="text-[10px] uppercase font-black">Mandatory Check</p>
-                </div>
-                <p className="text-xs text-muted-foreground font-mono">
-                  assert!(Clock::get()?.unix_timestamp >= stake_account.unlock_timestamp, Error::StakeLocked);
-                </p>
+        
+        <div className="space-y-8">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="exn-card p-6 border-primary/20 space-y-4">
+                 <h5 className="text-[10px] font-black uppercase text-primary">Global Reward Vault</h5>
+                 <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["reward_vault"]</span></p>
+                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool.</p>
               </div>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-border">
-            <h4 className="text-sm font-black uppercase text-primary mb-6">Action Separation (Atomic)</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-foreground/5 rounded-2xl border border-border">
-                <p className="text-xs font-black uppercase mb-3">Claim Reward</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Calculate delta between current `global_reward_index` and user's checkpoint. Transfer yield from **Global Reward Vault** to user. Reset checkpoint.
-                </p>
+              <div className="exn-card p-6 border-secondary/20 space-y-4">
+                 <h5 className="text-[10px] font-black uppercase text-secondary">Global Treasury Vault</h5>
+                 <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["treasury_vault"]</span></p>
+                 <p className="text-xs text-foreground/70">Collector for governance fees (10 EXN per proposal / 3 EXN per vote).</p>
               </div>
-              <div className="p-6 bg-foreground/5 rounded-2xl border border-border">
-                <p className="text-xs font-black uppercase mb-3">Unstake Principal</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Transfer original principal from **Stake PDA** to user. Close Stake PDA and return rent to user. Decrease Validator's `total_staked`.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Validator Management */}
-      <section className="space-y-10">
-        <div className="flex items-center gap-4">
-          <Network className="w-8 h-8 text-primary" />
-          <h2 className="text-3xl font-bold uppercase tracking-widest">4. Validator Sharding</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="exn-card p-6 border-border space-y-4">
-            <h5 className="text-xs font-black uppercase text-primary">Registration</h5>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Requires valid `License ID`. Transfers 500 USDC to **Global License Vault**. Creates Validator metadata account.
-            </p>
-          </div>
-          <div className="exn-card p-6 border-amber-500/20 space-y-4">
-            <h5 className="text-xs font-black uppercase text-amber-500">Activation Seed</h5>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Mandatory transfer of 15M EXN to **Validator Seed PDA**. Node cannot participate in `crank` without this balance.
-            </p>
-          </div>
-          <div className="exn-card p-6 border-emerald-500/20 space-y-4">
-            <h5 className="text-xs font-black uppercase text-emerald-500">Commission</h5>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              During `crank`, a configurable % (max 30%) of the epoch reward is diverted to the validator's reward balance.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Governance & DAO */}
-      <section className="space-y-10">
-        <div className="flex items-center gap-4">
-          <Landmark className="w-8 h-8 text-secondary" />
-          <h2 className="text-3xl font-bold uppercase tracking-widest">5. Governance Engine</h2>
-        </div>
-        <div className="exn-card p-10 border-secondary/30 space-y-8">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-secondary" />
-                  <p className="text-xs font-black uppercase tracking-widest">Proposal Creation</p>
-                </div>
-                <div className="p-4 bg-foreground/5 rounded-xl border border-border">
-                  <p className="text-[10px] text-muted-foreground font-bold mb-2">Requirement:</p>
-                  <p className="text-sm font-bold text-foreground">1M EXN Staked Weight</p>
-                  <p className="text-[10px] text-secondary font-black mt-2">FEE: 10 EXN -> Treasury Vault</p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-secondary" />
-                  <p className="text-xs font-black uppercase tracking-widest">Vote Consensus</p>
-                </div>
-                <div className="p-4 bg-foreground/5 rounded-xl border border-border">
-                  <p className="text-[10px] text-muted-foreground font-bold mb-2">Requirement:</p>
-                  <p className="text-sm font-bold text-foreground">10k EXN Staked Weight</p>
-                  <p className="text-[10px] text-secondary font-black mt-2">FEE: 3 EXN -> Treasury Vault</p>
-                </div>
+              <div className="exn-card p-6 border-emerald-500/20 space-y-4">
+                 <h5 className="text-[10px] font-black uppercase text-emerald-500">Global License Vault</h5>
+                 <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["license_vault"]</span></p>
+                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales (500 USDC per unit).</p>
               </div>
            </div>
-           <p className="text-[10px] text-muted-foreground uppercase font-black text-center tracking-[0.2em] border-t border-border pt-8">
-             Voting ends 4 hours before proposal deadline to calculate stake-weighted quorum.
-           </p>
+
+           <div className="exn-card p-8 border-border">
+              <h3 className="text-lg font-bold uppercase tracking-widest mb-6">User-Validator PDAs (Dynamic)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div className="space-y-4">
+                    <div className="p-4 bg-foreground/5 rounded-xl border border-border">
+                       <p className="text-[10px] font-black uppercase text-primary mb-2">Validator Seed PDA</p>
+                       <p className="text-xs font-mono text-foreground">["validator_seed", validator_id]</p>
+                       <p className="text-[11px] text-muted-foreground mt-3">Purposed for the mandatory 15,000,000 EXN activation deposit. Ensures validator skin-in-the-game.</p>
+                    </div>
+                 </div>
+                 <div className="space-y-4">
+                    <div className="p-4 bg-foreground/5 rounded-xl border border-border">
+                       <p className="text-[10px] font-black uppercase text-secondary mb-2">Staking Vault PDA</p>
+                       <p className="text-xs font-mono text-foreground">["stake_account", user_pubkey, stake_id]</p>
+                       <p className="text-[11px] text-muted-foreground mt-3">Isolated vault for individual delegator principal. Ensures funds are never commingled with validator capital.</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* 3. Staking Lifecycle */}
+      <section className="space-y-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 rounded-xl">
+            <ArrowRightLeft className="w-8 h-8 text-emerald-500" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">3. Staking & Maturity Logic</h2>
+        </div>
+
+        <div className="exn-card p-10 space-y-10">
+           <div className="space-y-4">
+              <h4 className="text-sm font-black uppercase text-emerald-500 tracking-widest">Instruction: <span className="text-foreground font-mono">stake_tokens(amount, duration)</span></h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                 <div className="space-y-4">
+                    <h5 className="text-[10px] font-black uppercase text-muted-foreground">Step-by-Step Behavior</h5>
+                    <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+                       <li>Derive unique <span className="text-foreground font-bold">Staking Vault PDA</span> for the user transaction.</li>
+                       <li>Transfer <span className="text-foreground font-bold">amount</span> from User Wallet to the <span className="text-primary">Staking Vault PDA</span>.</li>
+                       <li>Calculate and store <span className="text-foreground font-bold">unlock_timestamp</span> based on current <span className="font-mono">Clock::unix_timestamp</span> + tier.</li>
+                       <li>Checkpoint the Validator's current <span className="text-foreground font-bold">global_reward_index</span>.</li>
+                    </ol>
+                 </div>
+                 <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-4">
+                    <div className="flex items-center gap-2 text-amber-500">
+                      <ShieldAlert className="w-4 h-4" />
+                      <p className="text-[10px] font-black uppercase">Maturity Constraint</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Funds in the <span className="font-bold">Staking Vault PDA</span> are cryptographically locked. The program must reject any transfer-out attempts before the <span className="font-mono">unlock_timestamp</span> is reached.
+                    </p>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* 4. Claims & Unstaking (Atomic) */}
+      <section className="space-y-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-primary/10 rounded-xl">
+            <Zap className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">4. Decoupled Settlement</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div className="exn-card p-8 border-primary/20 space-y-6">
+              <h4 className="text-sm font-black uppercase text-primary tracking-widest">Instruction: <span className="text-foreground font-mono">claim_rewards()</span></h4>
+              <div className="space-y-4">
+                 <p className="text-xs text-muted-foreground leading-relaxed">
+                    1. Assert current time >= stake account maturity.<br/>
+                    2. Calculate yield: <span className="font-mono">(ValidatorIndex - Checkpoint) * StakeAmount</span>.<br/>
+                    3. Transfer yield from <span className="text-foreground font-bold">Global Reward Vault</span> to User Wallet.<br/>
+                    4. Reset stake checkpoint to current Validator Index.
+                 </p>
+              </div>
+           </div>
+           <div className="exn-card p-8 border-secondary/20 space-y-6">
+              <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">unstake_principal()</span></h4>
+              <div className="space-y-4">
+                 <p className="text-xs text-muted-foreground leading-relaxed">
+                    1. Assert current time >= stake account maturity.<br/>
+                    2. Transfer original principal from the <span className="text-foreground font-bold">Staking Vault PDA</span> to User Wallet.<br/>
+                    3. Close the Staking Vault PDA account and return rent lamports to user.<br/>
+                    4. Decrement Validator's total network weight.
+                 </p>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* 5. Node Management */}
+      <section className="space-y-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-amber-500/10 rounded-xl">
+            <Network className="w-8 h-8 text-amber-500" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">5. Validator & License Flow</h2>
+        </div>
+        
+        <div className="exn-card p-10 border-amber-500/20 space-y-10">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-4">
+                 <p className="text-xs font-black uppercase text-amber-500">License Acquisition</p>
+                 <p className="text-sm text-muted-foreground leading-relaxed">
+                   User transfers 500 USDC to the <span className="text-foreground font-bold">Global License Vault</span>. The program issues a unique <span className="text-foreground font-bold">License ID</span> (NFT or metadata account) to the user's wallet.
+                 </p>
+              </div>
+              <div className="space-y-4">
+                 <p className="text-xs font-black uppercase text-amber-500">Node Activation</p>
+                 <p className="text-sm text-muted-foreground leading-relaxed">
+                   Validator calls <span className="font-mono">deposit_seed(15M EXN)</span>. Funds are moved to the <span className="text-foreground font-bold">Validator Seed PDA</span>. Node status changes from <span className="text-muted-foreground">PENDING</span> to <span className="text-primary font-bold">ONLINE</span>.
+                 </p>
+              </div>
+           </div>
+           <div className="pt-8 border-t border-border">
+              <p className="text-[10px] text-muted-foreground uppercase font-bold text-center italic">
+                Deactivation requires an <span className="font-mono">unstake_seed</span> call, which changes status to OFFLINE and triggers a 24-hour withdrawal cooldown for the 15M EXN.
+              </p>
+           </div>
+        </div>
+      </section>
+
+      {/* 6. Admin Authorities */}
+      <section className="space-y-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-primary/10 rounded-xl">
+            <ShieldAlert className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">6. Administrative Instructions</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="p-6 bg-foreground/5 rounded-2xl border border-border space-y-3">
+              <p className="text-xs font-black uppercase text-primary">Settle Revenue</p>
+              <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Instruction transfers USDC from <span className="font-mono">GlobalLicenseVault</span> to the designated Admin wallet.</p>
+           </div>
+           <div className="p-6 bg-foreground/5 rounded-2xl border border-border space-y-3">
+              <p className="text-xs font-black uppercase text-primary">Update Parameters</p>
+              <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Allows dynamic modification of the 14-day reward distribution cap to match network growth.</p>
+           </div>
         </div>
       </section>
 
       {/* Footer / Call to Action */}
       <div className="pt-20 border-t border-border flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="space-y-2">
-          <h3 className="text-2xl font-bold uppercase tracking-tighter">Ready to Deploy?</h3>
-          <p className="text-muted-foreground text-sm uppercase font-black tracking-widest">Target Network: Mainnet-Beta | Env: Anchor 0.29.0</p>
+          <h3 className="text-2xl font-bold uppercase tracking-tighter">Architecture Finalized</h3>
+          <p className="text-muted-foreground text-sm uppercase font-black tracking-widest">Target Network: Mainnet-Beta | Build: Anchor 0.29.0</p>
         </div>
         <div className="flex gap-4">
           <Link href="/admin" className="exn-button px-10">Admin Terminal</Link>
