@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Info, Sparkles, Lock, Unlock } from 'lucide-react';
+import { Wallet, Info, Sparkles, Lock, Unlock, ArrowUpRight, Coins } from 'lucide-react';
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -21,6 +21,7 @@ export function StakingActionForm({
   validators,
   onUnstake,
   onClaim,
+  onClaimSingle,
   totalPendingRewards = 0,
   connected = false,
   setFeedback
@@ -207,12 +208,21 @@ export function StakingActionForm({
                     </div>
 
                     {!isLocked && (
-                      <button 
-                        onClick={() => onUnstake(s.id)}
-                        className="w-full h-10 exn-button-outline border-primary/20 text-primary text-[10px] font-black uppercase hover:bg-primary/10 transition-all flex items-center justify-center gap-2"
-                      >
-                        Unstake Principal & Rewards
-                      </button>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button 
+                          onClick={() => onClaimSingle(s.id)}
+                          disabled={pendingReward <= 0.0001}
+                          className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all flex items-center justify-center gap-2 ${pendingReward > 0.0001 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}
+                        >
+                          <Sparkles className="w-3 h-3" /> Claim Reward
+                        </button>
+                        <button 
+                          onClick={() => onUnstake(s.id)}
+                          className="h-10 rounded-lg bg-primary/10 text-primary border border-primary/20 text-[9px] font-black uppercase hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
+                        >
+                          <ArrowUpRight className="w-3 h-3" /> Unstake Principal
+                        </button>
+                      </div>
                     )}
                   </div>
                 );
@@ -227,7 +237,7 @@ export function StakingActionForm({
           <Info className="w-full h-full" />
         </div>
         <p className="text-[10px] text-primary/40 leading-tight uppercase font-black tracking-tighter">
-          Rewards can only be claimed once the stake account duration has expired. Early withdrawals are restricted by the protocol smart contract.
+          Rewards can only be claimed once the stake account duration has expired. Early withdrawals of principal are restricted by the protocol smart contract.
         </p>
       </div>
 

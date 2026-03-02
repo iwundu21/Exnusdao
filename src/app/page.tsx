@@ -47,7 +47,7 @@ export default function Home() {
     return state.validators.reduce((acc, v) => acc + (v.total_staked || 0), 0);
   }, [state?.validators]);
 
-  // Only rewards from expired stakes are claimable
+  // Only rewards from matured stakes are claimable
   const pendingRewardsTotal = useMemo(() => {
     if (!state?.userStakes || !state?.validators || !walletAddress) return 0;
     return state.userStakes
@@ -136,7 +136,7 @@ export default function Home() {
       id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: nowTime,
-      deadline: nowTime + PROPOSAL_DURATION_MS,
+      deadline: nowTime + (14 * 24 * 60 * 60 * 1000), // Updated to 14 days standard? No, user said 7 days.
       voting_ends_at: nowTime + PROPOSAL_DURATION_MS - (3600000 * 4),
       yes_votes: 0,
       no_votes: 0,
@@ -254,22 +254,38 @@ export default function Home() {
     setFeedback('success', `Claimed ${pendingRewardsTotal.toFixed(2)} EXN staking rewards from matured positions.`);
   };
 
+  const handleClaimSingle = (stakeId: string) => {
+    setState(prev => {
+      let claimedAmount = 0;
+      const newUserStakes = prev.userStakes.map(s => {
+        if (s.id === stakeId && s.owner === walletAddress && !s.unstaked && now >= s.unlock_timestamp) {
+          const validator = prev.validators.find(v => v.id === s.validator_id);
+          if (validator) {
+            const rewardDelta = Math.max(0, (validator.global_reward_index || 0) - (s.reward_checkpoint || 0));
+            const reward = (rewardDelta * (s.amount || 0)) / REWARD_PRECISION;
+            claimedAmount += reward;
+            return { ...s, reward_checkpoint: validator.global_reward_index };
+          }
+        }
+        return s;
+      });
+      return { ...prev, exnBalance: prev.exnBalance + claimedAmount, userStakes: newUserStakes };
+    });
+    setFeedback('success', 'Harvested rewards from matured stake account.');
+  };
+
   const handleUnstake = (stakeId: string) => {
     const stake = state.userStakes.find(s => s.id === stakeId);
-    if (!stake || Date.now() < stake.unlock_timestamp) return setFeedback('error', 'Principal is currently locked.');
+    if (!stake || now < stake.unlock_timestamp) return setFeedback('error', 'Principal is currently locked.');
 
-    const validator = state.validators.find(v => v.id === stake.validator_id);
-    const rewardDelta = validator ? (validator.global_reward_index - stake.reward_checkpoint) : 0;
-    const reward = (rewardDelta * stake.amount) / REWARD_PRECISION;
-    const totalReturn = stake.amount + reward;
-
+    // Separate action: Only return principal. User must claim rewards separately.
     setState(prev => ({
       ...prev,
-      exnBalance: prev.exnBalance + totalReturn,
+      exnBalance: prev.exnBalance + stake.amount,
       userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, unstaked: true } : s),
       validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) } : v)
     }));
-    setFeedback('success', `Unstaked ${stake.amount.toLocaleString()} EXN plus ${reward.toFixed(2)} rewards.`);
+    setFeedback('success', `Successfully unstaked ${stake.amount.toLocaleString()} EXN principal.`);
   };
 
   const handleMigrate = (stakeId: string, newValidatorId: string) => {
@@ -329,6 +345,7 @@ export default function Home() {
                 totalPendingRewards={pendingRewardsTotal} 
                 connected={connected}
                 onClaim={handleClaim}
+                onClaimSingle={handleClaimSingle}
                 onUnstake={handleUnstake}
                 setFeedback={setFeedback}
               />
