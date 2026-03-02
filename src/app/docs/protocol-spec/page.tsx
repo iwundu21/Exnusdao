@@ -25,7 +25,8 @@ import {
   BadgeDollarSign,
   Settings,
   Scale,
-  ShieldCheck
+  ShieldCheck,
+  LogOut
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -252,14 +253,24 @@ export default function ProtocolSpecPage() {
 
            {/* Seed Management */}
            <div className="space-y-6 pt-10 border-t border-white/5">
-              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.2 Seed & Commission</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                 <div className="exn-card p-6 border-primary/10 bg-primary/5 space-y-4">
-                    <p className="text-xs font-black uppercase text-primary">Instruction: <span className="font-mono">deposit_seed</span> (15M EXN)</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      <span className="text-foreground font-bold">Transfer Behavior:</span> Moves 15,000,000 EXN from Validator Wallet to the unique <span className="text-foreground font-bold">Validator Seed PDA</span> (Seeds: <span className="font-mono">["validator_seed", pubkey]</span>). 
-                      This capital is cryptographically locked to the node's identity and is required to toggle status to <span className="text-emerald-500 font-bold">ONLINE</span>.
-                    </p>
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.2 Seed & Commission Management</h3>
+              <div className="grid grid-cols-1 gap-10">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="exn-card p-6 border-primary/10 bg-primary/5 space-y-4">
+                       <p className="text-xs font-black uppercase text-primary">Instruction: <span className="font-mono">deposit_seed</span> (15M EXN)</p>
+                       <p className="text-[11px] text-muted-foreground">
+                          Moves 15,000,000 EXN from Validator Wallet to the <span className="text-foreground font-bold">Validator Seed PDA</span> (Seeds: <span className="font-mono">["validator_seed", pubkey]</span>). 
+                          This capital is cryptographically locked and required to toggle status to <span className="text-emerald-500 font-bold">ONLINE</span>.
+                       </p>
+                    </div>
+                    <div className="exn-card p-6 border-destructive/10 bg-destructive/5 space-y-4">
+                       <p className="text-xs font-black uppercase text-destructive">Instruction: <span className="font-mono">withdraw_seed</span></p>
+                       <p className="text-[11px] text-muted-foreground">
+                          1. <span className="font-bold">Verify Authority:</span> Caller must be Node Owner.<br/>
+                          2. <span className="font-bold">Toggle Status:</span> Set Node to <span className="font-bold">INACTIVE</span>.<br/>
+                          3. <span className="font-bold">Settle Capital:</span> Transfer 15M EXN from the <span className="text-foreground font-bold">Validator Seed PDA</span> back to Owner Wallet.
+                       </p>
+                    </div>
                  </div>
                  <div className="exn-card p-6 border-emerald-500/10 bg-emerald-500/5 space-y-4">
                     <p className="text-xs font-black uppercase text-emerald-500">Instruction: <span className="font-mono">claim_node_commission</span></p>
