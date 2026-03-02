@@ -60,19 +60,25 @@ export default function ProtocolSpecPage() {
           <div className="space-y-4">
             <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">initialize(ctx)</span></h4>
             <p className="text-sm text-foreground/80 leading-relaxed">
-              The entry point for anchoring the protocol. This must be a one-time operation authorized by the Deployer.
+              The entry point for anchoring the protocol. This is a one-time atomic operation that provisions the global state and derives the three core protocol vaults.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <h5 className="text-[10px] font-black uppercase text-muted-foreground">Step-by-Step Behavior</h5>
+              <h5 className="text-[10px] font-black uppercase text-muted-foreground">Atomic Provisioning Flow</h5>
               <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
                 <li>Initialize the <span className="text-foreground font-bold">Global State Account</span> using seeds <span className="font-mono text-primary">["global_state"]</span>.</li>
-                <li>Assign <span className="text-foreground font-bold">Admin Authority</span> to the caller's public key.</li>
-                <li>Store the <span className="text-foreground font-bold">EXN Mint</span> and <span className="text-foreground font-bold">USDC Mint</span> addresses in the Global State.</li>
-                <li>Derive and initialize the three Global PDAs: Reward Vault, Treasury Vault, and License Vault.</li>
-                <li>Set initial parameters: <span className="text-primary">Reward Cap</span>, <span className="text-primary">License Price (USDC)</span>, and <span className="text-primary">Epoch Index</span>.</li>
+                <li>Assign <span className="text-foreground font-bold">Admin Authority</span> to the deployer's public key.</li>
+                <li>Store <span className="text-foreground font-bold">EXN & USDC Mint</span> addresses in the Global State.</li>
+                <li><span className="text-foreground font-bold font-mono">AUTOMATIC DERIVATION:</span> Derive and initialize the three Global Vault PDAs simultaneously:
+                  <ul className="mt-2 space-y-1 text-xs opacity-80 list-disc pl-4">
+                    <li>Reward Vault (EXN Source)</li>
+                    <li>Treasury Vault (Governance Fees)</li>
+                    <li>License Vault (USDC Revenue)</li>
+                  </ul>
+                </li>
+                <li>Set initial parameters: <span className="text-primary">Reward Cap (1,250 EXN)</span> and <span className="text-primary">License Price (500 USDC)</span>.</li>
               </ol>
             </div>
             <div className="p-6 bg-background/50 rounded-2xl border border-border space-y-4">
@@ -81,7 +87,7 @@ export default function ProtocolSpecPage() {
                  <p className="text-[10px] font-black uppercase">Authority Constraint</p>
                </div>
                <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                 "Only the address set during initialization (Global State Admin) can authorize USDC withdrawals from the License Vault or update global network parameters like the License Price directly."
+                 "Only the address set during initialization (Global State Admin) can authorize USDC withdrawals from the License Vault or update global network parameters like the License Price directly until DAO handoff."
                </p>
             </div>
           </div>
@@ -106,24 +112,24 @@ export default function ProtocolSpecPage() {
                 </div>
                 <Database className="w-5 h-5 text-primary/40" />
               </div>
-              <p className="text-xs text-foreground/70 mt-3">The master account for the protocol. Stores all configuration, authority data, and global network indices.</p>
+              <p className="text-xs text-foreground/70 mt-3">The master account for the protocol. Stores all configuration, authority data, and global network indices. All vault PDAs are derived based on this program ID.</p>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="exn-card p-6 border-primary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-primary">Global Reward Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["reward_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool funded by the Admin.</p>
+                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool funded by the Admin to sustain delegator APY.</p>
               </div>
               <div className="exn-card p-6 border-secondary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-secondary">Global Treasury Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["treasury_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for governance fees and direct funding. Used for ecosystem growth.</p>
+                 <p className="text-xs text-foreground/70">Collector for governance fees (3 EXN per vote, 10 EXN per proposal) and direct funding. Used for ecosystem growth.</p>
               </div>
               <div className="exn-card p-6 border-emerald-500/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-emerald-500">Global License Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["license_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales. Settled by Admin.</p>
+                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales. Funds are held here until settled by the Protocol Admin.</p>
               </div>
            </div>
 
@@ -134,14 +140,14 @@ export default function ProtocolSpecPage() {
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border">
                        <p className="text-[10px] font-black uppercase text-primary mb-2">Validator Seed PDA</p>
                        <p className="text-xs font-mono text-foreground">["validator_seed", validator_pubkey]</p>
-                       <p className="text-[11px] text-muted-foreground mt-3">Isolated vault for the 15M EXN activation deposit. Ensures validator skin-in-the-game.</p>
+                       <p className="text-[11px] text-muted-foreground mt-3">Isolated vault for the 15M EXN activation deposit. Ensures validator skin-in-the-game. Derived automatically upon registration.</p>
                     </div>
                  </div>
                  <div className="space-y-4">
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border">
                        <p className="text-[10px] font-black uppercase text-secondary mb-2">Staking Vault PDA</p>
                        <p className="text-xs font-mono text-foreground">["stake_account", user_pubkey, stake_nonce]</p>
-                       <p className="text-[11px] text-muted-foreground mt-3">Isolated vault for individual delegator principal. Ensures funds are never commingled.</p>
+                       <p className="text-[11px] text-muted-foreground mt-3">Isolated vault for individual delegator principal. Ensures funds are never commingled. Derived atomically when user initiates a stake.</p>
                     </div>
                  </div>
               </div>
@@ -305,7 +311,7 @@ export default function ProtocolSpecPage() {
                 <Settings className="w-4 h-4 text-primary" />
                 <p className="text-xs font-black uppercase text-primary">Update Parameters</p>
               </div>
-              <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Allows modification of the <span className="font-bold">Reward Cap</span> and the <span className="font-bold">License Price (USDC)</span>.</p>
+              <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Allows modification of the <span className="font-bold">Reward Cap</span> and the <span className="font-bold">License Price (USDC)</span> stored in the Global State.</p>
            </div>
         </div>
       </section>
