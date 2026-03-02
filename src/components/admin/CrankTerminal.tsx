@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Clock, Zap, Info, CheckCircle2 } from 'lucide-react';
 
 const EPOCH_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days in ms
@@ -15,7 +15,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
     const timer = setInterval(() => {
       const now = Date.now();
       const elapsed = now - GENESIS_TIME;
-      const epoch = Math.floor(elapsed / EPOCH_DURATION) + 700; // Start at 700 for demo flavor
+      const epoch = Math.floor(elapsed / EPOCH_DURATION) + 700; 
       const remainingMs = EPOCH_DURATION - (elapsed % EPOCH_DURATION);
 
       setCurrentEpoch(epoch);
@@ -32,7 +32,9 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
   }, []);
 
   const activeValidators = validators.filter((v: any) => v.is_active);
-  const totalNetworkWeight = validators.reduce((acc: number, v: any) => acc + (v.total_staked || 0), 0);
+  const totalNetworkWeight = useMemo(() => {
+    return validators.reduce((acc: number, v: any) => acc + (v.total_staked || 0), 0);
+  }, [validators]);
   
   const isEpochCranked = lastCrankedEpoch >= currentEpoch;
 
@@ -136,7 +138,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
             </div>
           ) : (
             activeValidators.map((v: any) => {
-              const weightShare = (v.total_staked / totalNetworkWeight) * 100;
+              const weightShare = totalNetworkWeight > 0 ? (v.total_staked / totalNetworkWeight) * 100 : 0;
               return (
                 <div key={v.id} className="p-6 flex justify-between items-center bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors">
                   <div className="flex items-center gap-4">
@@ -160,7 +162,9 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
       </div>
       
       <div className="flex items-start gap-3 p-4 bg-foreground/5 border border-border rounded-xl">
-        <Info className="w-4 h-4 text-muted-foreground mt-0.5" />
+        <div className="mt-0.5">
+          <Info className="w-4 h-4 text-muted-foreground" />
+        </div>
         <p className="text-[10px] text-muted-foreground uppercase font-bold leading-tight tracking-tight">
           Rewards are dynamically calculated based on the global {rewardCap.toLocaleString()} EXN epoch cap. More network weight increases protocol security but adjusts individual node yield proportionally.
         </p>

@@ -1,10 +1,15 @@
 
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 
 export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate, selectedId, setFeedback }: any) {
+  // Dynamic calculation of total network weight for percentage share
+  const totalNetworkWeight = useMemo(() => {
+    return validators.reduce((acc: number, v: any) => acc + (v.total_staked || 0), 0);
+  }, [validators]);
+
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
@@ -22,6 +27,9 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
           const isSelected = selectedId === validator.id;
           const isUserStaked = userStakes.some((s: any) => s.validator_id === validator.id && !s.unstaked);
           const stakerCount = userStakes.filter((s: any) => s.validator_id === validator.id && !s.unstaked).length;
+          
+          // Calculate dynamic percentage share of total network weight
+          const weightShare = totalNetworkWeight > 0 ? (validator.total_staked / totalNetworkWeight) * 100 : 0;
 
           return (
             <div key={validator.id} className={`exn-card group border transition-all duration-300 ${isSelected ? 'border-primary ring-1 ring-primary shadow-[0_0_30px_rgba(0,245,255,0.15)]' : !validator.is_active ? 'border-destructive/20 opacity-80' : 'border-border'}`}>
@@ -36,14 +44,14 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 
                 <div className="absolute top-4 right-6 flex items-center gap-2">
+                   <div className="flex items-center gap-1.5 bg-primary/20 text-primary text-[9px] px-2 py-1 rounded font-black uppercase border border-primary/30 backdrop-blur-md">
+                      {weightShare.toFixed(2)}% Share
+                   </div>
                    {isUserStaked && (
                      <div className="flex items-center gap-1 bg-emerald-500 text-black text-[8px] px-1.5 py-0.5 rounded font-black uppercase shadow-[0_0_15px_rgba(16,185,129,0.5)]">
                        Your Stake Active
                      </div>
                    )}
-                   <div className="flex items-center gap-1 text-[9px] text-foreground/60 font-black uppercase tracking-widest bg-background/60 px-2 py-1 rounded backdrop-blur-md border border-border/10">
-                      {validator.location}
-                   </div>
                 </div>
 
                 <div className="absolute bottom-4 left-6 flex items-center gap-2">
@@ -82,8 +90,8 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                     <p className="text-foreground font-bold text-xs">{(validator.commission_rate / 100).toFixed(1)}%</p>
                   </div>
                   <div className="p-2 bg-foreground/5 rounded-lg border border-border/10">
-                    <p className="text-foreground/40 text-[9px] uppercase">R-Index</p>
-                    <p className="text-primary font-bold text-xs">{(validator.global_reward_index / 1000).toFixed(1)}k</p>
+                    <p className="text-foreground/40 text-[9px] uppercase">Location</p>
+                    <p className="text-primary font-bold text-[10px] uppercase truncate">{validator.location}</p>
                   </div>
                 </div>
 
