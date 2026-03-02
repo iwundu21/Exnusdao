@@ -371,20 +371,20 @@ export default function ProtocolSpecPage() {
         </div>
 
         <div className="exn-card p-10 space-y-12 border-secondary/20 bg-secondary/5">
-           {/* Proposal Types */}
+           {/* Proposal Lifecycle */}
            <div className="space-y-6">
-              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">8.1 Proposal Classification</h3>
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">8.1 Governance Lifecycle</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="p-6 bg-primary/5 rounded-2xl border border-primary/20 space-y-4">
-                    <p className="text-xs font-black uppercase text-primary tracking-widest">Type 0: Parameter Change</p>
+                    <p className="text-xs font-black uppercase text-primary tracking-widest">7-Day Consensus Window</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Used to modify mutable variables in the <span className="font-bold text-foreground">Global State Account</span> (e.g., Reward Cap, License Price).
+                      Every proposal is active for exactly <span className="font-bold text-foreground">7 Days</span>. The first 164 hours allow for active participation, while the final 4 hours trigger an automatic voting lock.
                     </p>
                  </div>
                  <div className="p-6 bg-secondary/5 rounded-2xl border border-secondary/20 space-y-4">
-                    <p className="text-xs font-black uppercase text-secondary tracking-widest">Type 1: Treasury Distribution</p>
+                    <p className="text-xs font-black uppercase text-secondary tracking-widest">4-Hour Finalization Lock</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Authorizes the transfer of EXN tokens from the <span className="font-bold text-foreground">Global Treasury Vault</span> to a designated recipient.
+                      The <span className="font-mono text-secondary">cast_vote</span> instruction is disabled during the final 4 hours. This prevents "flash-weight" attacks and allows the community to review final outcomes before execution.
                     </p>
                  </div>
               </div>
@@ -400,18 +400,18 @@ export default function ProtocolSpecPage() {
                 <div className="space-y-4">
                   <h5 className="text-[10px] font-black uppercase text-muted-foreground">Execution Behavior</h5>
                   <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                    <li><span className="text-foreground font-bold">Verify Identity:</span> Assert caller has active, non-unstaked <span className="font-mono text-primary">Stake Account PDAs</span>.</li>
-                    <li><span className="text-amber-500 font-bold uppercase">Requirement:</span> Assert total combined stake weight is <span className="font-black">≥ 10,000 EXN</span>.</li>
-                    <li><span className="text-foreground font-bold">Weight Snapshot:</span> Sum total principal across all valid accounts. <span className="text-secondary font-bold">1 EXN = 1 Vote Weight</span>.</li>
-                    <li><span className="text-foreground font-bold">Protocol Fee:</span> Transfer exactly <span className="text-foreground font-bold">3 EXN</span> from Voter wallet to <span className="text-secondary">Global Treasury Vault</span>.</li>
-                    <li><span className="text-foreground font-bold">Record Participation:</span> Add Voter address to the Proposal PDA's <span className="font-mono">voter_registry</span> to prevent double-voting.</li>
-                    <li><span className="text-foreground font-bold">Maturity Extension:</span> Apply a mandatory <span className="text-amber-500 font-bold">4-hour unlock delay</span> to all of the voter's Stake PDAs to prevent immediate capital exit.</li>
+                    <li><span className="text-foreground font-bold">Minimum Threshold:</span> Assert caller has total combined active stake <span className="font-black text-amber-500">≥ 10,000 EXN</span>.</li>
+                    <li><span className="text-foreground font-bold">Mandatory Rationale:</span> Caller must provide a string <span className="text-primary font-bold">comment</span> (rationale) for the on-chain registry.</li>
+                    <li><span className="text-foreground font-bold">Identity Verification:</span> Verify identity against active <span className="font-mono text-primary">Stake Account PDAs</span>.</li>
+                    <li><span className="text-foreground font-bold">Weight Snapshot:</span> Sum total principal. <span className="text-secondary font-bold">1 EXN = 1 Vote Weight</span>.</li>
+                    <li><span className="text-foreground font-bold">Protocol Fee:</span> Transfer <span className="text-foreground font-bold">3 EXN</span> to <span className="text-secondary">Global Treasury Vault</span>.</li>
+                    <li><span className="text-foreground font-bold">Maturity Extension:</span> Apply a mandatory <span className="text-amber-500 font-bold">4-hour unlock delay</span> to the voter's Stake PDAs.</li>
                   </ol>
                 </div>
                 <div className="p-6 bg-background/40 border border-border rounded-2xl space-y-4">
-                   <p className="text-[10px] font-black uppercase text-secondary">Anti-Sybil Logic</p>
+                   <p className="text-[10px] font-black uppercase text-secondary">Lock Window Logic</p>
                    <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                     "Voting weight is snapshot precisely at the time of the instruction. Developers must ensure the program loops through the user's Stake PDAs to aggregate total weight and enforces the 10,000 EXN minimum threshold before updating the proposal's global counters."
+                     "The program must assert that (Clock::unix_timestamp < proposal.deadline - 14400) before allowing the vote to proceed. Any attempt to vote in the final 4 hours of the 7-day window must be rejected with a 'VotingLockActive' error."
                    </p>
                 </div>
               </div>
@@ -430,7 +430,7 @@ export default function ProtocolSpecPage() {
                        <li>Verify caller has <span className="text-foreground font-bold">≥ 1M EXN</span> active stake weight.</li>
                        <li>Transfer <span className="text-foreground font-bold">10 EXN fee</span> to <span className="text-secondary">Global Treasury Vault</span>.</li>
                        <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> (PDA) seeds <span className="font-mono text-primary">["proposal", proposal_id]</span>.</li>
-                       <li>Store metadata and the 7-day consensus <span className="font-mono">deadline_timestamp</span>.</li>
+                       <li>Store metadata and the exact <span className="font-mono">deadline_timestamp</span> (Created + 7 Days).</li>
                     </ol>
                  </div>
               </div>
