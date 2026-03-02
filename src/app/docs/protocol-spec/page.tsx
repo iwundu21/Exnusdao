@@ -24,7 +24,8 @@ import {
   Hammer,
   BadgeDollarSign,
   Settings,
-  Scale
+  Scale,
+  ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,7 +43,7 @@ export default function ProtocolSpecPage() {
         <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.2</h1>
         <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
           Technical architecture and state machine behavior for the Exnus Network Solana Program. 
-          Use this specification to implement the core smart contract logic and multi-vault accounting.
+          Use this specification to implement the core smart contract logic, multi-vault accounting, and DAO consensus.
         </p>
       </div>
 
@@ -70,7 +71,7 @@ export default function ProtocolSpecPage() {
                 <li>Assign <span className="text-foreground font-bold">Admin Authority</span> to the caller's public key.</li>
                 <li>Store the <span className="text-foreground font-bold">EXN Mint</span> and <span className="text-foreground font-bold">USDC Mint</span> addresses in the Global State.</li>
                 <li>Derive and initialize the three Global PDAs: Reward Vault, Treasury Vault, and License Vault.</li>
-                <li>Set initial parameters: <span className="text-primary">Reward Cap</span>, <span className="text-primary">License Limit</span>, and <span className="text-primary">Epoch Index</span>.</li>
+                <li>Set initial parameters: <span className="text-primary">Reward Cap</span>, <span className="text-primary">License Price (USDC)</span>, and <span className="text-primary">Epoch Index</span>.</li>
               </ol>
             </div>
             <div className="p-6 bg-background/50 rounded-2xl border border-border space-y-4">
@@ -79,7 +80,7 @@ export default function ProtocolSpecPage() {
                  <p className="text-[10px] font-black uppercase">Authority Constraint</p>
                </div>
                <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                 "Only the address set during initialization can authorize USDC withdrawals from the License Vault or update global network parameters directly."
+                 "Only the address set during initialization can authorize USDC withdrawals from the License Vault or update global network parameters like the License Price directly."
                </p>
             </div>
           </div>
@@ -196,7 +197,7 @@ export default function ProtocolSpecPage() {
            <div className="exn-card p-8 border-primary/20 space-y-6">
               <h4 className="text-sm font-black uppercase text-primary tracking-widest">Instruction: <span className="text-foreground font-mono">claim_rewards()</span></h4>
               <div className="space-y-4">
-                 <p className="text-xs text-muted-foreground leading-relaxed">
+                 <p className="text-[11px] text-muted-foreground leading-relaxed">
                     1. Assert current time >= stake account maturity.<br/>
                     2. Calculate yield: <span className="font-mono">(ValidatorIndex - Checkpoint) * StakeAmount</span>.<br/>
                     3. Transfer yield from <span className="text-foreground font-bold">Global Reward Vault</span> to User Wallet.<br/>
@@ -207,7 +208,7 @@ export default function ProtocolSpecPage() {
            <div className="exn-card p-8 border-secondary/20 space-y-6">
               <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">unstake_principal()</span></h4>
               <div className="space-y-4">
-                 <p className="text-xs text-muted-foreground leading-relaxed">
+                 <p className="text-[11px] text-muted-foreground leading-relaxed">
                     1. Assert current time >= stake account maturity.<br/>
                     2. Transfer original principal from the <span className="text-foreground font-bold">Staking Vault PDA</span> to User Wallet.<br/>
                     3. Close the Staking Vault PDA account and return rent lamports to user.
@@ -251,18 +252,18 @@ export default function ProtocolSpecPage() {
 
            {/* Seed Management */}
            <div className="space-y-6 pt-10 border-t border-white/5">
-              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.2 Seed & Operational Status</h3>
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.2 Seed & Commission</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                  <div className="exn-card p-6 border-primary/10 bg-primary/5 space-y-4">
-                    <p className="text-xs font-black uppercase text-primary">Deposit Seed (15M EXN)</p>
+                    <p className="text-xs font-black uppercase text-primary">Instruction: <span className="font-mono">deposit_seed</span> (15M EXN)</p>
                     <p className="text-[11px] text-muted-foreground">
                       Moves 15M EXN to the <span className="font-bold text-foreground">Validator Seed PDA</span>. Only after this deposit can the node be toggled to <span className="text-emerald-500 font-bold">ONLINE</span>.
                     </p>
                  </div>
-                 <div className="exn-card p-6 border-destructive/10 bg-destructive/5 space-y-4">
-                    <p className="text-xs font-black uppercase text-destructive">Withdraw Seed</p>
+                 <div className="exn-card p-6 border-emerald-500/10 bg-emerald-500/5 space-y-4">
+                    <p className="text-xs font-black uppercase text-emerald-500">Instruction: <span className="font-mono">claim_node_commission</span></p>
                     <p className="text-[11px] text-muted-foreground">
-                      Transitions node to <span className="text-destructive font-bold">OFFLINE</span> and returns the 15M EXN to the owner.
+                      Transfers the node owner's accrued commission (calculated during epoch cranks) from the <span className="font-bold text-foreground">Global Reward Vault</span> to their wallet.
                     </p>
                  </div>
               </div>
@@ -274,7 +275,7 @@ export default function ProtocolSpecPage() {
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
-            <ShieldAlert className="w-8 h-8 text-primary" />
+            <ShieldCheck className="w-8 h-8 text-primary" />
           </div>
           <h2 className="text-3xl font-bold uppercase tracking-widest">6. Administrative Instructions</h2>
         </div>
@@ -365,19 +366,19 @@ export default function ProtocolSpecPage() {
                  <div className="p-6 bg-primary/5 rounded-2xl border border-primary/20 space-y-4">
                     <p className="text-xs font-black uppercase text-primary tracking-widest">Type 0: Parameter Change</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Used to modify mutable variables in the <span className="font-bold text-foreground">Global State Account</span>.
+                      Used to modify mutable variables in the <span className="font-bold text-foreground">Global State Account</span> (e.g., Reward Cap, License Price).
                     </p>
                  </div>
                  <div className="p-6 bg-secondary/5 rounded-2xl border border-secondary/20 space-y-4">
                     <p className="text-xs font-black uppercase text-secondary tracking-widest">Type 1: Treasury Distribution</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Authorizes the transfer of EXN tokens from the <span className="font-bold text-foreground">Global Treasury Vault</span> to a recipient.
+                      Authorizes the transfer of EXN tokens from the <span className="font-bold text-foreground">Global Treasury Vault</span> to a designated recipient.
                     </p>
                  </div>
               </div>
            </div>
 
-           {/* Voting Logic */}
+           {/* Voting Mechanics */}
            <div className="space-y-6 pt-10 border-t border-white/5">
               <div className="flex items-center gap-3">
                  <Scale className="w-5 h-5 text-secondary" />
@@ -385,19 +386,19 @@ export default function ProtocolSpecPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-4">
-                  <h5 className="text-[10px] font-black uppercase text-muted-foreground">Weighted Logic</h5>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    1. Assert caller has active <span className="font-bold text-foreground">Stake Account PDAs</span>.<br/>
-                    2. Fetch total principal across all non-unstaked accounts.<br/>
-                    3. <span className="text-secondary font-bold">Weight = Staked EXN</span> (1:1 Ratio).<br/>
-                    4. Transfer <span className="font-bold text-foreground">3 EXN fee</span> to Treasury Vault.<br/>
-                    5. Record voter address in Proposal PDA to prevent double-voting.
-                  </p>
+                  <h5 className="text-[10px] font-black uppercase text-muted-foreground">Execution Behavior</h5>
+                  <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+                    <li><span className="text-foreground font-bold">Verify Identity:</span> Assert caller has active, non-unstaked <span className="font-mono text-primary">Stake Account PDAs</span>.</li>
+                    <li><span className="text-foreground font-bold">Weight Snapshot:</span> Sum total principal across all valid accounts. <span className="text-secondary font-bold">1 EXN = 1 Vote Weight</span>.</li>
+                    <li><span className="text-foreground font-bold">Protocol Fee:</span> Transfer exactly <span className="text-foreground font-bold">3 EXN</span> from Voter wallet to <span className="text-secondary">Global Treasury Vault</span>.</li>
+                    <li><span className="text-foreground font-bold">Record Participation:</span> Add Voter address to the Proposal PDA's <span className="font-mono">voter_registry</span> to prevent double-voting.</li>
+                    <li><span className="text-foreground font-bold">Maturity Extension:</span> Apply a mandatory <span className="text-amber-500 font-bold">4-hour unlock delay</span> to all of the voter's Stake PDAs to prevent immediate capital exit.</li>
+                  </ol>
                 </div>
                 <div className="p-6 bg-background/40 border border-border rounded-2xl space-y-4">
-                   <p className="text-[10px] font-black uppercase text-secondary">Anti-Sybil Constraint</p>
-                   <p className="text-xs text-muted-foreground leading-relaxed italic">
-                     "Voting weight is snapshot at the time of vote casting. Moving funds after voting does not reduce previously cast weight, but the 4-hour lock prevents immediate withdrawal after a decision."
+                   <p className="text-[10px] font-black uppercase text-secondary">Anti-Sybil Logic</p>
+                   <p className="text-[11px] text-muted-foreground leading-relaxed italic">
+                     "Voting weight is snapshot precisely at the time of the instruction. Developers must ensure the program loops through the user's Stake PDAs to aggregate total weight before updating the proposal's global counters."
                    </p>
                 </div>
               </div>
@@ -413,9 +414,10 @@ export default function ProtocolSpecPage() {
                  <div className="space-y-4">
                     <h5 className="text-[10px] font-black uppercase text-muted-foreground">On-Chain Behavior</h5>
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                       <li>Verify caller has <span className="text-foreground font-bold">≥ 1M EXN</span> stake.</li>
+                       <li>Verify caller has <span className="text-foreground font-bold">≥ 1M EXN</span> active stake weight.</li>
                        <li>Transfer <span className="text-foreground font-bold">10 EXN fee</span> to <span className="text-secondary">Global Treasury Vault</span>.</li>
                        <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> (PDA) seeds <span className="font-mono text-primary">["proposal", proposal_id]</span>.</li>
+                       <li>Store metadata and the 7-day consensus <span className="font-mono">deadline_timestamp</span>.</li>
                     </ol>
                  </div>
               </div>
