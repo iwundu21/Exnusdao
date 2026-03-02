@@ -1,8 +1,6 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, Zap, Info, CheckCircle2, History, Timer, Activity } from 'lucide-react';
 
 const EPOCH_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days in ms
 const GENESIS_TIME = 1704067200000; // Reference point: Jan 1, 2024
@@ -77,7 +75,6 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="exn-card p-6 border-primary/20 bg-primary/5">
           <div className="flex items-center gap-3 mb-4">
-            <Activity className="w-4 h-4 text-primary" />
             <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Active Nodes</h3>
           </div>
           <p className="text-3xl font-bold text-primary">{activeValidators.length}</p>
@@ -86,7 +83,6 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
 
         <div className="exn-card p-6 border-secondary/20 bg-secondary/5">
           <div className="flex items-center gap-3 mb-4">
-            <Zap className="w-4 h-4 text-secondary" />
             <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Epoch Distribution</h3>
           </div>
           <p className="text-3xl font-bold text-secondary">{rewardCap.toLocaleString()}</p>
@@ -95,7 +91,6 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
 
         <div className="exn-card p-6 border-emerald-500/20 bg-emerald-500/5">
           <div className="flex items-center gap-3 mb-4">
-            <Timer className="w-4 h-4 text-emerald-500" />
             <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Status</h3>
           </div>
           <p className={`text-2xl font-bold ${isEpochCranked ? 'text-emerald-500' : 'text-amber-500'}`}>
@@ -108,10 +103,6 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="space-y-6">
           <div className="exn-card p-10 border-primary/30 flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden h-full">
-            <div className="absolute top-0 right-0 p-4 opacity-5">
-               <Zap className="w-40 h-40" />
-            </div>
-            
             <div className="max-w-md space-y-4 relative z-10">
               <h3 className="text-2xl font-bold uppercase tracking-widest">Execute Network Crank</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -122,7 +113,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
             <div className="flex flex-col items-center gap-6 relative z-10 w-full">
               {isEpochCranked ? (
                 <div className="w-full py-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-black uppercase text-sm tracking-[0.3em] flex items-center justify-center gap-3">
-                  <CheckCircle2 className="w-5 h-5" /> Epoch {currentEpoch} Settled
+                  Epoch {currentEpoch} Settled
                 </div>
               ) : (
                 <button 
@@ -135,7 +126,6 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
               )}
 
               <div className="flex items-center gap-2 text-[10px] text-primary/40 uppercase font-black tracking-widest">
-                <Clock className="w-3 h-3" />
                 Next Cycle Starts in {timeLeft.d} Days
               </div>
             </div>
@@ -145,7 +135,6 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
         <div className="space-y-6">
            <div className="exn-card p-0 border-border overflow-hidden h-full">
               <div className="p-4 bg-foreground/5 border-b border-border flex items-center gap-2">
-                 <History className="w-4 h-4 text-muted-foreground" />
                  <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Epoch Lifecycle Registry</p>
               </div>
               <div className="divide-y divide-border">
@@ -208,9 +197,6 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
       </div>
       
       <div className="flex items-start gap-3 p-4 bg-foreground/5 border border-border rounded-xl">
-        <div className="mt-0.5">
-          <Info className="w-4 h-4 text-muted-foreground" />
-        </div>
         <p className="text-[10px] text-muted-foreground uppercase font-bold leading-tight tracking-tight">
           The network crank initiates a dynamic 14-day reward distribution. "ACTIVE" epochs are currently collecting weight and can be settled by operators. "SETTLED" epochs have finalized their reward indices for all delegators.
         </p>
