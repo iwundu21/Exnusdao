@@ -18,7 +18,9 @@ import {
   CircleDollarSign,
   Landmark,
   RefreshCw,
-  Calculator
+  Calculator,
+  Gavel,
+  Vote
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -293,11 +295,93 @@ export default function ProtocolSpecPage() {
                     <p className="text-foreground">Index_Update = (Reward_Pool * Weight_Share) / Total_Stake</p>
                     <p className="italic border-t border-white/5 pt-2">"This ensures reward growth is perfectly proportional to stake weight, allowing delegators to calculate their specific yield using simple delta multiplication."</p>
                  </div>
-                 <div className="p-4 border border-amber-500/30 rounded-xl bg-amber-500/5">
-                    <p className="text-[9px] text-amber-500 uppercase font-black mb-2">Computational Bound</p>
-                    <p className="text-[11px] text-muted-foreground leading-tight">
-                      Solana Compute Budgets may limit the number of validators processed in a single transaction. Implementers should use a "paging" system for the crank if the validator count exceeds 25 nodes.
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* 8. DAO Governance Consensus */}
+      <section className="space-y-10 pb-20">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-secondary/10 rounded-xl">
+            <Vote className="w-8 h-8 text-secondary" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">8. DAO Governance Consensus</h2>
+        </div>
+
+        <div className="exn-card p-10 space-y-12 border-secondary/20 bg-secondary/5">
+           {/* Proposal Logic */}
+           <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                 <Gavel className="w-5 h-5 text-secondary" />
+                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-secondary font-mono">create_proposal(title, description, type, amount, target)</span></h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-4">
+                    <h5 className="text-[10px] font-black uppercase text-muted-foreground">On-Chain Behavior</h5>
+                    <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+                       <li>Verify caller has <span className="text-foreground font-bold">≥ 1,000,000 EXN</span> in active staking weight across the network.</li>
+                       <li>Transfer <span className="text-foreground font-bold">10 EXN fee</span> from caller to the <span className="text-secondary">Global Treasury Vault</span>.</li>
+                       <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> with <span className="font-mono">created_at</span> and <span className="font-mono">deadline</span> (7 days).</li>
+                       <li>Set <span className="text-foreground font-bold">voting_ends_at</span> window (Deadline - 4 hours) to prevent last-second flash-loan manipulation.</li>
+                    </ol>
+                 </div>
+                 <div className="p-6 bg-background/40 rounded-2xl border border-border">
+                    <p className="text-[10px] text-muted-foreground uppercase font-black mb-4">Proposal Account State</p>
+                    <ul className="space-y-2 font-mono text-[10px] text-foreground/80">
+                       <li>- proposer: Pubkey</li>
+                       <li>- type: 0 (Param) | 1 (Treasury)</li>
+                       <li>- yes_votes: u64 (Atomic)</li>
+                       <li>- no_votes: u64 (Atomic)</li>
+                       <li>- executed: bool</li>
+                    </ul>
+                 </div>
+              </div>
+           </div>
+
+           {/* Voting Logic */}
+           <div className="space-y-6 pt-10 border-t border-white/5">
+              <div className="flex items-center gap-3">
+                 <Vote className="w-5 h-5 text-primary" />
+                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-primary font-mono">cast_vote(proposal_id, support, rationale)</span></h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-4">
+                    <h5 className="text-[10px] font-black uppercase text-muted-foreground">Stake-Weighted Logic</h5>
+                    <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+                       <li>Verify caller has <span className="text-foreground font-bold">≥ 10,000 EXN</span> active stake.</li>
+                       <li>Transfer <span className="text-foreground font-bold">3 EXN fee</span> to the <span className="text-secondary">Global Treasury Vault</span>.</li>
+                       <li>Calculate caller's <span className="text-primary font-bold">Snapshot Stake Weight</span> (Sum of all active stake accounts).</li>
+                       <li>Increment <span className="font-mono">yes_votes</span> or <span className="font-mono">no_votes</span> by the weight value.</li>
+                       <li>Record <span className="text-foreground font-bold">Voter Pubkey</span> in the proposal's bit-map to strictly prevent double-voting.</li>
+                    </ol>
+                 </div>
+                 <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
+                    <p className="text-[10px] text-amber-500 uppercase font-black mb-2">Flash-Loan Protection</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed italic">
+                      "The voting weight must be snapshotted from the Global State accounts to ensure that tokens purchased within the current epoch cannot be used for governance until the next cycle."
                     </p>
+                 </div>
+              </div>
+           </div>
+
+           {/* Execution Logic */}
+           <div className="space-y-6 pt-10 border-t border-white/5">
+              <div className="flex items-center gap-3">
+                 <Zap className="w-5 h-5 text-emerald-500" />
+                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-emerald-500 font-mono">execute_proposal(proposal_id)</span></h4>
+              </div>
+              <div className="space-y-4">
+                 <p className="text-sm text-muted-foreground leading-relaxed">
+                    A permissionless instruction that can be called by anyone after the <span className="font-mono">deadline</span> has passed. 
+                 </p>
+                 <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+                    <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+                       <li>Assert <span className="font-mono">Clock::unix_timestamp >= deadline</span>.</li>
+                       <li>Verify <span className="font-mono">yes_votes > no_votes</span> (Simple Majority Consensus).</li>
+                       <li>If <span className="font-mono">type == 1</span> (Treasury), authorize a transfer of <span className="text-foreground font-bold">amount</span> from the <span className="text-secondary">Global Treasury Vault</span> PDA to the <span className="text-foreground font-bold">recipient</span> wallet.</li>
+                       <li>Set <span className="font-mono">executed = true</span> to prevent double-execution.</li>
+                    </ol>
                  </div>
               </div>
            </div>
