@@ -20,7 +20,9 @@ import {
   RefreshCw,
   Calculator,
   Gavel,
-  Vote
+  Vote,
+  Hammer,
+  BadgeDollarSign
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -52,7 +54,7 @@ export default function ProtocolSpecPage() {
         </div>
         <div className="exn-card p-8 border-secondary/20 bg-secondary/5 space-y-8">
           <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">initialize(ctx)</span></h4>
+            <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">initialize(ctx)</span></h4>
             <p className="text-sm text-foreground/80 leading-relaxed">
               The entry point for anchoring the protocol. This must be a one-time operation authorized by the Deployer.
             </p>
@@ -64,7 +66,7 @@ export default function ProtocolSpecPage() {
               <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
                 <li>Assign <span className="text-foreground font-bold">Admin Authority</span> to the caller's public key.</li>
                 <li>Store the <span className="text-foreground font-bold">EXN Mint</span> and <span className="text-foreground font-bold">USDC Mint</span> addresses in the Global State account.</li>
-                <li>Derive and initialize the three Global PDAs (described in section 2).</li>
+                <li>Derive and initialize the three Global PDAs: Reward Vault, Treasury Vault, and License Vault.</li>
                 <li>Set initial protocol parameters: <span className="text-primary">Reward Cap</span>, <span className="text-primary">License Limit</span>, and <span className="text-primary">Epoch Index</span>.</li>
               </ol>
             </div>
@@ -167,7 +169,7 @@ export default function ProtocolSpecPage() {
         </div>
       </section>
 
-      {/* 4. Claims & Unstaking (Atomic) */}
+      {/* 4. Claims & Unstaking (Decoupled) */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
@@ -202,34 +204,80 @@ export default function ProtocolSpecPage() {
         </div>
       </section>
 
-      {/* 5. Node Management */}
+      {/* 5. Validator Registration & Management */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-amber-500/10 rounded-xl">
-            <Network className="w-8 h-8 text-amber-500" />
+            <Hammer className="w-8 h-8 text-amber-500" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">5. Validator & License Flow</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">5. Validator Lifecycle</h2>
         </div>
-        
-        <div className="exn-card p-10 border-amber-500/20 space-y-10">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-4">
-                 <p className="text-xs font-black uppercase text-amber-500">License Acquisition</p>
-                 <p className="text-sm text-muted-foreground leading-relaxed">
-                   User transfers 500 USDC to the <span className="text-foreground font-bold">Global License Vault</span>. The program issues a unique <span className="text-foreground font-bold">License ID</span> (NFT or metadata account) to the user's wallet.
-                 </p>
-              </div>
-              <div className="space-y-4">
-                 <p className="text-xs font-black uppercase text-amber-500">Node Activation</p>
-                 <p className="text-sm text-muted-foreground leading-relaxed">
-                   Validator calls <span className="font-mono">deposit_seed(15M EXN)</span>. Funds are moved to the <span className="text-foreground font-bold">Validator Seed PDA</span>. Node status changes from <span className="text-muted-foreground">PENDING</span> to <span className="text-primary font-bold">ONLINE</span>.
-                 </p>
+
+        <div className="exn-card p-10 space-y-12">
+           {/* Registration */}
+           <div className="space-y-6">
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.1 Node Registration</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div className="space-y-4">
+                    <p className="text-xs font-black uppercase text-amber-500">Prerequisite: License</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      User must first transfer 500 USDC to the <span className="font-bold text-foreground">Global License Vault</span>. This instruction generates a unique License ID mapped to the user's wallet.
+                    </p>
+                 </div>
+                 <div className="space-y-4">
+                    <p className="text-xs font-black uppercase text-amber-500">Instruction: <span className="font-mono">register_validator</span></p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      1. Verify <span className="font-mono">license_id</span> ownership.<br/>
+                      2. Initialize <span className="font-bold text-foreground">Validator State Account</span> (PDA).<br/>
+                      3. Map metadata (Name, Location, Commission Rate).<br/>
+                      4. Set <span className="font-mono">license.is_claimed = true</span>.
+                    </p>
+                 </div>
               </div>
            </div>
-           <div className="pt-8 border-t border-border">
-              <p className="text-[10px] text-muted-foreground uppercase font-bold text-center italic">
-                Deactivation requires an <span className="font-mono">unstake_seed</span> call, which changes status to OFFLINE and triggers a 24-hour withdrawal cooldown for the 15M EXN.
-              </p>
+
+           {/* Seed Management */}
+           <div className="space-y-6 pt-10 border-t border-white/5">
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.2 Seed & Operational Status</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div className="exn-card p-6 border-primary/10 bg-primary/5 space-y-4">
+                    <p className="text-xs font-black uppercase text-primary">Deposit Seed (15M EXN)</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Moves 15M EXN to the <span className="font-bold text-foreground">Validator Seed PDA</span>. Only after this deposit can the node be toggled to <span className="text-emerald-500 font-bold">ONLINE</span> status.
+                    </p>
+                 </div>
+                 <div className="exn-card p-6 border-destructive/10 bg-destructive/5 space-y-4">
+                    <p className="text-xs font-black uppercase text-destructive">Withdraw Seed</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Transitions node to <span className="text-destructive font-bold">OFFLINE</span> and returns the 15M EXN to the owner. This action is blocked if there are active delegator positions remaining.
+                    </p>
+                 </div>
+              </div>
+           </div>
+
+           {/* Node Management */}
+           <div className="space-y-6 pt-10 border-t border-white/5">
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.3 Commission & Closure</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                       <BadgeDollarSign className="w-4 h-4 text-emerald-500" />
+                       <h4 className="text-xs font-black uppercase text-emerald-500">Claim Node Commission</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Owners can call <span className="font-mono">claim_node_commission()</span> to withdraw accrued commission rewards. These rewards are calculated during the Epoch Crank (Section 7) and stored in the <span className="font-bold text-foreground">accrued_node_rewards</span> field.
+                    </p>
+                 </div>
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                       <ShieldAlert className="w-4 h-4 text-destructive" />
+                       <h4 className="text-xs font-black uppercase text-destructive">Decommission Node</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Permanently terminates the node account. The associated license is <span className="text-destructive font-bold">BURNED</span> and cannot be reused. Requires 0 active delegator weight.
+                    </p>
+                 </div>
+              </div>
            </div>
         </div>
       </section>
@@ -310,27 +358,24 @@ export default function ProtocolSpecPage() {
         </div>
 
         <div className="exn-card p-10 space-y-12 border-secondary/20 bg-secondary/5">
-           {/* Proposal Logic */}
            <div className="space-y-6">
               <div className="flex items-center gap-3">
                  <Gavel className="w-5 h-5 text-secondary" />
-                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-secondary font-mono">create_proposal(title, description, type, amount, target)</span></h4>
+                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-secondary font-mono">create_proposal</span></h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-4">
                     <h5 className="text-[10px] font-black uppercase text-muted-foreground">On-Chain Behavior</h5>
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                       <li>Verify caller has <span className="text-foreground font-bold">≥ 1,000,000 EXN</span> in active staking weight across the network.</li>
+                       <li>Verify caller has <span className="text-foreground font-bold">≥ 1,000,000 EXN</span> active stake.</li>
                        <li>Transfer <span className="text-foreground font-bold">10 EXN fee</span> from caller to the <span className="text-secondary">Global Treasury Vault</span>.</li>
-                       <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> with <span className="font-mono">created_at</span> and <span className="font-mono">deadline</span> (7 days).</li>
-                       <li>Set <span className="text-foreground font-bold">voting_ends_at</span> window (Deadline - 4 hours) to prevent last-second flash-loan manipulation.</li>
+                       <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> with <span className="font-mono">deadline</span> (7 days).</li>
                     </ol>
                  </div>
                  <div className="p-6 bg-background/40 rounded-2xl border border-border">
                     <p className="text-[10px] text-muted-foreground uppercase font-black mb-4">Proposal Account State</p>
                     <ul className="space-y-2 font-mono text-[10px] text-foreground/80">
-                       <li>- proposer: Pubkey</li>
-                       <li>- type: 0 (Param) | 1 (Treasury)</li>
+                       <li>- type: Parameter | Treasury</li>
                        <li>- yes_votes: u64 (Atomic)</li>
                        <li>- no_votes: u64 (Atomic)</li>
                        <li>- executed: bool</li>
@@ -339,11 +384,10 @@ export default function ProtocolSpecPage() {
               </div>
            </div>
 
-           {/* Voting Logic */}
            <div className="space-y-6 pt-10 border-t border-white/5">
               <div className="flex items-center gap-3">
                  <Vote className="w-5 h-5 text-primary" />
-                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-primary font-mono">cast_vote(proposal_id, support, rationale)</span></h4>
+                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-primary font-mono">cast_vote</span></h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-4">
@@ -351,37 +395,14 @@ export default function ProtocolSpecPage() {
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
                        <li>Verify caller has <span className="text-foreground font-bold">≥ 10,000 EXN</span> active stake.</li>
                        <li>Transfer <span className="text-foreground font-bold">3 EXN fee</span> to the <span className="text-secondary">Global Treasury Vault</span>.</li>
-                       <li>Calculate caller's <span className="text-primary font-bold">Snapshot Stake Weight</span> (Sum of all active stake accounts).</li>
-                       <li>Increment <span className="font-mono">yes_votes</span> or <span className="font-mono">no_votes</span> by the weight value.</li>
-                       <li>Record <span className="text-foreground font-bold">Voter Pubkey</span> in the proposal's bit-map to strictly prevent double-voting.</li>
+                       <li>Increment <span className="font-mono">yes_votes</span> or <span className="font-mono">no_votes</span> by the caller's snapshot stake weight.</li>
                     </ol>
                  </div>
                  <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
                     <p className="text-[10px] text-amber-500 uppercase font-black mb-2">Flash-Loan Protection</p>
                     <p className="text-xs text-muted-foreground leading-relaxed italic">
-                      "The voting weight must be snapshotted from the Global State accounts to ensure that tokens purchased within the current epoch cannot be used for governance until the next cycle."
+                      "Voting weight must be snapshotted to ensure tokens purchased within the current epoch cannot influence active proposals."
                     </p>
-                 </div>
-              </div>
-           </div>
-
-           {/* Execution Logic */}
-           <div className="space-y-6 pt-10 border-t border-white/5">
-              <div className="flex items-center gap-3">
-                 <Zap className="w-5 h-5 text-emerald-500" />
-                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-emerald-500 font-mono">execute_proposal(proposal_id)</span></h4>
-              </div>
-              <div className="space-y-4">
-                 <p className="text-sm text-muted-foreground leading-relaxed">
-                    A permissionless instruction that can be called by anyone after the <span className="font-mono">deadline</span> has passed. 
-                 </p>
-                 <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
-                    <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                       <li>Assert <span className="font-mono">Clock::unix_timestamp >= deadline</span>.</li>
-                       <li>Verify <span className="font-mono">yes_votes > no_votes</span> (Simple Majority Consensus).</li>
-                       <li>If <span className="font-mono">type == 1</span> (Treasury), authorize a transfer of <span className="text-foreground font-bold">amount</span> from the <span className="text-secondary">Global Treasury Vault</span> PDA to the <span className="text-foreground font-bold">recipient</span> wallet.</li>
-                       <li>Set <span className="font-mono">executed = true</span> to prevent double-execution.</li>
-                    </ol>
                  </div>
               </div>
            </div>
