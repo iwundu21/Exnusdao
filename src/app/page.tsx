@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -16,6 +17,7 @@ const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
 const MIN_STAKE_FOR_VOTE = 10_000;
 const PROPOSAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 Days for DAO
 const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 Days for Rewards
+const GENESIS_TIME = 1704067200000;
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -178,6 +180,12 @@ export default function Home() {
   };
 
   const handleCrank = () => {
+    const currentEpoch = Math.floor((Date.now() - GENESIS_TIME) / EPOCH_DURATION_MS) + 700;
+    
+    if (state.lastCrankedEpoch >= currentEpoch) {
+      return setFeedback('warning', `Network Epoch ${currentEpoch} distribution has already been finalized.`);
+    }
+
     const totalPool = state.rewardCap;
     const activeValidators = state.validators.filter(v => v.is_active && v.total_staked > 0);
     const totalActiveWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
@@ -203,11 +211,12 @@ export default function Home() {
 
       return {
         ...prev,
-        validators: newValidators
+        validators: newValidators,
+        lastCrankedEpoch: currentEpoch
       };
     });
 
-    setFeedback('success', `Network crank successful. Distributed ${totalPool} EXN dynamic pool rewards.`);
+    setFeedback('success', `Network crank successful. Distributed ${totalPool} EXN dynamic pool rewards for Epoch ${currentEpoch}.`);
   };
 
   const handleClaim = () => {
@@ -334,6 +343,7 @@ export default function Home() {
         <CrankTerminal 
           validators={state.validators} 
           rewardCap={state.rewardCap}
+          lastCrankedEpoch={state.lastCrankedEpoch}
           onCrank={handleCrank}
           connected={connected}
         />

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -85,6 +86,7 @@ export interface ProtocolState {
   proposals: Proposal[];
   isPaused: boolean;
   lastTransaction: TransactionFeedback | null;
+  lastCrankedEpoch: number;
 }
 
 const SEED_AMOUNT = 15000000;
@@ -101,6 +103,7 @@ const INITIAL_STATE: ProtocolState = {
   licenseLimit: 21,
   isPaused: false,
   lastTransaction: null,
+  lastCrankedEpoch: 699,
   validators: [
     { 
       id: 'v1', 
