@@ -199,7 +199,7 @@ export default function ProtocolSpecPage() {
               <h4 className="text-sm font-black uppercase text-primary tracking-widest">Instruction: <span className="text-foreground font-mono">claim_rewards()</span></h4>
               <div className="space-y-4">
                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    1. Assert current time >= stake account maturity.<br/>
+                    1. Assert current time &gt;= stake account maturity.<br/>
                     2. Calculate yield: <span className="font-mono">(ValidatorIndex - Checkpoint) * StakeAmount</span>.<br/>
                     3. Transfer yield from <span className="text-foreground font-bold">Global Reward Vault</span> to User Wallet.<br/>
                     4. Reset stake checkpoint to current Validator Index.
@@ -210,7 +210,7 @@ export default function ProtocolSpecPage() {
               <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">unstake_principal()</span></h4>
               <div className="space-y-4">
                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    1. Assert current time >= stake account maturity.<br/>
+                    1. Assert current time &gt;= stake account maturity.<br/>
                     2. Transfer original principal from the <span className="text-foreground font-bold">Staking Vault PDA</span> to User Wallet.<br/>
                     3. Close the Staking Vault PDA account and return rent lamports to user.
                  </p>
@@ -400,7 +400,7 @@ export default function ProtocolSpecPage() {
                 <div className="space-y-4">
                   <h5 className="text-[10px] font-black uppercase text-muted-foreground">Execution Behavior</h5>
                   <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                    <li><span className="text-foreground font-bold">Minimum Threshold:</span> Assert caller has total combined active stake <span className="font-black text-amber-500">≥ 10,000 EXN</span>.</li>
+                    <li><span className="text-foreground font-bold">Minimum Threshold:</span> Assert caller has total combined active stake &ge; 10,000 EXN.</li>
                     <li><span className="text-foreground font-bold">Mandatory Rationale:</span> Caller must provide a string <span className="text-primary font-bold">comment</span> (rationale) for the on-chain registry.</li>
                     <li><span className="text-foreground font-bold">Identity Verification:</span> Verify identity against active <span className="font-mono text-primary">Stake Account PDAs</span>.</li>
                     <li><span className="text-foreground font-bold">Weight Snapshot:</span> Sum total principal. <span className="text-secondary font-bold">1 EXN = 1 Vote Weight</span>.</li>
@@ -411,7 +411,7 @@ export default function ProtocolSpecPage() {
                 <div className="p-6 bg-background/40 border border-border rounded-2xl space-y-4">
                    <p className="text-[10px] font-black uppercase text-secondary">Lock Window Logic</p>
                    <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                     "The program must assert that (Clock::unix_timestamp < proposal.deadline - 14400) before allowing the vote to proceed. Any attempt to vote in the final 4 hours of the 7-day window must be rejected with a 'VotingLockActive' error."
+                     &quot;The program must assert that (Clock::unix_timestamp &lt; proposal.deadline - 14400) before allowing the vote to proceed. Any attempt to vote in the final 4 hours of the 7-day window must be rejected with a &apos;VotingLockActive&apos; error.&quot;
                    </p>
                 </div>
               </div>
@@ -427,7 +427,7 @@ export default function ProtocolSpecPage() {
                  <div className="space-y-4">
                     <h5 className="text-[10px] font-black uppercase text-muted-foreground">On-Chain Behavior</h5>
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                       <li>Verify caller has <span className="text-foreground font-bold">≥ 1M EXN</span> active stake weight.</li>
+                       <li>Verify caller has <span className="text-foreground font-bold">&ge; 1M EXN</span> active stake weight.</li>
                        <li>Transfer <span className="text-foreground font-bold">10 EXN fee</span> to <span className="text-secondary">Global Treasury Vault</span>.</li>
                        <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> (PDA) seeds <span className="font-mono text-primary">["proposal", proposal_id]</span>.</li>
                        <li>Store metadata and the exact <span className="font-mono">deadline_timestamp</span> (Created + 7 Days).</li>
