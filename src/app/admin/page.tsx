@@ -14,7 +14,8 @@ import {
   AlertTriangle,
   Lock,
   ExternalLink,
-  Zap
+  Zap,
+  Ticket
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -28,6 +29,7 @@ export default function AdminPage() {
   });
   const [funding, setFunding] = useState({ reward: '', treasury: '' });
   const [newCap, setNewCap] = useState('');
+  const [newLicensePrice, setNewLicensePrice] = useState('');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -52,7 +54,8 @@ export default function AdminPage() {
       usdcMint: mints.usdc,
       rewardVaultPda,
       treasuryVaultPda,
-      usdcVaultPda
+      usdcVaultPda,
+      licensePrice: 500 // Initial default
     }));
     setFeedback('success', 'Protocol smart contract initialized. Authority anchored to active wallet.');
   };
@@ -91,6 +94,14 @@ export default function AdminPage() {
     setState(prev => ({ ...prev, rewardCap: cap }));
     setNewCap('');
     setFeedback('success', `Network 14-day distribution cap updated to ${cap.toLocaleString()} EXN.`);
+  };
+
+  const handleUpdateLicensePrice = () => {
+    const price = Number(newLicensePrice);
+    if (!price || price <= 0) return setFeedback('error', 'Invalid license price.');
+    setState(prev => ({ ...prev, licensePrice: price }));
+    setNewLicensePrice('');
+    setFeedback('success', `Protocol node license price updated to ${price.toLocaleString()} USDC.`);
   };
 
   const handleWithdrawUsdc = () => {
@@ -215,9 +226,9 @@ export default function AdminPage() {
                  <p className="text-[8px] font-mono text-muted-foreground mt-2 truncate">{state.usdcVaultPda}</p>
               </div>
               <div className="exn-card p-6 border-border bg-foreground/5">
-                 <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-3">Epoch Reward Cap</p>
-                 <p className="text-2xl font-bold text-foreground">{(state.rewardCap || 0).toLocaleString()} EXN</p>
-                 <p className="text-[8px] uppercase font-bold text-muted-foreground mt-2">14-Day Cycle</p>
+                 <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-3">Current License Price</p>
+                 <p className="text-2xl font-bold text-foreground">{(state.licensePrice || 0).toLocaleString()} <span className="text-sm">USDC</span></p>
+                 <p className="text-[8px] uppercase font-bold text-muted-foreground mt-2">Dynamic Parameter</p>
               </div>
            </div>
 
@@ -267,19 +278,34 @@ export default function AdminPage() {
                     <h3 className="text-lg font-bold uppercase tracking-widest">Protocol Sharding Parameters</h3>
                  </div>
                  
-                 <div className="space-y-4">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black">14-Day Dynamic Distribution Cap (EXN)</p>
-                    <div className="flex gap-4">
-                       <input 
-                        type="number" 
-                        value={newCap} 
-                        onChange={e => setNewCap(e.target.value)} 
-                        className="exn-input flex-1 h-12" 
-                        placeholder={state.rewardCap.toString()}
-                      />
-                       <button onClick={handleUpdateCap} className="exn-button-outline px-8 h-12 text-[10px] font-black uppercase">Apply Parameter</button>
-                    </div>
-                    <p className="text-[9px] text-muted-foreground uppercase">Current Pool: {state.rewardCap.toLocaleString()} EXN per 14-day epoch</p>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="space-y-4">
+                      <p className="text-[10px] text-muted-foreground uppercase font-black">14-Day Reward Cap (EXN)</p>
+                      <div className="flex gap-2">
+                         <input 
+                          type="number" 
+                          value={newCap} 
+                          onChange={e => setNewCap(e.target.value)} 
+                          className="exn-input h-12" 
+                          placeholder={state.rewardCap.toString()}
+                        />
+                         <button onClick={handleUpdateCap} className="exn-button-outline px-4 h-12 text-[9px] font-black uppercase">Apply</button>
+                      </div>
+                   </div>
+
+                   <div className="space-y-4">
+                      <p className="text-[10px] text-muted-foreground uppercase font-black">License Price (USDC)</p>
+                      <div className="flex gap-2">
+                         <input 
+                          type="number" 
+                          value={newLicensePrice} 
+                          onChange={e => setNewLicensePrice(e.target.value)} 
+                          className="exn-input h-12" 
+                          placeholder={state.licensePrice.toString()}
+                        />
+                         <button onClick={handleUpdateLicensePrice} className="exn-button-outline px-4 h-12 text-[9px] font-black uppercase">Apply</button>
+                      </div>
+                   </div>
                  </div>
               </div>
            </div>

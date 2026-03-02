@@ -82,6 +82,7 @@ export interface ProtocolState {
   usdcVaultBalance: number;
   rewardCap: number;
   licenseLimit: number;
+  licensePrice: number;
   validators: Validator[];
   userStakes: UserStake[];
   licenses: License[];
@@ -112,6 +113,7 @@ const INITIAL_STATE: ProtocolState = {
   usdcVaultBalance: 5000,
   rewardCap: 1250,
   licenseLimit: 21,
+  licensePrice: 500,
   isPaused: false,
   lastTransaction: null,
   lastCrankedEpoch: 699,

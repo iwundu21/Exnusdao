@@ -67,7 +67,7 @@ export default function ProtocolSpecPage() {
                 <li>Assign <span className="text-foreground font-bold">Admin Authority</span> to the caller's public key.</li>
                 <li>Store the <span className="text-foreground font-bold">EXN Mint</span> and <span className="text-foreground font-bold">USDC Mint</span> addresses in the Global State account.</li>
                 <li>Derive and initialize the three Global PDAs: Reward Vault, Treasury Vault, and License Vault.</li>
-                <li>Set initial protocol parameters: <span className="text-primary">Reward Cap</span>, <span className="text-primary">License Limit</span>, and <span className="text-primary">Epoch Index</span>.</li>
+                <li>Set initial protocol parameters: <span className="text-primary">Reward Cap</span>, <span className="text-primary">License Limit</span>, <span className="text-primary">Initial License Price</span>, and <span className="text-primary">Epoch Index</span>.</li>
               </ol>
             </div>
             <div className="p-6 bg-background/50 rounded-2xl border border-border space-y-4">
@@ -97,7 +97,7 @@ export default function ProtocolSpecPage() {
               <div className="exn-card p-6 border-primary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-primary">Global Reward Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["reward_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool.</p>
+                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool pool.</p>
               </div>
               <div className="exn-card p-6 border-secondary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-secondary">Global Treasury Vault</h5>
@@ -107,7 +107,7 @@ export default function ProtocolSpecPage() {
               <div className="exn-card p-6 border-emerald-500/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-emerald-500">Global License Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["license_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales (500 USDC per unit).</p>
+                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales. Pricing is dynamic and managed by Admin.</p>
               </div>
            </div>
 
@@ -221,7 +221,7 @@ export default function ProtocolSpecPage() {
                  <div className="space-y-4">
                     <p className="text-xs font-black uppercase text-amber-500">Prerequisite: License</p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      User must first transfer 500 USDC to the <span className="font-bold text-foreground">Global License Vault</span>. This instruction generates a unique License ID mapped to the user's wallet.
+                      User must first transfer the current <span className="font-bold text-foreground">Dynamic License Price</span> in USDC to the <span className="font-bold text-foreground">Global License Vault</span>. This price is managed by Admin (e.g., initially 500 USDC).
                     </p>
                  </div>
                  <div className="space-y-4">
@@ -298,7 +298,7 @@ export default function ProtocolSpecPage() {
            </div>
            <div className="p-6 bg-foreground/5 rounded-2xl border border-border space-y-3">
               <p className="text-xs font-black uppercase text-primary">Update Parameters</p>
-              <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Allows dynamic modification of the 14-day reward distribution cap to match network growth.</p>
+              <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Allows dynamic modification of the <span className="font-bold">Reward Cap</span> and the <span className="font-bold">License Price (USDC)</span> based on network health.</p>
            </div>
         </div>
       </section>

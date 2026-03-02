@@ -8,8 +8,6 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
-const LICENSE_PRICE = 500;
-
 export default function PurchaseLicensePage() {
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
@@ -20,20 +18,23 @@ export default function PurchaseLicensePage() {
     setMounted(true);
   }, []);
 
+  const licensePrice = state.licensePrice || 500;
+
   const handlePurchase = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     const activeNodes = state.validators.length;
     if (activeNodes >= state.licenseLimit) {
       return setFeedback('warning', 'Protocol registration cap reached.');
     }
-    if (state.usdcBalance < LICENSE_PRICE) {
-      return setFeedback('error', 'Insufficient USDC balance for purchase.');
+    if (state.usdcBalance < licensePrice) {
+      return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
     }
     const uniqueId = `LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
     const newLicense = { id: uniqueId, owner: walletAddress, is_claimed: false, is_burned: false };
     setState(prev => ({
       ...prev,
-      usdcBalance: prev.usdcBalance - LICENSE_PRICE,
+      usdcBalance: prev.usdcBalance - licensePrice,
+      usdcVaultBalance: prev.usdcVaultBalance + licensePrice,
       licenses: [...prev.licenses, newLicense]
     }));
     setFeedback('success', `License ${uniqueId} generated successfully.`);
@@ -92,7 +93,7 @@ export default function PurchaseLicensePage() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-emerald-500">500 USDC</p>
+            <p className="text-2xl font-bold text-emerald-500">{licensePrice.toLocaleString()} USDC</p>
           </div>
         </div>
 
