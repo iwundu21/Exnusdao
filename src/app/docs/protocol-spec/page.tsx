@@ -16,7 +16,9 @@ import {
   Lock,
   ArrowRightLeft,
   CircleDollarSign,
-  Landmark
+  Landmark,
+  RefreshCw,
+  Calculator
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -31,7 +33,7 @@ export default function ProtocolSpecPage() {
           </div>
           <p className="text-xs font-black uppercase tracking-[0.3em] text-primary">Developer Blueprint</p>
         </div>
-        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.0</h1>
+        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.1</h1>
         <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
           Technical architecture and state machine behavior for the Exnus Network Solana Program. 
           Use this specification to implement the core smart contract logic and multi-vault accounting.
@@ -247,6 +249,57 @@ export default function ProtocolSpecPage() {
            <div className="p-6 bg-foreground/5 rounded-2xl border border-border space-y-3">
               <p className="text-xs font-black uppercase text-primary">Update Parameters</p>
               <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Allows dynamic modification of the 14-day reward distribution cap to match network growth.</p>
+           </div>
+        </div>
+      </section>
+
+      {/* 7. Network Crank Logic */}
+      <section className="space-y-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 rounded-xl">
+            <RefreshCw className="w-8 h-8 text-emerald-500" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">7. Network Crank & Distribution</h2>
+        </div>
+
+        <div className="exn-card p-10 space-y-8 border-emerald-500/20 bg-emerald-500/5">
+           <div className="space-y-4">
+              <h4 className="text-sm font-black uppercase text-emerald-500 tracking-widest">Instruction: <span className="text-foreground font-mono">crank_epoch_distribution(epoch_idx)</span></h4>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                A permissionless "Keeper" instruction that calculates and finalizes reward indices for the entire network at the end of a 14-day cycle.
+              </p>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-6">
+              <div className="space-y-4">
+                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Execution Steps (On-Chain)</h5>
+                 <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+                    <li>Assert <span className="text-foreground font-mono">Clock::unix_timestamp</span> exceeds the current Epoch's end-time.</li>
+                    <li>Calculate <span className="text-foreground font-bold">Total Network Weight</span> (Sum of all active validator stake).</li>
+                    <li>Iterate through active validators to calculate <span className="text-secondary font-bold">Epoch Share</span>.</li>
+                    <li><span className="text-foreground font-bold">Validator Pool</span> = (ValidatorWeight / TotalNetworkWeight) * GlobalRewardCap.</li>
+                    <li>Calculate <span className="text-primary font-bold">Node Commission</span> based on Validator's set rate.</li>
+                    <li>Add <span className="text-foreground font-bold">Remnant Pool</span> (ValidatorPool - Commission) to the Validator's <span className="font-mono">global_reward_index</span>.</li>
+                    <li>Update <span className="text-foreground font-bold">Global State</span> last_cranked_epoch = epoch_idx.</li>
+                 </ol>
+              </div>
+
+              <div className="p-6 bg-background/60 rounded-2xl border border-border space-y-6">
+                 <div className="flex items-center gap-3">
+                    <Calculator className="w-5 h-5 text-emerald-500" />
+                    <p className="text-[10px] font-black uppercase text-foreground">Mathematical Identity</p>
+                 </div>
+                 <div className="space-y-4 font-mono text-[11px] text-muted-foreground bg-black/20 p-4 rounded-lg">
+                    <p className="text-foreground">Index_Update = (Reward_Pool * Weight_Share) / Total_Stake</p>
+                    <p className="italic border-t border-white/5 pt-2">"This ensures reward growth is perfectly proportional to stake weight, allowing delegators to calculate their specific yield using simple delta multiplication."</p>
+                 </div>
+                 <div className="p-4 border border-amber-500/30 rounded-xl bg-amber-500/5">
+                    <p className="text-[9px] text-amber-500 uppercase font-black mb-2">Computational Bound</p>
+                    <p className="text-[11px] text-muted-foreground leading-tight">
+                      Solana Compute Budgets may limit the number of validators processed in a single transaction. Implementers should use a "paging" system for the crank if the validator count exceeds 25 nodes.
+                    </p>
+                 </div>
+              </div>
            </div>
         </div>
       </section>
