@@ -37,13 +37,28 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
   const isEpochCranked = lastCrankedEpoch >= currentEpoch;
 
   const epochHistory = useMemo(() => {
-    return Array.from({ length: 5 }, (_, i) => {
+    return Array.from({ length: 8 }, (_, i) => {
       const eNum = currentEpoch - i;
       if (eNum < 700) return null;
+      
+      const startMs = GENESIS_TIME + (eNum - 700) * EPOCH_DURATION;
+      const endMs = startMs + EPOCH_DURATION;
+      
+      const formatOptions: Intl.DateTimeFormatOptions = {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      };
+
       return {
         number: eNum,
         status: eNum <= lastCrankedEpoch ? 'SETTLED' : eNum === currentEpoch ? 'ACTIVE' : 'PENDING',
-        isCurrent: eNum === currentEpoch
+        isCurrent: eNum === currentEpoch,
+        startFormatted: new Date(startMs).toLocaleString([], formatOptions),
+        endFormatted: new Date(endMs).toLocaleString([], formatOptions)
       };
     }).filter(Boolean);
   }, [currentEpoch, lastCrankedEpoch]);
@@ -66,7 +81,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
           <div className="space-y-1">
              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Cycle Ends In</p>
              <p className="text-xl font-bold text-foreground font-mono">
-               {timeLeft.d}d {timeLeft.h}h {timeLeft.m}m {timeLeft.s}s
+               {timeLeft.d}D {timeLeft.h}H {timeLeft.m}M {timeLeft.s}S
              </p>
           </div>
         </div>
@@ -74,25 +89,19 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="exn-card p-6 border-primary/20 bg-primary/5">
-          <div className="flex items-center gap-3 mb-4">
-            <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Active Nodes</h3>
-          </div>
+          <p className="text-[10px] uppercase font-black tracking-widest text-foreground mb-4">Active Nodes</p>
           <p className="text-3xl font-bold text-primary">{activeValidators.length}</p>
           <p className="text-[10px] text-muted-foreground uppercase mt-2 font-bold tracking-tight">Contributing Weight</p>
         </div>
 
         <div className="exn-card p-6 border-secondary/20 bg-secondary/5">
-          <div className="flex items-center gap-3 mb-4">
-            <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Epoch Distribution</h3>
-          </div>
+          <p className="text-[10px] uppercase font-black tracking-widest text-foreground mb-4">Epoch Distribution</p>
           <p className="text-3xl font-bold text-secondary">{rewardCap.toLocaleString()}</p>
           <p className="text-[10px] text-muted-foreground uppercase mt-2 font-bold tracking-tight">Dynamic Reward Pool</p>
         </div>
 
         <div className="exn-card p-6 border-emerald-500/20 bg-emerald-500/5">
-          <div className="flex items-center gap-3 mb-4">
-            <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground">Status</h3>
-          </div>
+          <p className="text-[10px] uppercase font-black tracking-widest text-foreground mb-4">Status</p>
           <p className={`text-2xl font-bold ${isEpochCranked ? 'text-emerald-500' : 'text-amber-500'}`}>
             {isEpochCranked ? 'SETTLED' : 'ACTIVE'}
           </p>
@@ -125,28 +134,33 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
                 </button>
               )}
 
-              <div className="flex items-center gap-2 text-[10px] text-primary/40 uppercase font-black tracking-widest">
+              <p className="text-[10px] text-primary/40 uppercase font-black tracking-widest">
                 Next Cycle Starts in {timeLeft.d} Days
-              </div>
+              </p>
             </div>
           </div>
         </div>
 
         <div className="space-y-6">
            <div className="exn-card p-0 border-border overflow-hidden h-full">
-              <div className="p-4 bg-foreground/5 border-b border-border flex items-center gap-2">
+              <div className="p-4 bg-foreground/5 border-b border-border">
                  <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Epoch Lifecycle Registry</p>
               </div>
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-foreground/10">
                  {epochHistory.map((epoch: any) => (
-                   <div key={epoch.number} className={`p-6 flex justify-between items-center transition-colors ${epoch.isCurrent ? 'bg-primary/5' : 'bg-transparent'}`}>
+                   <div key={epoch.number} className={`p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors ${epoch.isCurrent ? 'bg-primary/5' : 'bg-transparent'}`}>
                       <div className="flex items-center gap-4">
                          <div className={`w-2 h-2 rounded-full ${epoch.status === 'SETTLED' ? 'bg-emerald-500' : epoch.status === 'ACTIVE' ? 'bg-amber-500 animate-pulse' : 'bg-foreground/20'}`} />
                          <div>
                             <p className="text-sm font-bold text-foreground uppercase">Epoch {epoch.number}</p>
-                            <p className="text-[8px] text-muted-foreground uppercase font-black tracking-widest">
-                              {epoch.status === 'SETTLED' ? 'Rewards Distributed' : epoch.status === 'ACTIVE' ? 'Active Collection Window' : 'Awaiting Cycle'}
-                            </p>
+                            <div className="flex flex-col gap-0.5 mt-1">
+                               <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">
+                                 Start: {epoch.startFormatted}
+                               </p>
+                               <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">
+                                 End: {epoch.endFormatted}
+                               </p>
+                            </div>
                          </div>
                       </div>
                       <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase border ${epoch.status === 'SETTLED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : epoch.status === 'ACTIVE' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-foreground/5 text-muted-foreground border-border'}`}>
@@ -162,9 +176,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
       <div className="exn-card p-0 border-border overflow-hidden">
         <div className="p-4 bg-foreground/5 border-b border-border flex items-center justify-between">
            <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Active Network Weight Shards</p>
-           <div className="flex items-center gap-4 text-[9px] font-black uppercase">
-             <span className="text-primary">Global Weight: {totalNetworkWeight.toLocaleString()} EXN</span>
-           </div>
+           <p className="text-[9px] font-black uppercase text-primary">Global Weight: {totalNetworkWeight.toLocaleString()} EXN</p>
         </div>
         <div className="divide-y divide-border">
           {activeValidators.length === 0 ? (
@@ -196,7 +208,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
         </div>
       </div>
       
-      <div className="flex items-start gap-3 p-4 bg-foreground/5 border border-border rounded-xl">
+      <div className="p-4 bg-foreground/5 border border-border rounded-xl">
         <p className="text-[10px] text-muted-foreground uppercase font-bold leading-tight tracking-tight">
           The network crank initiates a dynamic 14-day reward distribution. "ACTIVE" epochs are currently collecting weight and can be settled by operators. "SETTLED" epochs have finalized their reward indices for all delegators.
         </p>
