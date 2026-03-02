@@ -22,7 +22,8 @@ import {
   Gavel,
   Vote,
   Hammer,
-  BadgeDollarSign
+  BadgeDollarSign,
+  Settings
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -76,7 +77,7 @@ export default function ProtocolSpecPage() {
                  <p className="text-[10px] font-black uppercase">Authority Constraint</p>
                </div>
                <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                 "Only the address set during initialization can authorize USDC withdrawals from the License Vault or update global network parameters."
+                 "Only the address set during initialization can authorize USDC withdrawals from the License Vault or update global network parameters directly."
                </p>
             </div>
           </div>
@@ -97,7 +98,7 @@ export default function ProtocolSpecPage() {
               <div className="exn-card p-6 border-primary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-primary">Global Reward Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["reward_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool pool.</p>
+                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool.</p>
               </div>
               <div className="exn-card p-6 border-secondary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-secondary">Global Treasury Vault</h5>
@@ -107,7 +108,7 @@ export default function ProtocolSpecPage() {
               <div className="exn-card p-6 border-emerald-500/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-emerald-500">Global License Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["license_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales. Pricing is dynamic and managed by Admin.</p>
+                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales. Pricing is dynamic (Section 6).</p>
               </div>
            </div>
 
@@ -293,11 +294,17 @@ export default function ProtocolSpecPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            <div className="p-6 bg-foreground/5 rounded-2xl border border-border space-y-3">
-              <p className="text-xs font-black uppercase text-primary">Settle Revenue</p>
+              <div className="flex items-center gap-2">
+                <CircleDollarSign className="w-4 h-4 text-emerald-500" />
+                <p className="text-xs font-black uppercase text-primary">Settle Revenue</p>
+              </div>
               <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Instruction transfers USDC from <span className="font-mono">GlobalLicenseVault</span> to the designated Admin wallet.</p>
            </div>
            <div className="p-6 bg-foreground/5 rounded-2xl border border-border space-y-3">
-              <p className="text-xs font-black uppercase text-primary">Update Parameters</p>
+              <div className="flex items-center gap-2">
+                <Settings className="w-4 h-4 text-primary" />
+                <p className="text-xs font-black uppercase text-primary">Update Parameters</p>
+              </div>
               <p className="text-[11px] text-muted-foreground">Authorized: <span className="font-bold">Admin Only</span>. Allows dynamic modification of the <span className="font-bold">Reward Cap</span> and the <span className="font-bold">License Price (USDC)</span> based on network health.</p>
            </div>
         </div>
@@ -358,7 +365,27 @@ export default function ProtocolSpecPage() {
         </div>
 
         <div className="exn-card p-10 space-y-12 border-secondary/20 bg-secondary/5">
+           {/* Proposal Types */}
            <div className="space-y-6">
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">8.1 Proposal Classification</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="p-6 bg-primary/5 rounded-2xl border border-primary/20 space-y-4">
+                    <p className="text-xs font-black uppercase text-primary tracking-widest">Type 0: Parameter Change</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Used to modify mutable variables in the <span className="font-bold text-foreground">Global State</span> account. This includes the Reward Cap, License Price, and Epoch Duration. Execution updates the contract's operational state.
+                    </p>
+                 </div>
+                 <div className="p-6 bg-secondary/5 rounded-2xl border border-secondary/20 space-y-4">
+                    <p className="text-xs font-black uppercase text-secondary tracking-widest">Type 1: Treasury Distribution</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      A financial instruction that authorizes the transfer of EXN tokens from the <span className="font-bold text-foreground">Global Treasury Vault</span> to a specific external wallet. Requires defined <span className="font-mono">recipient</span> and <span className="font-mono">amount</span>.
+                    </p>
+                 </div>
+              </div>
+           </div>
+
+           {/* Creation */}
+           <div className="space-y-6 pt-10 border-t border-white/5">
               <div className="flex items-center gap-3">
                  <Gavel className="w-5 h-5 text-secondary" />
                  <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-secondary font-mono">create_proposal</span></h4>
@@ -369,39 +396,49 @@ export default function ProtocolSpecPage() {
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
                        <li>Verify caller has <span className="text-foreground font-bold">≥ 1,000,000 EXN</span> active stake.</li>
                        <li>Transfer <span className="text-foreground font-bold">10 EXN fee</span> from caller to the <span className="text-secondary">Global Treasury Vault</span>.</li>
-                       <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> with <span className="font-mono">deadline</span> (7 days).</li>
+                       <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> (PDA) with selected Type (0 or 1).</li>
+                       <li>Store snapshot of current <span className="text-foreground font-mono">Clock::unix_timestamp</span> for voting deadline.</li>
                     </ol>
                  </div>
                  <div className="p-6 bg-background/40 rounded-2xl border border-border">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black mb-4">Proposal Account State</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-black mb-4">Proposal Account Data Schema</p>
                     <ul className="space-y-2 font-mono text-[10px] text-foreground/80">
-                       <li>- type: Parameter | Treasury</li>
-                       <li>- yes_votes: u64 (Atomic)</li>
-                       <li>- no_votes: u64 (Atomic)</li>
-                       <li>- executed: bool</li>
+                       <li>- type: u8 (0: Param | 1: Treasury)</li>
+                       <li>- target_amount: u64 (Type 1 only)</li>
+                       <li>- target_recipient: Pubkey (Type 1 only)</li>
+                       <li>- yes_votes: u64</li>
+                       <li>- no_votes: u64</li>
+                       <li>- deadline: i64</li>
                     </ul>
                  </div>
               </div>
            </div>
 
+           {/* Execution */}
            <div className="space-y-6 pt-10 border-t border-white/5">
               <div className="flex items-center gap-3">
-                 <Vote className="w-5 h-5 text-primary" />
-                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-primary font-mono">cast_vote</span></h4>
+                 <Zap className="w-5 h-5 text-primary" />
+                 <h4 className="text-sm font-black uppercase text-foreground tracking-widest">Instruction: <span className="text-primary font-mono">execute_proposal</span></h4>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                  <div className="space-y-4">
-                    <h5 className="text-[10px] font-black uppercase text-muted-foreground">Stake-Weighted Logic</h5>
+                    <h5 className="text-[10px] font-black uppercase text-muted-foreground">Type-Specific Execution Logic</h5>
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                       <li>Verify caller has <span className="text-foreground font-bold">≥ 10,000 EXN</span> active stake.</li>
-                       <li>Transfer <span className="text-foreground font-bold">3 EXN fee</span> to the <span className="text-secondary">Global Treasury Vault</span>.</li>
-                       <li>Increment <span className="font-mono">yes_votes</span> or <span className="font-mono">no_votes</span> by the caller's snapshot stake weight.</li>
+                       <li>Assert <span className="font-mono">Clock::unix_timestamp >= deadline</span>.</li>
+                       <li>Assert <span className="font-mono">yes_votes > no_votes</span>.</li>
+                       <li>
+                         <span className="text-foreground font-bold">If Type 0:</span> Mutate the target global state field (e.g., <span className="font-mono">state.reward_cap = proposal.new_value</span>).
+                       </li>
+                       <li>
+                         <span className="text-foreground font-bold">If Type 1:</span> Trigger Cross-Program Invocation (CPI) to Token Program: Transfer <span className="font-mono">target_amount</span> from <span className="text-secondary font-bold">Global Treasury Vault</span> to <span className="font-mono">target_recipient</span>.
+                       </li>
+                       <li>Mark <span className="font-mono">proposal.executed = true</span> to prevent double-spending/mutation.</li>
                     </ol>
                  </div>
                  <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
-                    <p className="text-[10px] text-amber-500 uppercase font-black mb-2">Flash-Loan Protection</p>
+                    <p className="text-[10px] text-amber-500 uppercase font-black mb-2">Double-Spend Prevention</p>
                     <p className="text-xs text-muted-foreground leading-relaxed italic">
-                      "Voting weight must be snapshotted to ensure tokens purchased within the current epoch cannot influence active proposals."
+                      "Proposal execution must be atomic and terminal. Once a Treasury transfer is authorized and executed, the proposal state is permanently locked to prevent repeated vault draining."
                     </p>
                  </div>
               </div>
