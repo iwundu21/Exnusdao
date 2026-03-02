@@ -100,7 +100,7 @@ export interface ProtocolState {
 }
 
 const SEED_AMOUNT = 15000000;
-const PROPOSAL_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+const PROPOSAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 Days for DAO
 const VOTING_LOCK_WINDOW = 3600000 * 4;
 
 const INITIAL_STATE: ProtocolState = {
