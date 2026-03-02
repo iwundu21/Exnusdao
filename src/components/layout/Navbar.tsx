@@ -2,14 +2,15 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer } from 'lucide-react';
+import { Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 
 export function Navbar() {
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
+  const walletAddress = publicKey?.toBase58() || '';
   const { state, isLoaded } = useProtocolState();
   const [mounted, setMounted] = useState(false);
 
@@ -19,6 +20,7 @@ export function Navbar() {
 
   const currentExn = isLoaded ? state.exnBalance : 0;
   const currentUsdc = isLoaded ? state.usdcBalance : 0;
+  const isAdmin = isLoaded && state.isInitialized && state.adminWallet === walletAddress;
 
   return (
     <nav className="flex items-center justify-between px-10 py-6 border-b border-border backdrop-blur-md fixed top-0 left-0 w-full z-50 bg-background/80">
@@ -43,6 +45,11 @@ export function Navbar() {
           <Link href="/manage-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
             <Settings className="w-4 h-4" /> Manage Node
           </Link>
+          {isAdmin && (
+            <Link href="/admin" className="flex items-center gap-2 text-primary font-black hover:opacity-80 transition-all">
+              <ShieldCheck className="w-4 h-4" /> Admin
+            </Link>
+          )}
         </div>
 
         {mounted && connected && isLoaded && (

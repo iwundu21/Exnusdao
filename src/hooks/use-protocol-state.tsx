@@ -78,6 +78,8 @@ export interface ProtocolState {
   usdcBalance: number;
   totalStaked: number;
   treasuryBalance: number;
+  rewardVaultBalance: number;
+  usdcVaultBalance: number;
   rewardCap: number;
   licenseLimit: number;
   validators: Validator[];
@@ -87,10 +89,17 @@ export interface ProtocolState {
   isPaused: boolean;
   lastTransaction: TransactionFeedback | null;
   lastCrankedEpoch: number;
+  // Admin & On-Chain State
+  isInitialized: boolean;
+  adminWallet: string | null;
+  exnMint: string | null;
+  usdcMint: string | null;
+  rewardVaultPda: string | null;
+  treasuryVaultPda: string | null;
+  usdcVaultPda: string | null;
 }
 
 const SEED_AMOUNT = 15000000;
-const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
 const PROPOSAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const VOTING_LOCK_WINDOW = 3600000 * 4;
 
@@ -99,11 +108,20 @@ const INITIAL_STATE: ProtocolState = {
   usdcBalance: 2500,
   totalStaked: 45045200, 
   treasuryBalance: 250000,
+  rewardVaultBalance: 1000000,
+  usdcVaultBalance: 5000,
   rewardCap: 1250,
   licenseLimit: 21,
   isPaused: false,
   lastTransaction: null,
   lastCrankedEpoch: 699,
+  isInitialized: false,
+  adminWallet: null,
+  exnMint: null,
+  usdcMint: null,
+  rewardVaultPda: null,
+  treasuryVaultPda: null,
+  usdcVaultPda: null,
   validators: [
     { 
       id: 'v1', 
