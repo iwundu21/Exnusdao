@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -56,10 +55,10 @@ export default function AdminPage() {
       rewardVaultPda,
       treasuryVaultPda,
       usdcVaultPda,
-      licensePrice: 500, // Initial default
-      rewardCap: 1250 // Initial default
+      licensePrice: 0, // Initialized to 0 as per requirements
+      rewardCap: 0 // Initialized to 0 as per requirements
     }));
-    setFeedback('success', 'Protocol smart contract initialized. Authority anchored to active wallet.');
+    setFeedback('success', 'Protocol smart contract initialized. Reward Cap and License Price set to zero for manual configuration.');
   };
 
   const handleFundRewardVault = () => {
@@ -92,7 +91,7 @@ export default function AdminPage() {
 
   const handleUpdateCap = () => {
     const cap = Number(newCap);
-    if (!cap || cap <= 0) return setFeedback('error', 'Invalid distribution cap.');
+    if (!cap || cap < 0) return setFeedback('error', 'Invalid distribution cap.');
     setState(prev => ({ ...prev, rewardCap: cap }));
     setNewCap('');
     setFeedback('success', `Protocol 14-day distribution cap updated to ${cap.toLocaleString()} EXN.`);
@@ -100,7 +99,7 @@ export default function AdminPage() {
 
   const handleUpdateLicensePrice = () => {
     const price = Number(newLicensePrice);
-    if (!price || price <= 0) return setFeedback('error', 'Invalid license price.');
+    if (!price || price < 0) return setFeedback('error', 'Invalid license price.');
     setState(prev => ({ ...prev, licensePrice: price }));
     setNewLicensePrice('');
     setFeedback('success', `Dynamic node license price updated to ${price.toLocaleString()} USDC.`);
@@ -289,7 +288,7 @@ export default function AdminPage() {
               <div className="exn-card p-8 space-y-8 border-border/20">
                  <div className="flex items-center gap-3">
                     <Settings className="w-5 h-5 text-muted-foreground" />
-                    <h3 className="text-lg font-bold uppercase tracking-widest">Protocol Sharding Parameters</h3>
+                    <h3 className="text-lg font-bold uppercase tracking-widest">Protocol Parameters</h3>
                  </div>
                  
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

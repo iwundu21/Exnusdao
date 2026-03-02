@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -111,9 +110,9 @@ const INITIAL_STATE: ProtocolState = {
   treasuryBalance: 250000,
   rewardVaultBalance: 1000000,
   usdcVaultBalance: 5000,
-  rewardCap: 1250,
+  rewardCap: 0, // Set to 0 for manual config
   licenseLimit: 21,
-  licensePrice: 500,
+  licensePrice: 0, // Set to 0 for manual config
   isPaused: false,
   lastTransaction: null,
   lastCrankedEpoch: 699,

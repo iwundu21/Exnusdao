@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -37,7 +36,7 @@ export default function ProtocolSpecPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
-            <Book className="w-5 h-5 text-primary" />
+            < Book className="w-5 h-5 text-primary" />
           </div>
           <p className="text-xs font-black uppercase tracking-[0.3em] text-primary">Developer Blueprint</p>
         </div>
@@ -78,7 +77,7 @@ export default function ProtocolSpecPage() {
                     <li>License Vault (USDC) - Seeds: <span className="font-mono text-primary">["license_vault"]</span></li>
                   </ul>
                 </li>
-                <li>Set initial parameters: <span className="text-primary font-bold">Dynamic License Price</span> and <span className="text-primary font-bold">14-Day Reward Cap</span>.</li>
+                <li>Set initial parameters to zero: <span className="text-primary font-bold">Dynamic License Price (0)</span> and <span className="text-primary font-bold">14-Day Reward Cap (0)</span>. Admin must manually update these via the front-end Command Center.</li>
               </ol>
             </div>
             <div className="p-6 bg-background/50 rounded-2xl border border-border space-y-4">
@@ -293,7 +292,7 @@ export default function ProtocolSpecPage() {
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
-            <ShieldCheck className="w-8 h-8 text-primary" />
+            < ShieldCheck className="w-8 h-8 text-primary" />
           </div>
           <h2 className="text-3xl font-bold uppercase tracking-widest">6. Administrative Instructions</h2>
         </div>
