@@ -1,7 +1,8 @@
+
 "use client";
 
-import React, { useState } from 'react';
-import { Wallet, Info, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Wallet, Info, Sparkles, Lock, Unlock } from 'lucide-react';
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -27,6 +28,12 @@ export function StakingActionForm({
   const [amount, setAmount] = useState('');
   const [duration, setDuration] = useState('30');
   const [activeTab, setActiveTab] = useState<'stake' | 'my-stakes'>('stake');
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAction = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
@@ -142,10 +149,10 @@ export function StakingActionForm({
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
           <div className="flex justify-between items-center p-6 bg-secondary/10 border border-secondary/20 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.1)]">
             <div className="space-y-1">
-              <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Total Claimable</p>
+              <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Matured Claimable</p>
               <p className="text-2xl font-bold text-secondary">{totalPendingRewards.toFixed(2)} EXN</p>
               <div className="flex items-center gap-1.5 text-[8px] text-secondary/60 uppercase font-bold">
-                <Sparkles className="w-2.5 h-2.5" /> Rewards accrue per Network Crank
+                <Sparkles className="w-2.5 h-2.5" /> Claims available after account maturity
               </div>
             </div>
             <button 
@@ -164,7 +171,7 @@ export function StakingActionForm({
               </div>
             ) : (
               activeUserStakes.map((s: any) => {
-                const isLocked = Date.now() < s.unlock_timestamp;
+                const isLocked = now < s.unlock_timestamp;
                 const validator = validators?.find((v: any) => v.id === s.validator_id);
                 const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION : 0;
                 
@@ -182,17 +189,20 @@ export function StakingActionForm({
                         <p className="text-[10px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Network Node'}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-base font-black text-emerald-500">+{pendingReward.toFixed(4)} EXN</p>
-                        <p className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md inline-block ${isLocked ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
-                          {isLocked ? 'Locked' : 'Unlocked'}
+                        <p className={`text-base font-black ${isLocked ? 'text-foreground/40' : 'text-emerald-500'}`}>
+                          +{pendingReward.toFixed(4)} EXN
                         </p>
+                        <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md mt-1 ${isLocked ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                          {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
+                          {isLocked ? 'Locked' : 'Matured'}
+                        </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 pt-4 border-t border-border/10">
                        <div className="flex justify-between items-center text-[9px] text-foreground/30 uppercase font-black">
-                          <span>Principal Unlock</span>
-                          <span className="text-foreground/60 font-mono">{unlockFormatted}</span>
+                          <span>Account Maturity</span>
+                          <span className={`font-mono ${isLocked ? 'text-amber-500/60' : 'text-emerald-500/60'}`}>{unlockFormatted}</span>
                        </div>
                     </div>
 
@@ -217,7 +227,7 @@ export function StakingActionForm({
           <Info className="w-full h-full" />
         </div>
         <p className="text-[10px] text-primary/40 leading-tight uppercase font-black tracking-tighter">
-          Protocol lock periods are immutable once broadcast. Rewards are settled on every network pulse. Verify selection before signature.
+          Rewards can only be claimed once the stake account duration has expired. Early withdrawals are restricted by the protocol smart contract.
         </p>
       </div>
 

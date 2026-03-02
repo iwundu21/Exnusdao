@@ -27,9 +27,12 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'staking' | 'governance' | 'crank'>('staking');
   const [selectedValidator, setSelectedValidator] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     setIsMounted(true);
+    const interval = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const userStakeWeight = useMemo(() => {
@@ -44,10 +47,11 @@ export default function Home() {
     return state.validators.reduce((acc, v) => acc + (v.total_staked || 0), 0);
   }, [state?.validators]);
 
+  // Only rewards from expired stakes are claimable
   const pendingRewardsTotal = useMemo(() => {
     if (!state?.userStakes || !state?.validators || !walletAddress) return 0;
     return state.userStakes
-      .filter(s => s.owner === walletAddress && !s.unstaked)
+      .filter(s => s.owner === walletAddress && !s.unstaked && now >= s.unlock_timestamp)
       .reduce((acc, stake) => {
         const validator = state.validators.find(v => v.id === stake.validator_id);
         if (!validator) return acc;
@@ -55,7 +59,7 @@ export default function Home() {
         const reward = (rewardDelta * (stake.amount || 0)) / REWARD_PRECISION;
         return acc + reward;
       }, 0);
-  }, [state?.userStakes, state?.validators, walletAddress]);
+  }, [state?.userStakes, state?.validators, walletAddress, now]);
 
   const handleStake = (stakeData: any) => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
@@ -126,14 +130,14 @@ export default function Home() {
       return setFeedback('error', `Insufficient EXN. Proposal broadcast fee: ${PROPOSAL_FEE} EXN.`);
     }
 
-    const now = Date.now();
+    const nowTime = Date.now();
     const newProp = {
       ...data,
       id: state.proposals.length + 1,
       proposer: walletAddress,
-      created_at: now,
-      deadline: now + PROPOSAL_DURATION_MS,
-      voting_ends_at: now + PROPOSAL_DURATION_MS - (3600000 * 4),
+      created_at: nowTime,
+      deadline: nowTime + PROPOSAL_DURATION_MS,
+      voting_ends_at: nowTime + PROPOSAL_DURATION_MS - (3600000 * 4),
       yes_votes: 0,
       no_votes: 0,
       executed: false,
@@ -223,25 +227,31 @@ export default function Home() {
     if (pendingRewardsTotal <= 0) return;
     
     setState(prev => {
+      let claimedAmount = 0;
       const newUserStakes = prev.userStakes.map(s => {
-        if (s.owner === walletAddress && !s.unstaked) {
+        if (s.owner === walletAddress && !s.unstaked && now >= s.unlock_timestamp) {
           const validator = prev.validators.find(v => v.id === s.validator_id);
-          return { 
-            ...s, 
-            reward_checkpoint: validator?.global_reward_index || s.reward_checkpoint 
-          };
+          if (validator) {
+            const rewardDelta = Math.max(0, (validator.global_reward_index || 0) - (s.reward_checkpoint || 0));
+            const reward = (rewardDelta * (s.amount || 0)) / REWARD_PRECISION;
+            claimedAmount += reward;
+            return { 
+              ...s, 
+              reward_checkpoint: validator.global_reward_index
+            };
+          }
         }
         return s;
       });
 
       return {
         ...prev,
-        exnBalance: prev.exnBalance + pendingRewardsTotal,
+        exnBalance: prev.exnBalance + claimedAmount,
         userStakes: newUserStakes
       };
     });
     
-    setFeedback('success', `Claimed ${pendingRewardsTotal.toFixed(2)} EXN staking rewards.`);
+    setFeedback('success', `Claimed ${pendingRewardsTotal.toFixed(2)} EXN staking rewards from matured positions.`);
   };
 
   const handleUnstake = (stakeId: string) => {
