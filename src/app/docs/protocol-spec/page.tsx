@@ -257,7 +257,8 @@ export default function ProtocolSpecPage() {
                  <div className="exn-card p-6 border-primary/10 bg-primary/5 space-y-4">
                     <p className="text-xs font-black uppercase text-primary">Instruction: <span className="font-mono">deposit_seed</span> (15M EXN)</p>
                     <p className="text-[11px] text-muted-foreground">
-                      Moves 15M EXN to the <span className="font-bold text-foreground">Validator Seed PDA</span>. Only after this deposit can the node be toggled to <span className="text-emerald-500 font-bold">ONLINE</span>.
+                      <span className="text-foreground font-bold">Transfer Behavior:</span> Moves 15,000,000 EXN from Validator Wallet to the unique <span className="text-foreground font-bold">Validator Seed PDA</span> (Seeds: <span className="font-mono">["validator_seed", pubkey]</span>). 
+                      This capital is cryptographically locked to the node's identity and is required to toggle status to <span className="text-emerald-500 font-bold">ONLINE</span>.
                     </p>
                  </div>
                  <div className="exn-card p-6 border-emerald-500/10 bg-emerald-500/5 space-y-4">
