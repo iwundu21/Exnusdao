@@ -23,7 +23,8 @@ import {
   Vote,
   Hammer,
   BadgeDollarSign,
-  Settings
+  Settings,
+  Scale
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -38,7 +39,7 @@ export default function ProtocolSpecPage() {
           </div>
           <p className="text-xs font-black uppercase tracking-[0.3em] text-primary">Developer Blueprint</p>
         </div>
-        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.1</h1>
+        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.2</h1>
         <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
           Technical architecture and state machine behavior for the Exnus Network Solana Program. 
           Use this specification to implement the core smart contract logic and multi-vault accounting.
@@ -314,25 +315,33 @@ export default function ProtocolSpecPage() {
            </div>
 
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-6">
-              <div className="space-y-4">
-                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Execution Steps (On-Chain)</h5>
-                 <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
+              <div className="space-y-6">
+                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">7.1 Execution Steps (On-Chain)</h5>
+                 <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5 leading-relaxed">
                     <li>Assert <span className="text-foreground font-mono">Clock::unix_timestamp</span> exceeds Epoch end-time.</li>
                     <li>Calculate <span className="text-foreground font-bold">Total Network Weight</span> (Sum of all active validator stake).</li>
-                    <li>Calculate <span className="text-secondary font-bold">Epoch Share</span> per validator.</li>
-                    <li>Calculate <span className="text-primary font-bold">Node Commission</span> based on Validator rate.</li>
-                    <li>Update <span className="text-foreground font-bold">global_reward_index</span> for each validator.</li>
-                    <li>Update <span className="text-foreground font-bold">Global State Account</span> last_cranked_epoch = epoch_idx.</li>
+                    <li>Calculate <span className="text-secondary font-bold">Epoch Share</span> per validator based on relative weight.</li>
+                    <li><span className="text-primary font-bold">Mandatory Commission Split:</span> Deduct node owner fee from the validator's share first.</li>
+                    <li>Update <span className="text-foreground font-bold">Validator Accrued Rewards</span> with the commission amount.</li>
+                    <li>Distribute the <span className="text-emerald-500 font-bold">Delegator Remainder</span> into the global reward index.</li>
                  </ol>
               </div>
 
               <div className="p-6 bg-background/60 rounded-2xl border border-border space-y-6">
                  <div className="flex items-center gap-3">
                     <Calculator className="w-5 h-5 text-emerald-500" />
-                    <p className="text-[10px] font-black uppercase text-foreground">Mathematical Identity</p>
+                    <p className="text-[10px] font-black uppercase text-foreground">7.2 Reward Sharding Math</p>
                  </div>
-                 <div className="space-y-4 font-mono text-[11px] text-muted-foreground bg-black/20 p-4 rounded-lg">
-                    <p className="text-foreground">Index_Update = (Reward_Pool * Weight_Share) / Total_Stake</p>
+                 <div className="space-y-4 font-mono text-[10px] text-muted-foreground bg-black/30 p-6 rounded-lg leading-relaxed">
+                    <p className="text-foreground/60 border-b border-white/5 pb-2 uppercase font-black">Step 1: Node Total Share</p>
+                    <p className="text-foreground">Node_Share = (Reward_Pool * Node_Weight) / Total_Network_Weight</p>
+                    
+                    <p className="text-foreground/60 border-b border-white/5 pb-2 pt-4 uppercase font-black">Step 2: Commission Deduction</p>
+                    <p className="text-secondary">Owner_Commission = Node_Share * Commission_Rate (%)</p>
+                    
+                    <p className="text-foreground/60 border-b border-white/5 pb-2 pt-4 uppercase font-black">Step 3: Delegator Pool Update</p>
+                    <p className="text-emerald-500">Delegator_Pool = Node_Share - Owner_Commission</p>
+                    <p className="text-emerald-500">New_Global_Index = Old_Index + (Delegator_Pool / Node_Weight)</p>
                  </div>
               </div>
            </div>
@@ -365,6 +374,32 @@ export default function ProtocolSpecPage() {
                       Authorizes the transfer of EXN tokens from the <span className="font-bold text-foreground">Global Treasury Vault</span> to a recipient.
                     </p>
                  </div>
+              </div>
+           </div>
+
+           {/* Voting Logic */}
+           <div className="space-y-6 pt-10 border-t border-white/5">
+              <div className="flex items-center gap-3">
+                 <Scale className="w-5 h-5 text-secondary" />
+                 <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">8.2 Voting Mechanics (Instruction: <span className="font-mono">cast_vote</span>)</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-4">
+                  <h5 className="text-[10px] font-black uppercase text-muted-foreground">Weighted Logic</h5>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    1. Assert caller has active <span className="font-bold text-foreground">Stake Account PDAs</span>.<br/>
+                    2. Fetch total principal across all non-unstaked accounts.<br/>
+                    3. <span className="text-secondary font-bold">Weight = Staked EXN</span> (1:1 Ratio).<br/>
+                    4. Transfer <span className="font-bold text-foreground">3 EXN fee</span> to Treasury Vault.<br/>
+                    5. Record voter address in Proposal PDA to prevent double-voting.
+                  </p>
+                </div>
+                <div className="p-6 bg-background/40 border border-border rounded-2xl space-y-4">
+                   <p className="text-[10px] font-black uppercase text-secondary">Anti-Sybil Constraint</p>
+                   <p className="text-xs text-muted-foreground leading-relaxed italic">
+                     "Voting weight is snapshot at the time of vote casting. Moving funds after voting does not reduce previously cast weight, but the 4-hour lock prevents immediate withdrawal after a decision."
+                   </p>
+                </div>
               </div>
            </div>
 
