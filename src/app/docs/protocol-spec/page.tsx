@@ -80,7 +80,7 @@ export default function ProtocolSpecPage() {
                  <p className="text-[10px] font-black uppercase">Authority Constraint</p>
                </div>
                <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                 "Only the address set during initialization can authorize USDC withdrawals from the License Vault or update global network parameters like the License Price directly."
+                 "Only the address set during initialization (Global State Admin) can authorize USDC withdrawals from the License Vault or update global network parameters like the License Price directly."
                </p>
             </div>
           </div>
@@ -112,17 +112,17 @@ export default function ProtocolSpecPage() {
               <div className="exn-card p-6 border-primary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-primary">Global Reward Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["reward_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool.</p>
+                 <p className="text-xs text-foreground/70">Source of all EXN reward emissions. Holds the dynamic distribution pool funded by the Admin.</p>
               </div>
               <div className="exn-card p-6 border-secondary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-secondary">Global Treasury Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["treasury_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for governance fees (10 EXN per proposal / 3 EXN per vote).</p>
+                 <p className="text-xs text-foreground/70">Collector for governance fees and direct funding. Used for ecosystem growth.</p>
               </div>
               <div className="exn-card p-6 border-emerald-500/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-emerald-500">Global License Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["license_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales.</p>
+                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales. Settled by Admin.</p>
               </div>
            </div>
 
@@ -389,6 +389,7 @@ export default function ProtocolSpecPage() {
                   <h5 className="text-[10px] font-black uppercase text-muted-foreground">Execution Behavior</h5>
                   <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
                     <li><span className="text-foreground font-bold">Verify Identity:</span> Assert caller has active, non-unstaked <span className="font-mono text-primary">Stake Account PDAs</span>.</li>
+                    <li><span className="text-amber-500 font-bold uppercase">Requirement:</span> Assert total combined stake weight is <span className="font-black">≥ 10,000 EXN</span>.</li>
                     <li><span className="text-foreground font-bold">Weight Snapshot:</span> Sum total principal across all valid accounts. <span className="text-secondary font-bold">1 EXN = 1 Vote Weight</span>.</li>
                     <li><span className="text-foreground font-bold">Protocol Fee:</span> Transfer exactly <span className="text-foreground font-bold">3 EXN</span> from Voter wallet to <span className="text-secondary">Global Treasury Vault</span>.</li>
                     <li><span className="text-foreground font-bold">Record Participation:</span> Add Voter address to the Proposal PDA's <span className="font-mono">voter_registry</span> to prevent double-voting.</li>
@@ -398,7 +399,7 @@ export default function ProtocolSpecPage() {
                 <div className="p-6 bg-background/40 border border-border rounded-2xl space-y-4">
                    <p className="text-[10px] font-black uppercase text-secondary">Anti-Sybil Logic</p>
                    <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                     "Voting weight is snapshot precisely at the time of the instruction. Developers must ensure the program loops through the user's Stake PDAs to aggregate total weight before updating the proposal's global counters."
+                     "Voting weight is snapshot precisely at the time of the instruction. Developers must ensure the program loops through the user's Stake PDAs to aggregate total weight and enforces the 10,000 EXN minimum threshold before updating the proposal's global counters."
                    </p>
                 </div>
               </div>
