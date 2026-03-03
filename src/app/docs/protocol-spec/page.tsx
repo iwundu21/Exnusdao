@@ -32,7 +32,8 @@ import {
   Coins,
   Vault,
   Unlock,
-  Ticket
+  Ticket,
+  Image as ImageIcon
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -68,7 +69,7 @@ export default function ProtocolSpecPage() {
             <p className="text-sm text-foreground/80 leading-relaxed">
               Provision the singleton <span className="text-foreground font-mono">GlobalState</span> account. 
               The frontend provides the <span className="text-primary font-bold">EXN</span> and <span className="text-emerald-500 font-bold">USDC</span> mint addresses. 
-              The instruction <span className="text-primary font-bold underline">atomically</span> derives and creates the 4 core Global PDA vaults.
+              The instruction <span className="text-primary font-bold underline">atomically</span> derives and creates the core Global PDA vaults.
             </p>
           </div>
           
@@ -93,7 +94,7 @@ export default function ProtocolSpecPage() {
         </div>
       </section>
 
-      {/* 3. NFT Licensing */}
+      {/* 3. NFT Licensing & Assets */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
@@ -112,27 +113,27 @@ export default function ProtocolSpecPage() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-6">
-                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Minting Logic</h5>
+                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Asset Creation (Metaplex Standard)</h5>
                  <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
-                    <li><span className="text-foreground font-bold underline">Asset Issuance:</span> Program mints a unique NFT (Mint Address = License ID).</li>
-                    <li><span className="text-foreground font-bold underline">Ownership:</span> NFT is transferred to the purchaser's wallet.</li>
-                    <li><span className="text-foreground font-bold underline">Transferability:</span> Licenses are fully transferable; the wallet currently holding the NFT possesses the right to register a node.</li>
+                    <li><span className="text-foreground font-bold underline">Minting Logic:</span> Program invokes Token Metadata Program to create Metadata and Master Edition accounts.</li>
+                    <li><span className="text-foreground font-bold underline">Metadata URI:</span> Points to a JSON file (Arweave/IPFS) containing the <span className="text-primary font-bold">License Logo URL</span>.</li>
+                    <li><span className="text-foreground font-bold underline">Identity:</span> The NFT's Mint Address is the unique identifier for the license.</li>
                  </ul>
               </div>
               <div className="p-6 bg-background/60 rounded-2xl border border-border space-y-6">
                  <div className="flex items-center gap-3">
-                    <History className="w-5 h-5 text-primary" />
-                    <p className="text-[10px] font-black uppercase text-foreground">Registration Rule</p>
+                    <ImageIcon className="w-5 h-5 text-primary" />
+                    <p className="text-[10px] font-black uppercase text-foreground">Visual Metadata Policy</p>
                  </div>
                  <p className="text-sm text-muted-foreground leading-relaxed italic">
-                   "A node is bound to a specific License NFT Mint Address. If the NFT is transferred or burned, the node's operational status is revoked by the program."
+                   "Each license features a base Exnus identity logo. Upon registration, the program updates the metadata URI to reflect the specific node operator's brand if desired."
                  </p>
               </div>
            </div>
         </div>
       </section>
 
-      {/* 4. Unified Staking */}
+      {/* 4. Unified Staking Vault */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-amber-500/10 rounded-xl">
@@ -165,6 +166,55 @@ export default function ProtocolSpecPage() {
                  </p>
               </div>
            </div>
+        </div>
+      </section>
+
+      {/* 5. Validator Seeds */}
+      <section className="space-y-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 rounded-xl">
+             <Coins className="w-8 h-8 text-emerald-500" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">5. Validator Seed Deposits</h2>
+        </div>
+        <div className="exn-card p-10 border-emerald-500/20 bg-emerald-500/5 space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-6">
+              <h4 className="text-sm font-black uppercase text-emerald-500 tracking-widest">Instruction: <span className="text-foreground font-mono">deposit_seed(ctx)</span></h4>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                Node owners deposit exactly <span className="text-primary font-bold underline">15,000,000 EXN</span> into the Global Staked Vault. 
+                This capital is tracked via the <span className="text-foreground font-mono">ValidatorState</span> account and serves as the node's operational bond.
+              </p>
+              <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
+                <li><span className="text-foreground font-bold">Withdrawal:</span> Only possible after node deactivation and a 48-hour cooling-off window.</li>
+              </ul>
+            </div>
+            <div className="p-6 bg-background/60 rounded-2xl border border-border flex flex-col justify-center">
+               <p className="text-[10px] font-black uppercase text-emerald-500 mb-2">Skin-in-the-Game Policy</p>
+               <p className="text-xs text-muted-foreground leading-relaxed italic">
+                 "Seed capital is the last to be withdrawn from the Staked Vault, ensuring operator commitment throughout the node's lifecycle."
+               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Node Registration */}
+      <section className="space-y-10">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-primary/10 rounded-xl">
+             <Hammer className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">6. Node Provisioning</h2>
+        </div>
+        <div className="exn-card p-10 border-primary/20 bg-primary/5 space-y-10">
+          <div className="space-y-4">
+            <h4 className="text-sm font-black uppercase text-primary tracking-widest">Instruction: <span className="text-foreground font-mono">register_node(ctx, name, logo_uri)</span></h4>
+            <p className="text-sm text-foreground/80 leading-relaxed">
+              Binds a physical validator identity to a verified <span className="text-primary font-bold underline">License NFT</span>. 
+              The program verifies the presence of the NFT in the signer's wallet before updating the registry.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -229,8 +279,8 @@ export default function ProtocolSpecPage() {
                  <h5 className="text-[10px] font-black uppercase text-muted-foreground">Instruction: <span className="text-foreground font-mono">cast_vote(support, rationale)</span></h5>
                  <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
                     <li><span className="text-foreground font-bold underline">Min Stake:</span> Requires at least <span className="text-primary font-bold">10,000 EXN</span> actively staked.</li>
-                    <li><span className="text-foreground font-bold underline">Mandatory Rationale:</span> A comment string must be provided or the transaction reverts.</li>
-                    <li><span className="text-foreground font-bold underline">Lock Window:</span> Instruction is <span className="text-amber-500 font-bold">Disabled</span> if Cluster Time is within 4 Hours of deadline.</li>
+                    <li><span className="text-foreground font-bold underline">Mandatory Rationale:</span> A rationale (comment) MUST be provided or the transaction reverts.</li>
+                    <li><span className="text-foreground font-bold underline">Lock Window:</span> Instruction reverts if Cluster Time is within 4 Hours of deadline.</li>
                  </ul>
               </div>
               <div className="p-6 bg-background/60 rounded-2xl border border-border space-y-6">

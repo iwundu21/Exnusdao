@@ -24,6 +24,7 @@ export interface License {
   is_claimed: boolean;
   is_burned?: boolean;
   metadata_uri?: string;
+  image_url?: string;
 }
 
 export interface UserStake {
@@ -149,7 +150,14 @@ const INITIAL_STATE: ProtocolState = {
   ],
   userStakes: [],
   licenses: [
-    { id: 'EXNUS-LIC-001', owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', is_claimed: true, is_burned: false, metadata_uri: 'https://exnus.network/license/001' },
+    { 
+      id: 'EXNUS-LIC-001', 
+      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', 
+      is_claimed: true, 
+      is_burned: false, 
+      metadata_uri: 'https://exnus.network/license/001',
+      image_url: 'https://picsum.photos/seed/license1/400/400'
+    },
   ],
   proposals: [
     { 

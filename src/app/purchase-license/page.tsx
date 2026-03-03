@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Ticket, Flame, Wallet, ExternalLink, ArrowLeft, Sparkles, ShieldCheck } from 'lucide-react';
+import { Ticket, Flame, Wallet, ExternalLink, ArrowLeft, Sparkles, ShieldCheck, Database, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function PurchaseLicensePage() {
   const { publicKey, connected } = useWallet();
@@ -13,6 +14,7 @@ export default function PurchaseLicensePage() {
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [mounted, setMounted] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
+  const [mintPhase, setMintPhase] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -33,28 +35,37 @@ export default function PurchaseLicensePage() {
     }
 
     setIsMinting(true);
+    setMintPhase('Provisioning Mint Account...');
     
-    // Simulate NFT Minting Delay
+    // Simulate NFT Minting Phases
     setTimeout(() => {
-      const mintAddress = `EXNUS-LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-      const newLicense = { 
-        id: mintAddress, 
-        owner: walletAddress, 
-        is_claimed: false, 
-        is_burned: false,
-        metadata_uri: `https://exnus.network/license/${mintAddress}`
-      };
+      setMintPhase('Creating Metaplex Metadata...');
+      setTimeout(() => {
+        setMintPhase('Uploading Visual Asset URI...');
+        setTimeout(() => {
+          const mintAddress = `EXNUS-LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+          const newLicense = { 
+            id: mintAddress, 
+            owner: walletAddress, 
+            is_claimed: false, 
+            is_burned: false,
+            metadata_uri: `https://exnus.network/license/${mintAddress}`,
+            image_url: `https://picsum.photos/seed/${mintAddress}/400/400`
+          };
 
-      setState(prev => ({
-        ...prev,
-        usdcBalance: prev.usdcBalance - licensePrice,
-        usdcVaultBalance: prev.usdcVaultBalance + licensePrice,
-        licenses: [...prev.licenses, newLicense]
-      }));
+          setState(prev => ({
+            ...prev,
+            usdcBalance: prev.usdcBalance - licensePrice,
+            usdcVaultBalance: prev.usdcVaultBalance + licensePrice,
+            licenses: [...prev.licenses, newLicense]
+          }));
 
-      setIsMinting(false);
-      setFeedback('success', `Node License NFT ${shortenAddress(mintAddress)} minted and transferred.`);
-    }, 2000);
+          setIsMinting(false);
+          setMintPhase(null);
+          setFeedback('success', `Node License NFT ${shortenAddress(mintAddress)} minted with full metadata.`);
+        }, 1500);
+      }, 1500);
+    }, 1500);
   };
 
   if (!mounted || !isLoaded) return (
@@ -94,7 +105,7 @@ export default function PurchaseLicensePage() {
           <div className="space-y-4">
             <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">License Minting</h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Exnus Node Licenses are minted as unique on-chain assets (NFTs). Possession of this asset in your wallet authorizes the registration of one high-performance validator node.
+              Exnus Node Licenses are minted as unique on-chain assets (NFTs) using the Metaplex standard. This includes a cryptographic identity and a high-resolution logo URI stored on Arweave.
             </p>
           </div>
 
@@ -106,7 +117,7 @@ export default function PurchaseLicensePage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-foreground uppercase tracking-widest">NFT License Asset</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black">Transferable Node Permit</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black">Metaplex Token Standard</p>
                 </div>
               </div>
               <div className="text-right">
@@ -129,23 +140,28 @@ export default function PurchaseLicensePage() {
                 </div>
               </div>
               
-              <button 
-                onClick={handlePurchase} 
-                disabled={activeNodeCount >= totalLimit || isMinting} 
-                className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit && !isMinting ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-              >
-                {isMinting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    Minting On-Chain Asset...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Mint Node License NFT
-                  </>
+              <div className="space-y-4">
+                <button 
+                  onClick={handlePurchase} 
+                  disabled={activeNodeCount >= totalLimit || isMinting} 
+                  className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit && !isMinting ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                >
+                  {isMinting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      NFT Construction Phase...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Mint Node License NFT
+                    </>
+                  )}
+                </button>
+                {isMinting && (
+                  <p className="text-[10px] text-center uppercase font-black tracking-widest text-primary animate-pulse">{mintPhase}</p>
                 )}
-              </button>
+              </div>
             </div>
           </div>
         </div>
@@ -164,20 +180,30 @@ export default function PurchaseLicensePage() {
                   </div>
                 ) : (
                   myLicenses.map((lic) => (
-                    <div key={lic.id} className="p-4 bg-foreground/5 rounded-xl border border-border/40 space-y-3 group hover:border-primary/30 transition-all">
-                       <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-[9px] text-muted-foreground uppercase font-black mb-1">Mint Address</p>
-                            <p className="font-mono text-[11px] text-primary">{shortenAddress(lic.id)}</p>
+                    <div key={lic.id} className="p-4 bg-foreground/5 rounded-xl border border-border/40 space-y-4 group hover:border-primary/30 transition-all">
+                       <div className="flex gap-4">
+                          <div className="w-12 h-12 relative rounded-lg overflow-hidden border border-white/5">
+                             <Image src={lic.image_url || `https://picsum.photos/seed/${lic.id}/100/100`} alt="License Logo" fill className="object-cover" />
                           </div>
-                          <a href={getExplorerLink(lic.id)} target="_blank" rel="noopener noreferrer">
-                             <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
-                          </a>
+                          <div className="flex-1">
+                             <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="text-[9px] text-muted-foreground uppercase font-black mb-1">Mint Address</p>
+                                  <p className="font-mono text-[11px] text-primary">{shortenAddress(lic.id)}</p>
+                                </div>
+                                <a href={getExplorerLink(lic.id)} target="_blank" rel="noopener noreferrer">
+                                   <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
+                                </a>
+                             </div>
+                          </div>
                        </div>
                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
                           <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${lic.is_burned ? 'bg-destructive/10 text-destructive' : lic.is_claimed ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                              {lic.is_burned ? 'Burned' : lic.is_claimed ? 'Node Active' : 'Unused'}
                           </span>
+                          <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground uppercase font-black">
+                             <Database className="w-2.5 h-2.5" /> IPFS Linked
+                          </div>
                        </div>
                     </div>
                   ))
@@ -187,7 +213,7 @@ export default function PurchaseLicensePage() {
            
            <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
               <p className="text-[10px] text-muted-foreground uppercase font-black leading-relaxed">
-                <span className="text-primary">Note:</span> Node licenses are transferrable assets. If you sell or transfer the NFT, you relinquish the right to operate the associated node.
+                <span className="text-primary">Note:</span> Each NFT includes an immutable <span className="text-foreground">Master Edition</span> account, ensuring the uniqueness and authenticity of your node license on the network.
               </p>
            </div>
         </div>
