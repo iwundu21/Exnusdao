@@ -49,7 +49,6 @@ export function Footer() {
         <div className="flex items-center gap-8">
           <div className="hidden sm:flex items-center gap-6 text-[9px] text-muted-foreground uppercase font-black tracking-widest">
             <Link href="/" className="hover:text-primary transition-colors">Dashboard</Link>
-            <Link href="/docs/protocol-spec" className="hover:text-primary transition-colors flex items-center gap-1">Protocol Spec <ExternalLink className="w-2.5 h-2.5" /></Link>
           </div>
           <div className="flex items-center gap-4 border-l border-border pl-6">
             <ThemeToggle />

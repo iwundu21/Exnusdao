@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer, ShieldCheck, Book } from 'lucide-react';
+import { Settings, Coins, CircleDollarSign, LayoutDashboard, Ticket, Hammer, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -44,9 +43,6 @@ export function Navbar() {
           </Link>
           <Link href="/manage-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
             <Settings className="w-4 h-4" /> Manage Node
-          </Link>
-          <Link href="/docs/protocol-spec" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-            <Book className="w-4 h-4" /> Docs
           </Link>
           {isAdmin && (
             <Link href="/admin" className="flex items-center gap-2 text-primary font-black hover:opacity-80 transition-all">
