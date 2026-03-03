@@ -171,9 +171,10 @@ export default function ProtocolSpecPage() {
                     <h5 className="text-[10px] font-black uppercase text-muted-foreground">Step-by-Step Behavior</h5>
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
                        <li>Derive unique <span className="text-foreground font-bold">Staking Vault PDA</span> for the user.</li>
-                       <li>Transfer <span className="text-foreground font-bold">amount</span> from User Wallet to the <span className="text-primary">Staking Vault PDA</span>.</li>
+                       <li>Transfer <span className="text-foreground font-bold">amount</span> from User Wallet to the <span className="text-primary font-bold">Staking Vault PDA</span>.</li>
                        <li>Calculate and store <span className="text-foreground font-bold">unlock_timestamp</span> based on <span className="font-mono">Clock::unix_timestamp</span> + tier.</li>
                        <li>Checkpoint the Validator's current <span className="text-foreground font-bold">global_reward_index</span>.</li>
+                       <li>Initialize the on-chain <span className="text-foreground font-bold">Staking Account</span> record dynamically to store accounting data.</li>
                     </ol>
                  </div>
                  <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-4">
@@ -200,24 +201,28 @@ export default function ProtocolSpecPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           {/* Reward Claiming */}
            <div className="exn-card p-8 border-primary/20 space-y-6">
               <h4 className="text-sm font-black uppercase text-primary tracking-widest">Instruction: <span className="text-foreground font-mono">claim_rewards()</span></h4>
               <div className="space-y-4">
                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    1. Assert current time &gt;= stake account maturity.<br/>
-                    2. Calculate yield: <span className="font-mono">(ValidatorIndex - Checkpoint) * StakeAmount</span>.<br/>
-                    3. Transfer yield from <span className="text-foreground font-bold">Global Reward Vault</span> to User Wallet.<br/>
-                    4. Reset stake checkpoint to current Validator Index.
+                    1. <span className="text-foreground font-bold">Assert Maturity:</span> Current time must be &gt;= <span className="font-mono">unlock_timestamp</span>.<br/>
+                    2. <span className="text-foreground font-bold">Calculate Yield:</span> <span className="font-mono">(ValidatorIndex - Checkpoint) * StakeAmount</span>.<br/>
+                    3. <span className="text-foreground font-bold">Source Vault:</span> Transfer calculated yield from the <span className="text-emerald-500 font-bold">Global Reward Vault PDA</span> to User Wallet.<br/>
+                    4. <span className="text-foreground font-bold">Update State:</span> Update <span className="font-mono">reward_checkpoint</span> to current Validator Index to prevent double claiming.<br/>
+                    5. Rewards can be claimed multiple times after maturity until principal is unstaked.
                  </p>
               </div>
            </div>
+           {/* Principal Unstaking */}
            <div className="exn-card p-8 border-secondary/20 space-y-6">
               <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">unstake_principal()</span></h4>
               <div className="space-y-4">
                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    1. Assert current time &gt;= stake account maturity.<br/>
-                    2. Transfer original principal from the <span className="text-foreground font-bold">Staking Vault PDA</span> to User Wallet.<br/>
-                    3. Close the Staking Vault PDA account and return rent lamports to user.
+                    1. <span className="text-foreground font-bold">Assert Maturity:</span> Current time must be &gt;= <span className="font-mono">unlock_timestamp</span>.<br/>
+                    2. <span className="text-foreground font-bold">Source Vault:</span> Transfer the exact <span className="font-bold">Original Principal</span> from the <span className="text-secondary font-bold">Staking Vault PDA</span> back to User Wallet.<br/>
+                    3. <span className="text-foreground font-bold">Update State:</span> Set <span className="font-mono">is_unstaked = true</span> or close the account to return rent lamports and prevent double unstaking.<br/>
+                    4. This instruction only settles principal. Yield must be harvested via <span className="font-mono">claim_rewards</span>.
                  </p>
               </div>
            </div>
