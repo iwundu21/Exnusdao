@@ -18,7 +18,10 @@ import {
   Vault,
   Ticket,
   Image as ImageIcon,
-  ShieldCheck
+  ShieldCheck,
+  Zap,
+  Trash2,
+  Clock
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -79,13 +82,13 @@ export default function ProtocolSpecPage() {
         </div>
       </section>
 
-      {/* 3. NFT Licensing & Assets */}
+      {/* 2. NFT Licensing & Assets */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
              <Ticket className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">3. NFT-Based Licensing</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">2. NFT-Based Licensing</h2>
         </div>
         <div className="exn-card p-10 border-primary/20 bg-primary/5 space-y-10">
            <div className="space-y-4">
@@ -118,13 +121,13 @@ export default function ProtocolSpecPage() {
         </div>
       </section>
 
-      {/* 4. Unified Staking Vault */}
+      {/* 3. Unified Staking Vault */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-amber-500/10 rounded-xl">
              <Vault className="w-8 h-8 text-amber-500" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">4. Unified Staked Vault</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">3. Unified Staked Vault</h2>
         </div>
         <div className="exn-card p-10 border-amber-500/20 bg-amber-500/5 space-y-10">
            <div className="space-y-4">
@@ -154,43 +157,47 @@ export default function ProtocolSpecPage() {
         </div>
       </section>
 
-      {/* 5. Validator Seeds */}
+      {/* 4. Validator Operations */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-emerald-500/10 rounded-xl">
              <Coins className="w-8 h-8 text-emerald-500" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">5. Validator Skin-in-the-Game</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">4. Node Management & Seed</h2>
         </div>
         <div className="exn-card p-10 border-emerald-500/20 bg-emerald-500/5 space-y-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-6">
-              <h4 className="text-sm font-black uppercase text-emerald-500 tracking-widest">Instruction: <span className="text-foreground font-mono">deposit_seed(ctx)</span></h4>
+              <h4 className="text-sm font-black uppercase text-emerald-500 tracking-widest">Instruction: <span className="text-foreground font-mono">deposit_seed(ctx)</span> / <span className="text-foreground font-mono">withdraw_seed(ctx)</span></h4>
               <p className="text-sm text-foreground/80 leading-relaxed">
                 Node owners deposit exactly <span className="text-primary font-bold underline">15,000,000 EXN</span> into the Global Staked Vault. 
                 This serves as the operational bond for the validator node.
               </p>
               <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
-                <li><span className="text-foreground font-bold">Withdrawal:</span> Allowed only after node deactivation and a mandatory 48-hour cooling-off window.</li>
+                <li><span className="text-foreground font-bold underline">Cooling Window:</span> Withdrawal is permitted only after node deactivation and a <span className="text-primary font-bold">48-hour cooling-off window</span>.</li>
+                <li><span className="text-foreground font-bold underline">Commission Harvest:</span> Use <span className="text-foreground font-mono">claim_commission(ctx)</span> to harvest accrued performance fees from the Reward Vault.</li>
               </ul>
             </div>
-            <div className="p-6 bg-background/60 rounded-2xl border border-border flex flex-col justify-center">
-               <p className="text-[10px] font-black uppercase text-emerald-500 mb-2">Operational Commitment</p>
+            <div className="p-6 bg-background/60 rounded-2xl border border-border flex flex-col justify-center gap-4">
+               <div className="flex items-center gap-2 text-emerald-500">
+                 <Clock className="w-4 h-4" />
+                 <p className="text-[10px] font-black uppercase">Security Lock</p>
+               </div>
                <p className="text-xs text-muted-foreground leading-relaxed italic">
-                 "Seed capital is the last to be withdrawn, ensuring operators maintain a high standard of uptime throughout the node's lifecycle."
+                 "Seed capital cannot be withdrawn while delegator funds are actively staked to the node, protecting network stability."
                </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. Node Registration */}
+      {/* 5. Node Provisioning */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
              <Hammer className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">6. Node Provisioning</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">5. Node Provisioning</h2>
         </div>
         <div className="exn-card p-10 border-primary/20 bg-primary/5 space-y-10">
           <div className="space-y-4">
@@ -200,16 +207,27 @@ export default function ProtocolSpecPage() {
               The program verifies the presence of the specified NFT in the signer's wallet before updating the global registry.
             </p>
           </div>
+          <div className="p-8 bg-destructive/5 border border-destructive/20 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="space-y-1">
+              <h5 className="text-sm font-bold text-foreground uppercase">Decommissioning & Burning</h5>
+              <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
+                The <span className="text-foreground font-mono text-destructive">close_node(ctx)</span> instruction terminates the validator account and <span className="text-destructive font-bold underline">permanently burns</span> the associated License NFT.
+              </p>
+            </div>
+            <div className="p-3 border border-destructive/40 rounded-lg">
+              <Trash2 className="w-6 h-6 text-destructive" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* 7. 10-Year Reward Blocks */}
+      {/* 6. 10-Year Reward Blocks */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
             <RefreshCw className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">7. 10-Year Reward Blocks</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">6. 10-Year Reward Blocks</h2>
         </div>
 
         <div className="exn-card p-10 space-y-8 border-primary/20 bg-primary/5">
@@ -250,13 +268,13 @@ export default function ProtocolSpecPage() {
         </div>
       </section>
 
-      {/* 8. DAO Governance */}
+      {/* 7. DAO Governance */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-secondary/10 rounded-xl">
              <Landmark className="w-8 h-8 text-secondary" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">8. DAO Consensus & Voting</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">7. DAO Consensus & Voting</h2>
         </div>
         <div className="exn-card p-10 border-secondary/20 bg-secondary/5 space-y-10">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
