@@ -79,6 +79,7 @@ export interface ProtocolState {
   treasuryBalance: number;
   rewardVaultBalance: number;
   usdcVaultBalance: number;
+  stakedVaultBalance: number;
   rewardCap: number;
   licenseLimit: number;
   licensePrice: number;
@@ -97,6 +98,7 @@ export interface ProtocolState {
   rewardVaultPda: string | null;
   treasuryVaultPda: string | null;
   usdcVaultPda: string | null;
+  stakedVaultPda: string | null;
 }
 
 const SEED_AMOUNT = 15000000;
@@ -110,9 +112,10 @@ const INITIAL_STATE: ProtocolState = {
   treasuryBalance: 250000,
   rewardVaultBalance: 1000000,
   usdcVaultBalance: 5000,
-  rewardCap: 0, // Set to 0 for manual config
+  stakedVaultBalance: 45045200,
+  rewardCap: 0,
   licenseLimit: 21,
-  licensePrice: 0, // Set to 0 for manual config
+  licensePrice: 0,
   isPaused: false,
   lastTransaction: null,
   lastCrankedEpoch: 699,
@@ -123,6 +126,7 @@ const INITIAL_STATE: ProtocolState = {
   rewardVaultPda: null,
   treasuryVaultPda: null,
   usdcVaultPda: null,
+  stakedVaultPda: null,
   validators: [
     { 
       id: 'v1', 

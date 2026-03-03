@@ -15,7 +15,8 @@ import {
   ExternalLink,
   Zap,
   TrendingUp,
-  Banknote
+  Banknote,
+  Layers
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -41,10 +42,11 @@ export default function AdminPage() {
   const handleInitialize = () => {
     if (!connected) return setFeedback('error', 'Wallet connection required for protocol initialization.');
     
-    // Derived PDA Mock addresses (Program Derived Addresses)
+    // Derived PDA Mock addresses
     const rewardVaultPda = `RVD-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
     const treasuryVaultPda = `TVD-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
     const usdcVaultPda = `UVD-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    const stakedVaultPda = `SVD-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
     setState(prev => ({
       ...prev,
@@ -55,16 +57,17 @@ export default function AdminPage() {
       rewardVaultPda,
       treasuryVaultPda,
       usdcVaultPda,
-      licensePrice: 0, // Initialized to 0 as per requirements
-      rewardCap: 0 // Initialized to 0 as per requirements
+      stakedVaultPda,
+      licensePrice: 0,
+      rewardCap: 0
     }));
-    setFeedback('success', 'Protocol smart contract initialized. Reward Cap and License Price set to zero for manual configuration.');
+    setFeedback('success', 'Protocol initialization complete. Global Staked Vault derived automatically.');
   };
 
   const handleFundRewardVault = () => {
     const amt = Number(funding.reward);
-    if (!amt || amt <= 0) return setFeedback('error', 'Specify valid EXN amount to fund rewards.');
-    if (state.exnBalance < amt) return setFeedback('error', 'Insufficient EXN in admin wallet to fund vault.');
+    if (!amt || amt <= 0) return setFeedback('error', 'Specify valid EXN amount.');
+    if (state.exnBalance < amt) return setFeedback('error', 'Insufficient EXN balance.');
 
     setState(prev => ({
       ...prev,
@@ -72,13 +75,13 @@ export default function AdminPage() {
       rewardVaultBalance: (prev.rewardVaultBalance || 0) + amt
     }));
     setFunding({ ...funding, reward: '' });
-    setFeedback('success', `Successfully injected ${amt.toLocaleString()} EXN into the Reward Vault.`);
+    setFeedback('success', `Injected ${amt.toLocaleString()} EXN into the Reward Vault.`);
   };
 
   const handleFundTreasury = () => {
     const amt = Number(funding.treasury);
-    if (!amt || amt <= 0) return setFeedback('error', 'Specify valid EXN amount for treasury funding.');
-    if (state.exnBalance < amt) return setFeedback('error', 'Insufficient EXN in admin wallet.');
+    if (!amt || amt <= 0) return setFeedback('error', 'Specify valid amount.');
+    if (state.exnBalance < amt) return setFeedback('error', 'Insufficient balance.');
 
     setState(prev => ({
       ...prev,
@@ -91,29 +94,29 @@ export default function AdminPage() {
 
   const handleUpdateCap = () => {
     const cap = Number(newCap);
-    if (!cap || cap < 0) return setFeedback('error', 'Invalid distribution cap.');
+    if (!cap || cap < 0) return setFeedback('error', 'Invalid cap.');
     setState(prev => ({ ...prev, rewardCap: cap }));
     setNewCap('');
-    setFeedback('success', `Protocol 14-day distribution cap updated to ${cap.toLocaleString()} EXN.`);
+    setFeedback('success', `Distribution cap updated to ${cap.toLocaleString()} EXN.`);
   };
 
   const handleUpdateLicensePrice = () => {
     const price = Number(newLicensePrice);
-    if (!price || price < 0) return setFeedback('error', 'Invalid license price.');
+    if (!price || price < 0) return setFeedback('error', 'Invalid price.');
     setState(prev => ({ ...prev, licensePrice: price }));
     setNewLicensePrice('');
-    setFeedback('success', `Dynamic node license price updated to ${price.toLocaleString()} USDC.`);
+    setFeedback('success', `License price updated to ${price.toLocaleString()} USDC.`);
   };
 
   const handleWithdrawUsdc = () => {
     const amt = state.usdcVaultBalance;
-    if (amt <= 0) return setFeedback('warning', 'USDC license vault is currently empty.');
+    if (amt <= 0) return setFeedback('warning', 'Vault empty.');
     setState(prev => ({
       ...prev,
       usdcBalance: prev.usdcBalance + amt,
       usdcVaultBalance: 0
     }));
-    setFeedback('success', `Withdrew ${amt.toLocaleString()} USDC from protocol vault to admin wallet.`);
+    setFeedback('success', `Withdrew ${amt.toLocaleString()} USDC from protocol vault.`);
   };
 
   if (!mounted || !isLoaded) return null;
@@ -144,12 +147,7 @@ export default function AdminPage() {
           </div>
           <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Command Center</h1>
           <p className="text-muted-foreground text-sm max-w-xl">
-            Configure on-chain protocol parameters, manage decentralized liquidity vaults, and authorize global initialization. 
-            {state.isInitialized && (
-              <span className="block mt-2 font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded w-fit">
-                Current Authority: {shortenAddress(state.adminWallet || '')}
-              </span>
-            )}
+            Configure on-chain protocol parameters, manage decentralized liquidity vaults, and authorize global initialization.
           </p>
         </div>
         {state.isInitialized && (
@@ -200,7 +198,7 @@ export default function AdminPage() {
 
            <div className="p-6 bg-background/50 rounded-2xl border border-border/10 space-y-4">
               <p className="text-[10px] text-muted-foreground uppercase font-black leading-relaxed">
-                Initialization will derive PDAs for the Reward, Treasury, and License vaults. The currently connected wallet ({shortenAddress(walletAddress)}) will be permanently registered as the Protocol Admin and granted settlement authority over all global vaults.
+                Initialization will derive 4 Global Vaults: Reward, Treasury, License, and the Unified Staked Vault.
               </p>
               <button onClick={handleInitialize} className="exn-button w-full h-14 uppercase tracking-[0.3em] text-xs font-black">
                 Initialize Global Protocol State
@@ -235,13 +233,13 @@ export default function AdminPage() {
                  <p className="text-2xl font-bold text-foreground">{(state.usdcVaultBalance || 0).toLocaleString()}</p>
                  <p className="text-[8px] font-mono text-muted-foreground mt-2 truncate">{state.usdcVaultPda}</p>
               </div>
-              <div className="exn-card p-6 border-border bg-foreground/5">
+              <div className="exn-card p-6 border-primary/40 bg-primary/10">
                  <div className="flex justify-between items-start mb-3">
-                    <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">License Price</p>
-                    <Settings className="w-4 h-4 text-muted-foreground/40" />
+                    <p className="text-[10px] uppercase font-black tracking-widest text-primary">Staked Vault (EXN)</p>
+                    <Layers className="w-4 h-4 text-primary/40" />
                  </div>
-                 <p className="text-2xl font-bold text-foreground">{(state.licensePrice || 0).toLocaleString()} <span className="text-sm">USDC</span></p>
-                 <p className="text-[8px] uppercase font-bold text-muted-foreground mt-2">Dynamic Parameter</p>
+                 <p className="text-2xl font-bold text-foreground">{(state.stakedVaultBalance || 0).toLocaleString()}</p>
+                 <p className="text-[8px] font-mono text-muted-foreground mt-2 truncate">{state.stakedVaultPda}</p>
               </div>
            </div>
 
@@ -266,7 +264,6 @@ export default function AdminPage() {
                           />
                           <button onClick={handleFundRewardVault} className="absolute right-2 top-2 h-8 px-4 bg-primary text-black text-[9px] font-black uppercase rounded">Inject</button>
                        </div>
-                       <p className="text-[9px] text-muted-foreground uppercase font-bold">Admin Balance: {state.exnBalance.toLocaleString()} EXN</p>
                     </div>
 
                     <div className="space-y-4">
@@ -340,9 +337,6 @@ export default function AdminPage() {
                 >
                   Withdraw to Admin Wallet <ArrowUpRight className="w-4 h-4" />
                 </button>
-                {!isAdmin && (
-                  <p className="text-[9px] text-destructive text-center uppercase font-black mt-2">Restricted: Not the protocol authority</p>
-                )}
               </div>
 
               <div className="exn-card p-6 border-border bg-foreground/[0.02] space-y-4">
@@ -351,10 +345,6 @@ export default function AdminPage() {
                     <div className="flex justify-between items-center text-[9px] uppercase font-bold">
                        <span className="text-muted-foreground">EXN Mint</span>
                        <a href={getExplorerLink(state.exnMint || '')} target="_blank" className="text-primary flex items-center gap-1 font-mono">{shortenAddress(state.exnMint || '')} <ExternalLink className="w-2.5 h-2.5" /></a>
-                    </div>
-                    <div className="flex justify-between items-center text-[9px] uppercase font-bold">
-                       <span className="text-muted-foreground">USDC Mint</span>
-                       <a href={getExplorerLink(state.usdcMint || '')} target="_blank" className="text-emerald-500 flex items-center gap-1 font-mono">{shortenAddress(state.usdcMint || '')} <ExternalLink className="w-2.5 h-2.5" /></a>
                     </div>
                     <div className="flex justify-between items-center text-[9px] uppercase font-bold">
                        <span className="text-muted-foreground">Protocol Authority</span>

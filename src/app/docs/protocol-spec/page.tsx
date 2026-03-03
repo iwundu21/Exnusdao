@@ -40,10 +40,10 @@ export default function ProtocolSpecPage() {
           </div>
           <p className="text-xs font-black uppercase tracking-[0.3em] text-primary">Developer Blueprint</p>
         </div>
-        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.2</h1>
+        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v1.3</h1>
         <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
           Technical architecture and state machine behavior for the Exnus Network Solana Program. 
-          The protocol implements a <span className="text-foreground font-bold underline">5-Vault Architecture</span> for total capital isolation.
+          The protocol implements a <span className="text-foreground font-bold underline">4-Vault Architecture</span> for unified capital management.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export default function ProtocolSpecPage() {
           <div className="space-y-4">
             <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">initialize(ctx)</span></h4>
             <p className="text-sm text-foreground/80 leading-relaxed">
-              The entry point for anchoring the protocol. This is a one-time atomic operation that provisions the global state and <span className="text-secondary font-bold">automatically derives</span> the three core protocol vaults.
+              The entry point for anchoring the protocol. This is a one-time atomic operation that provisions the global state and <span className="text-secondary font-bold">automatically derives</span> the four core protocol vaults.
             </p>
           </div>
           
@@ -70,11 +70,12 @@ export default function ProtocolSpecPage() {
                 <li>Initialize the <span className="text-foreground font-bold">Global State Account</span> using seeds <span className="font-mono text-primary">["global_state"]</span>.</li>
                 <li>Assign <span className="text-foreground font-bold">Admin Authority</span> to the deployer's public key.</li>
                 <li>Store <span className="text-foreground font-bold">EXN & USDC Mint</span> addresses in the Global State.</li>
-                <li><span className="text-foreground font-bold font-mono">AUTOMATIC VAULT DERIVATION:</span> Derive and initialize the 3 Global Vault PDAs simultaneously:
+                <li><span className="text-foreground font-bold font-mono">AUTOMATIC VAULT DERIVATION:</span> Derive and initialize the 4 Global Vault PDAs simultaneously:
                   <ul className="mt-2 space-y-1 text-xs opacity-80 list-disc pl-4">
                     <li>Reward Vault (EXN) - Seeds: <span className="font-mono text-primary">["reward_vault"]</span></li>
                     <li>Treasury Vault (EXN) - Seeds: <span className="font-mono text-primary">["treasury_vault"]</span></li>
                     <li>License Vault (USDC) - Seeds: <span className="font-mono text-primary">["license_vault"]</span></li>
+                    <li><span className="text-primary font-bold">Staked Vault (EXN)</span> - Seeds: <span className="font-mono text-primary">["staked_vault"]</span></li>
                   </ul>
                 </li>
                 <li>Set initial parameters to zero: <span className="text-primary font-bold">Dynamic License Price (0)</span> and <span className="text-primary font-bold">14-Day Reward Cap (0)</span>. Admin must manually update these via the front-end Command Center.</li>
@@ -99,7 +100,7 @@ export default function ProtocolSpecPage() {
           <div className="p-3 bg-primary/10 rounded-xl">
             <Layers className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">2. The 5-Vault Architecture</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">2. The 4-Vault Architecture</h2>
         </div>
         
         <div className="space-y-8">
@@ -114,7 +115,7 @@ export default function ProtocolSpecPage() {
               <p className="text-xs text-foreground/70 mt-3">The master account for the protocol. Stores all configuration, authority data, and global network indices. All vault PDAs are derived based on this program ID.</p>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="exn-card p-6 border-primary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-primary">1. Global Reward Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["reward_vault"]</span></p>
@@ -123,30 +124,35 @@ export default function ProtocolSpecPage() {
               <div className="exn-card p-6 border-secondary/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-secondary">2. Global Treasury Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["treasury_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for governance fees (3 EXN per vote, 10 EXN per proposal) and direct funding. Used for ecosystem growth.</p>
+                 <p className="text-xs text-foreground/70">Collector for governance fees and proposals. Used for ecosystem growth.</p>
               </div>
               <div className="exn-card p-6 border-emerald-500/20 space-y-4">
                  <h5 className="text-[10px] font-black uppercase text-emerald-500">3. Global License Vault</h5>
                  <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["license_vault"]</span></p>
-                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales. Funds are held here until settled by the Protocol Admin.</p>
+                 <p className="text-xs text-foreground/70">Collector for USDC revenue from node license sales.</p>
+              </div>
+              <div className="exn-card p-6 border-primary/40 bg-primary/5 space-y-4">
+                 <h5 className="text-[10px] font-black uppercase text-primary">4. Global Staked Vault</h5>
+                 <p className="text-[11px] text-muted-foreground">Seeds: <span className="font-mono">["staked_vault"]</span></p>
+                 <p className="text-xs text-foreground/70">Unified pool for all active capital. Holds both Validator Seeds (15M EXN) and Delegator Staking Principal.</p>
               </div>
            </div>
 
            <div className="exn-card p-8 border-border">
-              <h3 className="text-lg font-bold uppercase tracking-widest mb-6">Dynamic User/Validator Vaults</h3>
+              <h3 className="text-lg font-bold uppercase tracking-widest mb-6">Dynamic Accounting Accounts (Non-Vault)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                  <div className="space-y-4">
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border">
-                       <p className="text-[10px] font-black uppercase text-primary mb-2">4. Validator Seed Vault (PDA)</p>
-                       <p className="text-xs font-mono text-foreground">["validator_seed", validator_pubkey]</p>
-                       <p className="text-[11px] text-muted-foreground mt-3">Isolated vault for the 15M EXN activation deposit. Ensures validator skin-in-the-game. Derived automatically upon registration.</p>
+                       <p className="text-[10px] font-black uppercase text-primary mb-2">Validator State Account (PDA)</p>
+                       <p className="text-xs font-mono text-foreground">["validator_state", validator_pubkey]</p>
+                       <p className="text-[11px] text-muted-foreground mt-3">Tracks the 15M EXN seed deposit and operational status. Does not hold tokens; references ownership in the Global Staked Vault.</p>
                     </div>
                  </div>
                  <div className="space-y-4">
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border">
-                       <p className="text-[10px] font-black uppercase text-secondary mb-2">5. Staking Vault (PDA)</p>
+                       <p className="text-[10px] font-black uppercase text-secondary mb-2">Stake Account (PDA)</p>
                        <p className="text-xs font-mono text-foreground">["stake_account", user_pubkey, stake_nonce]</p>
-                       <p className="text-[11px] text-muted-foreground mt-3">Isolated vault for individual delegator principal. Ensures funds are never commingled. Derived atomically when user initiates a stake.</p>
+                       <p className="text-[11px] text-muted-foreground mt-3">Tracks individual delegator principal, lock tiers, and reward checkpoints. References ownership in the Global Staked Vault.</p>
                     </div>
                  </div>
               </div>
@@ -160,7 +166,7 @@ export default function ProtocolSpecPage() {
           <div className="p-3 bg-emerald-500/10 rounded-xl">
             <ArrowRightLeft className="w-8 h-8 text-emerald-500" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">3. Staking & Maturity Logic</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">3. Staking & Unified Liquidity</h2>
         </div>
 
         <div className="exn-card p-10 space-y-10">
@@ -170,11 +176,10 @@ export default function ProtocolSpecPage() {
                  <div className="space-y-4">
                     <h5 className="text-[10px] font-black uppercase text-muted-foreground">Step-by-Step Behavior</h5>
                     <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
-                       <li>Derive unique <span className="text-foreground font-bold">Staking Vault PDA</span> for the user.</li>
-                       <li>Transfer <span className="text-foreground font-bold">amount</span> from User Wallet to the <span className="text-primary font-bold">Staking Vault PDA</span>.</li>
-                       <li>Calculate and store <span className="text-foreground font-bold">unlock_timestamp</span> based on <span className="font-mono">Clock::unix_timestamp</span> + tier.</li>
+                       <li>Initialize the on-chain <span className="text-foreground font-bold">Stake Account</span> record.</li>
+                       <li>Transfer <span className="text-foreground font-bold">amount</span> from User Wallet to the <span className="text-primary font-bold">Global Staked Vault PDA</span>.</li>
+                       <li>Update accounting record with <span className="text-foreground font-bold">unlock_timestamp</span> and <span className="text-foreground font-bold">amount</span>.</li>
                        <li>Checkpoint the Validator's current <span className="text-foreground font-bold">global_reward_index</span>.</li>
-                       <li>Initialize the on-chain <span className="text-foreground font-bold">Staking Account</span> record dynamically to store accounting data.</li>
                     </ol>
                  </div>
                  <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-4">
@@ -183,7 +188,7 @@ export default function ProtocolSpecPage() {
                       <p className="text-[10px] font-black uppercase">Maturity Constraint</p>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Funds in the <span className="font-bold">Staking Vault PDA</span> are cryptographically locked. The program must reject any transfer-out attempts before the <span className="font-mono">unlock_timestamp</span> is reached.
+                      While tokens are pooled in the Global Staked Vault, the program strictly enforces that individual principal can only be withdrawn if the record in the <span className="font-bold">Stake Account PDA</span> has passed its <span className="font-mono">unlock_timestamp</span>.
                     </p>
                  </div>
               </div>
@@ -209,8 +214,7 @@ export default function ProtocolSpecPage() {
                     1. <span className="text-foreground font-bold">Assert Maturity:</span> Current time must be &gt;= <span className="font-mono">unlock_timestamp</span>.<br/>
                     2. <span className="text-foreground font-bold">Calculate Yield:</span> <span className="font-mono">(ValidatorIndex - Checkpoint) * StakeAmount</span>.<br/>
                     3. <span className="text-foreground font-bold">Source Vault:</span> Transfer calculated yield from the <span className="text-emerald-500 font-bold">Global Reward Vault PDA</span> to User Wallet.<br/>
-                    4. <span className="text-foreground font-bold">Update State:</span> Update <span className="font-mono">reward_checkpoint</span> to current Validator Index to prevent double claiming.<br/>
-                    5. Rewards can be claimed multiple times after maturity until principal is unstaked.
+                    4. <span className="text-foreground font-bold">Update State:</span> Update <span className="font-mono">reward_checkpoint</span> to current Validator Index.
                  </p>
               </div>
            </div>
@@ -220,9 +224,8 @@ export default function ProtocolSpecPage() {
               <div className="space-y-4">
                  <p className="text-[11px] text-muted-foreground leading-relaxed">
                     1. <span className="text-foreground font-bold">Assert Maturity:</span> Current time must be &gt;= <span className="font-mono">unlock_timestamp</span>.<br/>
-                    2. <span className="text-foreground font-bold">Source Vault:</span> Transfer the exact <span className="font-bold">Original Principal</span> from the <span className="text-secondary font-bold">Staking Vault PDA</span> back to User Wallet.<br/>
-                    3. <span className="text-foreground font-bold">Update State:</span> Set <span className="font-mono">is_unstaked = true</span> or close the account to return rent lamports and prevent double unstaking.<br/>
-                    4. This instruction only settles principal. Yield must be harvested via <span className="font-mono">claim_rewards</span>.
+                    2. <span className="text-foreground font-bold">Source Vault:</span> Transfer the exact principal from the <span className="text-primary font-bold">Global Staked Vault PDA</span> back to User Wallet.<br/>
+                    3. <span className="text-foreground font-bold">Update State:</span> Close the <span className="font-mono">Stake Account</span> record and return rent lamports.
                  </p>
               </div>
            </div>
@@ -254,8 +257,7 @@ export default function ProtocolSpecPage() {
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       1. Verify <span className="font-mono">license_id</span> ownership.<br/>
                       2. Initialize <span className="font-bold text-foreground">Validator State Account</span> (PDA).<br/>
-                      3. Map metadata (Name, Location, Commission Rate).<br/>
-                      4. Set <span className="font-mono">license.is_claimed = true</span>.
+                      3. Map metadata and set <span className="font-mono">license.is_claimed = true</span>.
                     </p>
                  </div>
               </div>
@@ -263,14 +265,14 @@ export default function ProtocolSpecPage() {
 
            {/* Seed Management */}
            <div className="space-y-6 pt-10 border-t border-white/5">
-              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.2 Seed & Commission Management</h3>
+              <h3 className="text-lg font-bold uppercase tracking-widest text-foreground">5.2 Seed Management</h3>
               <div className="grid grid-cols-1 gap-10">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="exn-card p-6 border-primary/10 bg-primary/5 space-y-4">
                        <p className="text-xs font-black uppercase text-primary">Instruction: <span className="font-mono">deposit_seed</span> (15M EXN)</p>
                        <p className="text-[11px] text-muted-foreground">
-                          Moves 15,000,000 EXN from Validator Wallet to the <span className="text-foreground font-bold">Validator Seed Vault PDA</span> (Seeds: <span className="font-mono">["validator_seed", pubkey]</span>). 
-                          This capital is isolated and required to toggle status to <span className="text-emerald-500 font-bold">ONLINE</span>.
+                          Moves 15,000,000 EXN from Validator Wallet to the <span className="text-foreground font-bold">Global Staked Vault PDA</span>. 
+                          The <span className="text-foreground font-bold">Validator State Account</span> is updated to reflect active skin-in-the-game.
                        </p>
                     </div>
                     <div className="exn-card p-6 border-destructive/10 bg-destructive/5 space-y-4">
@@ -278,15 +280,9 @@ export default function ProtocolSpecPage() {
                        <p className="text-[11px] text-muted-foreground">
                           1. <span className="font-bold">Verify Authority:</span> Caller must be Node Owner.<br/>
                           2. <span className="font-bold">Toggle Status:</span> Set Node to <span className="font-bold">INACTIVE</span>.<br/>
-                          3. <span className="font-bold">Settle Capital:</span> Transfer 15M EXN from the <span className="text-foreground font-bold">Validator Seed Vault PDA</span> back to Owner Wallet.
+                          3. <span className="font-bold">Settle Capital:</span> Transfer 15M EXN from the <span className="text-foreground font-bold">Global Staked Vault PDA</span> back to Owner Wallet.
                        </p>
                     </div>
-                 </div>
-                 <div className="exn-card p-6 border-emerald-500/10 bg-emerald-500/5 space-y-4">
-                    <p className="text-xs font-black uppercase text-emerald-500">Instruction: <span className="font-mono">claim_node_commission</span></p>
-                    <p className="text-[11px] text-muted-foreground">
-                      Transfers the node owner's accrued commission (calculated during epoch cranks) from the <span className="font-bold text-foreground">Global Reward Vault</span> to their wallet.
-                    </p>
                  </div>
               </div>
            </div>
@@ -394,7 +390,7 @@ export default function ProtocolSpecPage() {
                  <div className="p-6 bg-secondary/5 rounded-2xl border border-secondary/20 space-y-4">
                     <p className="text-xs font-black uppercase text-secondary tracking-widest">4-Hour Finalization Lock</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      The <span className="font-mono text-secondary">cast_vote</span> instruction is disabled during the final 4 hours. This prevents "flash-weight" attacks and allows the community to review final outcomes before execution.
+                      The <span className="font-mono text-secondary">cast_vote</span> instruction is disabled during the final 4 hours. This prevents "flash-weight" attacks.
                     </p>
                  </div>
               </div>
@@ -411,17 +407,16 @@ export default function ProtocolSpecPage() {
                   <h5 className="text-[10px] font-black uppercase text-muted-foreground">Execution Behavior</h5>
                   <ol className="space-y-4 text-sm text-muted-foreground list-decimal pl-5">
                     <li><span className="text-foreground font-bold">Minimum Threshold:</span> Assert caller has total combined active stake &ge; 10,000 EXN.</li>
-                    <li><span className="text-foreground font-bold">Mandatory Rationale:</span> Caller must provide a string <span className="text-primary font-bold">comment</span> (rationale) for the on-chain registry.</li>
+                    <li><span className="text-foreground font-bold">Mandatory Rationale:</span> Caller must provide a string <span className="text-primary font-bold">comment</span> for the on-chain registry.</li>
                     <li><span className="text-foreground font-bold">Identity Verification:</span> Verify identity against active <span className="font-mono text-primary">Stake Account PDAs</span>.</li>
-                    <li><span className="text-foreground font-bold">Weight Snapshot:</span> Sum total principal. <span className="text-secondary font-bold">1 EXN = 1 Vote Weight</span>.</li>
                     <li><span className="text-foreground font-bold">Protocol Fee:</span> Transfer <span className="text-foreground font-bold">3 EXN</span> to <span className="text-secondary">Global Treasury Vault</span>.</li>
-                    <li><span className="text-foreground font-bold">Maturity Extension:</span> Apply a mandatory <span className="text-amber-500 font-bold">4-hour unlock delay</span> to the voter's Stake PDAs.</li>
+                    <li><span className="text-foreground font-bold">Maturity Extension:</span> Apply a mandatory <span className="text-amber-500 font-bold">4-hour unlock delay</span> to the voter's active records.</li>
                   </ol>
                 </div>
                 <div className="p-6 bg-background/40 border border-border rounded-2xl space-y-4">
                    <p className="text-[10px] font-black uppercase text-secondary">Lock Window Logic</p>
                    <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                     "The program must assert that (Clock::unix_timestamp &lt; proposal.deadline - 14400) before allowing the vote to proceed. Any attempt to vote in the final 4 hours of the 7-day window must be rejected with a 'VotingLockActive' error."
+                     "The program must assert that (Clock::unix_timestamp &lt; proposal.deadline - 14400) before allowing the vote to proceed. Any attempt to vote in the final 4 hours of the 7-day window must be rejected."
                    </p>
                 </div>
               </div>
@@ -440,7 +435,6 @@ export default function ProtocolSpecPage() {
                        <li>Verify caller has <span className="text-foreground font-bold">&ge; 1M EXN</span> active stake weight.</li>
                        <li>Transfer <span className="text-foreground font-bold">10 EXN fee</span> to <span className="text-secondary">Global Treasury Vault</span>.</li>
                        <li>Initialize <span className="text-foreground font-bold">Proposal Account</span> (PDA) seeds <span className="font-mono text-primary">["proposal", proposal_id]</span>.</li>
-                       <li>Store metadata and the exact <span className="font-mono">deadline_timestamp</span> (Created + 7 Days).</li>
                     </ol>
                  </div>
               </div>
