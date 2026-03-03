@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Ticket, Flame, Wallet, ExternalLink, ArrowLeft, Sparkles, ShieldCheck, Database, Image as ImageIcon } from 'lucide-react';
+import { Ticket, Wallet, ArrowLeft, Sparkles, ShieldCheck, Database, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -20,49 +20,51 @@ export default function PurchaseLicensePage() {
     setMounted(true);
   }, []);
 
-  const licensePrice = state.licensePrice || 500;
+  const licensePrice = state.licensePrice || 0;
+  const currentMintedCount = state.licenses.length;
+  const totalLimit = state.licenseLimit || 0;
+  const remainingSlots = Math.max(0, totalLimit - currentMintedCount);
 
   const handlePurchase = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     
-    const activeNodes = state.validators.length;
-    if (activeNodes >= state.licenseLimit) {
-      return setFeedback('warning', 'Protocol registration cap reached.');
+    if (totalLimit > 0 && currentMintedCount >= totalLimit) {
+      return setFeedback('warning', 'Maximum license supply cap reached.');
     }
-    
-    if (state.usdcBalance < licensePrice) {
+
+    if (licensePrice > 0 && state.usdcBalance < licensePrice) {
       return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
     }
 
     setIsMinting(true);
-    setMintPhase('Provisioning Mint Account...');
+    setMintPhase('Provisioning NFT Mint Account...');
     
-    // Simulate NFT Minting Phases
+    // Simulate Metaplex NFT Minting Phases
     setTimeout(() => {
-      setMintPhase('Creating Metaplex Metadata...');
+      setMintPhase('Creating Metaplex Metadata Account...');
       setTimeout(() => {
-        setMintPhase('Uploading Visual Asset URI...');
+        setMintPhase('Uploading Logo to Decentralized Storage (Arweave)...');
         setTimeout(() => {
-          const mintAddress = `EXNUS-LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+          const mintAddress = `LIC-NFT-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
           const newLicense = { 
             id: mintAddress, 
             owner: walletAddress, 
             is_claimed: false, 
             is_burned: false,
-            metadata_uri: `https://exnus.network/license/${mintAddress}`,
+            metadata_uri: `https://arweave.net/${Math.random().toString(36).substring(2, 12)}`,
             image_url: `https://picsum.photos/seed/${mintAddress}/400/400`
           };
 
           setState(prev => ({
             ...prev,
-            usdcBalance: prev.usdcBalance - licensePrice,
+            usdcBalance: Math.max(0, prev.usdcBalance - licensePrice),
             usdcVaultBalance: prev.usdcVaultBalance + licensePrice,
             licenses: [...prev.licenses, newLicense]
           }));
 
           setIsMinting(false);
           setMintPhase(null);
-          setFeedback('success', `Node License NFT ${shortenAddress(mintAddress)} minted with full metadata.`);
+          setFeedback('success', `Node License NFT ${shortenAddress(mintAddress)} minted successfully.`);
         }, 1500);
       }, 1500);
     }, 1500);
@@ -82,16 +84,13 @@ export default function PurchaseLicensePage() {
            <Wallet className="w-12 h-12 text-primary" />
          </div>
          <div className="space-y-4">
-           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Connection Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to mint a protocol node license NFT.</p>
+           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
+           <p className="text-muted-foreground max-w-md mx-auto">Connect your wallet to mint your Node License NFT.</p>
          </div>
       </div>
     );
   }
 
-  const activeNodeCount = state.validators.length;
-  const totalLimit = state.licenseLimit || 21;
-  const remainingSlots = totalLimit - activeNodeCount;
   const myLicenses = state.licenses.filter(l => l.owner === walletAddress);
 
   return (
@@ -105,7 +104,7 @@ export default function PurchaseLicensePage() {
           <div className="space-y-4">
             <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">License Minting</h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Exnus Node Licenses are minted as unique on-chain assets (NFTs) using the Metaplex standard. This includes a cryptographic identity and a high-resolution logo URI stored on Arweave.
+              Mint your unique Node License NFT to gain validator registration rights. The supply and price are dynamically managed by the Protocol Authority.
             </p>
           </div>
 
@@ -116,8 +115,8 @@ export default function PurchaseLicensePage() {
                   <Ticket className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">NFT License Asset</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black">Metaplex Token Standard</p>
+                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">Purchase to Mint</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black">NFT Standard Authorization</p>
                 </div>
               </div>
               <div className="text-right">
@@ -128,28 +127,30 @@ export default function PurchaseLicensePage() {
             <div className="space-y-6">
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
-                   <span className="text-muted-foreground">Active Nodes / Total Limit</span>
+                   <span className="text-muted-foreground">Minted / Total Supply Cap</span>
                    <div className="flex items-center gap-1.5 font-black">
-                     <span className={remainingSlots > 0 ? "text-primary" : "text-destructive"}>{activeNodeCount}</span>
+                     <span className={remainingSlots > 0 ? "text-primary" : "text-destructive"}>{currentMintedCount}</span>
                      <span className="text-muted-foreground/40">/</span>
-                     <span className="text-muted-foreground">{totalLimit}</span>
+                     <span className="text-muted-foreground">{totalLimit || '∞'}</span>
                    </div>
                 </div>
-                <div className="w-full h-1.5 bg-foreground/5 rounded-full overflow-hidden">
-                  <div className="h-full exn-gradient-bg transition-all duration-500" style={{ width: `${Math.min(100, (activeNodeCount / totalLimit) * 100)}%` }} />
-                </div>
+                {totalLimit > 0 && (
+                  <div className="w-full h-1.5 bg-foreground/5 rounded-full overflow-hidden">
+                    <div className="h-full exn-gradient-bg transition-all duration-500" style={{ width: `${Math.min(100, (currentMintedCount / totalLimit) * 100)}%` }} />
+                  </div>
+                )}
               </div>
               
               <div className="space-y-4">
                 <button 
                   onClick={handlePurchase} 
-                  disabled={activeNodeCount >= totalLimit || isMinting} 
-                  className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit && !isMinting ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                  disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || isMinting} 
+                  className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting) ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
                 >
                   {isMinting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                      NFT Construction Phase...
+                      Executing On-Chain Mint...
                     </>
                   ) : (
                     <>
@@ -169,7 +170,7 @@ export default function PurchaseLicensePage() {
         <div className="lg:col-span-2 space-y-6">
            <div className="exn-card p-6 border-border/10">
               <h3 className="text-xs font-black text-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-primary" /> Your License Wallet
+                <ShieldCheck className="w-4 h-4 text-primary" /> Your NFT Inventory
               </h3>
               
               <div className="space-y-4">
@@ -183,7 +184,7 @@ export default function PurchaseLicensePage() {
                     <div key={lic.id} className="p-4 bg-foreground/5 rounded-xl border border-border/40 space-y-4 group hover:border-primary/30 transition-all">
                        <div className="flex gap-4">
                           <div className="w-12 h-12 relative rounded-lg overflow-hidden border border-white/5">
-                             <Image src={lic.image_url || `https://picsum.photos/seed/${lic.id}/100/100`} alt="License Logo" fill className="object-cover" />
+                             <Image src={lic.image_url || `https://picsum.photos/seed/${lic.id}/100/100`} alt="License" fill className="object-cover" />
                           </div>
                           <div className="flex-1">
                              <div className="flex justify-between items-start">
@@ -199,22 +200,16 @@ export default function PurchaseLicensePage() {
                        </div>
                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
                           <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${lic.is_burned ? 'bg-destructive/10 text-destructive' : lic.is_claimed ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
-                             {lic.is_burned ? 'Burned' : lic.is_claimed ? 'Node Active' : 'Unused'}
+                             {lic.is_burned ? 'Burned' : lic.is_claimed ? 'Node Active' : 'Available'}
                           </span>
                           <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground uppercase font-black">
-                             <Database className="w-2.5 h-2.5" /> IPFS Linked
+                             <Database className="w-2.5 h-2.5" /> Arweave-URI
                           </div>
                        </div>
                     </div>
                   ))
                 )}
               </div>
-           </div>
-           
-           <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
-              <p className="text-[10px] text-muted-foreground uppercase font-black leading-relaxed">
-                <span className="text-primary">Note:</span> Each NFT includes an immutable <span className="text-foreground">Master Edition</span> account, ensuring the uniqueness and authenticity of your node license on the network.
-              </p>
            </div>
         </div>
       </div>

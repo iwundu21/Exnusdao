@@ -110,18 +110,18 @@ const VOTING_LOCK_WINDOW = 3600000 * 4;
 
 const INITIAL_STATE: ProtocolState = {
   exnBalance: 25000000, 
-  usdcBalance: 2500,
-  totalStaked: 45045200, 
+  usdcBalance: 10000,
+  totalStaked: 15000000, 
   treasuryBalance: 250000,
   rewardVaultBalance: 1000000,
-  usdcVaultBalance: 5000,
-  stakedVaultBalance: 45045200,
-  rewardCap: 0,
-  licenseLimit: 21,
-  licensePrice: 0,
+  usdcVaultBalance: 0,
+  stakedVaultBalance: 15000000,
+  rewardCap: 0, // Set to 0 on initialization
+  licenseLimit: 0, // Set to 0 on initialization (Admin will update)
+  licensePrice: 0, // Set to 0 on initialization (Admin will update)
   isPaused: false,
   lastTransaction: null,
-  lastCrankedBlock: 999, // First crank will be 1000
+  lastCrankedBlock: 999,
   networkStartDate: null,
   isInitialized: false,
   adminWallet: null,
@@ -131,34 +131,9 @@ const INITIAL_STATE: ProtocolState = {
   treasuryVaultPda: null,
   usdcVaultPda: null,
   stakedVaultPda: null,
-  validators: [
-    { 
-      id: 'v1', 
-      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
-      name: 'CyberCore-01', 
-      description: 'Primary edge node', 
-      logo_uri: '66', 
-      location: 'Singapore', 
-      is_active: true, 
-      seed_deposited: true, 
-      total_staked: SEED_AMOUNT + 15200, 
-      commission_rate: 500, 
-      accrued_node_rewards: 452, 
-      global_reward_index: 1200000, 
-      license_id: 'EXNUS-LIC-001' 
-    }
-  ],
+  validators: [],
   userStakes: [],
-  licenses: [
-    { 
-      id: 'EXNUS-LIC-001', 
-      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', 
-      is_claimed: true, 
-      is_burned: false, 
-      metadata_uri: 'https://exnus.network/license/001',
-      image_url: 'https://picsum.photos/seed/license1/400/400'
-    },
-  ],
+  licenses: [],
   proposals: [
     { 
       id: 0, 
