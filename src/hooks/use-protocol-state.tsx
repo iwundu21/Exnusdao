@@ -89,7 +89,8 @@ export interface ProtocolState {
   proposals: Proposal[];
   isPaused: boolean;
   lastTransaction: TransactionFeedback | null;
-  lastCrankedEpoch: number;
+  lastCrankedBlock: number;
+  networkStartDate: number | null;
   // Admin & On-Chain State
   isInitialized: boolean;
   adminWallet: string | null;
@@ -118,7 +119,8 @@ const INITIAL_STATE: ProtocolState = {
   licensePrice: 0,
   isPaused: false,
   lastTransaction: null,
-  lastCrankedEpoch: 699,
+  lastCrankedBlock: 999, // First crank will be 1000
+  networkStartDate: null,
   isInitialized: false,
   adminWallet: null,
   exnMint: null,
