@@ -15,14 +15,15 @@ export interface Validator {
   commission_rate: number;
   accrued_node_rewards: number;
   global_reward_index: number;
-  license_id?: string;
+  license_id?: string; // This is the Mint Address of the NFT
 }
 
 export interface License {
-  id: string;
+  id: string; // The Mint Address / Unique Identity
   owner: string;
   is_claimed: boolean;
   is_burned?: boolean;
+  metadata_uri?: string;
 }
 
 export interface UserStake {
@@ -143,28 +144,12 @@ const INITIAL_STATE: ProtocolState = {
       commission_rate: 500, 
       accrued_node_rewards: 452, 
       global_reward_index: 1200000, 
-      license_id: 'LIC-DEMO1' 
-    },
-    { 
-      id: 'v2', 
-      owner: 'Nebula-Mock-Owner', 
-      name: 'NebulaNode', 
-      description: 'Deep space validator', 
-      logo_uri: '77', 
-      location: 'Mars Alpha', 
-      is_active: true, 
-      seed_deposited: true, 
-      total_staked: SEED_AMOUNT + 12500, 
-      commission_rate: 800, 
-      accrued_node_rewards: 210, 
-      global_reward_index: 1200000, 
-      license_id: 'LIC-DEMO2' 
+      license_id: 'EXNUS-LIC-001' 
     }
   ],
   userStakes: [],
   licenses: [
-    { id: 'LIC-DEMO1', owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', is_claimed: true, is_burned: false },
-    { id: 'LIC-DEMO2', owner: 'Nebula-Mock-Owner', is_claimed: true, is_burned: false },
+    { id: 'EXNUS-LIC-001', owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210', is_claimed: true, is_burned: false, metadata_uri: 'https://exnus.network/license/001' },
   ],
   proposals: [
     { 

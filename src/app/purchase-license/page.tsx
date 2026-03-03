@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Ticket, Flame, Wallet, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Ticket, Flame, Wallet, ExternalLink, ArrowLeft, Sparkles, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -13,6 +12,7 @@ export default function PurchaseLicensePage() {
   const walletAddress = publicKey?.toBase58() || '';
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [mounted, setMounted] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -22,22 +22,39 @@ export default function PurchaseLicensePage() {
 
   const handlePurchase = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    
     const activeNodes = state.validators.length;
     if (activeNodes >= state.licenseLimit) {
       return setFeedback('warning', 'Protocol registration cap reached.');
     }
+    
     if (state.usdcBalance < licensePrice) {
       return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
     }
-    const uniqueId = `LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-    const newLicense = { id: uniqueId, owner: walletAddress, is_claimed: false, is_burned: false };
-    setState(prev => ({
-      ...prev,
-      usdcBalance: prev.usdcBalance - licensePrice,
-      usdcVaultBalance: prev.usdcVaultBalance + licensePrice,
-      licenses: [...prev.licenses, newLicense]
-    }));
-    setFeedback('success', `License ${uniqueId} generated successfully.`);
+
+    setIsMinting(true);
+    
+    // Simulate NFT Minting Delay
+    setTimeout(() => {
+      const mintAddress = `EXNUS-LIC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+      const newLicense = { 
+        id: mintAddress, 
+        owner: walletAddress, 
+        is_claimed: false, 
+        is_burned: false,
+        metadata_uri: `https://exnus.network/license/${mintAddress}`
+      };
+
+      setState(prev => ({
+        ...prev,
+        usdcBalance: prev.usdcBalance - licensePrice,
+        usdcVaultBalance: prev.usdcVaultBalance + licensePrice,
+        licenses: [...prev.licenses, newLicense]
+      }));
+
+      setIsMinting(false);
+      setFeedback('success', `Node License NFT ${shortenAddress(mintAddress)} minted and transferred.`);
+    }, 2000);
   };
 
   if (!mounted || !isLoaded) return (
@@ -55,7 +72,7 @@ export default function PurchaseLicensePage() {
          </div>
          <div className="space-y-4">
            <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Connection Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to purchase a protocol node license.</p>
+           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to mint a protocol node license NFT.</p>
          </div>
       </div>
     );
@@ -64,82 +81,115 @@ export default function PurchaseLicensePage() {
   const activeNodeCount = state.validators.length;
   const totalLimit = state.licenseLimit || 21;
   const remainingSlots = totalLimit - activeNodeCount;
+  const myLicenses = state.licenses.filter(l => l.owner === walletAddress);
 
   return (
-    <div className="max-w-3xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
       <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors uppercase text-xs font-bold tracking-widest">
         <ArrowLeft className="w-4 h-4" /> Back to Dashboard
       </Link>
 
-      <div className="space-y-4">
-        <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Licensing</h1>
-        <p className="text-muted-foreground max-xl flex items-center gap-2 flex-wrap">
-          Register your validator for wallet 
-          <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">
-            {shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" />
-          </a>.
-        </p>
-      </div>
-
-      <div className="exn-card p-10 space-y-8 border-primary/20">
-        <div className="flex justify-between items-center border-b border-border pb-8">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
-              <Ticket className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground uppercase tracking-widest">Protocol License</p>
-              <p className="text-xs text-muted-foreground uppercase">Unique Identity Token</p>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+        <div className="lg:col-span-3 space-y-8">
+          <div className="space-y-4">
+            <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">License Minting</h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Exnus Node Licenses are minted as unique on-chain assets (NFTs). Possession of this asset in your wallet authorizes the registration of one high-performance validator node.
+            </p>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-emerald-500">{licensePrice.toLocaleString()} USDC</p>
-          </div>
-        </div>
 
-        <div className="space-y-6">
-          <div className="flex flex-col gap-3">
-            <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
-               <span className="text-muted-foreground">Active Nodes / Total Slots</span>
-               <div className="flex items-center gap-1.5 font-black">
-                 <span className={remainingSlots > 0 ? "text-primary" : "text-destructive"}>{activeNodeCount}</span>
-                 <span className="text-muted-foreground/40">/</span>
-                 <span className="text-muted-foreground">{totalLimit}</span>
-               </div>
-            </div>
-            <div className="w-full h-1.5 bg-foreground/5 rounded-full">
-              <div className="h-full exn-gradient-bg transition-all duration-500" style={{ width: `${Math.min(100, (activeNodeCount / totalLimit) * 100)}%` }} />
-            </div>
-          </div>
-          <button onClick={handlePurchase} disabled={activeNodeCount >= totalLimit} className={`w-full h-14 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>
-            Purchase License
-          </button>
-        </div>
-
-        <div className="p-4 bg-foreground/5 rounded-xl border border-border">
-          <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-4">Your Purchased Licenses</h3>
-          <div className="space-y-3">
-            {state.licenses.filter(l => l.owner === walletAddress).length === 0 ? (
-              <p className="text-[10px] text-muted-foreground uppercase text-center py-4">No licenses found for this wallet</p>
-            ) : (
-              state.licenses.filter(l => l.owner === walletAddress).map((lic) => (
-                <div key={lic.id} className="flex items-center justify-between p-3 bg-foreground/5 rounded-lg border border-border">
-                  <span className="font-mono text-xs text-primary">{lic.id}</span>
-                  <div className="flex items-center gap-2">
-                    {lic.is_burned ? (
-                      <span className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-black uppercase bg-destructive/10 text-destructive border border-destructive/20">
-                        Burned 🔥
-                      </span>
-                    ) : (
-                      <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase border ${lic.is_claimed ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                        {lic.is_claimed ? 'Claimed' : 'Active'}
-                      </span>
-                    )}
-                  </div>
+          <div className="exn-card p-10 space-y-10 border-primary/20 bg-primary/5">
+            <div className="flex justify-between items-center border-b border-white/5 pb-8">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                  <Ticket className="w-6 h-6 text-primary" />
                 </div>
-              ))
-            )}
+                <div>
+                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">NFT License Asset</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black">Transferable Node Permit</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-emerald-500">{licensePrice.toLocaleString()} USDC</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
+                   <span className="text-muted-foreground">Active Nodes / Total Limit</span>
+                   <div className="flex items-center gap-1.5 font-black">
+                     <span className={remainingSlots > 0 ? "text-primary" : "text-destructive"}>{activeNodeCount}</span>
+                     <span className="text-muted-foreground/40">/</span>
+                     <span className="text-muted-foreground">{totalLimit}</span>
+                   </div>
+                </div>
+                <div className="w-full h-1.5 bg-foreground/5 rounded-full overflow-hidden">
+                  <div className="h-full exn-gradient-bg transition-all duration-500" style={{ width: `${Math.min(100, (activeNodeCount / totalLimit) * 100)}%` }} />
+                </div>
+              </div>
+              
+              <button 
+                onClick={handlePurchase} 
+                disabled={activeNodeCount >= totalLimit || isMinting} 
+                className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${activeNodeCount < totalLimit && !isMinting ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+              >
+                {isMinting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    Minting On-Chain Asset...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    Mint Node License NFT
+                  </>
+                )}
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div className="lg:col-span-2 space-y-6">
+           <div className="exn-card p-6 border-border/10">
+              <h3 className="text-xs font-black text-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-primary" /> Your License Wallet
+              </h3>
+              
+              <div className="space-y-4">
+                {myLicenses.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 opacity-20 border border-dashed border-border rounded-xl">
+                     <Ticket className="w-8 h-8 mb-2" />
+                     <p className="text-[10px] uppercase font-black text-center">No License NFTs Found</p>
+                  </div>
+                ) : (
+                  myLicenses.map((lic) => (
+                    <div key={lic.id} className="p-4 bg-foreground/5 rounded-xl border border-border/40 space-y-3 group hover:border-primary/30 transition-all">
+                       <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-[9px] text-muted-foreground uppercase font-black mb-1">Mint Address</p>
+                            <p className="font-mono text-[11px] text-primary">{shortenAddress(lic.id)}</p>
+                          </div>
+                          <a href={getExplorerLink(lic.id)} target="_blank" rel="noopener noreferrer">
+                             <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
+                          </a>
+                       </div>
+                       <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${lic.is_burned ? 'bg-destructive/10 text-destructive' : lic.is_claimed ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                             {lic.is_burned ? 'Burned' : lic.is_claimed ? 'Node Active' : 'Unused'}
+                          </span>
+                       </div>
+                    </div>
+                  ))
+                )}
+              </div>
+           </div>
+           
+           <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
+              <p className="text-[10px] text-muted-foreground uppercase font-black leading-relaxed">
+                <span className="text-primary">Note:</span> Node licenses are transferrable assets. If you sell or transfer the NFT, you relinquish the right to operate the associated node.
+              </p>
+           </div>
         </div>
       </div>
     </div>

@@ -31,7 +31,8 @@ import {
   ShieldQuestion,
   Coins,
   Vault,
-  Unlock
+  Unlock,
+  Ticket
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -46,10 +47,10 @@ export default function ProtocolSpecPage() {
           </div>
           <p className="text-xs font-black uppercase tracking-[0.3em] text-primary">Developer Blueprint</p>
         </div>
-        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v2.1</h1>
+        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase">Protocol Specification v2.2</h1>
         <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
           Final technical architecture for the Exnus Network Solana Program. 
-          The protocol implements a <span className="text-foreground font-bold underline">10-Year Reward Block</span> system starting at index 001000.
+          Implementing <span className="text-foreground font-bold underline">NFT-Based Licensing</span> and a <span className="text-foreground font-bold underline">10-Year Reward Block</span> system.
         </p>
       </div>
 
@@ -65,8 +66,9 @@ export default function ProtocolSpecPage() {
           <div className="space-y-4">
             <h4 className="text-sm font-black uppercase text-secondary tracking-widest">Instruction: <span className="text-foreground font-mono">initialize(ctx, exn_mint, usdc_mint)</span></h4>
             <p className="text-sm text-foreground/80 leading-relaxed">
-              Provision the singleton <span className="text-foreground font-mono">GlobalState</span> account and establish the protocol's mint authority. 
-              This instruction <span className="text-primary font-bold underline">atomically</span> derives and creates the 4 core Global PDA vaults.
+              Provision the singleton <span className="text-foreground font-mono">GlobalState</span> account. 
+              The frontend provides the <span className="text-primary font-bold">EXN</span> and <span className="text-emerald-500 font-bold">USDC</span> mint addresses. 
+              The instruction <span className="text-primary font-bold underline">atomically</span> derives and creates the 4 core Global PDA vaults.
             </p>
           </div>
           
@@ -74,7 +76,6 @@ export default function ProtocolSpecPage() {
             <div className="space-y-4">
               <h5 className="text-[10px] font-black uppercase text-muted-foreground">Mandatory Inputs & Actions</h5>
               <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
-                <li><span className="text-foreground font-bold">Mint Integration:</span> Capture the EXN and USDC mint addresses provided by the frontend.</li>
                 <li><span className="text-foreground font-bold">Vault Provisioning:</span> Derives <span className="text-primary font-mono">staked_vault</span>, <span className="text-emerald-500 font-mono">reward_vault</span>, <span className="text-secondary font-mono">license_vault</span>, and <span className="text-foreground font-mono">treasury_vault</span>.</li>
                 <li><span className="text-foreground font-bold">Initial Params:</span> Sets Reward Cap and License Price to <span className="text-primary font-bold">0</span>.</li>
               </ul>
@@ -82,86 +83,86 @@ export default function ProtocolSpecPage() {
             <div className="p-6 bg-background/50 rounded-2xl border border-border space-y-4">
                <div className="flex items-center gap-2 text-secondary">
                  <ShieldCheck className="w-4 h-4" />
-                 <p className="text-[10px] font-black uppercase">Atomic Account Creation</p>
+                 <p className="text-[10px] font-black uppercase">Atomic Multi-Account Creation</p>
                </div>
                <p className="text-[11px] text-muted-foreground leading-relaxed italic">
-                 "The initialization instruction must include sufficient rent for all Global PDAs. Failure to create any vault account results in a total transaction revert, ensuring protocol integrity."
+                 "Initialization fails if any vault account creation reverts, ensuring the protocol enters a consistent state with all mint authorities established."
                </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Account & Vault PDAs */}
+      {/* 3. NFT Licensing */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
-             <Layers className="w-8 h-8 text-primary" />
+             <Ticket className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">2. Account & Vault PDAs</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">3. NFT-Based Licensing</h2>
         </div>
-        <div className="exn-card p-10 border-primary/20 bg-primary/5">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <div className="space-y-8">
-                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Unified Capital PDAs</h5>
-                 <div className="space-y-4">
-                    <div className="p-4 bg-background/40 rounded-xl border border-border flex justify-between items-center">
-                       <span className="text-xs font-mono">Global Staked Vault (EXN)</span>
-                       <span className="text-[10px] font-black text-primary uppercase">["staked_vault"]</span>
-                    </div>
-                    <div className="p-4 bg-background/40 rounded-xl border border-border flex justify-between items-center">
-                       <span className="text-xs font-mono">Global Reward Vault (EXN)</span>
-                       <span className="text-[10px] font-black text-emerald-500 uppercase">["reward_vault"]</span>
-                    </div>
-                    <div className="p-4 bg-background/40 rounded-xl border border-border flex justify-between items-center">
-                       <span className="text-xs font-mono">License Vault (USDC)</span>
-                       <span className="text-[10px] font-black text-secondary uppercase">["license_vault"]</span>
-                    </div>
-                    <div className="p-4 bg-background/40 rounded-xl border border-border flex justify-between items-center">
-                       <span className="text-xs font-mono">Treasury Vault (EXN)</span>
-                       <span className="text-[10px] font-black text-foreground uppercase">["treasury_vault"]</span>
-                    </div>
-                 </div>
+        <div className="exn-card p-10 border-primary/20 bg-primary/5 space-y-10">
+           <div className="space-y-4">
+              <h4 className="text-sm font-black uppercase text-primary tracking-widest">Instruction: <span className="text-foreground font-mono">purchase_license(ctx)</span></h4>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                Users pay the configured <span className="text-emerald-500 font-bold font-mono">USDC</span> price to mint a unique **Node License NFT**. 
+                This NFT serves as the cryptographic permit required to register and operate a validator node.
+              </p>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-6">
+                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Minting Logic</h5>
+                 <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
+                    <li><span className="text-foreground font-bold underline">Asset Issuance:</span> Program mints a unique NFT (Mint Address = License ID).</li>
+                    <li><span className="text-foreground font-bold underline">Ownership:</span> NFT is transferred to the purchaser's wallet.</li>
+                    <li><span className="text-foreground font-bold underline">Transferability:</span> Licenses are fully transferable; the wallet currently holding the NFT possesses the right to register a node.</li>
+                 </ul>
               </div>
-              <div className="p-6 bg-black/20 rounded-2xl border border-border space-y-6">
-                 <div className="flex items-center gap-2">
-                    <Vault className="w-4 h-4 text-primary" />
-                    <p className="text-[10px] font-black uppercase">Vault Derivation Hierarchy</p>
+              <div className="p-6 bg-background/60 rounded-2xl border border-border space-y-6">
+                 <div className="flex items-center gap-3">
+                    <History className="w-5 h-5 text-primary" />
+                    <p className="text-[10px] font-black uppercase text-foreground">Registration Rule</p>
                  </div>
-                 <p className="text-sm text-muted-foreground leading-relaxed">
-                   All active network capital—including <span className="text-foreground font-bold underline">15M EXN Validator Seeds</span> and <span className="text-foreground font-bold underline">Delegator Principal</span>—is consolidated into the <span className="text-primary font-bold">Global Staked Vault</span>. 
-                   Yield is isolated in the <span className="text-emerald-500 font-bold">Reward Vault</span> to prevent principal dilution during emissions.
+                 <p className="text-sm text-muted-foreground leading-relaxed italic">
+                   "A node is bound to a specific License NFT Mint Address. If the NFT is transferred or burned, the node's operational status is revoked by the program."
                  </p>
               </div>
            </div>
         </div>
       </section>
 
-      {/* 4. Staking Lifecycle */}
+      {/* 4. Unified Staking */}
       <section className="space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-amber-500/10 rounded-xl">
-             <Lock className="w-8 h-8 text-amber-500" />
+             <Vault className="w-8 h-8 text-amber-500" />
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-widest">4. Staking & Unstaking</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-widest">4. Unified Staking Vault</h2>
         </div>
         <div className="exn-card p-10 border-amber-500/20 bg-amber-500/5 space-y-10">
+           <div className="space-y-4">
+              <h4 className="text-sm font-black uppercase text-amber-500 tracking-widest">Vault: <span className="text-foreground font-mono">staked_vault</span></h4>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                All protocol capital (15M EXN Validator Seeds + Delegator Principal) is held in the <span className="text-primary font-bold underline">Global Staked Vault</span>. 
+                Accounting is handled via isolated data accounts to track ownership and duration.
+              </p>
+           </div>
+           
            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-6">
-                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Instruction: <span className="text-foreground font-mono">stake_exn(amount)</span></h5>
+                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Instruction: <span className="text-foreground font-mono">stake_exn(amount, duration)</span></h5>
                  <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
                     <li><span className="text-foreground font-bold">Transfer:</span> User Wallet → <span className="text-primary font-bold">Global Staked Vault</span>.</li>
-                    <li><span className="text-foreground font-bold">Accounting:</span> Create unique Stake Account PDA to track duration and principal.</li>
-                    <li><span className="text-foreground font-bold">Yield Logic:</span> Principal and Rewards are settled from decoupled vaults to ensure solvency.</li>
+                    <li><span className="text-foreground font-bold">Maturity:</span> Funds are locked until the expiration of the chosen multiplier window.</li>
+                    <li><span className="text-foreground font-bold">Settlement:</span> Unstaking transfers funds from <span className="text-primary font-bold">Global Staked Vault</span> back to the user.</li>
                  </ul>
               </div>
-              <div className="space-y-6">
-                 <h5 className="text-[10px] font-black uppercase text-muted-foreground">Instruction: <span className="text-foreground font-mono">unstake_exn()</span></h5>
-                 <ul className="space-y-4 text-sm text-muted-foreground list-disc pl-5">
-                    <li><span className="text-foreground font-bold">Maturity:</span> Cluster time must exceed Stake Unlock Timestamp.</li>
-                    <li><span className="text-foreground font-bold">Settlement:</span> <span className="text-primary font-bold">Global Staked Vault</span> → User Wallet.</li>
-                    <li><span className="text-foreground font-bold">Protection:</span> Account is closed post-transfer to prevent double-spending.</li>
-                 </ul>
+              <div className="p-6 bg-black/20 rounded-2xl border border-border space-y-4">
+                 <p className="text-[10px] font-black uppercase text-primary">Decoupled Settlement</p>
+                 <p className="text-xs text-muted-foreground leading-relaxed">
+                   Principal is returned from the **Staked Vault**, while Rewards are distributed from the **Reward Vault**, ensuring principal solvency.
+                 </p>
               </div>
            </div>
         </div>
@@ -238,8 +239,7 @@ export default function ProtocolSpecPage() {
                     <p className="text-[10px] font-black uppercase">Voter Protection Policy</p>
                  </div>
                  <p className="text-sm text-muted-foreground leading-relaxed">
-                   To prevent governance manipulation, any wallet casting a vote has its active Stake Maturity <span className="text-foreground font-bold underline">Extended</span> by 4 hours. 
-                   Capital is physically locked until the voting window concludes.
+                   The program verifies the caller's aggregate Stake PDA weight. Capital maturity is extended by 4 hours upon voting to prevent immediate withdrawal post-consensus.
                  </p>
               </div>
            </div>

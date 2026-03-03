@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Upload, AlertCircle, ExternalLink, Wallet } from 'lucide-react';
+import { ArrowLeft, Upload, AlertCircle, ExternalLink, Wallet, Search, Ticket, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
@@ -18,6 +17,7 @@ export default function RegisterNodePage() {
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -61,10 +61,13 @@ export default function RegisterNodePage() {
   const handleRegister = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     if (hasExistingNode) return setFeedback('warning', 'Only one node registration permitted per wallet.');
+    
     const license = state.licenses.find(l => l.id === formData.licenseId);
-    if (!license) return setFeedback('error', 'Invalid license ID provided.');
-    if (license.is_burned) return setFeedback('error', 'License has been permanently burned.');
-    if (license.is_claimed) return setFeedback('error', 'License already active on network.');
+    if (!license) return setFeedback('error', 'Invalid license NFT selected.');
+    if (license.owner !== walletAddress) return setFeedback('error', 'License NFT ownership verification failed.');
+    if (license.is_burned) return setFeedback('error', 'License NFT has been burned.');
+    if (license.is_claimed) return setFeedback('error', 'License is already bound to another node.');
+    
     if (!formData.name || !formData.location) return setFeedback('error', 'Node name and location required.');
 
     const newNode = {
@@ -88,8 +91,17 @@ export default function RegisterNodePage() {
       validators: [...prev.validators, newNode],
       licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
     }));
-    setFeedback('success', 'Validator registration successful. Initializing account.');
+    
+    setFeedback('success', 'NFT-Bound node registration successful.');
     setTimeout(() => router.push('/manage-node'), 1500);
+  };
+
+  const scanForNFTs = () => {
+    setIsScanning(true);
+    setTimeout(() => {
+      setIsScanning(false);
+      setFeedback('success', 'Wallet scan complete. License NFTs identified.');
+    }, 1500);
   };
 
   if (!mounted || !isLoaded) return (
@@ -107,13 +119,13 @@ export default function RegisterNodePage() {
          </div>
          <div className="space-y-4">
            <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Connection Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to register as a network validator.</p>
+           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to verify License NFT ownership.</p>
          </div>
       </div>
     );
   }
 
-  const userLicenses = state.licenses.filter(l => l.owner === walletAddress && !l.is_claimed && !l.is_burned);
+  const availableLicenses = state.licenses.filter(l => l.owner === walletAddress && !l.is_claimed && !l.is_burned);
 
   return (
     <div className="max-w-4xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
@@ -122,12 +134,9 @@ export default function RegisterNodePage() {
       </Link>
 
       <div className="space-y-4">
-        <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Validator Registration</h1>
-        <p className="text-muted-foreground max-w-xl flex items-center gap-2 flex-wrap">
-          Provision high-performance infrastructure for wallet 
-          <a href={getExplorerLink(walletAddress)} target="_blank" rel="noopener noreferrer" className="text-foreground font-mono text-[10px] bg-foreground/5 px-2 py-1 rounded inline-flex items-center gap-1 hover:bg-primary/20 transition-all">
-            {shortenAddress(walletAddress)} <ExternalLink className="w-2.5 h-2.5" />
-          </a>.
+        <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Provisioning</h1>
+        <p className="text-muted-foreground max-w-xl">
+          Register a validator node by binding it to a verified **Node License NFT**. Ownership of the NFT must be proven via cryptographic wallet signature.
         </p>
       </div>
 
@@ -136,13 +145,42 @@ export default function RegisterNodePage() {
            <AlertCircle className="w-12 h-12 text-amber-500" />
            <div className="space-y-2">
              <h2 className="text-2xl font-bold text-foreground uppercase">Active Node Detected</h2>
-             <p className="text-xs text-muted-foreground uppercase tracking-widest">Protocol policy allows only one node per wallet address.</p>
+             <p className="text-xs text-muted-foreground uppercase tracking-widest">Only one node registration permitted per wallet address.</p>
            </div>
            <Link href="/manage-node" className="exn-button">Manage Existing Node</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2 exn-card p-8 space-y-8">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                 <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">NFT Authorization</h3>
+                 <button onClick={scanForNFTs} className="text-[10px] text-primary hover:underline font-black uppercase flex items-center gap-2">
+                   {isScanning ? <><div className="w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin" /> Scanning...</> : <><Search className="w-3 h-3" /> Scan Wallet</>}
+                 </button>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Select License NFT</label>
+                <div className="relative">
+                   <Ticket className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
+                   <select 
+                    value={formData.licenseId} 
+                    onChange={e => setFormData({...formData, licenseId: e.target.value})} 
+                    className="exn-input h-12 pl-12 text-[10px] font-mono"
+                   >
+                    <option value="">Select a Minted License...</option>
+                    {availableLicenses.map(l => (
+                      <option key={l.id} value={l.id}>{l.id}</option>
+                    ))}
+                   </select>
+                </div>
+                <p className="text-[9px] text-muted-foreground/60 italic uppercase">
+                  {availableLicenses.length === 0 ? "No unused license NFTs found in your wallet." : `${availableLicenses.length} valid license assets identified.`}
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Node Name</label>
@@ -159,35 +197,42 @@ export default function RegisterNodePage() {
                   <span className="absolute right-4 top-3.5 text-muted-foreground font-bold">%</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">License ID</label>
-                <select value={formData.licenseId} onChange={e => setFormData({...formData, licenseId: e.target.value})} className="exn-input h-12 text-xs font-mono">
-                  <option value="">Select a License</option>
-                  {userLicenses.map(l => (<option key={l.id} value={l.id}>{l.id}</option>))}
-                </select>
-              </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Validator Bio</label>
-                <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[100px] py-4 text-xs" placeholder="Briefly describe your hardware specs and uptime commitment..." />
+                <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[100px] py-4 text-xs" placeholder="Describe your hardware and commitment..." />
               </div>
             </div>
-            <button onClick={handleRegister} disabled={!formData.licenseId || !formData.name} className={`w-full h-14 uppercase tracking-widest font-black transition-all ${(!formData.licenseId || !formData.name) ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed' : 'exn-button'}`}>
-              Initialize Node
+            
+            <button 
+              onClick={handleRegister} 
+              disabled={!formData.licenseId || !formData.name} 
+              className={`w-full h-14 uppercase tracking-widest font-black transition-all ${(!formData.licenseId || !formData.name) ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed' : 'exn-button'}`}
+            >
+              Bind Node to NFT
             </button>
           </div>
+
           <div className="space-y-6">
-            <div className="exn-card aspect-square relative flex items-center justify-center overflow-hidden border-primary/20">
+            <div className="exn-card aspect-square relative flex items-center justify-center overflow-hidden border-primary/20 bg-black/40">
               {previewUrl ? (<Image src={previewUrl} alt="Logo" fill className="object-cover" />) : (
-                <div className="text-center space-y-2 p-6">
-                  <Upload className="w-8 h-8 text-muted-foreground/20 mx-auto" />
-                  <p className="text-[10px] uppercase font-black text-muted-foreground/40">Logo Preview</p>
+                <div className="text-center space-y-4 p-6">
+                  <div className="w-16 h-16 bg-foreground/5 rounded-full flex items-center justify-center mx-auto border border-border">
+                    <ShieldCheck className="w-8 h-8 text-muted-foreground/20" />
+                  </div>
+                  <p className="text-[10px] uppercase font-black text-muted-foreground/40 tracking-widest">Identity Preview</p>
                 </div>
               )}
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
             <button onClick={() => fileInputRef.current?.click()} className="w-full py-3 border border-primary/20 text-primary text-[10px] font-black uppercase rounded-lg hover:bg-primary/10 transition-all flex items-center justify-center gap-2">
-              <Upload className="w-4 h-4" /> Upload Identity Logo
+              <Upload className="w-4 h-4" /> Upload Node Logo
             </button>
+            
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-2">
+               <p className="text-[10px] text-muted-foreground font-bold uppercase leading-relaxed">
+                 <span className="text-primary">Verification:</span> Upon binding, the License NFT metadata is updated on-chain to reflect the active node identity.
+               </p>
+            </div>
           </div>
         </div>
       )}
