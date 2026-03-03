@@ -17,7 +17,8 @@ import {
   TrendingUp,
   Banknote,
   Layers,
-  Calendar
+  Calendar,
+  Database
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -29,7 +30,6 @@ export default function AdminPage() {
     exn: 'EXN1111111111111111111111111111111111111111', 
     usdc: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' 
   });
-  const [funding, setFunding] = useState({ reward: '', treasury: '' });
   const [newCap, setNewCap] = useState('');
   const [newLicensePrice, setNewLicensePrice] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -38,10 +38,9 @@ export default function AdminPage() {
     setMounted(true);
   }, []);
 
-  const isAdmin = state.adminWallet === walletAddress;
-
   const handleInitialize = () => {
     if (!connected) return setFeedback('error', 'Wallet connection required.');
+    if (!mints.exn || !mints.usdc) return setFeedback('error', 'EXN and USDC mint addresses are required for initialization.');
     
     setState(prev => ({
       ...prev,
@@ -49,14 +48,15 @@ export default function AdminPage() {
       adminWallet: walletAddress,
       exnMint: mints.exn,
       usdcMint: mints.usdc,
-      rewardVaultPda: 'RV-MOCK',
-      treasuryVaultPda: 'TV-MOCK',
-      usdcVaultPda: 'LV-MOCK',
-      stakedVaultPda: 'SV-MOCK',
+      rewardVaultPda: 'RV-MOCK-GLOBAL',
+      treasuryVaultPda: 'TV-MOCK-GLOBAL',
+      usdcVaultPda: 'LV-MOCK-GLOBAL',
+      stakedVaultPda: 'SV-MOCK-GLOBAL',
       licensePrice: 0,
-      rewardCap: 0
+      rewardCap: 0,
+      networkStartDate: null
     }));
-    setFeedback('success', 'Protocol initialized. Params set to 0.');
+    setFeedback('success', 'Protocol initialized. All core Global Vaults provisioned. Parameters set to 0.');
   };
 
   const handleSetNetworkStart = () => {
@@ -108,9 +108,36 @@ export default function AdminPage() {
         <div className="exn-card p-10 border-amber-500/30 bg-amber-500/5 space-y-10">
            <div className="flex items-center gap-4 text-amber-500">
              <AlertTriangle className="w-8 h-8" />
-             <h3 className="text-xl font-bold uppercase">Protocol Not Initialized</h3>
+             <div className="space-y-1">
+               <h3 className="text-xl font-bold uppercase">Initialize Protocol Context</h3>
+               <p className="text-sm opacity-60">Provision the singleton anchor and all Global Vault PDAs.</p>
+             </div>
            </div>
-           <button onClick={handleInitialize} className="exn-button w-full h-14 uppercase font-black">Initialize Global State</button>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">EXN Mint Address</label>
+                <input 
+                  value={mints.exn} 
+                  onChange={e => setMints({...mints, exn: e.target.value})} 
+                  className="exn-input h-12 font-mono text-xs" 
+                  placeholder="EXN Mint..."
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">USDC Mint Address</label>
+                <input 
+                  value={mints.usdc} 
+                  onChange={e => setMints({...mints, usdc: e.target.value})} 
+                  className="exn-input h-12 font-mono text-xs" 
+                  placeholder="USDC Mint..."
+                />
+              </div>
+           </div>
+
+           <button onClick={handleInitialize} className="exn-button w-full h-14 uppercase font-black text-sm tracking-widest">
+             Execute initialize(exn_mint, usdc_mint)
+           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -122,13 +149,13 @@ export default function AdminPage() {
                  </div>
                  {!state.networkStartDate ? (
                    <div className="p-6 bg-primary/5 border border-primary/20 rounded-xl space-y-4">
-                      <p className="text-sm text-muted-foreground">The 10-year reward block cycle is currently inactive.</p>
-                      <button onClick={handleSetNetworkStart} className="exn-button px-10 text-xs">Set Network Start Date</button>
+                      <p className="text-sm text-muted-foreground">The 10-year reward block cycle is currently inactive. Admin must trigger the start clock.</p>
+                      <button onClick={handleSetNetworkStart} className="exn-button px-10 text-xs uppercase font-black">Set Network Start Date</button>
                    </div>
                  ) : (
                    <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
                       <p className="text-xs font-black uppercase text-emerald-500">Lifecycle Active</p>
-                      <p className="text-sm text-muted-foreground mt-1">Started: {new Date(state.networkStartDate).toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Unix Time: {state.networkStartDate} | {new Date(state.networkStartDate).toLocaleString()}</p>
                    </div>
                  )}
               </div>
@@ -159,9 +186,30 @@ export default function AdminPage() {
 
            <div className="space-y-8">
               <div className="exn-card p-8 border-emerald-500/30 bg-emerald-500/5 space-y-6">
-                 <h3 className="text-lg font-bold uppercase tracking-widest">License Settlement</h3>
-                 <p className="text-3xl font-bold">{state.usdcVaultBalance.toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
-                 <button disabled className="w-full h-12 bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed text-[10px] uppercase font-black">Withdraw to Admin</button>
+                 <h3 className="text-lg font-bold uppercase tracking-widest">Protocol Liquidity</h3>
+                 <div className="space-y-4">
+                   <div>
+                     <p className="text-[10px] text-muted-foreground uppercase font-black">License Vault (Settled)</p>
+                     <p className="text-2xl font-bold">{state.usdcVaultBalance.toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
+                   </div>
+                   <div>
+                     <p className="text-[10px] text-muted-foreground uppercase font-black">Global Staked Vault</p>
+                     <p className="text-2xl font-bold">{state.stakedVaultBalance.toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
+                   </div>
+                 </div>
+                 <button disabled className="w-full h-12 bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed text-[10px] uppercase font-black">Withdraw Vault Yield</button>
+              </div>
+
+              <div className="exn-card p-6 space-y-4 border-primary/20 bg-primary/5">
+                 <div className="flex items-center gap-2">
+                   <Database className="w-4 h-4 text-primary" />
+                   <p className="text-[10px] font-black uppercase tracking-widest">On-Chain Context</p>
+                 </div>
+                 <div className="space-y-2 font-mono text-[9px] text-muted-foreground">
+                    <p>EXN MINT: {shortenAddress(state.exnMint || '')}</p>
+                    <p>USDC MINT: {shortenAddress(state.usdcMint || '')}</p>
+                    <p>STAKED PDA: {shortenAddress(state.stakedVaultPda || '')}</p>
+                 </div>
               </div>
            </div>
         </div>
