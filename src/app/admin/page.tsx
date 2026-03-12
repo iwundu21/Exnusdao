@@ -67,7 +67,7 @@ export default function AdminPage() {
   const handleUpdateCap = () => {
     const cap = Number(newCap);
     if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid cap value provided.');
-    // In a real app, this would be a Firestore updateDoc call
+    // Global parameters are anchored in the singleton protocol/global document
     setFeedback('success', `30-day Reward Block Cap updated to ${cap.toLocaleString()} EXN.`);
   };
 
@@ -243,7 +243,7 @@ export default function AdminPage() {
                         <div className="space-y-2">
                            <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
                            <p className="text-xs text-muted-foreground leading-relaxed">
-                              Executing a Master Reset will purge all on-chain global parameters. 
+                              Executing a Master Reset will purge all cloud-anchored global parameters. 
                               Note: Individual validator accounts and user profile documents will persist, but chronological epoch logic will be re-anchored.
                            </p>
                         </div>

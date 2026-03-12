@@ -183,6 +183,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   }, [db]);
 
   const setState = useCallback((updater: any) => {
+    // Legacy support for direct state updates if needed, though Firebase is reactive.
     console.warn("Direct setState is deprecated in favor of Firebase atomic updates.");
   }, []);
 
