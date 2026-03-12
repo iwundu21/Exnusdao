@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, createContext, useContext, ReactNode, useCallback, useEffect } from 'react';
+import { useState, createContext, useContext, ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getProtocolState, saveProtocolState } from '@/app/lib/actions';
 
@@ -123,6 +123,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const walletAddress = publicKey?.toBase58() || '';
   const [state, setInternalState] = useState<ProtocolState>(DEFAULT_STATE);
   const [isLoaded, setIsLoaded] = useState(false);
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const fetchState = useCallback(async () => {
     const data = await getProtocolState();
@@ -136,11 +141,15 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     fetchState();
   }, [fetchState]);
 
+  // Robust setState that decoupled state updates from persistence side-effects
   const setState = useCallback(async (updater: (prev: ProtocolState) => ProtocolState) => {
-    setInternalState(prev => {
-      const next = updater(prev);
-      saveProtocolState(next);
-      return next;
+    const nextState = updater(stateRef.current);
+    setInternalState(nextState);
+    
+    // Side effect: save to DB file (fire and forget)
+    // Wrap in a microtask to avoid interference with the current render cycle
+    Promise.resolve().then(() => {
+      saveProtocolState(nextState);
     });
   }, []);
 

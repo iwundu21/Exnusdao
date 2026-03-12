@@ -28,6 +28,8 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Absolute suppression of any favicon */}
+        <link rel="icon" href="data:;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" />
       </head>
       <body className="font-body antialiased selection:bg-[#00f5ff] selection:text-black">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
