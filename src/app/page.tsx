@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -34,16 +33,13 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Updated weight to include seed deposits for node owners
   const userStakeWeight = useMemo(() => {
     if (!walletAddress || !state?.userStakes || !state?.validators) return 0;
     
-    // 1. Calculate traditional stake weight from user positions
     const stakesWeight = state.userStakes
       .filter(s => s.owner === walletAddress && !s.unstaked)
       .reduce((acc, s) => acc + (s.amount || 0), 0);
       
-    // 2. Calculate weight from owned node seed deposits (15M each)
     const seedWeight = state.validators
       .filter(v => v.owner === walletAddress && v.seed_deposited)
       .length * SEED_DEPOSIT_AMOUNT;
@@ -92,7 +88,7 @@ export default function Home() {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     
     if (!isNodeOwner && userStakeWeight < MIN_STAKE_FOR_VOTE) {
-      return setFeedback('error', `Minimum Staking Requirement: ${MIN_STAKE_FOR_VOTE.toLocaleString()} EXN required (unless you own an XNode).`);
+      return setFeedback('error', `Minimum Staking Requirement: ${MIN_STAKE_FOR_VOTE.toLocaleString()} EXN required.`);
     }
     
     if (exnBalance < VOTE_FEE) return setFeedback('error', `Insufficient EXN for voting fee.`);
@@ -105,7 +101,7 @@ export default function Home() {
     updateUserBalance(walletAddress, -VOTE_FEE, 0);
     setState(prev => ({
       ...prev,
-      treasuryBalance: prev.treasuryBalance + VOTE_FEE,
+      treasuryBalance: (prev.treasuryBalance || 0) + VOTE_FEE,
       proposals: prev.proposals.map(p => p.id === pId ? { 
         ...p, 
         yes_votes: support ? (p.yes_votes || 0) + effectiveWeight : p.yes_votes, 
@@ -128,8 +124,8 @@ export default function Home() {
       id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: nowTime,
-      deadline: nowTime + (7 * 24 * 60 * 60 * 1000), // 7 days
-      voting_ends_at: nowTime + (6 * 24 * 60 * 60 * 1000), // 6 days (1 day lock)
+      deadline: nowTime + (7 * 24 * 60 * 60 * 1000),
+      voting_ends_at: nowTime + (6 * 24 * 60 * 60 * 1000),
       yes_votes: 0,
       no_votes: 0,
       executed: false,
@@ -140,7 +136,7 @@ export default function Home() {
     updateUserBalance(walletAddress, -PROPOSAL_FEE, 0);
     setState(prev => ({
       ...prev,
-      treasuryBalance: prev.treasuryBalance + PROPOSAL_FEE,
+      treasuryBalance: (prev.treasuryBalance || 0) + PROPOSAL_FEE,
       proposals: [newProp, ...prev.proposals]
     }));
     setFeedback('success', 'Proposal broadcast to network.');
@@ -161,16 +157,16 @@ export default function Home() {
       }
       setState(prev => ({
         ...prev,
-        treasuryBalance: proposal.type === 1 ? Math.max(0, prev.treasuryBalance - proposal.amount) : prev.treasuryBalance,
+        treasuryBalance: proposal.type === 1 ? Math.max(0, (prev.treasuryBalance || 0) - proposal.amount) : prev.treasuryBalance,
         proposals: prev.proposals.map(p => p.id === pId ? { ...p, executed: true } : p)
       }));
-      setFeedback('success', 'Proposal enacted. On-chain state updated.');
+      setFeedback('success', 'Proposal enacted.');
     } else {
       setState(prev => ({
         ...prev,
         proposals: prev.proposals.map(p => p.id === pId ? { ...p, executed: true } : p)
       }));
-      setFeedback('warning', 'Proposal rejected by network consensus. Archived.');
+      setFeedback('warning', 'Proposal rejected.');
     }
   };
 
@@ -179,7 +175,7 @@ export default function Home() {
     const currentEpoch = Math.floor(elapsed / EPOCH_DURATION) + 1;
 
     if (targetEpoch >= currentEpoch) {
-      return setFeedback('error', `Settlement Blocked: Epoch ${targetEpoch} is still active.`);
+      return setFeedback('error', `Epoch ${targetEpoch} is still active.`);
     }
 
     if (state.lastCrankedEpoch >= targetEpoch) return;
@@ -189,7 +185,7 @@ export default function Home() {
     const totalActiveWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
 
     if (totalActiveWeight <= 0) {
-      return setFeedback('error', 'Crank Failed: No active XNodes with staked capital detected.');
+      return setFeedback('error', 'No active weight detected.');
     }
 
     const epochShares: any[] = [];
@@ -212,10 +208,11 @@ export default function Home() {
         ...prev,
         validators: newValidators,
         lastCrankedEpoch: targetEpoch,
+        rewardVaultBalance: Math.max(0, (prev.rewardVaultBalance || 0) - totalPool),
         settledEpochs: [...prev.settledEpochs, { epoch: targetEpoch, settledAt: Date.now(), totalPool, validatorShares: epochShares }]
       };
     });
-    setFeedback('success', `Epoch ${targetEpoch} finalized and rewards distributed.`);
+    setFeedback('success', `Epoch ${targetEpoch} settled.`);
   };
 
   const handleClaim = () => {
@@ -236,7 +233,7 @@ export default function Home() {
       return { ...prev, userStakes: newUserStakes };
     });
     updateUserBalance(walletAddress, total, 0);
-    setFeedback('success', `Claimed ${pendingRewardsTotal.toFixed(2)} EXN rewards.`);
+    setFeedback('success', `Claimed ${total.toFixed(2)} EXN.`);
   };
 
   const handleClaimSingle = (stakeId: string) => {
@@ -253,7 +250,7 @@ export default function Home() {
       ...prev,
       userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, reward_checkpoint: validator.global_reward_index } : s)
     }));
-    setFeedback('success', 'Harvested individual stake reward.');
+    setFeedback('success', 'Reward harvested.');
   };
 
   const handleUnstake = (stakeId: string) => {
@@ -267,7 +264,7 @@ export default function Home() {
       userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, unstaked: true } : s),
       validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) } : v)
     }));
-    setFeedback('success', 'Principal returned to wallet.');
+    setFeedback('success', 'Principal unstaked.');
   };
 
   if (!isMounted || !isLoaded) return null;
@@ -282,7 +279,12 @@ export default function Home() {
 
       {activeTab === 'staking' && (
         <>
-          <DashboardStats totalStaked={totalStakedReal} treasuryBalance={state.treasuryBalance} />
+          <DashboardStats 
+            totalStaked={totalStakedReal} 
+            treasuryBalance={state.treasuryBalance || 0} 
+            rewardVaultBalance={state.rewardVaultBalance || 0}
+            usdcVaultBalance={state.usdcVaultBalance || 0}
+          />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2">
               <ValidatorDiscovery 
