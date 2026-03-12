@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useRef } from 'react';
@@ -136,8 +137,8 @@ export interface ProtocolState {
 
 const INITIAL_LOCAL_STATE: ProtocolState = {
   totalStaked: 0, 
-  treasuryBalance: 0,
-  rewardVaultBalance: 0,
+  treasuryBalance: 3000000,
+  rewardVaultBalance: 20000000,
   usdcVaultBalance: 0,
   stakedVaultBalance: 0,
   rewardCap: 300000,
@@ -183,6 +184,7 @@ interface ProtocolContextType {
   updateFaucetClaim: (address: string, type: 'exn' | 'usdc') => void;
   adminFundVault: (address: string, amount: number, vault: 'rewardVaultBalance' | 'treasuryBalance') => void;
   adminWithdrawUsdc: (address: string, amount: number) => void;
+  mintLicense: (address: string, price: number, license: License) => void;
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
@@ -195,6 +197,20 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function load() {
+      // 1. Try browser storage first for persistence on Vercel
+      const localData = localStorage.getItem('EXNUS_NETWORK_STATE');
+      if (localData) {
+        try {
+          const parsed = JSON.parse(localData);
+          setState(parsed);
+          setIsLoaded(true);
+          return;
+        } catch (e) {
+          console.error("Local storage parse error", e);
+        }
+      }
+
+      // 2. Fallback to server action (db.json)
       const serverState = await getProtocolState();
       if (serverState) {
         setState(serverState);
@@ -207,6 +223,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoaded && !isSyncing.current) {
       isSyncing.current = true;
+      localStorage.setItem('EXNUS_NETWORK_STATE', JSON.stringify(state));
       saveProtocolState(state).finally(() => {
         isSyncing.current = false;
       });
@@ -332,6 +349,27 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const mintLicense = useCallback((address: string, price: number, license: License) => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile || profile.usdcBalance < price) return prev;
+      return {
+        ...prev,
+        usdcVaultBalance: (prev.usdcVaultBalance || 0) + price,
+        licenses: [...prev.licenses, license],
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            usdcBalance: profile.usdcBalance - price,
+            lastActive: Date.now(),
+            totalTransactions: profile.totalTransactions + 1
+          }
+        }
+      };
+    });
+  }, []);
+
   const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
     setState(prev => {
       const profile = prev.profiles[address];
@@ -368,7 +406,8 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       updateUserBalance,
       updateFaucetClaim,
       adminFundVault,
-      adminWithdrawUsdc
+      adminWithdrawUsdc,
+      mintLicense
     }}>
       {children}
     </ProtocolContext.Provider>

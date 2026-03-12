@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -11,7 +12,7 @@ import Image from 'next/image';
 export default function PurchaseLicensePage() {
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const { state, setState, isLoaded, setFeedback, updateUserBalance, usdcBalance } = useProtocolState();
+  const { state, isLoaded, setFeedback, mintLicense, usdcBalance } = useProtocolState();
   const [mounted, setMounted] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
   const [mintPhase, setMintPhase] = useState<string | null>(null);
@@ -54,7 +55,6 @@ export default function PurchaseLicensePage() {
     if (hasLicense) return setFeedback('warning', 'Only one XNode License permitted per wallet.');
     if (totalLimit > 0 && currentMintedCount >= totalLimit) return setFeedback('warning', 'Maximum license supply cap reached.');
     
-    // Check against the context-provided usdcBalance which is reactive to profiles
     if (licensePrice > 0 && usdcBalance < licensePrice) return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
 
     setIsMinting(true);
@@ -75,15 +75,8 @@ export default function PurchaseLicensePage() {
             image_url: `https://picsum.photos/seed/${mintAddress}/400/400`
           };
 
-          // Deduct from the specific user profile
-          updateUserBalance(walletAddress, 0, -licensePrice);
-
-          // Update protocol vaults and license registry
-          setState(prev => ({
-            ...prev,
-            usdcVaultBalance: (prev.usdcVaultBalance || 0) + licensePrice,
-            licenses: [...prev.licenses, newLicense]
-          }));
+          // Use the consolidated atomic minting function
+          mintLicense(walletAddress, licensePrice, newLicense);
 
           setIsMinting(false);
           setMintPhase(null);
