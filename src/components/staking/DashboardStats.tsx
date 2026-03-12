@@ -1,21 +1,22 @@
 "use client";
 
 import React from 'react';
-import { CircleDollarSign } from 'lucide-react';
+import { Coins, BarChart3 } from 'lucide-react';
 
 const EXN_PRICE = 0.23;
 
 interface DashboardStatsProps {
   totalStaked?: number;
-  usdcVaultBalance?: number;
+  treasuryBalance?: number;
 }
 
 export function DashboardStats({ 
   totalStaked = 0, 
-  usdcVaultBalance = 0 
+  treasuryBalance = 0 
 }: DashboardStatsProps) {
   
-  const exnUsdValue = totalStaked * EXN_PRICE;
+  const stakedUsdValue = totalStaked * EXN_PRICE;
+  const treasuryUsdValue = treasuryBalance * EXN_PRICE;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -28,7 +29,10 @@ export function DashboardStats({
           
           <div className="p-10 flex flex-col justify-between h-full relative z-10">
             <div className="space-y-1">
-              <p className="text-white/40 text-lg font-medium tracking-tight">Total Staked Balance</p>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-white/40" />
+                <p className="text-white/40 text-lg font-medium tracking-tight">Total Network Locked</p>
+              </div>
               <div className="h-[1px] w-full bg-white/5 mt-4" />
             </div>
             
@@ -37,7 +41,7 @@ export function DashboardStats({
                 {totalStaked.toLocaleString()} <span className="text-3xl font-medium ml-1">EXN</span>
               </p>
               <p className="text-xl font-bold text-[#10b981] tracking-tight">
-                ≈ ${exnUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ≈ ${stakedUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
@@ -53,20 +57,20 @@ export function DashboardStats({
 
           <div className="p-10 flex flex-col justify-between h-full relative z-10">
             <div className="space-y-1">
-              <p className="text-white/40 text-lg font-medium tracking-tight">Treasury Balance</p>
+              <div className="flex items-center gap-2">
+                <Coins className="w-4 h-4 text-white/40" />
+                <p className="text-white/40 text-lg font-medium tracking-tight">DAO Treasury Assets</p>
+              </div>
               <div className="h-[1px] w-full bg-white/5 mt-4" />
             </div>
             
             <div className="space-y-3">
               <p className="text-5xl font-bold text-white tracking-tight">
-                {usdcVaultBalance.toLocaleString()} <span className="text-3xl font-medium ml-1">USDC</span>
+                {treasuryBalance.toLocaleString()} <span className="text-3xl font-medium ml-1">EXN</span>
               </p>
-              <div className="flex items-center gap-2">
-                <div className="bg-[#3b82f6] p-1 rounded-full">
-                  <CircleDollarSign className="w-5 h-5 text-white" />
-                </div>
-                <p className="text-xl font-bold text-[#3b82f6] tracking-tight">USD Coin</p>
-              </div>
+              <p className="text-xl font-bold text-[#3b82f6] tracking-tight">
+                ≈ ${treasuryUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
             </div>
           </div>
         </div>
