@@ -73,13 +73,17 @@ export default function RegisterNodePage() {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     if (hasExistingNode) return setFeedback('warning', 'Only one node registration permitted per wallet.');
     
+    // Strict Validation
+    if (!formData.licenseId) return setFeedback('error', 'Please select a License NFT.');
+    if (!formData.name.trim()) return setFeedback('error', 'Node Name is required.');
+    if (!formData.location.trim()) return setFeedback('error', 'Node Location is required.');
+    if (!formData.description.trim()) return setFeedback('error', 'Node Bio/Description is required.');
+
     const license = state.licenses.find(l => l.id === formData.licenseId);
     if (!license) return setFeedback('error', 'Invalid license NFT selected.');
     if (license.owner !== walletAddress) return setFeedback('error', 'License NFT ownership verification failed.');
     if (license.is_burned) return setFeedback('error', 'License NFT has been burned.');
     if (license.is_claimed) return setFeedback('error', 'License is already bound to another node.');
-    
-    if (!formData.name || !formData.location) return setFeedback('error', 'Node name and location required.');
 
     const newNode = {
       id: `v${Date.now()}`,

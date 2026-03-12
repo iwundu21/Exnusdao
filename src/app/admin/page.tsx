@@ -29,24 +29,27 @@ export default function AdminPage() {
   }, []);
 
   const handleUpdateCap = () => {
+    if (!newCap.trim()) return setFeedback('error', 'Reward Cap field cannot be empty.');
     const cap = Number(newCap);
-    if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid cap.');
+    if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid cap value provided.');
     setState(prev => ({ ...prev, rewardCap: cap }));
     setNewCap('');
-    setFeedback('success', `14-day Reward Block Cap updated to ${cap.toLocaleString()} EXN.`);
+    setFeedback('success', `30-day Reward Block Cap updated to ${cap.toLocaleString()} EXN.`);
   };
 
   const handleUpdateLicensePrice = () => {
+    if (!newLicensePrice.trim()) return setFeedback('error', 'License Price field cannot be empty.');
     const price = Number(newLicensePrice);
-    if (isNaN(price) || price < 0) return setFeedback('error', 'Invalid price.');
+    if (isNaN(price) || price < 0) return setFeedback('error', 'Invalid price value provided.');
     setState(prev => ({ ...prev, licensePrice: price }));
     setNewLicensePrice('');
     setFeedback('success', `License Mint Price updated to ${price.toLocaleString()} USDC.`);
   };
 
   const handleUpdateLicenseLimit = () => {
+    if (!newLicenseLimit.trim()) return setFeedback('error', 'License Limit field cannot be empty.');
     const limit = Number(newLicenseLimit);
-    if (isNaN(limit) || limit < 0) return setFeedback('error', 'Invalid limit.');
+    if (isNaN(limit) || limit < 0) return setFeedback('error', 'Invalid limit value provided.');
     setState(prev => ({ ...prev, licenseLimit: limit }));
     setNewLicenseLimit('');
     setFeedback('success', `Total License Supply Cap updated to ${limit}.`);
@@ -105,7 +108,7 @@ export default function AdminPage() {
                </div>
                <div className="grid grid-cols-1 gap-8">
                  <div className="space-y-4">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black">14-Day Reward Block Pool (EXN)</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-black">30-Day Reward Block Pool (EXN)</p>
                     <div className="flex gap-2">
                        <input value={newCap} onChange={e => setNewCap(e.target.value)} className="exn-input h-12" placeholder={(state?.rewardCap ?? 0).toString()} />
                        <button onClick={handleUpdateCap} className="exn-button-outline px-6 h-12 text-[9px] uppercase font-black">Update Pool</button>

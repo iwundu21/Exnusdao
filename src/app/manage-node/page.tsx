@@ -77,9 +77,15 @@ export default function ManageNodePage() {
 
   const handleUpdate = () => {
     if (!editingNodeId || !formData) return;
+    
+    // Strict Validation
+    if (!formData.name.trim()) return setFeedback('error', 'Node Name cannot be empty.');
+    if (!formData.location.trim()) return setFeedback('error', 'Location cannot be empty.');
+    if (!formData.description.trim()) return setFeedback('error', 'Node Bio cannot be empty.');
     if (formData.commission_rate < 0 || formData.commission_rate > 30) {
       return setFeedback('error', 'Invalid commission rate. Range: 0% to 30%.');
     }
+
     setState(prev => ({
       ...prev,
       validators: prev.validators.map(v => v.id === editingNodeId ? {
