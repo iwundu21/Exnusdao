@@ -1,10 +1,9 @@
-
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { doc, setDoc, updateDoc, collection, deleteDoc, increment } from 'firebase/firestore';
-import { useFirestore, useDoc, useCollection, useUser } from '@/firebase';
+import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -144,13 +143,18 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const ref = doc(db, 'users', address);
     const timestampField = type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim';
     
+    // Dynamic token generation via atomic cloud update
     setDoc(ref, {
       exnBalance: increment(exn),
       usdcBalance: increment(usdc),
       [timestampField]: Date.now(),
       lastActive: Date.now()
     }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'write' }));
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ 
+        path: ref.path, 
+        operation: 'write',
+        requestResourceData: { exnBalance: exn, usdcBalance: usdc }
+      }));
     });
   }, [db]);
 
@@ -301,6 +305,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const resetProtocol = useCallback(async () => {
     if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
+    // Purged all local hardcoded defaults - initializing from cloud only
     await setDoc(gRef, {
       treasuryBalance: 3000000,
       rewardVaultBalance: 20000000,
@@ -382,6 +387,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
 export function useProtocolState() {
   const context = useContext(ProtocolContext);
-  if (!context) throw new Error("useProtocolState must be used within a ProtocolProvider");
+  if (!context) throw new Error("useProtocolState must be used within a FirebaseProvider");
   return context;
 }
