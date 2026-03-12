@@ -3,7 +3,7 @@
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, updateDoc, collection, deleteDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, collection, deleteDoc, increment } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection, useUser } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -59,7 +59,7 @@ interface ProtocolContextType {
   lastExnFaucetClaim: number;
   lastUsdcFaucetClaim: number;
   updateUserBalance: (address: string, exn: number, usdc: number) => void;
-  updateFaucetClaim: (address: string, type: 'exn' | 'usdc') => void;
+  claimFaucetAssets: (address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => void;
   adminFundVault: (address: string, amount: number, vault: string) => void;
   adminWithdrawUsdc: (address: string, amount: number) => void;
   mintLicense: (address: string, price: number, license: any) => void;
@@ -85,7 +85,7 @@ const ProtocolContext = createContext<ProtocolContextType | null>(null);
 export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { publicKey } = useWallet();
   const db = useFirestore();
-  const { user: firebaseUser, loading: authLoading } = useUser();
+  const { user: firebaseUser } = useUser();
   const walletAddress = publicKey?.toBase58() || '';
 
   // Cloud Firestore References
@@ -107,7 +107,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const userRef = useMemo(() => (walletAddress ? doc(db, 'users', walletAddress) : null), [db, walletAddress]);
   const { data: userProfile, loading: profileLoading } = useDoc(userRef);
 
-  // App Shell renders immediately; data loads in parallel
   const isLoaded = !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
 
   const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
@@ -121,7 +120,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const registerUser = useCallback((address: string) => {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
-    // Use setDoc with merge: true to avoid overwriting existing balances on every login
     setDoc(ref, {
       address,
       lastActive: Date.now()
@@ -133,7 +131,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const updateUserBalance = useCallback((address: string, exn: number, usdc: number) => {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
-    // Atomic increment using setDoc with merge ensures the document exists and balance adds correctly
     setDoc(ref, {
       exnBalance: increment(exn),
       usdcBalance: increment(usdc),
@@ -143,11 +140,16 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     });
   }, [db]);
 
-  const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
+  const claimFaucetAssets = useCallback((address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
+    const timestampField = type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim';
+    
     setDoc(ref, {
-      [type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim']: Date.now()
+      exnBalance: increment(exn),
+      usdcBalance: increment(usdc),
+      [timestampField]: Date.now(),
+      lastActive: Date.now()
     }, { merge: true }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
@@ -356,7 +358,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       lastExnFaucetClaim: userProfile?.lastExnFaucetClaim ?? 0,
       lastUsdcFaucetClaim: userProfile?.lastUsdcFaucetClaim ?? 0,
       updateUserBalance,
-      updateFaucetClaim,
+      claimFaucetAssets,
       adminFundVault,
       adminWithdrawUsdc,
       mintLicense,

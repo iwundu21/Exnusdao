@@ -12,7 +12,15 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export default function FaucetPage() {
   const { connected, publicKey } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const { state, isLoaded, setFeedback, updateUserBalance, updateFaucetClaim, lastExnFaucetClaim, lastUsdcFaucetClaim } = useProtocolState();
+  const { 
+    state, 
+    isLoaded, 
+    setFeedback, 
+    claimFaucetAssets, 
+    lastExnFaucetClaim, 
+    lastUsdcFaucetClaim 
+  } = useProtocolState();
+  
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(Date.now());
 
@@ -58,15 +66,13 @@ export default function FaucetPage() {
 
   const handleClaimExn = () => {
     if (exnTimeLeft > 0) return setFeedback('warning', `Cooldown active. Ready in ${formatTime(exnTimeLeft)}.`);
-    updateUserBalance(walletAddress, exnLimit, 0);
-    updateFaucetClaim(walletAddress, 'exn');
+    claimFaucetAssets(walletAddress, exnLimit, 0, 'exn');
     setFeedback('success', `${exnLimit.toLocaleString()} EXN dynamically generated for your wallet.`);
   };
 
   const handleClaimUsdc = () => {
     if (usdcTimeLeft > 0) return setFeedback('warning', `Cooldown active. Ready in ${formatTime(usdcTimeLeft)}.`);
-    updateUserBalance(walletAddress, 0, usdcLimit);
-    updateFaucetClaim(walletAddress, 'usdc');
+    claimFaucetAssets(walletAddress, 0, usdcLimit, 'usdc');
     setFeedback('success', `${usdcLimit.toLocaleString()} USDC dynamically generated for your wallet.`);
   };
 

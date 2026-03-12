@@ -5,25 +5,35 @@ import React, { useEffect, useState } from 'react';
 import { ExternalLink, X, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { getExplorerLink } from '@/lib/utils';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 export function TransactionStatus() {
-  const { state, clearFeedback } = useProtocolState();
-  const tx = state.lastTransaction;
+  const { clearFeedback } = useProtocolState();
+  const [tx, setTx] = useState<any | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    
+    const handleFeedback = (feedback: any) => {
+      setTx(feedback);
+    };
+
+    errorEmitter.on('feedback', handleFeedback);
+    return () => {
+      errorEmitter.off('feedback', handleFeedback);
+    };
   }, []);
 
   // Auto-dismiss after 8 seconds
   useEffect(() => {
     if (tx) {
       const timer = setTimeout(() => {
-        clearFeedback();
+        setTx(null);
       }, 8000);
       return () => clearTimeout(timer);
     }
-  }, [tx, clearFeedback]);
+  }, [tx]);
 
   if (!mounted || !tx) return null;
 
@@ -51,7 +61,7 @@ export function TransactionStatus() {
     }
   };
 
-  const current = styles[tx.status];
+  const current = (styles as any)[tx.status] || styles.success;
   const Icon = current.icon;
 
   return (
@@ -71,7 +81,7 @@ export function TransactionStatus() {
               <p className="text-sm text-foreground font-medium leading-relaxed">
                 {tx.message}
               </p>
-              {tx.status === 'success' && (
+              {tx.status === 'success' && tx.txHash && (
                 <div className="pt-3 flex items-center gap-4">
                   <a 
                     href={getExplorerLink(tx.txHash)} 
@@ -87,7 +97,7 @@ export function TransactionStatus() {
           </div>
           
           <button 
-            onClick={clearFeedback}
+            onClick={() => setTx(null)}
             className="text-foreground/20 hover:text-foreground transition-colors p-1"
           >
             <X className="w-4 h-4" />
