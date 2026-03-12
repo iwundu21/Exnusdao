@@ -1,9 +1,9 @@
-
 export const firebaseConfig = {
-  apiKey: "AIzaSyAs-demo-key",
-  authDomain: "exnus-protocol.firebaseapp.com",
-  projectId: "exnus-protocol",
-  storageBucket: "exnus-protocol.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:demo"
+  apiKey: "AIzaSyC2OzItT3DYL3diTN3OSfxRNmvkuw1OKQo",
+  authDomain: "exnusdao.firebaseapp.com",
+  projectId: "exnusdao",
+  storageBucket: "exnusdao.firebasestorage.app",
+  messagingSenderId: "833604209920",
+  appId: "1:833604209920:web:b9e8b55801959ff94df7e5",
+  measurementId: "G-GCHH3TBXLX"
 };
