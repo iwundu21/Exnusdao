@@ -64,16 +64,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
     if (userStakeWeight < 1000000) {
       return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum staked weight required to propose network changes.');
     }
-    
-    if (!newProp.title || !newProp.description) {
-      return setFeedback('error', 'Mandatory Fields Missing: Title and rationale are required for network broadcasting.');
-    }
-    
-    if (newProp.type === 1) {
-      if (!newProp.recipient || !newProp.amount || Number(newProp.amount) <= 0) {
-        return setFeedback('error', 'Invalid Distribution: Recipient address and positive amount are required.');
-      }
-    }
 
     onCreate({
       ...newProp,
@@ -96,6 +86,8 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
     setVotingOn(null);
     setVoteRationale('');
   };
+
+  const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0));
 
   return (
     <div className="space-y-10">
@@ -199,7 +191,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
           </div>
 
           <div className="flex gap-4 mt-10">
-            <button onClick={handleCreate} className="exn-button px-10 text-[10px]">Broadcast (10 EXN Fee)</button>
+            <button 
+              onClick={handleCreate} 
+              disabled={isProposalDisabled}
+              className={`px-10 text-[10px] transition-all h-12 flex items-center justify-center font-black uppercase ${!isProposalDisabled ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+            >
+              Broadcast (10 EXN Fee)
+            </button>
             <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 text-[10px]">Cancel</button>
           </div>
         </div>
@@ -307,7 +305,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                         className="exn-input h-24 text-xs bg-background"
                       />
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={handleConfirmVote} className="exn-button py-2 text-[10px]">Confirm Vote</button>
+                        <button 
+                          onClick={handleConfirmVote} 
+                          disabled={!voteRationale.trim()}
+                          className={`py-2 text-[10px] transition-all h-10 flex items-center justify-center font-black uppercase ${voteRationale.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                        >
+                          Confirm Vote
+                        </button>
                         <button onClick={() => setVotingOn(null)} className="exn-button-outline py-2 text-[10px]">Cancel</button>
                       </div>
                     </div>

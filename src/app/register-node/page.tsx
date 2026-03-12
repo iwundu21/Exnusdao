@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -73,12 +72,6 @@ export default function RegisterNodePage() {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     if (hasExistingNode) return setFeedback('warning', 'Only one node registration permitted per wallet.');
     
-    // Strict Validation
-    if (!formData.licenseId) return setFeedback('error', 'Please select a License NFT.');
-    if (!formData.name.trim()) return setFeedback('error', 'Node Name is required.');
-    if (!formData.location.trim()) return setFeedback('error', 'Node Location is required.');
-    if (!formData.description.trim()) return setFeedback('error', 'Node Bio/Description is required.');
-
     const license = state.licenses.find(l => l.id === formData.licenseId);
     if (!license) return setFeedback('error', 'Invalid license NFT selected.');
     if (license.owner !== walletAddress) return setFeedback('error', 'License NFT ownership verification failed.');
@@ -116,6 +109,8 @@ export default function RegisterNodePage() {
   // Preview Helpers
   const isLogoSet = formData.logo_uri.length > 0;
   const previewLogo = isLogoSet ? formData.logo_uri : `https://picsum.photos/seed/placeholder/800/400`;
+
+  const isRegistrationDisabled = !formData.licenseId || !formData.name.trim() || !formData.location.trim() || !formData.description.trim();
 
   return (
     <div className="max-w-6xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
@@ -205,8 +200,8 @@ export default function RegisterNodePage() {
             
             <button 
               onClick={handleRegister} 
-              disabled={!formData.licenseId || !formData.name} 
-              className={`w-full h-14 uppercase tracking-widest font-black transition-all ${(!formData.licenseId || !formData.name) ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed' : 'exn-button'}`}
+              disabled={isRegistrationDisabled} 
+              className={`w-full h-14 uppercase tracking-widest font-black transition-all ${isRegistrationDisabled ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed' : 'exn-button'}`}
             >
               Bind Node to NFT
             </button>

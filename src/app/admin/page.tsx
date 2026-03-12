@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -12,7 +11,8 @@ import {
   Calendar,
   Database,
   Coins,
-  Zap
+  Zap,
+  Power
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -29,7 +29,6 @@ export default function AdminPage() {
   }, []);
 
   const handleUpdateCap = () => {
-    if (!newCap.trim()) return setFeedback('error', 'Reward Cap field cannot be empty.');
     const cap = Number(newCap);
     if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid cap value provided.');
     setState(prev => ({ ...prev, rewardCap: cap }));
@@ -38,7 +37,6 @@ export default function AdminPage() {
   };
 
   const handleUpdateLicensePrice = () => {
-    if (!newLicensePrice.trim()) return setFeedback('error', 'License Price field cannot be empty.');
     const price = Number(newLicensePrice);
     if (isNaN(price) || price < 0) return setFeedback('error', 'Invalid price value provided.');
     setState(prev => ({ ...prev, licensePrice: price }));
@@ -47,7 +45,6 @@ export default function AdminPage() {
   };
 
   const handleUpdateLicenseLimit = () => {
-    if (!newLicenseLimit.trim()) return setFeedback('error', 'License Limit field cannot be empty.');
     const limit = Number(newLicenseLimit);
     if (isNaN(limit) || limit < 0) return setFeedback('error', 'Invalid limit value provided.');
     setState(prev => ({ ...prev, licenseLimit: limit }));
@@ -56,8 +53,8 @@ export default function AdminPage() {
   };
 
   const handleResetTimeline = () => {
-    setState(prev => ({ ...prev, networkStartDate: Date.now(), lastCrankedEpoch: 0 }));
-    setFeedback('success', 'Protocol timeline synchronized to current cluster time. Epoch 1 re-anchored.');
+    setState(prev => ({ ...prev, networkStartDate: Date.now(), lastCrankedEpoch: 0, settledEpochs: [] }));
+    setFeedback('success', 'Protocol timeline re-anchored. Epoch 1 is now active.');
   };
 
   if (!mounted || !isLoaded) return null;
@@ -93,9 +90,9 @@ export default function AdminPage() {
                </div>
                <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex justify-between items-center">
                   <div>
-                    <p className="text-xs font-black uppercase text-emerald-500">Lifecycle Active</p>
-                    <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Started: {new Date(state.networkStartDate).toLocaleString()}</p>
-                    <p className="text-[10px] text-primary font-bold uppercase mt-2">Last Finalized Epoch: {state.lastCrankedEpoch}</p>
+                    <p className="text-xs font-black uppercase text-emerald-500">Timeline Live</p>
+                    <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Last Reset: {new Date(state.networkStartDate).toLocaleString()}</p>
+                    <p className="text-[10px] text-primary font-bold uppercase mt-2">Current Active Epoch: {state.lastCrankedEpoch + 1}</p>
                   </div>
                   <button onClick={handleResetTimeline} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Re-anchor Epoch 1</button>
                </div>
@@ -111,7 +108,13 @@ export default function AdminPage() {
                     <p className="text-[10px] text-muted-foreground uppercase font-black">30-Day Reward Block Pool (EXN)</p>
                     <div className="flex gap-2">
                        <input value={newCap} onChange={e => setNewCap(e.target.value)} className="exn-input h-12" placeholder={(state?.rewardCap ?? 0).toString()} />
-                       <button onClick={handleUpdateCap} className="exn-button-outline px-6 h-12 text-[9px] uppercase font-black">Update Pool</button>
+                       <button 
+                         onClick={handleUpdateCap} 
+                         disabled={!newCap.trim()}
+                         className={`px-6 h-12 text-[9px] uppercase font-black transition-all ${newCap.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                       >
+                         Update Pool
+                       </button>
                     </div>
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -119,14 +122,26 @@ export default function AdminPage() {
                       <p className="text-[10px] text-muted-foreground uppercase font-black">License Mint Price (USDC)</p>
                       <div className="flex gap-2">
                          <input value={newLicensePrice} onChange={e => setNewLicensePrice(e.target.value)} className="exn-input h-12" placeholder={(state?.licensePrice ?? 0).toString()} />
-                         <button onClick={handleUpdateLicensePrice} className="exn-button-outline px-6 h-12 text-[9px] uppercase font-black">Update Price</button>
+                         <button 
+                           onClick={handleUpdateLicensePrice} 
+                           disabled={!newLicensePrice.trim()}
+                           className={`px-6 h-12 text-[9px] uppercase font-black transition-all ${newLicensePrice.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                         >
+                           Update Price
+                         </button>
                       </div>
                    </div>
                    <div className="space-y-4">
                       <p className="text-[10px] text-muted-foreground uppercase font-black">Total License Supply Cap</p>
                       <div className="flex gap-2">
                          <input value={newLicenseLimit} onChange={e => setNewLicenseLimit(e.target.value)} className="exn-input h-12" placeholder={(state?.licenseLimit ?? 0).toString()} />
-                         <button onClick={handleUpdateLicenseLimit} className="exn-button-outline px-6 h-12 text-[9px] uppercase font-black">Update Cap</button>
+                         <button 
+                           onClick={handleUpdateLicenseLimit} 
+                           disabled={!newLicenseLimit.trim()}
+                           className={`px-6 h-12 text-[9px] uppercase font-black transition-all ${newLicenseLimit.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                         >
+                           Update Cap
+                         </button>
                       </div>
                    </div>
                  </div>

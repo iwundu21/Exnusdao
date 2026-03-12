@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -78,10 +77,6 @@ export default function ManageNodePage() {
   const handleUpdate = () => {
     if (!editingNodeId || !formData) return;
     
-    // Strict Validation
-    if (!formData.name.trim()) return setFeedback('error', 'Node Name cannot be empty.');
-    if (!formData.location.trim()) return setFeedback('error', 'Location cannot be empty.');
-    if (!formData.description.trim()) return setFeedback('error', 'Node Bio cannot be empty.');
     if (formData.commission_rate < 0 || formData.commission_rate > 30) {
       return setFeedback('error', 'Invalid commission rate. Range: 0% to 30%.');
     }
@@ -204,6 +199,8 @@ export default function ManageNodePage() {
             const isUrl = logoToDisplay?.startsWith('http') || logoToDisplay?.startsWith('data:');
             const logoUrl = isUrl ? logoToDisplay : `https://picsum.photos/seed/${logoToDisplay}/400/400`;
 
+            const isUpdateDisabled = !formData?.name.trim() || !formData?.location.trim() || !formData?.description.trim();
+
             return (
               <div key={node.id} className="exn-card p-10 space-y-10 border-primary/20">
                 <div className="flex flex-col lg:flex-row justify-between gap-10">
@@ -317,7 +314,11 @@ export default function ManageNodePage() {
 
                         {isEditing && (
                           <div className="flex gap-4 pt-4">
-                            <button onClick={handleUpdate} className="exn-button flex-1 py-4 flex items-center justify-center gap-2">
+                            <button 
+                              onClick={handleUpdate} 
+                              disabled={isUpdateDisabled}
+                              className={`flex-1 py-4 flex items-center justify-center gap-2 transition-all ${isUpdateDisabled ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed' : 'exn-button'}`}
+                            >
                                <Save className="w-4 h-4" /> Save Network Updates
                             </button>
                             <button onClick={() => setEditingNodeId(null)} className="exn-button-outline px-10">Cancel</button>

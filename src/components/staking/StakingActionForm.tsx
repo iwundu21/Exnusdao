@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -57,6 +56,8 @@ export function StakingActionForm({
   };
 
   const activeUserStakes = userStakes.filter((s: any) => !s.unstaked);
+
+  const isStakeDisabled = !selectedNode || !amount || Number(amount) <= 0;
 
   if (!connected) {
     return (
@@ -138,8 +139,8 @@ export function StakingActionForm({
 
           <button 
             onClick={handleAction} 
-            disabled={!selectedNode}
-            className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${selectedNode ? 'exn-button' : 'bg-foreground/5 text-foreground/20 border border-border cursor-not-allowed'}`}
+            disabled={isStakeDisabled}
+            className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${!isStakeDisabled ? 'exn-button' : 'bg-foreground/5 text-foreground/20 border border-border cursor-not-allowed'}`}
           >
             {selectedNode ? `Confirm Stake with ${selectedNode.name}` : 'Confirm Stake'}
           </button>
