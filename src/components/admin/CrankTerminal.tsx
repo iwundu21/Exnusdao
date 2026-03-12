@@ -1,6 +1,8 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Activity, Clock, ShieldAlert } from 'lucide-react';
 
 const BLOCK_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days in ms
 
@@ -11,7 +13,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
   useEffect(() => {
     if (!networkStartDate) return;
     
-    const timer = setInterval(() => {
+    const updateTimer = () => {
       const now = Date.now();
       const elapsed = now - networkStartDate;
       const block = Math.floor(elapsed / BLOCK_DURATION) + 1000; 
@@ -25,7 +27,10 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
       const s = Math.floor((remainingMs % (1000 * 60)) / 1000);
 
       setTimeLeft({ d, h, m, s });
-    }, 1000);
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
 
     return () => clearInterval(timer);
   }, [networkStartDate]);
@@ -58,9 +63,10 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
 
   if (!networkStartDate) {
     return (
-      <div className="exn-card p-20 text-center space-y-6">
-        <p className="text-xl font-bold uppercase tracking-widest text-amber-500">Network Lifespan Not Initialized</p>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">The Protocol Admin must set the network start date to begin the 10-year reward block cycle.</p>
+      <div className="exn-card p-20 text-center space-y-6 animate-in fade-in duration-500">
+        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <p className="text-xl font-bold uppercase tracking-widest text-amber-500">Network Lifespan Not Started</p>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto">The Protocol Admin must anchor the network start date to begin the 10-year reward block cycle.</p>
       </div>
     );
   }
@@ -71,7 +77,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">Network Crank Terminal</h2>
           <p className="text-muted-foreground text-sm max-w-xl">
-            Settle the 14-day reward blocks. The system operates on a 10-year sharding cycle, distributing the {rewardCap.toLocaleString()} EXN pool permissionlessly.
+            Settle the 14-day reward blocks. The system operates on a 10-year sharding cycle, distributing the {(rewardCap || 0).toLocaleString()} EXN pool permissionlessly.
           </p>
         </div>
         <div className="px-6 py-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center gap-6">
@@ -91,8 +97,9 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         <div className="exn-card p-10 border-primary/30 flex flex-col items-center justify-center text-center space-y-8">
+          <Activity className="w-12 h-12 text-primary animate-pulse" />
           <h3 className="text-2xl font-bold uppercase tracking-widest">Execute Block {currentBlock} Crank</h3>
-          <p className="text-sm text-muted-foreground">Authorize sharding of {rewardCap.toLocaleString()} EXN to all active network weight shards.</p>
+          <p className="text-sm text-muted-foreground">Authorize sharding of {(rewardCap || 0).toLocaleString()} EXN to all active network weight shards.</p>
           
           <button 
             onClick={onCrank}

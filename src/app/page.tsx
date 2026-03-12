@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -123,7 +124,7 @@ export default function Home() {
 
   const handleCrank = () => {
     if (!state.networkStartDate) {
-      return setFeedback('error', 'Network start date not initialized by Admin.');
+      return setFeedback('error', 'Network start date not anchored.');
     }
 
     const currentBlock = Math.floor((Date.now() - state.networkStartDate) / BLOCK_DURATION_MS) + 1000;
@@ -132,11 +133,13 @@ export default function Home() {
       return setFeedback('warning', `Reward Block ${currentBlock} has already been finalized.`);
     }
 
-    const totalPool = state.rewardCap;
+    const totalPool = state.rewardCap || 0;
     const activeValidators = state.validators.filter(v => v.is_active && v.total_staked > 0);
     const totalActiveWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
 
-    if (totalActiveWeight <= 0) return;
+    if (totalActiveWeight <= 0) {
+      return setFeedback('warning', 'No active validators with stake found for reward sharding.');
+    }
 
     setState(prev => {
       const newValidators = prev.validators.map(v => {
@@ -195,30 +198,6 @@ export default function Home() {
   };
 
   if (!isMounted || !isLoaded) return null;
-
-  if (!state.isInitialized) {
-    return (
-      <div className="max-w-7xl mx-auto px-10 py-40 flex flex-col items-center justify-center text-center space-y-10 animate-in fade-in duration-500">
-         <div className="relative">
-            <div className="absolute -inset-4 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-            <div className="p-8 bg-background border border-border rounded-full relative">
-              <Activity className="w-16 h-16 text-primary" />
-            </div>
-         </div>
-         <div className="space-y-4">
-            <h1 className="text-6xl font-black exn-gradient-text uppercase tracking-tighter">Protocol Standby</h1>
-            <p className="text-muted-foreground max-w-lg mx-auto uppercase text-[10px] font-black tracking-[0.3em] leading-relaxed">
-              The Exnus network is currently in a pre-launch phase. Global vaults, mint authorities, and economic parameters must be anchored via the admin terminal to enable dashboard access.
-            </p>
-         </div>
-         {state.adminWallet === walletAddress && (
-           <a href="/admin" className="exn-button px-10 h-12 flex items-center gap-2">
-             <ShieldAlert className="w-4 h-4" /> Go to Admin Initialization
-           </a>
-         )}
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
