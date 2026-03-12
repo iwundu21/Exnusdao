@@ -1,0 +1,58 @@
+
+{
+  "totalStaked": 15000000,
+  "treasuryBalance": 50000,
+  "rewardVaultBalance": 100000,
+  "usdcVaultBalance": 5000,
+  "stakedVaultBalance": 15000000,
+  "rewardCap": 1500,
+  "licenseLimit": 100,
+  "licensePrice": 500,
+  "isPaused": false,
+  "lastTransaction": null,
+  "lastCrankedEpoch": 0,
+  "networkStartDate": 1739800000000,
+  "exnMint": "EXN1111111111111111111111111111111111111111",
+  "usdcMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "rewardVaultPda": "REWARD-PDA",
+  "treasuryVaultPda": "TREASURY-PDA",
+  "usdcVaultPda": "LICENSE-PDA",
+  "stakedVaultPda": "STAKED-PDA",
+  "adminWallet": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
+  "validators": [
+    {
+      "id": "v1",
+      "owner": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
+      "name": "CyberCore-01",
+      "description": "Primary edge node",
+      "logo_uri": "66",
+      "location": "Singapore",
+      "is_active": true,
+      "seed_deposited": true,
+      "total_staked": 15000000,
+      "commission_rate": 500,
+      "accrued_node_rewards": 0,
+      "global_reward_index": 0,
+      "license_id": "XNODE-DEFAULT"
+    }
+  ],
+  "userStakes": [],
+  "licenses": [
+    {
+      "id": "XNODE-DEFAULT",
+      "owner": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
+      "is_claimed": true,
+      "is_burned": false,
+      "image_url": "https://picsum.photos/seed/XNODE-DEFAULT/400/400"
+    }
+  ],
+  "proposals": [],
+  "settledEpochs": [],
+  "profiles": {},
+  "metadata": {
+    "version": "1.0.0-DEMO",
+    "totalVolume": 0,
+    "totalUsers": 0,
+    "lastUpdate": 1739800000000
+  }
+}

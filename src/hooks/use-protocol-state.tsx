@@ -1,7 +1,9 @@
+
 "use client";
 
-import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { getProtocolState, saveProtocolState } from '@/app/lib/actions';
 
 export interface Validator {
   id: string;
@@ -133,7 +135,7 @@ export interface ProtocolState {
   metadata: NetworkMetadata;
 }
 
-const INITIAL_STATE: ProtocolState = {
+const INITIAL_LOCAL_STATE: ProtocolState = {
   totalStaked: 15000000, 
   treasuryBalance: 50000,
   rewardVaultBalance: 100000,
@@ -153,33 +155,9 @@ const INITIAL_STATE: ProtocolState = {
   usdcVaultPda: 'LICENSE-PDA',
   stakedVaultPda: 'STAKED-PDA',
   adminWallet: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
-  validators: [
-    { 
-      id: 'v1', 
-      owner: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
-      name: 'CyberCore-01', 
-      description: 'Primary edge node', 
-      logo_uri: '66', 
-      location: 'Singapore', 
-      is_active: true, 
-      seed_deposited: true, 
-      total_staked: 15000000, 
-      commission_rate: 500, 
-      accrued_node_rewards: 0, 
-      global_reward_index: 0, 
-      license_id: 'XNODE-DEFAULT' 
-    }
-  ],
+  validators: [],
   userStakes: [],
-  licenses: [
-    {
-      id: 'XNODE-DEFAULT',
-      owner: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
-      is_claimed: true,
-      is_burned: false,
-      image_url: 'https://picsum.photos/seed/XNODE-DEFAULT/400/400'
-    }
-  ],
+  licenses: [],
   proposals: [],
   settledEpochs: [],
   profiles: {},
@@ -210,28 +188,29 @@ const ProtocolContext = createContext<ProtocolContextType | null>(null);
 
 export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { publicKey } = useWallet();
-  const [state, setState] = useState<ProtocolState>(INITIAL_STATE);
+  const [state, setState] = useState<ProtocolState>(INITIAL_LOCAL_STATE);
   const [isLoaded, setIsLoaded] = useState(false);
+  const isSyncing = useRef(false);
 
+  // Initial load from Server File DB
   useEffect(() => {
-    const saved = localStorage.getItem('exnus_general_memory_v1');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setState(prev => ({ 
-          ...prev, 
-          ...parsed
-        }));
-      } catch (e) {
-        console.error("Failed to parse general memory", e);
+    async function load() {
+      const serverState = await getProtocolState();
+      if (serverState) {
+        setState(serverState);
       }
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
+    load();
   }, []);
 
+  // Sync state to Server File DB on change
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('exnus_general_memory_v1', JSON.stringify(state));
+    if (isLoaded && !isSyncing.current) {
+      isSyncing.current = true;
+      saveProtocolState(state).finally(() => {
+        isSyncing.current = false;
+      });
     }
   }, [state, isLoaded]);
 
