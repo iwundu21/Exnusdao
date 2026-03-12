@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -15,7 +14,7 @@ const PROPOSAL_FEE = 10;
 const VOTE_FEE = 3;
 const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
 const MIN_STAKE_FOR_VOTE = 10_000;
-const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+const EPOCH_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
 export default function Home() {
   const { connected, publicKey } = useWallet();

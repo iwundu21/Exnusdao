@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -7,7 +6,7 @@ import { Twitter, MessageSquare, ExternalLink } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 
-const EPOCH_DURATION = 14 * 24 * 60 * 60 * 1000;
+const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

@@ -1,10 +1,9 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Activity, Clock, ChevronRight, History, Zap, ShieldCheck } from 'lucide-react';
 
-const EPOCH_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days in ms
+const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
 export function CrankTerminal({ 
   validators = [], 
@@ -30,9 +29,9 @@ export function CrankTerminal({
   const currentEpoch = Math.floor(elapsed / EPOCH_DURATION) + 1;
   const currentEpochEndTime = effectiveStartDate + (currentEpoch * EPOCH_DURATION);
 
-  // The next epoch that is ELIGIBLE for settlement
+  // The next epoch that is ELIGIBLE for settlement (must be a past epoch)
   const nextTargetToSettle = lastCrankedEpoch + 1;
-  const canSettleTarget = nextTargetToSettle < currentEpoch;
+  const isTargetMatured = nextTargetToSettle < currentEpoch;
 
   useEffect(() => {
     const remainingMs = Math.max(0, currentEpochEndTime - now);
@@ -67,15 +66,13 @@ export function CrankTerminal({
     }).filter(Boolean);
   }, [currentEpoch, lastCrankedEpoch, nextTargetToSettle, effectiveStartDate]);
 
-  const latestSettled = settledEpochs.find((e: any) => e.epoch === lastCrankedEpoch);
-
   return (
     <div className="space-y-10 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">Network Crank Terminal</h2>
           <p className="text-muted-foreground text-sm max-w-xl">
-            Settle matured epochs to shard the {(rewardCap || 0).toLocaleString()} EXN reward block. Current Epoch {currentEpoch} is active and matures in {timeLeft.d} days.
+            Settle matured 30-day epochs to shard the {(rewardCap || 0).toLocaleString()} EXN reward block. Current Epoch {currentEpoch} is active and matures in {timeLeft.d} days.
           </p>
         </div>
         
@@ -98,30 +95,30 @@ export function CrankTerminal({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-10">
-          <div className={`exn-card p-10 border-primary/30 flex flex-col md:flex-row items-center gap-10 transition-all ${canSettleTarget ? 'opacity-100' : 'opacity-60 bg-foreground/5'}`}>
+          <div className={`exn-card p-10 border-primary/30 flex flex-col md:flex-row items-center gap-10 transition-all ${isTargetMatured ? 'opacity-100' : 'opacity-60 bg-foreground/5'}`}>
             <div className="flex-shrink-0 relative">
-               <Activity className={`w-20 h-20 ${canSettleTarget ? 'text-primary animate-pulse' : 'text-muted-foreground'}`} />
-               {canSettleTarget && <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />}
+               <Activity className={`w-20 h-20 ${isTargetMatured ? 'text-primary animate-pulse' : 'text-muted-foreground'}`} />
+               {isTargetMatured && <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />}
             </div>
             <div className="flex-grow space-y-6">
               <div className="space-y-1">
                 <h3 className="text-2xl font-bold uppercase tracking-widest text-foreground">
-                   {canSettleTarget ? `Matured: Epoch ${nextTargetToSettle}` : `Epoch ${nextTargetToSettle} in Progress`}
+                   {isTargetMatured ? `Matured: Epoch ${nextTargetToSettle}` : `Epoch ${nextTargetToSettle} in Progress`}
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {canSettleTarget 
+                  {isTargetMatured 
                     ? `Chronological maturity reached. Execute settlement to shard rewards for all active network shards in Epoch ${nextTargetToSettle}.`
-                    : `This epoch is currently active and cannot be settled yet. Settlement becomes available once the 14-day cycle concludes.`
+                    : `This epoch is currently active and cannot be settled yet. Settlement becomes available once the 30-day cycle concludes.`
                   }
                 </p>
               </div>
               
               <button 
                 onClick={() => onCrank(nextTargetToSettle)}
-                disabled={!canSettleTarget || !connected}
-                className={`w-full py-5 rounded-xl font-black uppercase text-sm tracking-[0.3em] transition-all ${canSettleTarget && connected ? 'exn-button shadow-[0_0_30px_rgba(0,245,255,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                disabled={!isTargetMatured || !connected}
+                className={`w-full py-5 rounded-xl font-black uppercase text-sm tracking-[0.3em] transition-all ${isTargetMatured && connected ? 'exn-button shadow-[0_0_30px_rgba(0,245,255,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
               >
-                {canSettleTarget ? (connected ? `Settle Epoch ${nextTargetToSettle}` : 'Connect Wallet to Settle') : 'Maturity Required'}
+                {isTargetMatured ? (connected ? `Settle Epoch ${nextTargetToSettle}` : 'Connect Wallet to Settle') : 'Maturity Required'}
               </button>
             </div>
           </div>
@@ -215,7 +212,7 @@ export function CrankTerminal({
                 <p className="text-[10px] uppercase font-black tracking-widest">Protocol Tip</p>
              </div>
              <p className="text-[11px] text-muted-foreground leading-relaxed">
-               The network operates on 14-day sharding cycles. You can only settle epochs that have chronologically matured. Each settlement distributes the global reward pool to active validators and their delegators.
+               The network operates on 30-day sharding cycles. You can only settle epochs that have chronologically matured. Each settlement distributes the global reward pool to active validators and their delegators.
              </p>
           </div>
         </div>
