@@ -72,6 +72,7 @@ interface ProtocolContextType {
   updateValidator: (vId: string, data: any) => void;
   terminateValidator: (vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => void;
   toggleValidator: (vId: string, status: boolean) => void;
+  setState: (updater: any) => void;
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
@@ -81,6 +82,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const db = useFirestore();
   const walletAddress = publicKey?.toBase58() || '';
 
+  // Cloud Firestore References
   const globalRef = useMemo(() => doc(db, 'protocol', 'global'), [db]);
   const { data: globalData, loading: globalLoading } = useDoc(globalRef);
 
@@ -99,6 +101,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const userRef = useMemo(() => (walletAddress ? doc(db, 'users', walletAddress) : null), [db, walletAddress]);
   const { data: userProfile, loading: profileLoading } = useDoc(userRef);
 
+  // Shell-First Rendering: We don't block the render on these loading flags anymore
   const isLoaded = !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
 
   const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
@@ -317,10 +320,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     isPaused: globalData?.isPaused ?? false,
     lastCrankedEpoch: globalData?.lastCrankedEpoch ?? 0,
     networkStartDate: globalData?.networkStartDate ?? Date.now(),
-    validators: validators as Validator[],
-    userStakes: userStakes as any[],
-    licenses: licenses as any[],
-    proposals: proposals as any[],
+    validators: (validators || []) as Validator[],
+    userStakes: (userStakes || []) as any[],
+    licenses: (licenses || []) as any[],
+    proposals: (proposals || []) as any[],
     settledEpochs: globalData?.settledEpochs ?? [],
     lastTransaction: null
   };
@@ -353,7 +356,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       updateValidator,
       terminateValidator,
       toggleValidator,
-      setState: () => {}
+      setState: () => {} // Placeholder for potential local state overrides
     }}>
       {children}
     </ProtocolContext.Provider>
