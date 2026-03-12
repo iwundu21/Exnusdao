@@ -1,5 +1,4 @@
 {
-  "totalStaked": 0,
   "treasuryBalance": 3000000,
   "rewardVaultBalance": 20000000,
   "usdcVaultBalance": 0,
@@ -8,37 +7,23 @@
   "licenseLimit": 100,
   "licensePrice": 5000,
   "isPaused": false,
-  "lastTransaction": null,
   "lastCrankedEpoch": 0,
-  "networkStartDate": 1773327477024,
-  "exnMint": "EXN1111111111111111111111111111111111111111",
-  "usdcMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  "rewardVaultPda": "REWARD-PDA",
-  "treasuryVaultPda": "TREASURY-PDA",
-  "usdcVaultPda": "LICENSE-PDA",
-  "stakedVaultPda": "STAKED-PDA",
-  "adminWallet": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
+  "networkStartDate": 1773335083050,
   "validators": [],
   "userStakes": [],
   "licenses": [],
   "proposals": [],
-  "settledEpochs": [],
   "profiles": {
     "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW": {
       "address": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
-      "exnBalance": 18000000,
-      "usdcBalance": 20000,
-      "lastExnFaucetClaim": 1773328875835,
-      "lastUsdcFaucetClaim": 1773328878765,
-      "registeredAt": 1773327811797,
-      "lastActive": 1773328878765,
-      "totalTransactions": 4
+      "exnBalance": 25000000,
+      "usdcBalance": 10000,
+      "lastExnFaucetClaim": 0,
+      "lastUsdcFaucetClaim": 0,
+      "registeredAt": 1773335083693,
+      "lastActive": 1773335083693,
+      "totalTransactions": 0
     }
   },
-  "metadata": {
-    "version": "1.0.0-DEMO",
-    "totalVolume": 0,
-    "totalUsers": 1,
-    "lastUpdate": 1773327811797
-  }
+  "lastTransaction": null
 }

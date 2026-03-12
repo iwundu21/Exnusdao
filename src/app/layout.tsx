@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -8,6 +7,7 @@ import { ProtocolProvider } from '@/hooks/use-protocol-state';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { TransactionStatus } from '@/components/layout/TransactionStatus';
+import { getProtocolState } from '@/app/lib/actions';
 
 export const metadata: Metadata = {
   title: 'Exnus protocol | Network',
@@ -18,23 +18,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialState = await getProtocolState();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Absolute suppression of any favicon */}
-        <link rel="icon" href="data:;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" />
+        <link rel="icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" />
       </head>
       <body className="font-body antialiased selection:bg-[#00f5ff] selection:text-black">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <SolanaWalletProvider>
-            <ProtocolProvider>
+            <ProtocolProvider initialState={initialState}>
               <div className="min-h-screen flex flex-col">
                 <Navbar />
                 <main className="flex-grow pb-24 lg:pb-32">

@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useState, createContext, useContext, ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { getProtocolState, saveProtocolState } from '@/app/lib/actions';
+import { saveProtocolState } from '@/app/lib/actions';
 
 export interface Validator {
   id: string;
@@ -109,7 +108,7 @@ const DEFAULT_STATE: ProtocolState = {
   licensePrice: 5000,
   isPaused: false,
   lastCrankedEpoch: 0,
-  networkStartDate: Date.now(),
+  networkStartDate: 1773335083050,
   validators: [],
   userStakes: [],
   licenses: [],
@@ -118,36 +117,23 @@ const DEFAULT_STATE: ProtocolState = {
   lastTransaction: null,
 };
 
-export function ProtocolProvider({ children }: { children: ReactNode }) {
+export function ProtocolProvider({ children, initialState }: { children: ReactNode; initialState?: ProtocolState | null }) {
   const { publicKey } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const [state, setInternalState] = useState<ProtocolState>(DEFAULT_STATE);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [state, setInternalState] = useState<ProtocolState>(initialState || DEFAULT_STATE);
+  const [isLoaded, setIsLoaded] = useState(!!initialState);
   const stateRef = useRef(state);
 
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
-  const fetchState = useCallback(async () => {
-    const data = await getProtocolState();
-    if (data) {
-      setInternalState(prev => ({ ...data, lastTransaction: prev.lastTransaction }));
-    }
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    fetchState();
-  }, [fetchState]);
-
-  // Robust setState that decoupled state updates from persistence side-effects
+  // Handle updates and persistence
   const setState = useCallback(async (updater: (prev: ProtocolState) => ProtocolState) => {
     const nextState = updater(stateRef.current);
     setInternalState(nextState);
     
-    // Side effect: save to DB file (fire and forget)
-    // Wrap in a microtask to avoid interference with the current render cycle
+    // Fire-and-forget server persistence
     Promise.resolve().then(() => {
       saveProtocolState(nextState);
     });
