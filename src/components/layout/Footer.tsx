@@ -38,7 +38,7 @@ export function Footer() {
           <div className="hidden lg:flex items-center gap-4 border-l border-border pl-6">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-black text-emerald-500 uppercase">Mainnet-Beta</span>
+              <span className="text-[9px] font-black text-emerald-500 uppercase">Demo</span>
             </div>
             <span className="text-[9px] text-muted-foreground uppercase font-black">
               {state.networkStartDate ? `Epoch ${currentEpoch}` : 'Active'}
