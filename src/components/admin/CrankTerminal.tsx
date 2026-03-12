@@ -136,7 +136,7 @@ export function CrankTerminal({
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {[...settledEpochs].reverse().map((record: any) => (
-                  <div key={record.epoch} className="exn-card p-6 border-emerald-500/20 bg-emerald-500/5 group hover:border-emerald-500/40 transition-all">
+                  <div key={`epoch-record-${record.epoch}`} className="exn-card p-6 border-emerald-500/20 bg-emerald-500/5 group hover:border-emerald-500/40 transition-all">
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
@@ -156,10 +156,10 @@ export function CrankTerminal({
                     <div className="space-y-3">
                       <p className="text-[8px] text-muted-foreground uppercase font-black mb-1">Validator Shares</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {record.validatorShares.map((v: any) => {
+                        {record.validatorShares.map((v: any, idx: number) => {
                           const valData = validators.find((val: any) => val.id === v.validatorId);
                           return (
-                            <div key={v.validatorId} className="flex justify-between items-center p-3 bg-background/40 rounded-lg border border-border/10">
+                            <div key={`share-${record.epoch}-${v.validatorId}-${idx}`} className="flex justify-between items-center p-3 bg-background/40 rounded-lg border border-border/10">
                               <span className="text-[10px] font-bold text-foreground uppercase">{valData?.name || v.validatorId}</span>
                               <div className="text-right">
                                 <span className="text-[10px] font-black text-primary">{v.share.toFixed(2)} EXN</span>
@@ -184,7 +184,7 @@ export function CrankTerminal({
             </div>
             <div className="divide-y divide-border">
                {epochHistory.map((epoch: any) => (
-                 <div key={epoch.number} className={`p-4 flex justify-between items-center transition-colors ${epoch.isCurrent ? 'bg-primary/10 border-l-2 border-l-primary' : ''} ${epoch.isSettleable ? 'bg-amber-500/10' : ''}`}>
+                 <div key={`roadmap-epoch-${epoch.number}`} className={`p-4 flex justify-between items-center transition-colors ${epoch.isCurrent ? 'bg-primary/10 border-l-2 border-l-primary' : ''} ${epoch.isSettleable ? 'bg-amber-500/10' : ''}`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <p className="text-xs font-bold uppercase">Epoch {epoch.number}</p>
