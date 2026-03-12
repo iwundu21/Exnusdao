@@ -86,7 +86,7 @@ export function CrankTerminal({
             <div className="space-y-1">
                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Maturity In</p>
                <p className="text-xl font-bold text-foreground font-mono">
-                 {timeLeft.d}D {timeLeft.h}H {timeLeft.m}M
+                 {timeLeft.d}D {timeLeft.h}H {timeLeft.m}M {timeLeft.s}S
                </p>
             </div>
           </div>
