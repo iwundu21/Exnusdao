@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Upload, AlertCircle, Wallet, Ticket, ShieldCheck, MapPin, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import { useProtocolState } from '@/hooks/use-protocol-state';
+import { useProtocolState, Validator } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -13,7 +14,7 @@ export default function RegisterNodePage() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const { state, setState, isLoaded, setFeedback } = useProtocolState();
+  const { state, isLoaded, setFeedback, registerValidator } = useProtocolState();
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -82,7 +83,7 @@ export default function RegisterNodePage() {
       return setFeedback('error', 'All required fields must be completed.');
     }
 
-    const newNode = {
+    const newNode: Validator = {
       id: `v${Date.now()}`,
       owner: walletAddress,
       name: formData.name,
@@ -98,11 +99,7 @@ export default function RegisterNodePage() {
       license_id: formData.licenseId
     };
 
-    setState(prev => ({
-      ...prev,
-      validators: [...prev.validators, newNode],
-      licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
-    }));
+    registerValidator(newNode, formData.licenseId);
     
     setFeedback('success', 'On-chain XNode registration successful.');
     setTimeout(() => router.push('/manage-node'), 1500);

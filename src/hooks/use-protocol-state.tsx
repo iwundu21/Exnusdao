@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
@@ -76,7 +77,6 @@ interface ProtocolContextType {
   updateValidator: (vId: string, data: any) => void;
   terminateValidator: (vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => void;
   toggleValidator: (vId: string, status: boolean) => void;
-  setState: (updater: any) => void;
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
@@ -179,7 +179,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     setDoc(gRef, settings, { merge: true }).then(() => {
       setFeedback('success', 'Global network parameters updated in cloud ledger.');
     }).catch(err => {
-      console.error(err);
       setFeedback('error', 'Failed to update global protocol settings.');
     });
   }, [db, setFeedback]);
@@ -264,29 +263,41 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!db) return;
     const vRef = doc(db, 'validators', validator.id);
     const lRef = doc(db, 'licenses', licenseId);
-    setDoc(vRef, validator);
-    setDoc(lRef, { is_claimed: true }, { merge: true });
+    setDoc(vRef, validator).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'create' }));
+    });
+    setDoc(lRef, { is_claimed: true }, { merge: true }).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: lRef.path, operation: 'update' }));
+    });
   }, [db]);
 
   const updateValidator = useCallback((vId: string, data: any) => {
     if (!db) return;
     const vRef = doc(db, 'validators', vId);
-    setDoc(vRef, data, { merge: true });
+    setDoc(vRef, data, { merge: true }).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
+    });
   }, [db]);
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
     if (!db) return;
     const vRef = doc(db, 'validators', vId);
     const lRef = doc(db, 'licenses', licenseId);
-    deleteDoc(vRef);
-    setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true });
+    deleteDoc(vRef).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'delete' }));
+    });
+    setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true }).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: lRef.path, operation: 'update' }));
+    });
     updateUserBalance(wallet, seedRefund + rewards, 0);
   }, [db, updateUserBalance]);
 
   const toggleValidator = useCallback((vId: string, status: boolean) => {
     if (!db) return;
     const vRef = doc(db, 'validators', vId);
-    setDoc(vRef, { is_active: status }, { merge: true });
+    setDoc(vRef, { is_active: status }, { merge: true }).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
+    });
   }, [db]);
 
   const resetProtocol = useCallback(async () => {
@@ -364,8 +375,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       registerValidator,
       updateValidator,
       terminateValidator,
-      toggleValidator,
-      setState: () => {} 
+      toggleValidator
     }}>
       {children}
     </ProtocolContext.Provider>
