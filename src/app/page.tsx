@@ -79,7 +79,8 @@ export default function Home() {
         const validator = state.validators.find(v => v.id === stake.validator_id);
         if (!validator) return acc;
         const rewardDelta = Math.max(0, (validator.global_reward_index || 0) - (stake.reward_checkpoint || 0));
-        const reward = (rewardDelta * (stake.amount || 0)) / REWARD_PRECISION;
+        const multiplier = stake.lock_multiplier || 1000;
+        const reward = (rewardDelta * (stake.amount || 0) * multiplier) / (REWARD_PRECISION * 1000);
         return acc + reward;
       }, 0);
   }, [state?.userStakes, state?.validators, walletAddress]);
@@ -160,8 +161,9 @@ export default function Home() {
       .forEach(s => {
         const v = state.validators.find(val => val.id === s.validator_id);
         if (v) {
-          const reward = ((v.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION;
-          if (reward > 0) claimRewards(s.id, reward, s.validator_id, walletAddress);
+          const multiplier = s.lock_multiplier || 1000;
+          const reward = ((v.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000);
+          if (reward > 0) claimRewards(s.id, reward, v.global_reward_index, walletAddress);
         }
       });
     setFeedback('success', 'Rewards harvested.');
@@ -171,8 +173,9 @@ export default function Home() {
     const s = state.userStakes.find(x => x.id === stakeId);
     const v = state.validators.find(val => val.id === s?.validator_id);
     if (!s || !v) return;
-    const reward = ((v.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION;
-    if (reward > 0) claimRewards(s.id, reward, s.validator_id, walletAddress);
+    const multiplier = s.lock_multiplier || 1000;
+    const reward = ((v.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000);
+    if (reward > 0) claimRewards(s.id, reward, v.global_reward_index, walletAddress);
     setFeedback('success', 'Reward harvested.');
   };
 

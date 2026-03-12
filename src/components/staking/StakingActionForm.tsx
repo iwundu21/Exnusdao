@@ -1,7 +1,8 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Info, Sparkles, Lock, Unlock } from 'lucide-react';
+import { Wallet, Info, Sparkles, Lock, Unlock, Clock } from 'lucide-react';
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -169,23 +170,39 @@ export function StakingActionForm({
           <div className="space-y-4 max-h-[450px] overflow-auto pr-2 custom-scrollbar">
             {activeUserStakes.map((s: any) => {
               const isLocked = now < s.unlock_timestamp;
+              const unlockDate = new Date(s.unlock_timestamp);
               const validator = validators?.find((v: any) => v.id === s.validator_id);
-              const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION : 0;
+              const multiplier = s.lock_multiplier || 1000;
+              const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000) : 0;
               
               return (
                 <div key={s.id} className="p-5 bg-foreground/5 rounded-xl border border-border/10 space-y-4">
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="space-y-1">
                        <span className="text-xl font-bold text-foreground">{s.amount.toLocaleString()} EXN</span>
                        <p className="text-[10px] font-black text-primary/70 uppercase">{validator?.name || 'Node'}</p>
+                       <div className="flex items-center gap-1.5 pt-1">
+                         {isLocked ? (
+                           <div className="flex items-center gap-1 text-[9px] text-amber-500 font-black uppercase">
+                             <Clock className="w-3 h-3" />
+                             <span>Unlocks: {unlockDate.toLocaleDateString()}</span>
+                           </div>
+                         ) : (
+                           <div className="flex items-center gap-1 text-[9px] text-emerald-500 font-black uppercase">
+                             <Unlock className="w-3 h-3" />
+                             <span>Principal Matured</span>
+                           </div>
+                         )}
+                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-base font-black text-emerald-500">+{pendingReward.toFixed(2)}</p>
+                      <p className="text-[8px] text-muted-foreground uppercase font-black">Yield: {(multiplier/1000).toFixed(1)}x</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => onClaimSingle(s.id)} disabled={pendingReward <= 0} className="h-10 rounded-lg text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Claim</button>
-                    <button onClick={() => onUnstake(s.id)} disabled={isLocked} className="h-10 rounded-lg text-[9px] font-black uppercase bg-primary/10 text-primary border border-primary/20">Unstake</button>
+                    <button onClick={() => onClaimSingle(s.id)} disabled={pendingReward <= 0} className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all ${pendingReward > 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>Claim</button>
+                    <button onClick={() => onUnstake(s.id)} disabled={isLocked} className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all ${!isLocked ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>Unstake</button>
                   </div>
                 </div>
               );

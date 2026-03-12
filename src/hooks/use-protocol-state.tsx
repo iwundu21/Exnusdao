@@ -68,7 +68,7 @@ interface ProtocolContextType {
   
   addStake: (stake: any) => void;
   unstake: (stakeId: string, amount: number, validatorId: string) => void;
-  claimRewards: (stakeId: string, amount: number, validatorId: string, wallet: string) => void;
+  claimRewards: (stakeId: string, amount: number, newCheckpoint: number, wallet: string) => void;
   castVote: (pId: number, support: boolean, weight: number, comment: any) => void;
   createProposal: (proposal: any) => void;
   executeProposal: (pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => void;
@@ -213,10 +213,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
   }, [db]);
 
-  const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
+  const claimRewards = useCallback((stakeId: string, amount: number, newCheckpoint: number, wallet: string) => {
     if (!db) return;
     const sRef = doc(db, 'stakes', stakeId);
-    setDoc(sRef, { reward_checkpoint: increment(0) }, { merge: true });
+    setDoc(sRef, { reward_checkpoint: newCheckpoint }, { merge: true });
     updateUserBalance(wallet, amount, 0);
   }, [db, updateUserBalance]);
 
