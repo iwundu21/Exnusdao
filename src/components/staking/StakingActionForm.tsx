@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Info, Sparkles, Lock, Unlock, ArrowUpRight, Coins } from 'lucide-react';
+import { Wallet, Info, Sparkles, Lock, Unlock, ArrowUpRight } from 'lucide-react';
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -151,10 +151,10 @@ export function StakingActionForm({
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
           <div className="flex justify-between items-center p-6 bg-secondary/10 border border-secondary/20 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.1)]">
             <div className="space-y-1">
-              <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Matured Claimable</p>
+              <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Global Claimable</p>
               <p className="text-2xl font-bold text-secondary">{totalPendingRewards.toFixed(2)} EXN</p>
               <div className="flex items-center gap-1.5 text-[8px] text-secondary/60 uppercase font-bold">
-                <Sparkles className="w-2.5 h-2.5" /> Claims available after account maturity
+                <Sparkles className="w-2.5 h-2.5" /> Earned rewards available for instant harvest
               </div>
             </div>
             <button 
@@ -191,40 +191,39 @@ export function StakingActionForm({
                         <p className="text-[10px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Network Node'}</p>
                       </div>
                       <div className="text-right">
-                        <p className={`text-base font-black ${isLocked ? 'text-foreground/40' : 'text-emerald-500'}`}>
+                        <p className={`text-base font-black text-emerald-500`}>
                           +{pendingReward.toFixed(4)} EXN
                         </p>
                         <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md mt-1 ${isLocked ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                           {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
-                          {isLocked ? 'Locked' : 'Matured'}
+                          {isLocked ? 'Principal Locked' : 'Principal Matured'}
                         </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 pt-4 border-t border-border/10">
                        <div className="flex justify-between items-center text-[9px] text-foreground/30 uppercase font-black">
-                          <span>Account Maturity</span>
+                          <span>Principal Maturity</span>
                           <span className={`font-mono ${isLocked ? 'text-amber-500/60' : 'text-emerald-500/60'}`}>{unlockFormatted}</span>
                        </div>
                     </div>
 
-                    {!isLocked && (
-                      <div className="grid grid-cols-2 gap-3">
-                        <button 
-                          onClick={() => onClaimSingle(s.id)}
-                          disabled={pendingReward <= 0.0001}
-                          className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all flex items-center justify-center gap-2 ${pendingReward > 0.0001 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}
-                        >
-                          <Sparkles className="w-3 h-3" /> Claim Reward
-                        </button>
-                        <button 
-                          onClick={() => onUnstake(s.id)}
-                          className="h-10 rounded-lg bg-primary/10 text-primary border border-primary/20 text-[9px] font-black uppercase hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
-                        >
-                          <ArrowUpRight className="w-3 h-3" /> Unstake Principal
-                        </button>
-                      </div>
-                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <button 
+                        onClick={() => onClaimSingle(s.id)}
+                        disabled={pendingReward <= 0.0001}
+                        className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all flex items-center justify-center gap-2 ${pendingReward > 0.0001 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}
+                      >
+                        <Sparkles className="w-3 h-3" /> Claim Reward
+                      </button>
+                      <button 
+                        onClick={() => onUnstake(s.id)}
+                        disabled={isLocked}
+                        className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all flex items-center justify-center gap-2 ${!isLocked ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed opacity-50'}`}
+                      >
+                        <Unlock className="w-3 h-3" /> Unstake Principal
+                      </button>
+                    </div>
                   </div>
                 );
               })
@@ -238,7 +237,7 @@ export function StakingActionForm({
           <Info className="w-full h-full" />
         </div>
         <p className="text-[10px] text-primary/40 leading-tight uppercase font-black tracking-tighter">
-          Rewards can only be claimed once the stake account duration has expired. Early withdrawals of principal are restricted by the protocol smart contract.
+          Earned rewards can be harvested at any time. Unstaking of principal is only permitted after the account lock-up duration has expired.
         </p>
       </div>
 

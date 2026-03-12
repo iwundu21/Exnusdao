@@ -14,7 +14,6 @@ const PROPOSAL_FEE = 10;
 const VOTE_FEE = 3;
 const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
 const MIN_STAKE_FOR_VOTE = 10_000;
-const EPOCH_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -44,10 +43,11 @@ export default function Home() {
     return state.validators.reduce((acc, v) => acc + (v.total_staked || 0), 0);
   }, [state?.validators]);
 
+  // Rewards are now claimable at any time
   const pendingRewardsTotal = useMemo(() => {
     if (!state?.userStakes || !state?.validators || !walletAddress) return 0;
     return state.userStakes
-      .filter(s => s.owner === walletAddress && !s.unstaked && now >= s.unlock_timestamp)
+      .filter(s => s.owner === walletAddress && !s.unstaked)
       .reduce((acc, stake) => {
         const validator = state.validators.find(v => v.id === stake.validator_id);
         if (!validator) return acc;
@@ -55,7 +55,7 @@ export default function Home() {
         const reward = (rewardDelta * (stake.amount || 0)) / REWARD_PRECISION;
         return acc + reward;
       }, 0);
-  }, [state?.userStakes, state?.validators, walletAddress, now]);
+  }, [state?.userStakes, state?.validators, walletAddress]);
 
   const handleStake = (stakeData: any) => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
@@ -209,7 +209,7 @@ export default function Home() {
     setState(prev => {
       let total = 0;
       const newUserStakes = prev.userStakes.map(s => {
-        if (s.owner === walletAddress && !s.unstaked && now >= s.unlock_timestamp) {
+        if (s.owner === walletAddress && !s.unstaked) {
           const v = prev.validators.find(val => val.id === s.validator_id);
           if (v) {
             const reward = ((v.global_reward_index - s.reward_checkpoint) * s.amount) / REWARD_PRECISION;
@@ -222,6 +222,25 @@ export default function Home() {
       return { ...prev, exnBalance: prev.exnBalance + total, userStakes: newUserStakes };
     });
     setFeedback('success', `Claimed ${pendingRewardsTotal.toFixed(2)} EXN rewards.`);
+  };
+
+  const handleClaimSingle = (stakeId: string) => {
+    setState(prev => {
+      const stake = prev.userStakes.find(s => s.id === stakeId);
+      if (!stake) return prev;
+      const validator = prev.validators.find(v => v.id === stake.validator_id);
+      if (!validator) return prev;
+      
+      const reward = ((validator.global_reward_index - stake.reward_checkpoint) * stake.amount) / REWARD_PRECISION;
+      if (reward <= 0) return prev;
+
+      return {
+        ...prev,
+        exnBalance: prev.exnBalance + reward,
+        userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, reward_checkpoint: validator.global_reward_index } : s)
+      };
+    });
+    setFeedback('success', 'Harvested individual stake reward.');
   };
 
   const handleUnstake = (stakeId: string) => {
@@ -269,6 +288,7 @@ export default function Home() {
               totalPendingRewards={pendingRewardsTotal} 
               connected={connected}
               onClaim={handleClaim}
+              onClaimSingle={handleClaimSingle}
               onUnstake={handleUnstake}
               setFeedback={setFeedback}
             />
