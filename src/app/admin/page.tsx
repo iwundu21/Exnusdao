@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -181,7 +182,7 @@ export default function AdminPage() {
                    <div className="space-y-4">
                       <p className="text-[10px] text-muted-foreground uppercase font-black">14-Day Reward Block Pool (EXN)</p>
                       <div className="flex gap-2">
-                         <input value={newCap} onChange={e => setNewCap(e.target.value)} className="exn-input h-12" placeholder={state.rewardCap.toString()} />
+                         <input value={newCap} onChange={e => setNewCap(e.target.value)} className="exn-input h-12" placeholder={(state.rewardCap ?? 0).toString()} />
                          <button onClick={handleUpdateCap} className="exn-button-outline px-6 h-12 text-[9px] uppercase font-black">Update Pool</button>
                       </div>
                    </div>
@@ -189,14 +190,14 @@ export default function AdminPage() {
                      <div className="space-y-4">
                         <p className="text-[10px] text-muted-foreground uppercase font-black">License Mint Price (USDC)</p>
                         <div className="flex gap-2">
-                           <input value={newLicensePrice} onChange={e => setNewLicensePrice(e.target.value)} className="exn-input h-12" placeholder={state.licensePrice.toString()} />
+                           <input value={newLicensePrice} onChange={e => setNewLicensePrice(e.target.value)} className="exn-input h-12" placeholder={(state.licensePrice ?? 0).toString()} />
                            <button onClick={handleUpdateLicensePrice} className="exn-button-outline px-6 h-12 text-[9px] uppercase font-black">Update Price</button>
                         </div>
                      </div>
                      <div className="space-y-4">
                         <p className="text-[10px] text-muted-foreground uppercase font-black">Total License Supply Cap</p>
                         <div className="flex gap-2">
-                           <input value={newLicenseLimit} onChange={e => setNewLicenseLimit(e.target.value)} className="exn-input h-12" placeholder={state.licenseLimit.toString()} />
+                           <input value={newLicenseLimit} onChange={e => setNewLicenseLimit(e.target.value)} className="exn-input h-12" placeholder={(state.licenseLimit ?? 0).toString()} />
                            <button onClick={handleUpdateLicenseLimit} className="exn-button-outline px-6 h-12 text-[9px] uppercase font-black">Update Cap</button>
                         </div>
                      </div>
@@ -211,15 +212,15 @@ export default function AdminPage() {
                  <div className="space-y-4">
                    <div>
                      <p className="text-[10px] text-muted-foreground uppercase font-black">License Vault (USDC)</p>
-                     <p className="text-2xl font-bold">{state.usdcVaultBalance.toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
+                     <p className="text-2xl font-bold">{(state.usdcVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
                    </div>
                    <div>
                      <p className="text-[10px] text-muted-foreground uppercase font-black">Global Staked Vault (EXN)</p>
-                     <p className="text-2xl font-bold">{state.stakedVaultBalance.toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
+                     <p className="text-2xl font-bold">{(state.stakedVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
                    </div>
                    <div>
                      <p className="text-[10px] text-muted-foreground uppercase font-black">Global Reward Vault (EXN)</p>
-                     <p className="text-2xl font-bold">{state.rewardVaultBalance.toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
+                     <p className="text-2xl font-bold">{(state.rewardVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
                    </div>
                  </div>
               </div>

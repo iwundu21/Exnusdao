@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -150,7 +151,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('exnus_protocol_state');
     if (saved) {
       try {
-        setState(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Merge saved state with initial state to ensure new properties exist
+        setState(prev => ({ ...prev, ...parsed }));
       } catch (e) {
         console.error("Failed to parse protocol state", e);
       }
