@@ -91,7 +91,6 @@ export default function Home() {
   const handleVote = (pId: number, support: boolean, comment: string) => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     
-    // Check for stake requirement OR node ownership
     if (!isNodeOwner && userStakeWeight < MIN_STAKE_FOR_VOTE) {
       return setFeedback('error', `Minimum Staking Requirement: ${MIN_STAKE_FOR_VOTE.toLocaleString()} EXN required (unless you own an XNode).`);
     }
@@ -101,7 +100,6 @@ export default function Home() {
     const proposal = state.proposals.find(p => p.id === pId);
     if (!proposal || proposal.voters?.includes(walletAddress)) return;
 
-    // Weight is now correctly calculated including seed deposits in userStakeWeight
     const effectiveWeight = Math.max(userStakeWeight, isNodeOwner ? 1 : 0);
 
     updateUserBalance(walletAddress, -VOTE_FEE, 0);
@@ -130,8 +128,8 @@ export default function Home() {
       id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: nowTime,
-      deadline: nowTime + (7 * 24 * 60 * 60 * 1000),
-      voting_ends_at: nowTime + (7 * 24 * 60 * 60 * 1000) - (3600000 * 4),
+      deadline: nowTime + (7 * 24 * 60 * 60 * 1000), // 7 days
+      voting_ends_at: nowTime + (6 * 24 * 60 * 60 * 1000), // 6 days (1 day lock)
       yes_votes: 0,
       no_votes: 0,
       executed: false,

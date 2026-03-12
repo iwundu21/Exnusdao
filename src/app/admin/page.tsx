@@ -24,7 +24,7 @@ const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 
 export default function AdminPage() {
   const { connected, publicKey } = useWallet();
-  const { state, setState, isLoaded, setFeedback, updateUserBalance, exnBalance, usdcBalance } = useProtocolState();
+  const { state, setState, isLoaded, setFeedback, updateUserBalance, exnBalance } = useProtocolState();
   
   const [newCap, setNewCap] = useState('');
   const [newLicensePrice, setNewLicensePrice] = useState('');
@@ -115,9 +115,9 @@ export default function AdminPage() {
       userStakes: [],
       licenses: [],
       proposals: [],
-      profiles: {},
+      profiles: {}, // WIPE ALL USER DATA
       metadata: {
-        ...prev.metadata,
+        version: prev.metadata.version,
         totalVolume: 0,
         totalUsers: 0,
         lastUpdate: Date.now()
@@ -296,7 +296,7 @@ export default function AdminPage() {
                            <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
                            <p className="text-xs text-muted-foreground leading-relaxed">
                               Executing a Master Reset will permanently purge all on-chain simulation data. 
-                              This includes XNodes, staking positions, governance proposals, user balances, and historical sharding records. 
+                              This includes XNodes, staking positions, governance proposals, user profiles, balances, and historical sharding records. 
                               The network timeline will be re-anchored to the current second, starting the cluster at Epoch 1.
                            </p>
                         </div>

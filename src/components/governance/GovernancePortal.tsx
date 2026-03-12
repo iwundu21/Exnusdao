@@ -14,7 +14,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   });
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const updateCountdown = () => {
       const now = Date.now();
       let target = votingEndsAt;
       let label = 'Voting Ends: ';
@@ -22,8 +22,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
 
       if (now > deadline) {
         setTimeLeft({ label: 'Proposal Concluded', value: '', isLock: false });
-        clearInterval(timer);
-        return;
+        return true; // Stop timer
       }
 
       if (now > votingEndsAt) {
@@ -32,14 +31,23 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
         isLock = true;
       }
 
-      const diff = target - now;
+      const diff = Math.max(0, target - now);
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      const value = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      // Add leading zeros for "correct" time formatting
+      const f = (n: number) => n.toString().padStart(2, '0');
+      const value = `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`;
+      
       setTimeLeft({ label, value, isLock });
+      return false;
+    };
+
+    updateCountdown();
+    const timer = setInterval(() => {
+      if (updateCountdown()) clearInterval(timer);
     }, 1000);
 
     return () => clearInterval(timer);
@@ -78,7 +86,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const handleConfirmVote = () => {
     if (!votingOn) return;
     
-    // Check permission: either enough total weight OR node owner status
     if (!isNodeOwner && userStakeWeight < 10000) {
       return setFeedback('error', 'Consensus Requirement: 10,000 EXN minimum weight required to participate in DAO consensus.');
     }
