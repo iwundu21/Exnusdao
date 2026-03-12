@@ -15,7 +15,6 @@ import {
 interface DashboardStatsProps {
   totalStaked?: number;
   treasuryBalance?: number;
-  usdcVaultBalance?: number;
 }
 
 export function DashboardStats({ 
@@ -146,32 +145,17 @@ export function DashboardStats({
         {/* Dynamic Metric Grid */}
         <div className="flex flex-col gap-6 lg:col-span-1">
           
-          <div className="flex-1 exn-card p-10 bg-black/40 border-white/5 flex flex-col justify-between group hover:border-secondary/40 transition-all duration-500">
+          <div className="flex-1 exn-card p-10 bg-black/40 border-white/5 flex flex-col justify-center space-y-4 group hover:border-secondary/40 transition-all duration-500">
             <div className="space-y-1">
               <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">DAO Treasury</p>
               <div className="h-[2px] w-10 bg-secondary/30 rounded-full group-hover:w-16 transition-all" />
             </div>
-            <div className="space-y-0.5 text-right">
-              <p className="text-3xl font-mono font-bold text-white tracking-tighter">
+            <div className="space-y-1 text-right">
+              <p className="text-4xl font-mono font-bold text-white tracking-tighter">
                 {treasuryBalance.toLocaleString()} <span className="text-[10px] text-white/20">EXN</span>
               </p>
-              <p className="text-[11px] font-bold text-secondary/70 font-mono uppercase tracking-tight">
+              <p className="text-xl font-bold text-secondary/70 font-mono uppercase tracking-tight">
                 ${treasuryUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex-1 exn-card p-10 bg-black/40 border-white/5 flex flex-col justify-between group hover:border-emerald-500/40 transition-all duration-500">
-            <div className="space-y-1">
-              <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">License Vault</p>
-              <div className="h-[2px] w-10 bg-emerald-500/30 rounded-full group-hover:w-16 transition-all" />
-            </div>
-            <div className="space-y-0.5 text-right">
-              <p className="text-3xl font-mono font-bold text-white tracking-tighter">
-                {(state.usdcVaultBalance || 0).toLocaleString()} <span className="text-[10px] text-white/20">USDC</span>
-              </p>
-              <p className="text-[11px] font-bold text-emerald-500/70 font-mono uppercase tracking-tight">
-                ${(state.usdcVaultBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
