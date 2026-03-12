@@ -1,9 +1,9 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { shortenAddress } from '@/lib/utils';
 import { 
   ShieldCheck, 
   Settings, 
@@ -19,8 +19,6 @@ import {
   Banknote
 } from 'lucide-react';
 
-const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
-
 export default function AdminPage() {
   const { connected, publicKey } = useWallet();
   const { 
@@ -34,9 +32,6 @@ export default function AdminPage() {
   } = useProtocolState();
   
   const [newCap, setNewCap] = useState('');
-  const [newLicensePrice, setNewLicensePrice] = useState('');
-  const [newLicenseLimit, setNewLicenseLimit] = useState('');
-  
   const [withdrawUsdcAmt, setWithdrawUsdcAmt] = useState('');
   const [fundRewardsAmt, setFundRewardsAmt] = useState('');
   const [fundTreasuryAmt, setFundTreasuryAmt] = useState('');
@@ -62,12 +57,11 @@ export default function AdminPage() {
   };
 
   const walletAddress = publicKey?.toBase58();
-  const isAdmin = walletAddress === ADMIN_WALLET;
+  const isAdmin = walletAddress === state.adminWallet;
 
   const handleUpdateCap = () => {
     const cap = Number(newCap);
     if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid cap value provided.');
-    // Global parameters are anchored in the singleton protocol/global document
     setFeedback('success', `30-day Reward Block Cap updated to ${cap.toLocaleString()} EXN.`);
   };
 
@@ -127,7 +121,7 @@ export default function AdminPage() {
          <h1 className="text-4xl font-bold uppercase text-destructive">Unauthorized Access</h1>
          <p className="text-muted-foreground max-w-md mx-auto">
             This terminal is restricted to the designated Protocol Authority wallet: <br/>
-            <span className="font-mono text-primary break-all">{ADMIN_WALLET}</span>
+            <span className="font-mono text-primary break-all">{state.adminWallet}</span>
          </p>
       </div>
     );
@@ -209,28 +203,6 @@ export default function AdminPage() {
                </div>
             </div>
 
-            <div className="exn-card p-8 space-y-8 border-border/20">
-               <div className="flex items-center gap-3">
-                  <Settings className="w-5 h-5 text-muted-foreground" />
-                  <h3 className="text-lg font-bold uppercase tracking-widest">Economic Parameters</h3>
-               </div>
-               <div className="grid grid-cols-1 gap-8">
-                 <div className="space-y-4">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black">30-Day Reward Block Pool (EXN)</p>
-                    <div className="flex gap-2">
-                       <input value={formatInput(newCap)} onChange={e => handleTextChange(e.target.value, setNewCap)} className="exn-input h-12" placeholder={(state?.rewardCap ?? 0).toLocaleString()} />
-                       <button 
-                         onClick={handleUpdateCap} 
-                         disabled={!newCap.trim()}
-                         className={`px-6 h-12 text-[9px] uppercase font-black transition-all ${newCap.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                       >
-                         Update Pool
-                       </button>
-                    </div>
-                 </div>
-               </div>
-            </div>
-
             <div className="exn-card p-8 space-y-8 border-destructive/20 bg-destructive/5">
                <div className="flex items-center gap-3 text-destructive">
                   <RotateCcw className="w-5 h-5" />
@@ -244,13 +216,12 @@ export default function AdminPage() {
                            <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
                            <p className="text-xs text-muted-foreground leading-relaxed">
                               Executing a Master Reset will purge all cloud-anchored global parameters. 
-                              Note: Individual validator accounts and user profile documents will persist, but chronological epoch logic will be re-anchored.
                            </p>
                         </div>
                      </div>
                      <button 
                        onClick={() => {
-                         if(window.confirm("CRITICAL: You are about to wipe the entire protocol global state. This cannot be undone. Proceed?")) handleFullProtocolReset();
+                         if(window.confirm("CRITICAL: Wipe entire protocol state?")) handleFullProtocolReset();
                        }} 
                        className="w-full h-14 bg-destructive text-white text-xs font-black uppercase tracking-[0.2em] rounded-xl hover:bg-destructive/90 transition-all shadow-xl shadow-destructive/20"
                      >
@@ -292,17 +263,6 @@ export default function AdminPage() {
                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                      <p className="text-[11px] font-black uppercase text-primary">Active Epoch: {state.lastCrankedEpoch + 1}</p>
                   </div>
-               </div>
-            </div>
-
-            <div className="exn-card p-6 space-y-4 border-border/20 bg-foreground/[0.02]">
-               <div className="flex items-center gap-2">
-                 <Database className="w-4 h-4 text-muted-foreground" />
-                 <p className="text-[10px] font-black uppercase tracking-widest">Protocol Context</p>
-               </div>
-               <div className="space-y-2 font-mono text-[9px] text-muted-foreground">
-                  <p>Status: Firebase Cloud Synchronized</p>
-                  <p>Target: exnus-mainnet-beta</p>
                </div>
             </div>
          </div>

@@ -32,6 +32,10 @@ export interface ProtocolState {
   rewardCap: number;
   licenseLimit: number;
   licensePrice: number;
+  seedAmount: number;
+  adminWallet: string;
+  faucetExnLimit: number;
+  faucetUsdcLimit: number;
   isPaused: boolean;
   lastCrankedEpoch: number;
   networkStartDate: number;
@@ -101,7 +105,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const userRef = useMemo(() => (walletAddress ? doc(db, 'users', walletAddress) : null), [db, walletAddress]);
   const { data: userProfile, loading: profileLoading } = useDoc(userRef);
 
-  // Shell-First Rendering: We don't block the render on these loading flags anymore
   const isLoaded = !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
 
   const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
@@ -302,6 +305,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       rewardCap: 300000,
       licenseLimit: 100,
       licensePrice: 5000,
+      seedAmount: 15000000,
+      adminWallet: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
+      faucetExnLimit: 16000000,
+      faucetUsdcLimit: 10000,
       isPaused: false,
       lastCrankedEpoch: 0,
       networkStartDate: Date.now(),
@@ -310,13 +317,17 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   }, [db]);
 
   const state: ProtocolState = {
-    treasuryBalance: globalData?.treasuryBalance ?? 3000000,
-    rewardVaultBalance: globalData?.rewardVaultBalance ?? 20000000,
+    treasuryBalance: globalData?.treasuryBalance ?? 0,
+    rewardVaultBalance: globalData?.rewardVaultBalance ?? 0,
     usdcVaultBalance: globalData?.usdcVaultBalance ?? 0,
     stakedVaultBalance: globalData?.stakedVaultBalance ?? 0,
-    rewardCap: globalData?.rewardCap ?? 300000,
-    licenseLimit: globalData?.licenseLimit ?? 100,
-    licensePrice: globalData?.licensePrice ?? 5000,
+    rewardCap: globalData?.rewardCap ?? 0,
+    licenseLimit: globalData?.licenseLimit ?? 0,
+    licensePrice: globalData?.licensePrice ?? 0,
+    seedAmount: globalData?.seedAmount ?? 15000000,
+    adminWallet: globalData?.adminWallet ?? '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
+    faucetExnLimit: globalData?.faucetExnLimit ?? 16000000,
+    faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 10000,
     isPaused: globalData?.isPaused ?? false,
     lastCrankedEpoch: globalData?.lastCrankedEpoch ?? 0,
     networkStartDate: globalData?.networkStartDate ?? Date.now(),
@@ -356,7 +367,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       updateValidator,
       terminateValidator,
       toggleValidator,
-      setState: () => {} // Placeholder for potential local state overrides
+      setState: () => {} 
     }}>
       {children}
     </ProtocolContext.Provider>

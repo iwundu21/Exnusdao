@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, AlertTriangle, LogOut, Trash2, Wallet, Activity, Upload, MapPin, Users, TrendingUp, Info } from 'lucide-react';
+import { ArrowLeft, Wallet, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
@@ -10,13 +10,10 @@ import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress } from '@/lib/utils';
 
-const SEED_DEPOSIT_AMOUNT = 15000000;
-
 export default function ManageNodePage() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { state, isLoaded, setFeedback, exnBalance, updateUserBalance, updateValidator, terminateValidator, toggleValidator } = useProtocolState();
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
@@ -51,7 +48,6 @@ export default function ManageNodePage() {
 
   const handleUpdate = () => {
     if (!editingNodeId || !formData) return;
-    if (formData.commission_rate < 0 || formData.commission_rate > 30) return setFeedback('error', 'Rate: 0-30%');
     updateValidator(editingNodeId, {
       name: formData.name,
       location: formData.location,
@@ -72,16 +68,16 @@ export default function ManageNodePage() {
   };
 
   const handleDepositSeed = (vId: string) => {
-    if (exnBalance < SEED_DEPOSIT_AMOUNT) return setFeedback('error', 'Insufficient EXN');
-    updateUserBalance(walletAddress, -SEED_DEPOSIT_AMOUNT, 0);
-    updateValidator(vId, { seed_deposited: true, is_active: true, total_staked: SEED_DEPOSIT_AMOUNT });
+    if (exnBalance < state.seedAmount) return setFeedback('error', 'Insufficient EXN');
+    updateUserBalance(walletAddress, -state.seedAmount, 0);
+    updateValidator(vId, { seed_deposited: true, is_active: true, total_staked: state.seedAmount });
     setFeedback('success', 'Seed deposited.');
   };
 
   const handleWithdrawSeed = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node?.seed_deposited) return;
-    updateUserBalance(walletAddress, SEED_DEPOSIT_AMOUNT, 0);
+    updateUserBalance(walletAddress, state.seedAmount, 0);
     updateValidator(vId, { seed_deposited: false, is_active: false, total_staked: 0 });
     setFeedback('success', 'Seed withdrawn.');
   };
@@ -89,7 +85,7 @@ export default function ManageNodePage() {
   const handleCloseAccount = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node) return;
-    terminateValidator(vId, walletAddress, node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0, node.accrued_node_rewards || 0, node.license_id!);
+    terminateValidator(vId, walletAddress, node.seed_deposited ? state.seedAmount : 0, node.accrued_node_rewards || 0, node.license_id!);
     setFeedback('success', 'Node decommissioned.');
     router.push('/');
   };
@@ -130,34 +126,20 @@ export default function ManageNodePage() {
                   <p className="text-2xl font-bold text-emerald-500">{(node.accrued_node_rewards || 0).toFixed(2)} EXN</p>
                   <button onClick={() => handleClaimCommission(node.id)} className="w-full py-3 bg-emerald-500 text-black text-[9px] font-black uppercase rounded-lg">Harvest</button>
                 </div>
-                <button onClick={() => toggleValidator(node.id, !node.is_active)} className={`w-full py-4 rounded-xl font-black uppercase text-[10px] border ${node.is_active ? 'border-emerald-500/30 text-emerald-500' : 'border-destructive/30 text-destructive'}`}>
-                  {node.is_active ? '● ONLINE' : '○ PAUSED'}
-                </button>
               </div>
 
               <div className="xl:col-span-2 space-y-8">
-                <div className="flex justify-between items-center border-b border-border/10 pb-4">
-                  <h3 className="text-xs font-black uppercase tracking-widest">Metadata</h3>
-                  {!isEditing && <button onClick={() => startEditing(node)} className="exn-button-outline px-4 h-8 text-[9px]">Edit Profile</button>}
-                </div>
-
                 {isEditing ? (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input" placeholder="Name" />
-                      <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input" placeholder="Location" />
-                    </div>
-                    <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input h-32" />
-                    <div className="flex gap-4">
-                      <button onClick={handleUpdate} className="exn-button flex-1 h-12">Save</button>
-                      <button onClick={() => setEditingNodeId(null)} className="exn-button-outline h-12">Cancel</button>
-                    </div>
+                    <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input" placeholder="Name" />
+                    <button onClick={handleUpdate} className="exn-button w-full h-12">Save</button>
+                    <button onClick={() => setEditingNodeId(null)} className="exn-button-outline w-full h-12">Cancel</button>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-sm italic text-muted-foreground">{node.description}</p>
+                    <button onClick={() => startEditing(node)} className="w-full h-12 exn-button-outline uppercase text-[10px] font-black">Edit Identity</button>
                     {!node.seed_deposited ? (
-                      <button onClick={() => handleDepositSeed(node.id)} className="w-full h-12 bg-primary text-black font-black uppercase rounded-xl">Initialize Seed</button>
+                      <button onClick={() => handleDepositSeed(node.id)} className="w-full h-12 bg-primary text-black font-black uppercase rounded-xl">Initialize Seed ({state.seedAmount.toLocaleString()} EXN)</button>
                     ) : (
                       <button onClick={() => handleWithdrawSeed(node.id)} className="w-full h-12 border border-destructive/20 text-destructive font-black uppercase rounded-xl">Withdraw Seed</button>
                     )}

@@ -1,17 +1,15 @@
 
 'use server';
 
-import { readDb, writeDb } from './db-service';
-import { revalidatePath } from 'next/cache';
+/**
+ * DEPRECATED: Local filesystem actions removed.
+ * All mutations occur via client-side Firebase SDK.
+ */
 
 export async function getProtocolState() {
-  return await readDb();
+  return {};
 }
 
 export async function saveProtocolState(state: any) {
-  const res = await writeDb(state);
-  if (res.success) {
-    revalidatePath('/');
-  }
-  return res;
+  return { success: true };
 }
