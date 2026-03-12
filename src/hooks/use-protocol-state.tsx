@@ -15,11 +15,11 @@ export interface Validator {
   commission_rate: number;
   accrued_node_rewards: number;
   global_reward_index: number;
-  license_id?: string; // This is the Mint Address of the NFT
+  license_id?: string;
 }
 
 export interface License {
-  id: string; // The Mint Address / Unique Identity
+  id: string;
   owner: string;
   is_claimed: boolean;
   is_burned?: boolean;
@@ -51,7 +51,7 @@ export interface ProposalComment {
 export interface Proposal {
   id: number;
   proposer: string;
-  type: number; // 0: Parameter, 1: Treasury
+  type: number; 
   title: string;
   description: string;
   amount: number;
@@ -93,7 +93,6 @@ export interface ProtocolState {
   lastTransaction: TransactionFeedback | null;
   lastCrankedBlock: number;
   networkStartDate: number | null;
-  // Admin & On-Chain State
   isInitialized: boolean;
   adminWallet: string | null;
   exnMint: string | null;
@@ -104,21 +103,17 @@ export interface ProtocolState {
   stakedVaultPda: string | null;
 }
 
-const SEED_AMOUNT = 15000000;
-const PROPOSAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 Days for DAO
-const VOTING_LOCK_WINDOW = 3600000 * 4;
-
 const INITIAL_STATE: ProtocolState = {
   exnBalance: 25000000, 
   usdcBalance: 10000,
-  totalStaked: 15000000, 
-  treasuryBalance: 250000,
-  rewardVaultBalance: 1000000,
+  totalStaked: 0, 
+  treasuryBalance: 0,
+  rewardVaultBalance: 0,
   usdcVaultBalance: 0,
-  stakedVaultBalance: 15000000,
-  rewardCap: 0, // Set to 0 on initialization
-  licenseLimit: 0, // Set to 0 on initialization (Admin will update)
-  licensePrice: 0, // Set to 0 on initialization (Admin will update)
+  stakedVaultBalance: 0,
+  rewardCap: 0,
+  licenseLimit: 0,
+  licensePrice: 0,
   isPaused: false,
   lastTransaction: null,
   lastCrankedBlock: 999,
@@ -134,27 +129,7 @@ const INITIAL_STATE: ProtocolState = {
   validators: [],
   userStakes: [],
   licenses: [],
-  proposals: [
-    { 
-      id: 0, 
-      proposer: 'ExnUs99d...', 
-      type: 0, 
-      title: 'PIP-001: Increase Reward Cap', 
-      description: 'Increase the global reward cap from 1,250 to 1,500 EXN to encourage more network participation.', 
-      amount: 0, 
-      recipient: '', 
-      yes_votes: 15000, 
-      no_votes: 2000, 
-      created_at: Date.now() - 86400000, 
-      deadline: Date.now() + PROPOSAL_DURATION_MS - 86400000, 
-      voting_ends_at: Date.now() + PROPOSAL_DURATION_MS - 86400000 - VOTING_LOCK_WINDOW,
-      executed: false,
-      voters: [],
-      comments: [
-        { id: 'c1', author: 'Validator-Alpha', text: 'This will help offset hardware costs.', timestamp: Date.now() - 3600000, vote_stance: 'YES' }
-      ]
-    },
-  ],
+  proposals: [],
 };
 
 interface ProtocolContextType {

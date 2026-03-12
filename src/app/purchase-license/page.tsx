@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Ticket, Wallet, ArrowLeft, Sparkles, ShieldCheck, Database, ExternalLink } from 'lucide-react';
+import { Ticket, Wallet, ArrowLeft, Sparkles, ShieldCheck, Database, ExternalLink, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -20,6 +20,42 @@ export default function PurchaseLicensePage() {
     setMounted(true);
   }, []);
 
+  if (!mounted || !isLoaded) return (
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
+      <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="exn-gradient-text font-bold uppercase tracking-widest animate-pulse">Syncing Network State</p>
+    </div>
+  );
+
+  if (!state.isInitialized) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
+         <Activity className="w-12 h-12 text-amber-500" />
+         <div className="space-y-4">
+           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Protocol Standby</h1>
+           <p className="text-muted-foreground max-w-md mx-auto uppercase text-xs font-black tracking-widest">
+             Licensing is locked until the Global Initialization instruction is executed by the Protocol Authority.
+           </p>
+         </div>
+         <Link href="/" className="exn-button px-8">Return to Dashboard</Link>
+      </div>
+    );
+  }
+
+  if (!connected) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
+         <div className="p-6 bg-primary/10 rounded-full border border-primary/20">
+           <Wallet className="w-12 h-12 text-primary" />
+         </div>
+         <div className="space-y-4">
+           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
+           <p className="text-muted-foreground max-w-md mx-auto">Connect your wallet to mint your Node License NFT.</p>
+         </div>
+      </div>
+    );
+  }
+
   const licensePrice = state.licensePrice || 0;
   const currentMintedCount = state.licenses.length;
   const totalLimit = state.licenseLimit || 0;
@@ -27,19 +63,12 @@ export default function PurchaseLicensePage() {
 
   const handlePurchase = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
-    
-    if (totalLimit > 0 && currentMintedCount >= totalLimit) {
-      return setFeedback('warning', 'Maximum license supply cap reached.');
-    }
-
-    if (licensePrice > 0 && state.usdcBalance < licensePrice) {
-      return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
-    }
+    if (totalLimit > 0 && currentMintedCount >= totalLimit) return setFeedback('warning', 'Maximum license supply cap reached.');
+    if (licensePrice > 0 && state.usdcBalance < licensePrice) return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
 
     setIsMinting(true);
     setMintPhase('Provisioning NFT Mint Account...');
     
-    // Simulate Metaplex NFT Minting Phases
     setTimeout(() => {
       setMintPhase('Creating Metaplex Metadata Account...');
       setTimeout(() => {
@@ -69,27 +98,6 @@ export default function PurchaseLicensePage() {
       }, 1500);
     }, 1500);
   };
-
-  if (!mounted || !isLoaded) return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
-      <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="exn-gradient-text font-bold uppercase tracking-widest animate-pulse">Syncing Network State</p>
-    </div>
-  );
-
-  if (!connected) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
-         <div className="p-6 bg-primary/10 rounded-full border border-primary/20">
-           <Wallet className="w-12 h-12 text-primary" />
-         </div>
-         <div className="space-y-4">
-           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Connect your wallet to mint your Node License NFT.</p>
-         </div>
-      </div>
-    );
-  }
 
   const myLicenses = state.licenses.filter(l => l.owner === walletAddress);
 
@@ -159,9 +167,6 @@ export default function PurchaseLicensePage() {
                     </>
                   )}
                 </button>
-                {isMinting && (
-                  <p className="text-[10px] text-center uppercase font-black tracking-widest text-primary animate-pulse">{mintPhase}</p>
-                )}
               </div>
             </div>
           </div>
@@ -196,14 +201,6 @@ export default function PurchaseLicensePage() {
                                    <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
                                 </a>
                              </div>
-                          </div>
-                       </div>
-                       <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${lic.is_burned ? 'bg-destructive/10 text-destructive' : lic.is_claimed ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
-                             {lic.is_burned ? 'Burned' : lic.is_claimed ? 'Node Active' : 'Available'}
-                          </span>
-                          <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground uppercase font-black">
-                             <Database className="w-2.5 h-2.5" /> Arweave-URI
                           </div>
                        </div>
                     </div>
