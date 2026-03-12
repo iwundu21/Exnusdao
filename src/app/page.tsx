@@ -157,7 +157,9 @@ export default function Home() {
     const activeValidators = state.validators.filter(v => v.is_active && v.total_staked > 0);
     const totalActiveWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
 
-    if (totalActiveWeight <= 0) return;
+    if (totalActiveWeight <= 0) {
+      return setFeedback('error', 'Crank Failed: No active XNodes with staked capital detected.');
+    }
 
     const epochShares: any[] = [];
     setState(prev => {
@@ -182,7 +184,7 @@ export default function Home() {
         settledEpochs: [...prev.settledEpochs, { epoch: targetEpoch, settledAt: Date.now(), totalPool, validatorShares: epochShares }]
       };
     });
-    setFeedback('success', `Epoch ${targetEpoch} finalized.`);
+    setFeedback('success', `Epoch ${targetEpoch} finalized and rewards distributed.`);
   };
 
   const handleClaim = () => {
