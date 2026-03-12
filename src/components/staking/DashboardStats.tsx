@@ -147,7 +147,7 @@ export function DashboardStats({
           
           <div className="flex-1 exn-card p-10 bg-black/40 border-white/5 flex flex-col justify-center space-y-4 group hover:border-secondary/40 transition-all duration-500">
             <div className="space-y-1">
-              <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">DAO Treasury</p>
+              <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">Treasury</p>
               <div className="h-[2px] w-10 bg-secondary/30 rounded-full group-hover:w-16 transition-all" />
             </div>
             <div className="space-y-1 text-right">
