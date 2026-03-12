@@ -14,6 +14,7 @@ const PROPOSAL_FEE = 10;
 const VOTE_FEE = 3;
 const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
 const MIN_STAKE_FOR_VOTE = 10_000;
+const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000;
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -151,6 +152,14 @@ export default function Home() {
   };
 
   const handleCrank = (targetEpoch: number) => {
+    // Determine current epoch to enforce maturity rule
+    const elapsed = Date.now() - (state.networkStartDate || Date.now());
+    const currentEpoch = Math.floor(elapsed / EPOCH_DURATION) + 1;
+
+    if (targetEpoch >= currentEpoch) {
+      return setFeedback('error', `Settlement Blocked: Epoch ${targetEpoch} is still active.`);
+    }
+
     if (state.lastCrankedEpoch >= targetEpoch) return;
 
     const totalPool = state.rewardCap || 0;

@@ -30,8 +30,8 @@ export function CrankTerminal({
 
   const nextTargetToSettle = lastCrankedEpoch + 1;
   
-  // Simulation Logic: Allow settling the current epoch or matured ones
-  const isTargetMatured = nextTargetToSettle <= currentEpoch;
+  // STRICT RULE: Only epochs that have fully concluded (nextTarget < current) can be cranked.
+  const isTargetMatured = nextTargetToSettle < currentEpoch;
 
   useEffect(() => {
     const remainingMs = Math.max(0, currentEpochEndTime - now);
@@ -59,7 +59,7 @@ export function CrankTerminal({
         number: eNum,
         status,
         isCurrent: eNum === currentEpoch,
-        isSettleable: eNum === nextTargetToSettle && (status === 'PENDING' || status === 'ACTIVE'),
+        isSettleable: eNum === nextTargetToSettle && status === 'PENDING',
         startFormatted: new Date(startMs).toLocaleDateString(),
         endFormatted: new Date(endMs).toLocaleDateString()
       };
@@ -72,7 +72,7 @@ export function CrankTerminal({
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">Network Crank Terminal</h2>
           <p className="text-muted-foreground text-sm max-w-xl">
-            Settle matured 30-day epochs to shard the {(rewardCap || 0).toLocaleString()} EXN reward block. Current Epoch {currentEpoch} is active and matures in {timeLeft.d} days.
+            Settle matured 30-day epochs to shard the {(rewardCap || 0).toLocaleString()} EXN reward block. Epoch {currentEpoch} is active and cannot be settled until it matures.
           </p>
         </div>
         
@@ -103,12 +103,12 @@ export function CrankTerminal({
             <div className="flex-grow space-y-6">
               <div className="space-y-1">
                 <h3 className="text-2xl font-bold uppercase tracking-widest text-foreground">
-                   {nextTargetToSettle === currentEpoch ? `Current: Epoch ${nextTargetToSettle}` : `Target: Epoch ${nextTargetToSettle}`}
+                   Target: Epoch {nextTargetToSettle}
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {nextTargetToSettle === currentEpoch 
-                    ? `Execute settlement for the current active epoch. This will distribute proportional rewards based on current network weight.`
-                    : `Chronological maturity reached for Epoch ${nextTargetToSettle}. Execute settlement to shard rewards for all active network shards.`
+                  {isTargetMatured 
+                    ? `Chronological maturity reached for Epoch ${nextTargetToSettle}. Execute settlement to shard rewards for all active network shards.`
+                    : `Epoch ${nextTargetToSettle} is currently active or in the future. Settlement is restricted until the 30-day period concludes.`
                   }
                 </p>
               </div>
@@ -118,7 +118,7 @@ export function CrankTerminal({
                 disabled={!isTargetMatured || !connected}
                 className={`w-full py-5 rounded-xl font-black uppercase text-sm tracking-[0.3em] transition-all ${isTargetMatured && connected ? 'exn-button shadow-[0_0_30px_rgba(0,245,255,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
               >
-                {isTargetMatured ? (connected ? `Settle Epoch ${nextTargetToSettle}` : 'Connect Wallet to Settle') : 'Maturity Required'}
+                {isTargetMatured ? (connected ? `Settle Epoch ${nextTargetToSettle}` : 'Connect Wallet to Settle') : 'Waiting for Maturity'}
               </button>
             </div>
           </div>
@@ -189,7 +189,7 @@ export function CrankTerminal({
                       <div className="flex items-center gap-2">
                         <p className="text-xs font-bold uppercase">Epoch {epoch.number}</p>
                         {epoch.isCurrent && <span className="text-[8px] bg-primary text-black px-1.5 py-0.5 rounded font-black uppercase">ACTIVE</span>}
-                        {epoch.isSettleable && <span className="text-[8px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black uppercase">READY</span>}
+                        {epoch.isSettleable && <span className="text-[8px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black uppercase">MATURED</span>}
                       </div>
                       <p className="text-[9px] text-muted-foreground">{epoch.startFormatted} - {epoch.endFormatted}</p>
                     </div>
@@ -199,7 +199,7 @@ export function CrankTerminal({
                       epoch.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                       'bg-foreground/5 text-muted-foreground border-border'
                     }`}>
-                      {epoch.status}
+                      {epoch.status === 'PENDING' ? 'MATURED' : epoch.status}
                     </div>
                  </div>
                ))}
@@ -209,10 +209,10 @@ export function CrankTerminal({
           <div className="exn-card p-6 bg-primary/5 border-primary/20 space-y-4">
              <div className="flex items-center gap-2 text-primary">
                 <Clock className="w-4 h-4" />
-                <p className="text-[10px] uppercase font-black tracking-widest">Protocol Tip</p>
+                <p className="text-[10px] uppercase font-black tracking-widest">Protocol Constraint</p>
              </div>
              <p className="text-[11px] text-muted-foreground leading-relaxed">
-               Settlement distributes the global reward pool to active validators and their delegators. In this sandbox, you can settle epochs as soon as they become active to observe reward flows.
+               Settlement requires chronological maturity. An epoch cannot be sharded until its 30-day period has concluded. This ensures validators are rewarded for sustained performance.
              </p>
           </div>
         </div>
