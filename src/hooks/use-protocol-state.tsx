@@ -3,7 +3,7 @@
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, updateDoc, collection, deleteDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, collection, deleteDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection, useUser } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -107,7 +107,8 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const userRef = useMemo(() => (walletAddress ? doc(db, 'users', walletAddress) : null), [db, walletAddress]);
   const { data: userProfile, loading: profileLoading } = useDoc(userRef);
 
-  const isLoaded = !authLoading && !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
+  // App Shell renders immediately; data loads in parallel
+  const isLoaded = !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
 
   const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
     errorEmitter.emit('feedback', { status, message });
@@ -120,15 +121,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const registerUser = useCallback((address: string) => {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
+    // Use setDoc with merge: true to avoid overwriting existing balances on every login
     setDoc(ref, {
       address,
-      exnBalance: 25000000,
-      usdcBalance: 10000,
-      lastExnFaucetClaim: 0,
-      lastUsdcFaucetClaim: 0,
-      registeredAt: Date.now(),
-      lastActive: Date.now(),
-      totalTransactions: 0
+      lastActive: Date.now()
     }, { merge: true }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'create' }));
     });
@@ -137,11 +133,12 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const updateUserBalance = useCallback((address: string, exn: number, usdc: number) => {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
-    updateDoc(ref, {
+    // Atomic increment using setDoc with merge ensures the document exists and balance adds correctly
+    setDoc(ref, {
       exnBalance: increment(exn),
       usdcBalance: increment(usdc),
       lastActive: Date.now()
-    }).catch(err => {
+    }, { merge: true }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
   }, [db]);
@@ -149,9 +146,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
-    updateDoc(ref, {
+    setDoc(ref, {
       [type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim']: Date.now()
-    }).catch(err => {
+    }, { merge: true }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
   }, [db]);
@@ -332,7 +329,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     licenseLimit: globalData?.licenseLimit ?? 0,
     licensePrice: globalData?.licensePrice ?? 0,
     seedAmount: globalData?.seedAmount ?? 0,
-    adminWallet: globalData?.adminWallet ?? '',
+    adminWallet: globalData?.adminWallet ?? '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
     faucetExnLimit: globalData?.faucetExnLimit ?? 16000000,
     faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 10000,
     exnPrice: globalData?.exnPrice ?? 0.23,
