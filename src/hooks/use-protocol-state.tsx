@@ -112,6 +112,8 @@ export interface ProtocolState {
   usdcVaultPda: string;
   stakedVaultPda: string;
   adminWallet?: string;
+  lastExnFaucetClaim?: number;
+  lastUsdcFaucetClaim?: number;
 }
 
 const INITIAL_STATE: ProtocolState = {
@@ -165,6 +167,8 @@ const INITIAL_STATE: ProtocolState = {
   ],
   proposals: [],
   settledEpochs: [],
+  lastExnFaucetClaim: 0,
+  lastUsdcFaucetClaim: 0,
 };
 
 interface ProtocolContextType {
@@ -182,7 +186,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('exnus_protocol_state_v5');
+    const saved = localStorage.getItem('exnus_protocol_state_v6');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -199,7 +203,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('exnus_protocol_state_v5', JSON.stringify(state));
+      localStorage.setItem('exnus_protocol_state_v6', JSON.stringify(state));
     }
   }, [state, isLoaded]);
 
