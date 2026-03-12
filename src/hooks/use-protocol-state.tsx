@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, updateDoc, collection, query, where, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, collection } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -57,6 +57,7 @@ interface ProtocolContextType {
   adminFundVault: (address: string, amount: number, vault: string) => void;
   adminWithdrawUsdc: (address: string, amount: number) => void;
   mintLicense: (address: string, price: number, license: any) => void;
+  resetProtocol: () => Promise<void>;
   setState: (updater: (prev: any) => any) => void;
 }
 
@@ -67,11 +68,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const db = useFirestore();
   const walletAddress = publicKey?.toBase58() || '';
 
-  // 1. Global State
   const globalRef = useMemo(() => doc(db, 'protocol', 'global'), [db]);
   const { data: globalData, loading: globalLoading } = useDoc(globalRef);
 
-  // 2. Collections
   const validatorsQuery = useMemo(() => collection(db, 'validators'), [db]);
   const { data: validators, loading: valLoading } = useCollection(validatorsQuery);
 
@@ -84,15 +83,12 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const licensesQuery = useMemo(() => collection(db, 'licenses'), [db]);
   const { data: licenses, loading: licLoading } = useCollection(licensesQuery);
 
-  // 3. User Profile
   const userRef = useMemo(() => (walletAddress ? doc(db, 'users', walletAddress) : null), [db, walletAddress]);
   const { data: userProfile, loading: profileLoading } = useDoc(userRef);
 
   const isLoaded = !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
 
   const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
-    // Feedback is transient UI state, usually better handled via a global state or simple toast
-    // but we can store it in a local state here if needed.
     errorEmitter.emit('feedback', { status, message });
   }, []);
 
@@ -168,7 +164,24 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     updateDoc(gRef, { usdcVaultBalance: (globalData?.usdcVaultBalance || 0) + price });
   }, [db, userProfile, globalData]);
 
-  // Compatibility helper for older UI calls
+  const resetProtocol = useCallback(async () => {
+    if (!db) return;
+    const gRef = doc(db, 'protocol', 'global');
+    await setDoc(gRef, {
+      treasuryBalance: 3000000,
+      rewardVaultBalance: 20000000,
+      usdcVaultBalance: 0,
+      stakedVaultBalance: 0,
+      rewardCap: 300000,
+      licenseLimit: 100,
+      licensePrice: 5000,
+      isPaused: false,
+      lastCrankedEpoch: 0,
+      networkStartDate: Date.now(),
+      settledEpochs: []
+    });
+  }, [db]);
+
   const setState = useCallback((updater: any) => {
     console.warn("Direct setState is deprecated in favor of Firebase atomic updates.");
   }, []);
@@ -208,6 +221,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       adminFundVault,
       adminWithdrawUsdc,
       mintLicense,
+      resetProtocol,
       setState
     }}>
       {children}

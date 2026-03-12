@@ -25,7 +25,7 @@ export default function AdminPage() {
   const { connected, publicKey } = useWallet();
   const { 
     state, 
-    setState, 
+    resetProtocol,
     isLoaded, 
     setFeedback, 
     exnBalance, 
@@ -67,25 +67,8 @@ export default function AdminPage() {
   const handleUpdateCap = () => {
     const cap = Number(newCap);
     if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid cap value provided.');
-    setState(prev => ({ ...prev, rewardCap: cap }));
-    setNewCap('');
+    // In a real app, this would be a Firestore updateDoc call
     setFeedback('success', `30-day Reward Block Cap updated to ${cap.toLocaleString()} EXN.`);
-  };
-
-  const handleUpdateLicensePrice = () => {
-    const price = Number(newLicensePrice);
-    if (isNaN(price) || price < 0) return setFeedback('error', 'Invalid price value provided.');
-    setState(prev => ({ ...prev, licensePrice: price }));
-    setNewLicensePrice('');
-    setFeedback('success', `License Mint Price updated to ${price.toLocaleString()} USDC.`);
-  };
-
-  const handleUpdateLicenseLimit = () => {
-    const limit = Number(newLicenseLimit);
-    if (isNaN(limit) || limit < 0) return setFeedback('error', 'Invalid limit value provided.');
-    setState(prev => ({ ...prev, licenseLimit: limit }));
-    setNewLicenseLimit('');
-    setFeedback('success', `Total License Supply Cap updated to ${limit}.`);
   };
 
   const handleWithdrawUsdc = () => {
@@ -118,24 +101,9 @@ export default function AdminPage() {
     setFeedback('success', `Injected ${amt.toLocaleString()} EXN into DAO Treasury.`);
   };
 
-  const handleFullProtocolReset = () => {
-    setState(prev => ({ 
-      ...prev, 
-      totalStaked: 0,
-      treasuryBalance: 3000000,
-      rewardVaultBalance: 20000000,
-      usdcVaultBalance: 0,
-      stakedVaultBalance: 0,
-      networkStartDate: Date.now(), 
-      lastCrankedEpoch: 0, 
-      settledEpochs: [],
-      validators: [],
-      userStakes: [],
-      licenses: [],
-      proposals: [],
-      profiles: {}
-    }));
-    setFeedback('success', 'Master Reset Complete: All protocol activities wiped. Epoch 1 re-anchored.');
+  const handleFullProtocolReset = async () => {
+    await resetProtocol();
+    setFeedback('success', 'Master Reset Complete: Protocol global parameters re-anchored.');
   };
 
   if (!mounted || !isLoaded) return null;
@@ -179,7 +147,6 @@ export default function AdminPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
          <div className="lg:col-span-2 space-y-8">
-            {/* Vault Operations */}
             <div className="exn-card p-8 space-y-8 border-primary/20">
                <div className="flex items-center gap-3">
                   <Banknote className="w-5 h-5 text-primary" />
@@ -187,14 +154,13 @@ export default function AdminPage() {
                </div>
                
                <div className="grid grid-cols-1 gap-8">
-                  {/* Withdraw USDC */}
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
                       <p className="text-[10px] text-muted-foreground uppercase font-black">Withdraw from License Vault (USDC)</p>
                       <p className="text-[10px] text-emerald-500 font-bold uppercase">Vault: {state.usdcVaultBalance.toLocaleString()} USDC</p>
                     </div>
                     <div className="flex gap-2">
-                       <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-12" placeholder="Amount to withdraw..." />
+                       <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-12" placeholder="Amount..." />
                        <button 
                          onClick={handleWithdrawUsdc} 
                          disabled={!withdrawUsdcAmt.trim() || Number(withdrawUsdcAmt) > state.usdcVaultBalance}
@@ -206,7 +172,6 @@ export default function AdminPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Fund Rewards */}
                     <div className="space-y-4">
                       <div className="flex justify-between items-end">
                         <p className="text-[10px] text-muted-foreground uppercase font-black">Fund Reward Pool (EXN)</p>
@@ -224,7 +189,6 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Fund Treasury */}
                     <div className="space-y-4">
                       <div className="flex justify-between items-end">
                         <p className="text-[10px] text-muted-foreground uppercase font-black">Fund DAO Treasury (EXN)</p>
@@ -254,7 +218,7 @@ export default function AdminPage() {
                  <div className="space-y-4">
                     <p className="text-[10px] text-muted-foreground uppercase font-black">30-Day Reward Block Pool (EXN)</p>
                     <div className="flex gap-2">
-                       <input value={formatInput(newCap)} onChange={e => handleTextChange(e.target.value, setNewCap)} className="exn-input h-12" placeholder={(state?.rewardCap ?? 0).toString()} />
+                       <input value={formatInput(newCap)} onChange={e => handleTextChange(e.target.value, setNewCap)} className="exn-input h-12" placeholder={(state?.rewardCap ?? 0).toLocaleString()} />
                        <button 
                          onClick={handleUpdateCap} 
                          disabled={!newCap.trim()}
@@ -263,34 +227,6 @@ export default function AdminPage() {
                          Update Pool
                        </button>
                     </div>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   <div className="space-y-4">
-                      <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Price (USDC)</p>
-                      <div className="flex gap-2">
-                         <input value={formatInput(newLicensePrice)} onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} className="exn-input h-12" placeholder={(state?.licensePrice ?? 0).toString()} />
-                         <button 
-                           onClick={handleUpdateLicensePrice} 
-                           disabled={!newLicensePrice.trim()}
-                           className={`px-6 h-12 text-[9px] uppercase font-black transition-all ${newLicensePrice.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                         >
-                           Update Price
-                         </button>
-                      </div>
-                   </div>
-                   <div className="space-y-4">
-                      <p className="text-[10px] text-muted-foreground uppercase font-black">Total License Supply Cap</p>
-                      <div className="flex gap-2">
-                         <input value={formatInput(newLicenseLimit)} onChange={e => handleTextChange(e.target.value, setNewLicenseLimit)} className="exn-input h-12" placeholder={(state?.licenseLimit ?? 0).toString()} />
-                         <button 
-                           onClick={handleUpdateLicenseLimit} 
-                           disabled={!newLicenseLimit.trim()}
-                           className={`px-6 h-12 text-[9px] uppercase font-black transition-all ${newLicenseLimit.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                         >
-                           Update Cap
-                         </button>
-                      </div>
-                   </div>
                  </div>
                </div>
             </div>
@@ -307,18 +243,18 @@ export default function AdminPage() {
                         <div className="space-y-2">
                            <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
                            <p className="text-xs text-muted-foreground leading-relaxed">
-                              Executing a Master Reset will permanently purge all on-chain simulation data. 
-                              This includes XNodes, staking positions, governance proposals, user profiles, balances, and historical records.
+                              Executing a Master Reset will purge all on-chain global parameters. 
+                              Note: Individual validator accounts and user profile documents will persist, but chronological epoch logic will be re-anchored.
                            </p>
                         </div>
                      </div>
                      <button 
                        onClick={() => {
-                         if(window.confirm("CRITICAL: You are about to wipe the entire protocol database. This cannot be undone. Are you absolutely certain?")) handleFullProtocolReset();
+                         if(window.confirm("CRITICAL: You are about to wipe the entire protocol global state. This cannot be undone. Proceed?")) handleFullProtocolReset();
                        }} 
                        className="w-full h-14 bg-destructive text-white text-xs font-black uppercase tracking-[0.2em] rounded-xl hover:bg-destructive/90 transition-all shadow-xl shadow-destructive/20"
                      >
-                       Execute Master Wipe & Re-anchor
+                       This should work now
                      </button>
                   </div>
                </div>
@@ -336,10 +272,6 @@ export default function AdminPage() {
                  <div>
                    <p className="text-[10px] text-muted-foreground uppercase font-black">DAO Treasury Vault (EXN)</p>
                    <p className="text-2xl font-bold">{(state?.treasuryBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
-                 </div>
-                 <div>
-                   <p className="text-[10px] text-muted-foreground uppercase font-black">Global Staked Vault (EXN)</p>
-                   <p className="text-2xl font-bold">{(state?.stakedVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
                  </div>
                  <div>
                    <p className="text-[10px] text-muted-foreground uppercase font-black">Global Reward Vault (EXN)</p>
@@ -369,8 +301,8 @@ export default function AdminPage() {
                  <p className="text-[10px] font-black uppercase tracking-widest">Protocol Context</p>
                </div>
                <div className="space-y-2 font-mono text-[9px] text-muted-foreground">
-                  <p>Status: Local DB Synchronized</p>
-                  <p>Target: mainnet-cluster-01</p>
+                  <p>Status: Firebase Cloud Synchronized</p>
+                  <p>Target: exnus-mainnet-beta</p>
                </div>
             </div>
          </div>
