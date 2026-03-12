@@ -12,7 +12,9 @@ import {
   Calendar,
   Database,
   Coins,
-  ShieldAlert
+  ShieldAlert,
+  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
 
 const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
@@ -57,9 +59,14 @@ export default function AdminPage() {
     setFeedback('success', `Total License Supply Cap updated to ${limit}.`);
   };
 
-  const handleResetTimeline = () => {
+  const handleFullProtocolReset = () => {
     setState(prev => ({ 
       ...prev, 
+      totalStaked: 0,
+      treasuryBalance: 0,
+      rewardVaultBalance: 0,
+      usdcVaultBalance: 0,
+      stakedVaultBalance: 0,
       networkStartDate: Date.now(), 
       lastCrankedEpoch: 0, 
       settledEpochs: [],
@@ -67,9 +74,15 @@ export default function AdminPage() {
       userStakes: [],
       licenses: [],
       proposals: [],
-      profiles: {}
+      profiles: {},
+      metadata: {
+        ...prev.metadata,
+        totalVolume: 0,
+        totalUsers: 0,
+        lastUpdate: Date.now()
+      }
     }));
-    setFeedback('success', 'Protocol timeline re-anchored and all state cleared. Epoch 1 is now active.');
+    setFeedback('success', 'Master Reset Complete: All protocol activities wiped. Epoch 1 re-anchored.');
   };
 
   if (!mounted || !isLoaded) return null;
@@ -113,25 +126,33 @@ export default function AdminPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
          <div className="lg:col-span-2 space-y-8">
-            <div className="exn-card p-8 space-y-8 border-border/20">
-               <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  <h3 className="text-lg font-bold uppercase tracking-widest">Network Timeline</h3>
+            <div className="exn-card p-8 space-y-8 border-destructive/20 bg-destructive/5">
+               <div className="flex items-center gap-3 text-destructive">
+                  <RotateCcw className="w-5 h-5" />
+                  <h3 className="text-lg font-bold uppercase tracking-widest">Master Protocol Reset</h3>
                </div>
-               <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex justify-between items-center">
-                  <div>
-                    <p className="text-xs font-black uppercase text-emerald-500">Timeline Management</p>
-                    <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Origin: {new Date(state.networkStartDate).toLocaleString()}</p>
-                    <p className="text-[10px] text-primary font-bold uppercase mt-2">Active Epoch: {state.lastCrankedEpoch + 1}</p>
+               <div className="space-y-6">
+                  <div className="p-6 bg-background/50 border border-destructive/20 rounded-xl space-y-4">
+                     <div className="flex items-start gap-4">
+                        <AlertTriangle className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
+                        <div className="space-y-2">
+                           <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
+                           <p className="text-xs text-muted-foreground leading-relaxed">
+                              Executing a Master Reset will permanently purge all on-chain simulation data. 
+                              This includes XNodes, staking positions, governance proposals, user balances, and historical sharding records. 
+                              The network timeline will be re-anchored to the current second, starting the cluster at Epoch 1.
+                           </p>
+                        </div>
+                     </div>
+                     <button 
+                       onClick={() => {
+                         if(window.confirm("CRITICAL: You are about to wipe the entire protocol database. This cannot be undone. Are you absolutely certain?")) handleFullProtocolReset();
+                       }} 
+                       className="w-full h-14 bg-destructive text-white text-xs font-black uppercase tracking-[0.2em] rounded-xl hover:bg-destructive/90 transition-all shadow-xl shadow-destructive/20"
+                     >
+                       Execute Master Wipe & Re-anchor
+                     </button>
                   </div>
-                  <button 
-                    onClick={() => {
-                      if(window.confirm("This will wipe all network state and restart the timeline at Epoch 1. Proceed?")) handleResetTimeline();
-                    }} 
-                    className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black"
-                  >
-                    Reset All & Re-anchor
-                  </button>
                </div>
             </div>
 
@@ -207,7 +228,22 @@ export default function AdminPage() {
 
             <div className="exn-card p-6 space-y-4 border-primary/20 bg-primary/5">
                <div className="flex items-center gap-2">
-                 <Database className="w-4 h-4 text-primary" />
+                 <Calendar className="w-4 h-4 text-primary" />
+                 <p className="text-[10px] font-black uppercase tracking-widest">Network Timeline</p>
+               </div>
+               <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground uppercase font-black">Origin Anchor</p>
+                  <p className="text-[10px] font-mono text-foreground">{new Date(state.networkStartDate).toLocaleString()}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                     <p className="text-[11px] font-black uppercase text-primary">Active Epoch: {state.lastCrankedEpoch + 1}</p>
+                  </div>
+               </div>
+            </div>
+
+            <div className="exn-card p-6 space-y-4 border-border/20 bg-foreground/[0.02]">
+               <div className="flex items-center gap-2">
+                 <Database className="w-4 h-4 text-muted-foreground" />
                  <p className="text-[10px] font-black uppercase tracking-widest">Protocol Context</p>
                </div>
                <div className="space-y-2 font-mono text-[9px] text-muted-foreground">
