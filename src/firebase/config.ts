@@ -4,6 +4,6 @@ export const firebaseConfig = {
   projectId: "exnusdao",
   storageBucket: "exnusdao.firebasestorage.app",
   messagingSenderId: "833604209920",
-  appId: "1:833604209920:web:b9e8b55801959ff94df7e5",
-  measurementId: "G-GCHH3TBXLX"
+  appId: "1:833604209920:web:a82119227868d5a54df7e5",
+  measurementId: "G-GR07FDGY4V"
 };

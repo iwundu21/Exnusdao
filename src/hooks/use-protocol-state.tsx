@@ -85,7 +85,6 @@ const ProtocolContext = createContext<ProtocolContextType | null>(null);
 export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { publicKey } = useWallet();
   const db = useFirestore();
-  const { user: firebaseUser } = useUser();
   const walletAddress = publicKey?.toBase58() || '';
 
   // Cloud Firestore References
@@ -124,7 +123,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       address,
       lastActive: Date.now()
     }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'create' }));
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'write' }));
     });
   }, [db]);
 
@@ -136,7 +135,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       usdcBalance: increment(usdc),
       lastActive: Date.now()
     }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'write' }));
     });
   }, [db]);
 
@@ -151,7 +150,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       [timestampField]: Date.now(),
       lastActive: Date.now()
     }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'write' }));
     });
   }, [db]);
 
@@ -319,7 +318,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       lastCrankedEpoch: 0,
       networkStartDate: Date.now(),
       settledEpochs: []
-    });
+    }, { merge: true });
   }, [db]);
 
   const state: ProtocolState = {
@@ -330,7 +329,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     rewardCap: globalData?.rewardCap ?? 0,
     licenseLimit: globalData?.licenseLimit ?? 0,
     licensePrice: globalData?.licensePrice ?? 0,
-    seedAmount: globalData?.seedAmount ?? 0,
+    seedAmount: globalData?.seedAmount ?? 15000000,
     adminWallet: globalData?.adminWallet ?? '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
     faucetExnLimit: globalData?.faucetExnLimit ?? 16000000,
     faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 10000,
