@@ -136,11 +136,11 @@ export interface ProtocolState {
 }
 
 const INITIAL_LOCAL_STATE: ProtocolState = {
-  totalStaked: 15000000, 
-  treasuryBalance: 50000,
-  rewardVaultBalance: 100000,
-  usdcVaultBalance: 5000,
-  stakedVaultBalance: 15000000,
+  totalStaked: 0, 
+  treasuryBalance: 0,
+  rewardVaultBalance: 0,
+  usdcVaultBalance: 0,
+  stakedVaultBalance: 0,
   rewardCap: 1500,
   licenseLimit: 100,
   licensePrice: 500,
@@ -241,8 +241,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
             ...prev.profiles,
             [address]: {
               ...prev.profiles[address],
-              lastActive: Date.now(),
-              totalTransactions: prev.profiles[address].totalTransactions + 1
+              lastActive: Date.now()
             }
           }
         };
@@ -256,7 +255,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         lastUsdcFaucetClaim: 0,
         registeredAt: Date.now(),
         lastActive: Date.now(),
-        totalTransactions: 1
+        totalTransactions: 0
       };
 
       return {
