@@ -152,11 +152,9 @@ export default function Home() {
     }
   };
 
-  const handleCrank = () => {
-    const currentEpoch = Math.floor((Date.now() - state.networkStartDate) / EPOCH_DURATION_MS) + 1;
-    
-    if (state.lastCrankedEpoch >= currentEpoch) {
-      return setFeedback('warning', `Epoch ${currentEpoch} has already been settled.`);
+  const handleCrank = (targetEpoch: number) => {
+    if (state.lastCrankedEpoch >= targetEpoch) {
+      return setFeedback('warning', `Epoch ${targetEpoch} has already been settled.`);
     }
 
     const totalPool = state.rewardCap || 0;
@@ -183,11 +181,11 @@ export default function Home() {
       return {
         ...prev,
         validators: newValidators,
-        lastCrankedEpoch: currentEpoch
+        lastCrankedEpoch: targetEpoch
       };
     });
 
-    setFeedback('success', `Epoch ${currentEpoch} finalized. yield sharded.`);
+    setFeedback('success', `Epoch ${targetEpoch} finalized. yield sharded.`);
   };
 
   const handleClaim = () => {

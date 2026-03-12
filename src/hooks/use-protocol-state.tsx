@@ -110,13 +110,13 @@ const INITIAL_STATE: ProtocolState = {
   rewardVaultBalance: 100000,
   usdcVaultBalance: 5000,
   stakedVaultBalance: 15000000,
-  rewardCap: 1250,
+  rewardCap: 1500,
   licenseLimit: 100,
   licensePrice: 500,
   isPaused: false,
   lastTransaction: null,
-  lastCrankedEpoch: 0, // 0 means Epoch 1 is the first target
-  networkStartDate: Date.now(), // Dynamic start from "now"
+  lastCrankedEpoch: 0, 
+  networkStartDate: Date.now(), 
   exnMint: 'EXN1111111111111111111111111111111111111111',
   usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   rewardVaultPda: 'REWARD-PDA',
@@ -160,7 +160,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('exnus_protocol_state_v2');
+    const saved = localStorage.getItem('exnus_protocol_state_v3');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -177,7 +177,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('exnus_protocol_state_v2', JSON.stringify(state));
+      localStorage.setItem('exnus_protocol_state_v3', JSON.stringify(state));
     }
   }, [state, isLoaded]);
 
