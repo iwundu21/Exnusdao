@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Settings, LayoutDashboard, Ticket, Hammer, ShieldCheck, Coins, CircleDollarSign, Droplets, User } from 'lucide-react';
+import { Settings, LayoutDashboard, Ticket, Hammer, Coins, CircleDollarSign, User } from 'lucide-react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -25,7 +25,6 @@ export function Navbar() {
 
   const currentExn = isLoaded ? state.exnBalance : 0;
   const currentUsdc = isLoaded ? state.usdcBalance : 0;
-  const isAdmin = isLoaded && state.adminWallet === walletAddress;
   const profile = isLoaded && walletAddress ? state.profiles[walletAddress] : null;
 
   return (
@@ -52,15 +51,6 @@ export function Navbar() {
           <Link href="/manage-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
             <Settings className="w-4 h-4" /> Manage XNode
           </Link>
-          <Link href="/faucet" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-            <Droplets className="w-4 h-4" /> Faucet
-          </Link>
-
-          {(isAdmin || connected) && (
-            <Link href="/admin" className="flex items-center gap-2 text-primary font-black hover:opacity-80 transition-all">
-              <ShieldCheck className="w-4 h-4" /> Admin
-            </Link>
-          )}
         </div>
 
         {mounted && connected && isLoaded && (
