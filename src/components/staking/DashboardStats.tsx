@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { BarChart3 } from 'lucide-react';
 
 const EXN_PRICE = 0.23;
 
@@ -30,7 +29,6 @@ export function DashboardStats({
           <div className="p-10 flex flex-col justify-between h-full relative z-10">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-white/40" />
                 <p className="text-white/40 text-lg font-medium tracking-tight">Total Network Locked</p>
               </div>
               <div className="h-[1px] w-full bg-white/5 mt-4" />
