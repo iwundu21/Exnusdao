@@ -49,7 +49,6 @@ export default function AdminPage() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [now, setNow] = useState(Date.now());
 
-  // Initialize form once when data is loaded to prevent "input fighting"
   useEffect(() => {
     setMounted(true);
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -131,7 +130,7 @@ export default function AdminPage() {
       networkStartDate: Date.now(),
       lastCrankedEpoch: 0
     });
-    setFeedback('success', 'Network Genesis initialized. Protocol clock is now ticking.');
+    setFeedback('success', 'Network Genesis initialized.');
   };
 
   const handleManualCrank = () => {
@@ -139,16 +138,16 @@ export default function AdminPage() {
     const activeValidators = state.validators.filter(v => v.is_active && v.total_staked > 0);
     const totalWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
     
-    if (totalWeight <= 0) return setFeedback('error', 'No active network weight to distribute rewards.');
+    if (totalWeight <= 0) return setFeedback('error', 'No active network weight.');
     
     crankEpoch(nextEpoch, state.rewardCap, activeValidators, totalWeight);
-    setFeedback('success', `Admin Override: Epoch ${nextEpoch} has been sharded and settled.`);
+    setFeedback('success', `Admin Override: Epoch ${nextEpoch} settled.`);
   };
 
   const handleFullProtocolReset = async () => {
     await resetProtocol();
-    setFeedback('success', 'Master Reset Complete: Cloud global parameters re-anchored.');
-    setIsInitialized(false); // Allow re-initialization of form fields
+    setFeedback('success', 'Master Reset Complete.');
+    setIsInitialized(false);
   };
 
   if (!mounted) return null;
@@ -157,8 +156,8 @@ export default function AdminPage() {
     return (
       <div className="flex flex-col items-center justify-center py-40 text-center space-y-8 animate-in fade-in duration-500">
          <Lock className="w-12 h-12 text-primary" />
-         <h1 className="text-4xl font-bold uppercase">Authority Required</h1>
-         <p className="text-muted-foreground">Please connect your wallet to access the terminal.</p>
+         <h1 className="text-3xl font-bold uppercase">Authority Required</h1>
+         <p className="text-muted-foreground text-xs">Please connect your wallet to access the terminal.</p>
       </div>
     );
   }
@@ -169,10 +168,9 @@ export default function AdminPage() {
          <div className="p-6 bg-destructive/10 rounded-full border border-destructive/20">
             <ShieldAlert className="w-12 h-12 text-destructive" />
          </div>
-         <h1 className="text-4xl font-bold uppercase text-destructive">Unauthorized Access</h1>
-         <p className="text-muted-foreground max-w-md mx-auto">
-            This terminal is restricted to the designated Protocol Authority wallet: <br/>
-            <span className="font-mono text-primary break-all">{state.adminWallet}</span>
+         <h1 className="text-3xl font-bold uppercase text-destructive">Unauthorized Access</h1>
+         <p className="text-muted-foreground text-xs max-w-md mx-auto">
+            This terminal is restricted to the designated Protocol Authority wallet.
          </p>
       </div>
     );
@@ -188,7 +186,7 @@ export default function AdminPage() {
              <ShieldCheck className="w-5 h-5 text-primary" />
              <p className="text-xs font-black uppercase tracking-widest text-primary">Protocol Authority</p>
           </div>
-          <h1 className="text-6xl font-bold exn-gradient-text uppercase">Command Center</h1>
+          <h1 className="text-5xl font-bold exn-gradient-text uppercase">Command Center</h1>
         </div>
       </div>
 
@@ -200,7 +198,6 @@ export default function AdminPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
            <div className="lg:col-span-2 space-y-8">
-              {/* Epoch Control Section */}
               <div className="exn-card p-8 space-y-8 border-primary/30 bg-primary/5">
                  <div className="flex items-center gap-3">
                     <Activity className="w-5 h-5 text-primary" />
@@ -209,34 +206,23 @@ export default function AdminPage() {
                  
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="p-6 bg-background/50 border border-primary/20 rounded-xl space-y-4">
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">Genesis Activation</p>
-                       <p className="text-xs text-muted-foreground leading-relaxed">
-                          Reset the network clock to <span className="text-primary font-bold">Now</span>. This will restart the 30-day countdown for Epoch 1.
-                       </p>
-                       <button 
-                         onClick={handleStartEpochGenesis}
-                         className="w-full h-12 bg-primary/20 text-primary border border-primary/40 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/30 transition-all flex items-center justify-center gap-2"
-                       >
-                         <Play className="w-3 h-3 fill-current" /> Initialize Network Genesis
+                       <p className="text-[9px] text-muted-foreground uppercase font-black">Genesis Activation</p>
+                       <p className="text-[11px] text-muted-foreground leading-relaxed">Reset the network clock.</p>
+                       <button onClick={handleStartEpochGenesis} className="w-full h-12 bg-primary/20 text-primary border border-primary/40 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/30 transition-all flex items-center justify-center gap-2">
+                         <Play className="w-3 h-3 fill-current" /> Initialize Genesis
                        </button>
                     </div>
 
                     <div className="p-6 bg-background/50 border border-secondary/20 rounded-xl space-y-4">
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">Manual Settlement Override</p>
-                       <p className="text-xs text-muted-foreground leading-relaxed">
-                          Force the settlement of <span className="text-secondary font-bold">Epoch {state.lastCrankedEpoch + 1}</span> regardless of time remaining. Use for testing only.
-                       </p>
-                       <button 
-                         onClick={handleManualCrank}
-                         className="w-full h-12 bg-secondary/20 text-secondary border border-secondary/40 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-secondary/30 transition-all flex items-center justify-center gap-2"
-                       >
+                       <p className="text-[9px] text-muted-foreground uppercase font-black">Manual Settlement Override</p>
+                       <p className="text-[11px] text-muted-foreground leading-relaxed">Force settlement of Epoch {state.lastCrankedEpoch + 1}.</p>
+                       <button onClick={handleManualCrank} className="w-full h-12 bg-secondary/20 text-secondary border border-secondary/40 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-secondary/30 transition-all flex items-center justify-center gap-2">
                          <Zap className="w-3 h-3 fill-current" /> Force Manual Settlement
                        </button>
                     </div>
                  </div>
               </div>
 
-              {/* Global Network Controls */}
               <div className="exn-card p-8 space-y-8 border-secondary/20">
                  <div className="flex items-center gap-3">
                     <Settings className="w-5 h-5 text-secondary" />
@@ -245,52 +231,26 @@ export default function AdminPage() {
                  
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Price (USDC)</p>
+                       <p className="text-[9px] text-muted-foreground uppercase font-black">License Price (USDC)</p>
                        <div className="relative">
                           <Ticket className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
-                          <input 
-                            value={formatInput(newLicensePrice)} 
-                            onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} 
-                            className="exn-input h-12 pl-12 font-mono" 
-                            placeholder="Price in USDC..." 
-                          />
+                          <input value={formatInput(newLicensePrice)} onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} className="exn-input h-12 pl-12 font-mono text-sm" />
                        </div>
                     </div>
                     <div className="space-y-4">
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">Epoch Reward Cap (EXN)</p>
+                       <p className="text-[9px] text-muted-foreground uppercase font-black">Reward Cap (EXN)</p>
                        <div className="relative">
                           <Zap className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
-                          <input 
-                            value={formatInput(newRewardCap)} 
-                            onChange={e => handleTextChange(e.target.value, setNewRewardCap)} 
-                            className="exn-input h-12 pl-12 font-mono" 
-                            placeholder="Reward Pool per Epoch..." 
-                          />
-                       </div>
-                    </div>
-                    <div className="space-y-4 md:col-span-2">
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">Max XNode License Supply (Total Supply)</p>
-                       <div className="relative">
-                          <Layers className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
-                          <input 
-                            value={formatInput(newLicenseLimit)} 
-                            onChange={e => handleTextChange(e.target.value, setNewLicenseLimit)} 
-                            className="exn-input h-12 pl-12 font-mono" 
-                            placeholder="Max Licenses permitted..." 
-                          />
+                          <input value={formatInput(newRewardCap)} onChange={e => handleTextChange(e.target.value, setNewRewardCap)} className="exn-input h-12 pl-12 font-mono text-sm" />
                        </div>
                     </div>
                  </div>
                  
-                 <button 
-                   onClick={handleUpdateGlobals}
-                   className="w-full h-12 bg-secondary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:opacity-90 transition-all shadow-xl shadow-secondary/10"
-                 >
+                 <button onClick={handleUpdateGlobals} className="w-full h-12 bg-secondary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:opacity-90 transition-all">
                    Apply Global Updates
                  </button>
               </div>
 
-              {/* Vault Management */}
               <div className="exn-card p-8 space-y-8 border-primary/20">
                  <div className="flex items-center gap-3">
                     <Banknote className="w-5 h-5 text-primary" />
@@ -300,17 +260,13 @@ export default function AdminPage() {
                  <div className="grid grid-cols-1 gap-8">
                     <div className="space-y-4">
                       <div className="flex justify-between items-end">
-                        <p className="text-[10px] text-muted-foreground uppercase font-black">Withdraw from License Vault (USDC)</p>
-                        <p className="text-[10px] text-emerald-500 font-bold uppercase">Vault: {state.usdcVaultBalance.toLocaleString()} USDC</p>
+                        <p className="text-[9px] text-muted-foreground uppercase font-black">Withdraw from License Vault (USDC)</p>
+                        <p className="text-[9px] text-emerald-500 font-bold uppercase">Vault: {state.usdcVaultBalance.toLocaleString()} USDC</p>
                       </div>
                       <div className="flex gap-2">
-                         <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-12 font-mono" placeholder="Amount..." />
-                         <button 
-                           onClick={handleWithdrawUsdc} 
-                           disabled={!withdrawUsdcAmt.trim() || Number(withdrawUsdcAmt.replace(/,/g, '')) > state.usdcVaultBalance}
-                           className={`px-6 h-12 text-[9px] uppercase font-black transition-all flex items-center gap-2 ${withdrawUsdcAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                         >
-                           <ArrowDownLeft className="w-3 h-3" /> Withdraw USDC
+                         <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-12 font-mono text-sm" />
+                         <button onClick={handleWithdrawUsdc} disabled={!withdrawUsdcAmt.trim() || Number(withdrawUsdcAmt.replace(/,/g, '')) > state.usdcVaultBalance} className={`px-4 h-12 text-[9px] uppercase font-black transition-all flex items-center gap-2 ${withdrawUsdcAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>
+                           <ArrowDownLeft className="w-3 h-3" /> Withdraw
                          </button>
                       </div>
                     </div>
@@ -318,68 +274,37 @@ export default function AdminPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
                         <div className="flex justify-between items-end">
-                          <p className="text-[10px] text-muted-foreground uppercase font-black">Fund Reward Pool (EXN)</p>
+                          <p className="text-[9px] text-muted-foreground uppercase font-black">Fund Reward Pool (EXN)</p>
                           <p className="text-[9px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                         </div>
-                        <div className="flex flex-col gap-2">
-                           <input value={formatInput(fundRewardsAmt)} onChange={e => handleTextChange(e.target.value, setFundRewardsAmt)} className="exn-input h-12 font-mono" placeholder="EXN to add..." />
-                           <button 
-                             onClick={handleFundRewards} 
-                             disabled={!fundRewardsAmt.trim() || Number(fundRewardsAmt.replace(/,/g, '')) > exnBalance}
-                             className={`w-full h-12 text-[9px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundRewardsAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                           >
-                             <ArrowUpRight className="w-3 h-3" /> Fund Rewards
-                           </button>
-                        </div>
+                        <input value={formatInput(fundRewardsAmt)} onChange={e => handleTextChange(e.target.value, setFundRewardsAmt)} className="exn-input h-12 font-mono text-sm" />
+                        <button onClick={handleFundRewards} disabled={!fundRewardsAmt.trim() || Number(fundRewardsAmt.replace(/,/g, '')) > exnBalance} className={`w-full h-12 text-[9px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundRewardsAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>
+                          Fund Rewards
+                        </button>
                       </div>
 
                       <div className="space-y-4">
                         <div className="flex justify-between items-end">
-                          <p className="text-[10px] text-muted-foreground uppercase font-black">Fund DAO Treasury (EXN)</p>
+                          <p className="text-[9px] text-muted-foreground uppercase font-black">Fund DAO Treasury (EXN)</p>
                           <p className="text-[9px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                         </div>
-                        <div className="flex flex-col gap-2">
-                           <input value={formatInput(fundTreasuryAmt)} onChange={e => handleTextChange(e.target.value, setFundTreasuryAmt)} className="exn-input h-12 font-mono" placeholder="EXN to add..." />
-                           <button 
-                             onClick={handleFundTreasury} 
-                             disabled={!fundTreasuryAmt.trim() || Number(fundTreasuryAmt.replace(/,/g, '')) > exnBalance}
-                             className={`w-full h-12 text-[9px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundTreasuryAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                           >
-                             <ArrowUpRight className="w-3 h-3" /> Fund Treasury
-                           </button>
-                        </div>
+                        <input value={formatInput(fundTreasuryAmt)} onChange={e => handleTextChange(e.target.value, setFundTreasuryAmt)} className="exn-input h-12 font-mono text-sm" />
+                        <button onClick={handleFundTreasury} disabled={!fundTreasuryAmt.trim() || Number(fundTreasuryAmt.replace(/,/g, '')) > exnBalance} className={`w-full h-12 text-[9px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundTreasuryAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>
+                          Fund Treasury
+                        </button>
                       </div>
                     </div>
                  </div>
               </div>
 
-              {/* Reset Control */}
               <div className="exn-card p-8 space-y-8 border-destructive/20 bg-destructive/5">
                  <div className="flex items-center gap-3 text-destructive">
                     <RotateCcw className="w-5 h-5" />
                     <h3 className="text-lg font-bold uppercase tracking-widest">Master Protocol Reset</h3>
                  </div>
-                 <div className="space-y-6">
-                    <div className="p-6 bg-background/50 border border-destructive/20 rounded-xl space-y-4">
-                       <div className="flex items-start gap-4">
-                          <AlertTriangle className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
-                          <div className="space-y-2">
-                             <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
-                             <p className="text-xs text-muted-foreground leading-relaxed">
-                                Executing a Master Reset will purge all cloud-anchored global parameters and re-initialize limits. 
-                             </p>
-                          </div>
-                       </div>
-                       <button 
-                         onClick={() => {
-                           if(window.confirm("CRITICAL: Wipe entire protocol state?")) handleFullProtocolReset();
-                         }} 
-                         className="w-full h-14 bg-destructive text-white text-xs font-black uppercase tracking-[0.2em] rounded-xl hover:bg-destructive/90 transition-all shadow-xl shadow-destructive/20"
-                       >
-                         Master Reset Protocol
-                       </button>
-                    </div>
-                 </div>
+                 <button onClick={() => { if(window.confirm("CRITICAL: Reset state?")) handleFullProtocolReset(); }} className="w-full h-12 bg-destructive text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-destructive/90 transition-all">
+                   Master Reset Protocol
+                 </button>
               </div>
            </div>
 
@@ -389,24 +314,24 @@ export default function AdminPage() {
                  <div className="space-y-4">
                    <div className="flex justify-between items-end">
                      <div>
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Vault</p>
-                       <p className="text-2xl font-bold font-mono">{(state?.usdcVaultBalance ?? 0).toLocaleString()}</p>
+                       <p className="text-[9px] text-muted-foreground uppercase font-black">License Vault</p>
+                       <p className="text-lg font-bold font-mono">{(state?.usdcVaultBalance ?? 0).toLocaleString()}</p>
                      </div>
-                     <span className="text-xs text-emerald-500 font-bold">USDC</span>
+                     <span className="text-[10px] text-emerald-500 font-bold">USDC</span>
                    </div>
                    <div className="flex justify-between items-end">
                      <div>
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">DAO Treasury Vault</p>
-                       <p className="text-2xl font-bold font-mono">{(state?.treasuryBalance ?? 0).toLocaleString()}</p>
+                       <p className="text-[9px] text-muted-foreground uppercase font-black">DAO Treasury</p>
+                       <p className="text-lg font-bold font-mono">{(state?.treasuryBalance ?? 0).toLocaleString()}</p>
                      </div>
-                     <span className="text-xs text-primary font-bold">EXN</span>
+                     <span className="text-[10px] text-primary font-bold">EXN</span>
                    </div>
                    <div className="flex justify-between items-end">
                      <div>
-                       <p className="text-[10px] text-muted-foreground uppercase font-black">Global Reward Vault</p>
-                       <p className="text-2xl font-bold font-mono">{(state?.rewardVaultBalance ?? 0).toLocaleString()}</p>
+                       <p className="text-[9px] text-muted-foreground uppercase font-black">Global Reward Vault</p>
+                       <p className="text-lg font-bold font-mono">{(state?.rewardVaultBalance ?? 0).toLocaleString()}</p>
                      </div>
-                     <span className="text-xs text-primary font-bold">EXN</span>
+                     <span className="text-[10px] text-primary font-bold">EXN</span>
                    </div>
                  </div>
               </div>
@@ -417,13 +342,13 @@ export default function AdminPage() {
                    <p className="text-[10px] font-black uppercase tracking-widest">Network Timeline</p>
                  </div>
                  <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground uppercase font-black">Origin Anchor</p>
-                    <p className="text-[10px] font-mono text-foreground">{state.networkStartDate ? new Date(state.networkStartDate).toLocaleString() : 'NOT INITIALIZED'}</p>
+                    <p className="text-[9px] text-muted-foreground uppercase font-black">Origin Anchor</p>
+                    <p className="text-[9px] font-mono text-foreground">{state.networkStartDate ? new Date(state.networkStartDate).toLocaleString() : 'N/A'}</p>
                     <div className="flex items-center gap-2 mt-2">
-                       <div className={`w-2 h-2 rounded-full ${state.networkStartDate ? 'bg-primary animate-pulse' : 'bg-destructive'}`} />
-                       <p className="text-[11px] font-black uppercase text-primary">Active Epoch: {state.networkStartDate ? currentEpoch : '0'}</p>
+                       <div className={`w-1.5 h-1.5 rounded-full ${state.networkStartDate ? 'bg-primary animate-pulse' : 'bg-destructive'}`} />
+                       <p className="text-[10px] font-black uppercase text-primary">Active Epoch: {state.networkStartDate ? currentEpoch : '0'}</p>
                     </div>
-                    <p className="text-[9px] text-muted-foreground font-bold uppercase mt-1">Last Settled: {state.lastCrankedEpoch}</p>
+                    <p className="text-[8px] text-muted-foreground font-bold uppercase mt-1">Last Settled: {state.lastCrankedEpoch}</p>
                  </div>
               </div>
            </div>

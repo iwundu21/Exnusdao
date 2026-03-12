@@ -126,7 +126,7 @@ export function StakingActionForm({
                   onClick={() => setDuration(tier.days.toString())}
                   className={`py-3 px-2 border rounded-md transition-all flex flex-col items-center ${duration === tier.days.toString() ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground/50 hover:border-foreground/30'} ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <span className="text-sm font-bold">{tier.label}</span>
+                  <span className="text-xs font-bold">{tier.label}</span>
                   <span className="text-[10px] opacity-70">{(tier.multiplier/1000).toFixed(1)}x Yield</span>
                 </button>
               ))}
@@ -145,7 +145,7 @@ export function StakingActionForm({
           <button 
             onClick={handleAction} 
             disabled={isStakeDisabled}
-            className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${!isStakeDisabled ? 'exn-button text-xs' : 'bg-foreground/5 text-foreground/20 border border-border cursor-not-allowed text-xs'}`}
+            className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${!isStakeDisabled ? 'exn-button text-[10px]' : 'bg-foreground/5 text-foreground/20 border border-border cursor-not-allowed text-[10px]'}`}
           >
             Stake EXN
           </button>
@@ -157,12 +157,12 @@ export function StakingActionForm({
           <div className="flex justify-between items-center p-6 bg-secondary/10 border border-secondary/20 rounded-2xl">
             <div className="space-y-1">
               <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Global Claimable</p>
-              <p className="text-lg font-bold text-secondary">{totalPendingRewards.toFixed(2)} EXN</p>
+              <p className="text-base font-bold text-secondary">{totalPendingRewards.toFixed(2)} EXN</p>
             </div>
             <button 
               onClick={onClaim}
               disabled={totalPendingRewards <= 0 || !connected}
-              className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${totalPendingRewards > 0 && connected ? 'bg-secondary text-white' : 'bg-foreground/5 text-foreground/20 cursor-not-allowed'}`}
+              className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${totalPendingRewards > 0 && connected ? 'bg-secondary text-white' : 'bg-foreground/5 text-foreground/20 cursor-not-allowed'}`}
             >
               Claim All
             </button>
@@ -187,7 +187,7 @@ export function StakingActionForm({
                   <div key={s.id} className="p-5 bg-foreground/5 rounded-xl border border-border/10 space-y-4">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
-                         <span className="text-lg font-bold text-foreground font-mono">{s.amount.toLocaleString()} EXN</span>
+                         <span className="text-base font-bold text-foreground font-mono">{s.amount.toLocaleString()} EXN</span>
                          <p className="text-[10px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Node'}</p>
                          
                          <div className="flex flex-col gap-1.5 pt-2">
@@ -213,7 +213,7 @@ export function StakingActionForm({
                          </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-black text-emerald-500 font-mono">+{pendingReward.toFixed(2)}</p>
+                        <p className="text-xs font-black text-emerald-500 font-mono">+{pendingReward.toFixed(2)}</p>
                         <p className="text-[8px] text-muted-foreground uppercase font-black">Yield: {(multiplier/1000).toFixed(1)}x</p>
                       </div>
                     </div>

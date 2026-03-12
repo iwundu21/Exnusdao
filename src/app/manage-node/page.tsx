@@ -34,8 +34,8 @@ export default function ManageNodePage() {
   if (!connected) return (
     <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
        <Wallet className="w-12 h-12 text-primary" />
-       <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
-       <p className="text-muted-foreground">Please connect your wallet to manage your XNode.</p>
+       <h1 className="text-3xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
+       <p className="text-muted-foreground text-xs">Please connect your wallet to manage your XNode.</p>
     </div>
   );
 
@@ -62,7 +62,7 @@ export default function ManageNodePage() {
       commission_rate: formData.commission_rate * 100,
     });
     setEditingNodeId(null);
-    setFeedback('success', 'XNode identity updated in cloud ledger.');
+    setFeedback('success', 'XNode identity updated.');
   };
 
   const handleClaimCommission = (vId: string) => {
@@ -70,14 +70,14 @@ export default function ManageNodePage() {
     if (!node || (node.accrued_node_rewards || 0) <= 0) return;
     updateUserBalance(walletAddress, node.accrued_node_rewards, 0);
     updateValidator(vId, { accrued_node_rewards: 0 });
-    setFeedback('success', 'Protocol commission harvested to wallet.');
+    setFeedback('success', 'Protocol commission harvested.');
   };
 
   const handleDepositSeed = (vId: string) => {
-    if (exnBalance < state.seedAmount) return setFeedback('error', `Insufficient EXN. Required: ${state.seedAmount.toLocaleString()}`);
+    if (exnBalance < state.seedAmount) return setFeedback('error', `Insufficient EXN.`);
     updateUserBalance(walletAddress, -state.seedAmount, 0);
     updateValidator(vId, { seed_deposited: true, is_active: true, total_staked: state.seedAmount });
-    setFeedback('success', 'XNode seed deposited. Node is now ACTIVE.');
+    setFeedback('success', 'XNode seed deposited.');
   };
 
   const handleWithdrawSeed = (vId: string) => {
@@ -85,15 +85,15 @@ export default function ManageNodePage() {
     if (!node?.seed_deposited) return;
     updateUserBalance(walletAddress, state.seedAmount, 0);
     updateValidator(vId, { seed_deposited: false, is_active: false, total_staked: 0 });
-    setFeedback('success', 'Seed withdrawn. Node is now INACTIVE.');
+    setFeedback('success', 'Seed withdrawn.');
   };
 
   const handleCloseAccount = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node) return;
-    if (window.confirm("CRITICAL: Terminating this node will burn the bound License NFT. This action is irreversible. Proceed?")) {
+    if (window.confirm("CRITICAL: Terminate this node and burn License?")) {
       terminateValidator(vId, walletAddress, node.seed_deposited ? state.seedAmount : 0, node.accrued_node_rewards || 0, node.license_id!);
-      setFeedback('success', 'XNode decommissioned. License burned.');
+      setFeedback('success', 'XNode decommissioned.');
       router.push('/');
     }
   };
@@ -104,10 +104,10 @@ export default function ManageNodePage() {
          <ShieldAlert className="w-12 h-12 text-primary" />
        </div>
        <div className="space-y-4">
-         <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">No Active XNodes</h1>
-         <p className="text-muted-foreground max-w-md mx-auto">You do not currently have any XNodes registered to this wallet address.</p>
+         <h1 className="text-3xl font-bold uppercase tracking-tight text-foreground">No Active XNodes</h1>
+         <p className="text-muted-foreground text-xs">You do not have any XNodes registered to this wallet.</p>
        </div>
-       <Link href="/register-node" className="exn-button inline-block text-xs">Register New XNode</Link>
+       <Link href="/register-node" className="exn-button inline-block text-[10px]">Register New XNode</Link>
     </div>
   );
 
@@ -115,8 +115,8 @@ export default function ManageNodePage() {
     <div className="max-w-7xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
       <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground uppercase text-xs font-black tracking-widest"><ArrowLeft className="w-4 h-4" /> Back to Dashboard</Link>
       <div className="space-y-4">
-        <h1 className="text-6xl font-bold exn-gradient-text uppercase tracking-tighter">XNode Management</h1>
-        <p className="text-muted-foreground max-w-xl">Configure your validator identity, harvest commission, and manage your network seed capital.</p>
+        <h1 className="text-5xl font-bold exn-gradient-text uppercase tracking-tighter">XNode Management</h1>
+        <p className="text-muted-foreground text-xs">Configure identity and manage seed capital.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-12">
@@ -128,85 +128,70 @@ export default function ManageNodePage() {
           return (
             <div key={node.id} className="exn-card p-12 border-primary/20 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-8">
-                 <div className={`flex items-center gap-2 text-[10px] font-black uppercase px-4 py-2 rounded-full border backdrop-blur-md ${node.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-destructive/10 text-destructive border-destructive/20'}`}>
-                    <div className={`w-2 h-2 rounded-full ${node.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-destructive'}`} />
-                    {node.is_active ? 'Node Active' : 'Node Offline'}
+                 <div className={`flex items-center gap-2 text-[9px] font-black uppercase px-4 py-2 rounded-full border backdrop-blur-md ${node.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-destructive/10 text-destructive border-destructive/20'}`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${node.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-destructive'}`} />
+                    {node.is_active ? 'Online' : 'Offline'}
                  </div>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-16">
                 <div className="space-y-10">
                   <div className="flex items-center gap-8">
-                    <div className="relative w-28 h-28 rounded-3xl overflow-hidden border border-border shadow-2xl group-hover:scale-105 transition-transform duration-500">
+                    <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-border shadow-2xl">
                       <Image src={logoUrl} alt="logo" fill className="object-cover" />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-3xl font-bold uppercase tracking-tighter text-foreground">{node.name}</h2>
-                      <div className="flex items-center gap-2">
-                        <p className="text-[10px] font-mono text-primary font-bold">{shortenAddress(node.id)}</p>
-                      </div>
+                      <h2 className="text-2xl font-bold uppercase tracking-tighter text-foreground">{node.name}</h2>
+                      <p className="text-[9px] font-mono text-primary font-bold">{shortenAddress(node.id)}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-6 bg-foreground/5 rounded-2xl border border-border/40 space-y-1">
-                      <p className="text-[9px] uppercase font-black text-muted-foreground">Unique Stakers</p>
-                      <p className="text-lg font-bold font-mono">{stakerCount}</p>
+                      <p className="text-[8px] uppercase font-black text-muted-foreground">Users</p>
+                      <p className="text-base font-bold font-mono">{stakerCount}</p>
                     </div>
                     <div className="p-6 bg-foreground/5 rounded-2xl border border-border/40 space-y-1">
-                      <p className="text-[9px] uppercase font-black text-muted-foreground">Network Weight</p>
-                      <p className="text-lg font-bold text-primary font-mono">{node.total_staked.toLocaleString()}</p>
+                      <p className="text-[8px] uppercase font-black text-muted-foreground">Weight</p>
+                      <p className="text-base font-bold text-primary font-mono">{node.total_staked.toLocaleString()}</p>
                     </div>
                   </div>
 
                   <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-6">
                     <div className="space-y-1">
-                      <p className="text-[10px] uppercase font-black text-emerald-500 tracking-widest">Commission Pool</p>
-                      <p className="text-2xl font-bold text-foreground font-mono">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-xs text-emerald-500">EXN</span></p>
+                      <p className="text-[9px] uppercase font-black text-emerald-500 tracking-widest">Rewards</p>
+                      <p className="text-lg font-bold text-foreground font-mono">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-xs text-emerald-500">EXN</span></p>
                     </div>
-                    <button 
-                      onClick={() => handleClaimCommission(node.id)} 
-                      disabled={(node.accrued_node_rewards || 0) <= 0}
-                      className={`w-full py-4 rounded-xl text-[10px] font-black uppercase transition-all ${ (node.accrued_node_rewards || 0) > 0 ? 'bg-emerald-500 text-black hover:opacity-90 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                    >
-                      Harvest Rewards
+                    <button onClick={() => handleClaimCommission(node.id)} disabled={(node.accrued_node_rewards || 0) <= 0} className={`w-full py-3.5 rounded-xl text-[9px] font-black uppercase transition-all ${ (node.accrued_node_rewards || 0) > 0 ? 'bg-emerald-500 text-black' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}>
+                      Harvest
                     </button>
                   </div>
                 </div>
 
                 <div className="xl:col-span-2 space-y-10">
                   {isEditing ? (
-                    <div className="exn-card p-10 space-y-8 border-secondary/20 bg-secondary/5 animate-in fade-in slide-in-from-right-4">
-                      <h3 className="text-lg font-bold uppercase tracking-widest text-secondary">Update Identity Metadata</h3>
+                    <div className="exn-card p-10 space-y-8 border-secondary/20 bg-secondary/5">
+                      <h3 className="text-base font-bold uppercase tracking-widest text-secondary">Update Identity</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="text-[10px] uppercase font-black text-muted-foreground">Validator Name</label>
-                          <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12" />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] uppercase font-black text-muted-foreground">Location</label>
-                          <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-12" />
-                        </div>
-                        <div className="md:col-span-2 space-y-2">
-                          <label className="text-[10px] uppercase font-black text-muted-foreground">Bio / Description</label>
-                          <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[120px] py-4" />
-                        </div>
+                        <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 text-sm" placeholder="Name" />
+                        <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-12 text-sm" placeholder="Location" />
+                        <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[100px] text-xs py-4 md:col-span-2" placeholder="Description" />
                       </div>
                       <div className="flex gap-4">
-                        <button onClick={handleUpdate} className="exn-button flex-1 h-14 uppercase font-black tracking-widest text-xs">Save Changes</button>
-                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-14 uppercase font-black tracking-widest text-xs">Cancel</button>
+                        <button onClick={handleUpdate} className="exn-button flex-1 h-12 uppercase font-black tracking-widest text-[10px]">Save</button>
+                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-12 uppercase font-black tracking-widest text-[10px]">Cancel</button>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-10">
                       <div className="space-y-4">
-                        <p className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em]">Node Configuration</p>
+                        <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest">Node Actions</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           <button onClick={() => startEditing(node)} className="h-16 exn-button-outline uppercase text-[10px] font-black tracking-widest border-border hover:border-primary transition-all">Edit XNode Identity</button>
+                           <button onClick={() => startEditing(node)} className="h-14 exn-button-outline uppercase text-[9px] font-black tracking-widest rounded-xl">Edit Identity</button>
                            {!node.seed_deposited ? (
-                             <button onClick={() => handleDepositSeed(node.id)} className="h-16 exn-button uppercase text-[10px] font-black tracking-widest shadow-[0_0_20px_rgba(0,245,255,0.2)]">Deposit Seed ({state.seedAmount.toLocaleString()} EXN)</button>
+                             <button onClick={() => handleDepositSeed(node.id)} className="h-14 exn-button uppercase text-[9px] font-black tracking-widest">Deposit Seed</button>
                            ) : (
-                             <button onClick={() => handleWithdrawSeed(node.id)} className="h-16 bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 transition-all uppercase text-[10px] font-black tracking-widest rounded-xl">Withdraw Seed Capital</button>
+                             <button onClick={() => handleWithdrawSeed(node.id)} className="h-14 bg-destructive/10 text-destructive border border-destructive/20 uppercase text-[9px] font-black tracking-widest rounded-xl">Withdraw Seed</button>
                            )}
                         </div>
                       </div>
@@ -214,12 +199,9 @@ export default function ManageNodePage() {
                       <div className="p-8 bg-destructive/5 border border-destructive/20 rounded-2xl space-y-6">
                         <div className="flex items-center gap-3 text-destructive">
                            <AlertTriangle className="w-5 h-5" />
-                           <p className="text-[10px] uppercase font-black tracking-widest">Decommission Sector</p>
+                           <p className="text-[9px] uppercase font-black tracking-widest">Decommission Sector</p>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          Terminating your XNode is irreversible. This will purge the validator document from the cloud ledger and **burn the associated XNode License NFT**. You will receive a refund of any active seed capital and accrued commission.
-                        </p>
-                        <button onClick={() => handleCloseAccount(node.id)} className="w-full h-14 bg-destructive text-white uppercase text-[10px] font-black tracking-[0.2em] rounded-xl hover:bg-destructive/90 transition-all shadow-xl shadow-destructive/20">
+                        <button onClick={() => handleCloseAccount(node.id)} className="w-full h-12 bg-destructive text-white uppercase text-[9px] font-black tracking-[0.2em] rounded-xl">
                           Terminate On-Chain Registration
                         </button>
                       </div>

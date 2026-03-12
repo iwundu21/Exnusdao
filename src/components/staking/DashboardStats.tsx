@@ -29,29 +29,24 @@ export function DashboardStats({
 
   /**
    * Generates a sleek, professional growth curve anchored to the real-time cloud ledger.
-   * The shape reacts dynamically to changes in 'totalStaked' and 'networkStartDate'.
    */
   const chartData = useMemo(() => {
-    const points = 15; // Higher resolution for a sleeker curve
+    const points = 15;
     const data = [];
     const currentVal = totalStaked || 0;
     
-    // Default to 7 days history if network hasn't started
     const startTime = state.networkStartDate || (Date.now() - (7 * 24 * 60 * 60 * 1000));
     const now = Date.now();
-    const duration = Math.max(now - startTime, 1000 * 60 * 60); // Min 1 hour duration
+    const duration = Math.max(now - startTime, 1000 * 60 * 60);
     const timeStep = duration / points;
 
     for (let i = 0; i <= points; i++) {
       const pointTime = startTime + (i * timeStep);
       const date = new Date(pointTime);
       
-      // Professional growth model: 
-      // i=points is exactly the live value from Firestore.
-      // History points use a deterministic "logarithmic growth" model seeded by the live value.
       const progress = i / points;
-      const variation = 0.99 + (Math.sin(i * 1.2) * 0.01); // Subtle fluctuation
-      const baseGrowth = 0.85 + (Math.log10(1 + progress * 9) / 1) * 0.15; // Classic S-Curve/Log growth
+      const variation = 0.99 + (Math.sin(i * 1.2) * 0.01);
+      const baseGrowth = 0.85 + (Math.log10(1 + progress * 9) / 1) * 0.15;
       
       const value = i === points ? currentVal : Math.floor(currentVal * variation * baseGrowth);
       
@@ -81,12 +76,12 @@ export function DashboardStats({
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(0,245,255,0.5)]" />
                 <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.5em]">Real-Time Protocol TVL</p>
               </div>
-              <h3 className="text-3xl font-bold font-mono tracking-tighter text-white">
+              <h3 className="text-2xl font-bold font-mono tracking-tighter text-white">
                 {totalStaked.toLocaleString()} <span className="text-[10px] text-primary uppercase font-black ml-1">EXN</span>
               </h3>
             </div>
             <div className="text-right">
-              <p className="text-base font-bold text-emerald-500 font-mono tracking-tighter">
+              <p className="text-sm font-bold text-emerald-500 font-mono tracking-tighter">
                 ${stakedUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
               <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mt-1">Global Valuation (USD)</p>
@@ -102,14 +97,8 @@ export function DashboardStats({
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <XAxis 
-                  dataKey="date" 
-                  hide 
-                />
-                <YAxis 
-                  hide 
-                  domain={['dataMin * 0.9', 'dataMax * 1.1']} 
-                />
+                <XAxis dataKey="date" hide />
+                <YAxis hide domain={['dataMin * 0.9', 'dataMax * 1.1']} />
                 <Tooltip 
                   cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
                   content={({ active, payload }) => {
@@ -118,7 +107,7 @@ export function DashboardStats({
                         <div className="bg-black/95 backdrop-blur-xl border border-white/10 p-5 rounded-2xl shadow-3xl space-y-2">
                           <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">{payload[0].payload.date}</p>
                           <div className="h-px w-full bg-white/5" />
-                          <p className="text-lg font-bold text-primary font-mono tracking-tighter">
+                          <p className="text-base font-bold text-primary font-mono tracking-tighter">
                             {Number(payload[0].value).toLocaleString()} <span className="text-[10px]">EXN</span>
                           </p>
                         </div>
@@ -135,7 +124,6 @@ export function DashboardStats({
                   fillOpacity={1} 
                   fill="url(#chartGradient)" 
                   animationDuration={2000}
-                  isAnimationActive={true}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -144,22 +132,20 @@ export function DashboardStats({
 
         {/* Dynamic Metric Grid */}
         <div className="flex flex-col gap-6 lg:col-span-1">
-          
           <div className="flex-1 exn-card p-10 bg-black/40 border-white/5 flex flex-col justify-center space-y-4 group hover:border-secondary/40 transition-all duration-500">
             <div className="space-y-1">
               <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">Treasury</p>
               <div className="h-[2px] w-10 bg-secondary/30 rounded-full group-hover:w-16 transition-all" />
             </div>
             <div className="flex justify-between items-end">
-              <p className="text-2xl font-mono font-bold text-white tracking-tighter">
+              <p className="text-xl font-mono font-bold text-white tracking-tighter">
                 {treasuryBalance.toLocaleString()} <span className="text-[10px] text-white/20 ml-1">EXN</span>
               </p>
-              <p className="text-sm font-bold text-secondary/70 font-mono uppercase tracking-tight">
+              <p className="text-xs font-bold text-secondary/70 font-mono uppercase tracking-tight">
                 ${treasuryUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
-
         </div>
       </div>
     </div>

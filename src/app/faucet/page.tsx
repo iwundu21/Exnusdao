@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -43,7 +44,7 @@ export default function FaucetPage() {
            <Wallet className="w-12 h-12 text-primary" />
          </div>
          <div className="space-y-4">
-           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
+           <h1 className="text-3xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
            <p className="text-muted-foreground max-w-md mx-auto">Connect your wallet to receive protocol test tokens.</p>
          </div>
       </div>
@@ -82,9 +83,9 @@ export default function FaucetPage() {
       </Link>
 
       <div className="space-y-4">
-        <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Token Faucet</h1>
-        <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
-          Dynamically generate testnet assets to participate in the Exnus network. Limits: **{exnLimit.toLocaleString()} EXN** and **{usdcLimit.toLocaleString()} USDC** every 24 hours.
+        <h1 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Token Faucet</h1>
+        <p className="text-muted-foreground max-w-xl text-xs leading-relaxed">
+          Generate testnet assets. Limits: **{exnLimit.toLocaleString()} EXN** and **{usdcLimit.toLocaleString()} USDC** every 24 hours.
         </p>
       </div>
 
@@ -97,7 +98,7 @@ export default function FaucetPage() {
                <Coins className="w-8 h-8 text-primary" />
              </div>
              {exnTimeLeft > 0 && (
-               <div className="flex items-center gap-2 text-[10px] text-amber-500 font-black uppercase tracking-widest bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
+               <div className="flex items-center gap-2 text-[9px] text-amber-500 font-black uppercase tracking-widest bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
                  <Clock className="w-3 h-3" />
                  {formatTime(exnTimeLeft)}
                </div>
@@ -105,14 +106,14 @@ export default function FaucetPage() {
           </div>
 
           <div className="space-y-1 relative z-10">
-            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
-            <h3 className="text-4xl font-bold text-foreground">{exnLimit.toLocaleString()} <span className="text-xs text-primary font-black uppercase">EXN</span></h3>
+            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
+            <h3 className="text-2xl font-bold text-foreground">{exnLimit.toLocaleString()} <span className="text-[10px] text-primary font-black uppercase">EXN</span></h3>
           </div>
 
           <button 
             onClick={handleClaimExn} 
             disabled={exnTimeLeft > 0} 
-            className={`w-full h-16 uppercase tracking-[0.2em] font-black transition-all rounded-xl relative z-10 ${exnTimeLeft === 0 ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+            className={`w-full h-16 uppercase tracking-[0.2em] font-black transition-all rounded-xl relative z-10 text-[10px] ${exnTimeLeft === 0 ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
           >
             {exnTimeLeft > 0 ? 'Cooldown Active' : 'Generate EXN Drop'}
           </button>
@@ -126,7 +127,7 @@ export default function FaucetPage() {
                <CircleDollarSign className="w-8 h-8 text-emerald-500" />
              </div>
              {usdcTimeLeft > 0 && (
-               <div className="flex items-center gap-2 text-[10px] text-amber-500 font-black uppercase tracking-widest bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
+               <div className="flex items-center gap-2 text-[9px] text-amber-500 font-black uppercase tracking-widest bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
                  <Clock className="w-3 h-3" />
                  {formatTime(usdcTimeLeft)}
                </div>
@@ -134,14 +135,14 @@ export default function FaucetPage() {
           </div>
 
           <div className="space-y-1 relative z-10">
-            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
-            <h3 className="text-4xl font-bold text-foreground">{usdcLimit.toLocaleString()} <span className="text-xs text-emerald-500 font-black uppercase">USDC</span></h3>
+            <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
+            <h3 className="text-2xl font-bold text-foreground">{usdcLimit.toLocaleString()} <span className="text-[10px] text-emerald-500 font-black uppercase">USDC</span></h3>
           </div>
 
           <button 
             onClick={handleClaimUsdc} 
             disabled={usdcTimeLeft > 0} 
-            className={`w-full h-16 uppercase tracking-[0.2em] font-black transition-all rounded-xl relative z-10 ${usdcTimeLeft === 0 ? 'exn-button bg-none border-emerald-500 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+            className={`w-full h-16 uppercase tracking-[0.2em] font-black transition-all rounded-xl relative z-10 text-[10px] ${usdcTimeLeft === 0 ? 'exn-button bg-none border-emerald-500 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
           >
             {usdcTimeLeft > 0 ? 'Cooldown Active' : 'Generate USDC Drop'}
           </button>
