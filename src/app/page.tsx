@@ -122,15 +122,52 @@ export default function Home() {
     setFeedback('success', 'Proposal broadcast to network.');
   };
 
+  const handleExecute = (pId: number) => {
+    const proposal = state.proposals.find(p => p.id === pId);
+    if (!proposal || proposal.executed) return;
+
+    const totalVotes = (proposal.yes_votes || 0) + (proposal.no_votes || 0);
+    const passed = totalVotes > 0 && (proposal.yes_votes > proposal.no_votes);
+
+    if (passed) {
+      setState(prev => {
+        let newState = { ...prev };
+        
+        // If it's a treasury distribution, subtract from treasury
+        if (proposal.type === 1 && (proposal.amount || 0) > 0) {
+          newState.treasuryBalance = Math.max(0, (prev.treasuryBalance || 0) - proposal.amount);
+          // If the recipient is the user, add to their balance (mock implementation)
+          if (proposal.recipient === walletAddress) {
+            newState.exnBalance += proposal.amount;
+          }
+        }
+        
+        // Mark as executed in history
+        newState.proposals = prev.proposals.map(p => 
+          p.id === pId ? { ...p, executed: true } : p
+        );
+        
+        return newState;
+      });
+      setFeedback('success', 'Proposal enacted. On-chain state updated.');
+    } else {
+      setState(prev => ({
+        ...prev,
+        proposals: prev.proposals.map(p => p.id === pId ? { ...p, executed: true } : p)
+      }));
+      setFeedback('warning', 'Proposal rejected by network consensus. Archived.');
+    }
+  };
+
   const handleCrank = () => {
     if (!state.networkStartDate) {
-      return setFeedback('error', 'Network start date not anchored.');
+      return setFeedback('error', 'Network clock not anchored.');
     }
 
     const currentBlock = Math.floor((Date.now() - state.networkStartDate) / BLOCK_DURATION_MS) + 1000;
     
     if (state.lastCrankedBlock >= currentBlock) {
-      return setFeedback('warning', `Reward Block ${currentBlock} has already been finalized.`);
+      return setFeedback('warning', `Reward Block ${currentBlock} has already been settled.`);
     }
 
     const totalPool = state.rewardCap || 0;
@@ -138,7 +175,7 @@ export default function Home() {
     const totalActiveWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
 
     if (totalActiveWeight <= 0) {
-      return setFeedback('warning', 'No active validators with stake found for reward sharding.');
+      return setFeedback('warning', 'No active validators with stake weight detected.');
     }
 
     setState(prev => {
@@ -161,7 +198,7 @@ export default function Home() {
       };
     });
 
-    setFeedback('success', `Reward Block ${currentBlock} finalized. Yield sharded across network weight.`);
+    setFeedback('success', `Reward Block ${currentBlock} finalized. yield sharded.`);
   };
 
   const handleClaim = () => {
@@ -194,7 +231,7 @@ export default function Home() {
       userStakes: prev.userStakes.map(s => s.id === stakeId ? { ...s, unstaked: true } : s),
       validators: prev.validators.map(v => v.id === stake.validator_id ? { ...v, total_staked: Math.max(0, v.total_staked - stake.amount) } : v)
     }));
-    setFeedback('success', 'Principal unstaked successfully.');
+    setFeedback('success', 'Principal returned to wallet.');
   };
 
   if (!isMounted || !isLoaded) return null;
@@ -243,6 +280,7 @@ export default function Home() {
           walletAddress={walletAddress}
           onVote={handleVote}
           onCreate={handleCreateProposal}
+          onExecute={handleExecute}
           setFeedback={setFeedback}
         />
       )}
