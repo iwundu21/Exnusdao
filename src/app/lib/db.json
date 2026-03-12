@@ -26,13 +26,13 @@
   "profiles": {
     "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW": {
       "address": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
-      "exnBalance": 2000000,
-      "usdcBalance": 10000,
-      "lastExnFaucetClaim": 0,
-      "lastUsdcFaucetClaim": 0,
+      "exnBalance": 18000000,
+      "usdcBalance": 20000,
+      "lastExnFaucetClaim": 1773328875835,
+      "lastUsdcFaucetClaim": 1773328878765,
       "registeredAt": 1773327811797,
-      "lastActive": 1773327920132,
-      "totalTransactions": 2
+      "lastActive": 1773328878765,
+      "totalTransactions": 4
     }
   },
   "metadata": {

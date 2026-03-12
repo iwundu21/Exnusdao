@@ -11,6 +11,11 @@ import { TransactionStatus } from '@/components/layout/TransactionStatus';
 export const metadata: Metadata = {
   title: 'Exnus protocol | Network',
   description: 'Stake EXN tokens with top-tier validators on Solana.',
+  icons: {
+    icon: [],
+    apple: [],
+    shortcut: [],
+  },
 };
 
 export default function RootLayout({
