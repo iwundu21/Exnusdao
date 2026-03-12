@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "ProtocolGlobal": {
@@ -86,7 +85,8 @@
         "deadline": { "type": "number" },
         "voting_ends_at": { "type": "number" },
         "executed": { "type": "boolean" },
-        "voters": { "type": "array", "items": { "type": "string" } }
+        "voters": { "type": "array", "items": { "type": "string" } },
+        "comments": { "type": "array", "items": { "type": "object" } }
       }
     },
     "UserProfile": {

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -225,6 +224,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           const isVotingLocked = now > prop.voting_ends_at && !isExpired;
           const hasVoted = connected && prop.voters?.includes(walletAddress);
           const isVotingForThis = connected && votingOn?.id === prop.id;
+          const showComments = activeCommentId === prop.id;
 
           return (
             <div key={prop.id} className="exn-card p-0 border-border overflow-hidden">
@@ -293,6 +293,44 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     </button>
                   )}
                 </div>
+              </div>
+
+              {/* Voter Rationales Section */}
+              <div className="bg-background/40">
+                <button 
+                  onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
+                  className="w-full flex items-center justify-between px-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all border-b border-border/10"
+                >
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Voter Rationales ({prop.comments?.length || 0})
+                  </div>
+                  {showComments ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {showComments && (
+                  <div className="p-8 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 max-h-80 overflow-y-auto custom-scrollbar">
+                    {(!prop.comments || prop.comments.length === 0) ? (
+                      <p className="text-[10px] text-muted-foreground uppercase font-black text-center py-6 italic">No rationales provided yet.</p>
+                    ) : (
+                      prop.comments.map((comment: any, idx: number) => (
+                        <div key={idx} className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <span className={`w-1.5 h-1.5 rounded-full ${comment.vote_stance === 'YES' ? 'bg-emerald-500' : 'bg-destructive'}`} />
+                              <p className="text-[9px] font-mono text-primary font-bold">{shortenAddress(comment.author)}</p>
+                              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${comment.vote_stance === 'YES' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
+                                {comment.vote_stance}
+                              </span>
+                            </div>
+                            <p className="text-[8px] text-muted-foreground uppercase">{new Date(comment.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>
+                          </div>
+                          <p className="text-xs text-foreground/80 leading-relaxed">{comment.text}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
