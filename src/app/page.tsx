@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -15,6 +16,7 @@ const VOTE_FEE = 3;
 const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
 const MIN_STAKE_FOR_VOTE = 10_000;
 const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000;
+const SEED_DEPOSIT_AMOUNT = 15000000;
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -32,12 +34,22 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  // Updated weight to include seed deposits for node owners
   const userStakeWeight = useMemo(() => {
-    if (!walletAddress || !state?.userStakes) return 0;
-    return state.userStakes
+    if (!walletAddress || !state?.userStakes || !state?.validators) return 0;
+    
+    // 1. Calculate traditional stake weight from user positions
+    const stakesWeight = state.userStakes
       .filter(s => s.owner === walletAddress && !s.unstaked)
       .reduce((acc, s) => acc + (s.amount || 0), 0);
-  }, [state?.userStakes, walletAddress]);
+      
+    // 2. Calculate weight from owned node seed deposits (15M each)
+    const seedWeight = state.validators
+      .filter(v => v.owner === walletAddress && v.seed_deposited)
+      .length * SEED_DEPOSIT_AMOUNT;
+      
+    return stakesWeight + seedWeight;
+  }, [state?.userStakes, state?.validators, walletAddress]);
 
   const isNodeOwner = useMemo(() => {
     if (!walletAddress || !state?.validators) return false;
@@ -89,7 +101,7 @@ export default function Home() {
     const proposal = state.proposals.find(p => p.id === pId);
     if (!proposal || proposal.voters?.includes(walletAddress)) return;
 
-    // Use a minimum weight of 1 for node owners with 0 stake so their vote is recorded
+    // Weight is now correctly calculated including seed deposits in userStakeWeight
     const effectiveWeight = Math.max(userStakeWeight, isNodeOwner ? 1 : 0);
 
     updateUserBalance(walletAddress, -VOTE_FEE, 0);

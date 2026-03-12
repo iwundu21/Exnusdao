@@ -1,6 +1,6 @@
 {
   "totalStaked": 0,
-  "treasuryBalance": 10,
+  "treasuryBalance": 16,
   "rewardVaultBalance": 0,
   "usdcVaultBalance": 500,
   "stakedVaultBalance": 2000000,
@@ -71,34 +71,52 @@
       "created_at": 1773325982625,
       "deadline": 1773930782625,
       "voting_ends_at": 1773916382625,
-      "yes_votes": 0,
-      "no_votes": 0,
+      "yes_votes": 2000000,
+      "no_votes": 1,
       "executed": false,
-      "voters": [],
-      "comments": []
+      "voters": [
+        "HqAHfhUayVNgW74ndx8B3tpX2VrThEefD8FiDLaWLYYC",
+        "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW"
+      ],
+      "comments": [
+        {
+          "id": "c1773326415350",
+          "author": "HqAHfhUayVNgW74ndx8B3tpX2VrThEefD8FiDLaWLYYC",
+          "text": "I do not support ",
+          "timestamp": 1773326415350,
+          "vote_stance": "NO"
+        },
+        {
+          "id": "c1773326567457",
+          "author": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
+          "text": "Yes",
+          "timestamp": 1773326567457,
+          "vote_stance": "YES"
+        }
+      ]
     }
   ],
   "settledEpochs": [],
   "profiles": {
     "HqAHfhUayVNgW74ndx8B3tpX2VrThEefD8FiDLaWLYYC": {
       "address": "HqAHfhUayVNgW74ndx8B3tpX2VrThEefD8FiDLaWLYYC",
-      "exnBalance": 10000000,
+      "exnBalance": 9999997,
       "usdcBalance": 10000,
       "lastExnFaucetClaim": 0,
       "lastUsdcFaucetClaim": 0,
       "registeredAt": 1773325089760,
-      "lastActive": 1773326009075,
-      "totalTransactions": 3
+      "lastActive": 1773326415348,
+      "totalTransactions": 4
     },
     "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW": {
       "address": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
-      "exnBalance": 22999990,
+      "exnBalance": 22999987,
       "usdcBalance": 10000,
       "lastExnFaucetClaim": 0,
       "lastUsdcFaucetClaim": 0,
       "registeredAt": 1773325524019,
-      "lastActive": 1773325982626,
-      "totalTransactions": 2
+      "lastActive": 1773326567455,
+      "totalTransactions": 3
     }
   },
   "metadata": {

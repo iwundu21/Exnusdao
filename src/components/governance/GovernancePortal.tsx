@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -33,7 +34,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
 
       const diff = target - now;
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
@@ -62,7 +63,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
   const handleCreate = () => {
     if (userStakeWeight < 1000000) {
-      return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum staked weight required to propose network changes.');
+      return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum weight (Stakes + Seed) required to propose network changes.');
     }
 
     onCreate({
@@ -77,9 +78,9 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const handleConfirmVote = () => {
     if (!votingOn) return;
     
-    // Check permission: either enough stake OR node owner
+    // Check permission: either enough total weight OR node owner status
     if (!isNodeOwner && userStakeWeight < 10000) {
-      return setFeedback('error', 'Staking Requirement: 10,000 EXN minimum weight required to participate in DAO consensus.');
+      return setFeedback('error', 'Consensus Requirement: 10,000 EXN minimum weight required to participate in DAO consensus.');
     }
     
     if (!voteRationale.trim()) {
@@ -111,13 +112,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
         <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between">
            <div className="flex items-center gap-3">
              <User className="w-4 h-4 text-primary" />
-             <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Your Voting Weight</p>
+             <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Combined Consensus Weight</p>
            </div>
            <div className="text-right">
              <p className="text-xl font-bold text-primary">{userStakeWeight.toLocaleString()} EXN</p>
              {isNodeOwner && (
                <div className="flex items-center gap-1.5 justify-end text-[8px] text-emerald-500 font-black uppercase">
-                 <ShieldCheck className="w-2.5 h-2.5" /> Authority Granted via XNode
+                 <ShieldCheck className="w-2.5 h-2.5" /> Includes 15M Seed Power
                </div>
              )}
            </div>
@@ -125,8 +126,8 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
         <div className="p-4 bg-foreground/5 border border-border rounded-xl flex items-center gap-4">
            <Info className="w-4 h-4 text-muted-foreground" />
            <p className="text-[10px] text-muted-foreground uppercase font-black leading-tight tracking-tight">
-             PROPOSAL: 1M EXN STAKE + 10 EXN FEE <br/>
-             VOTING: 10K EXN STAKE (OR XNODE OWNER) + 3 EXN FEE
+             PROPOSAL: 1M EXN TOTAL WEIGHT + 10 EXN FEE <br/>
+             VOTING: 10K EXN TOTAL WEIGHT (OR XNODE OWNER) + 3 EXN FEE
            </p>
         </div>
       </div>
@@ -195,7 +196,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 value={newProp.description}
                 onChange={e => setNewProp({...newProp, description: e.target.value})}
                 className="exn-input h-[210px] text-xs py-4" 
-                placeholder="Describe the change and rationale for a 7-day consensus window. Required stake: 1M EXN." 
+                placeholder="Describe the change. Required combined weight: 1M EXN." 
               />
             </div>
           </div>
@@ -311,7 +312,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                       <textarea 
                         value={voteRationale}
                         onChange={e => setVoteRationale(e.target.value)}
-                        placeholder={isNodeOwner ? "Node Owner access granted. State your rationale." : "State your rationale. Required stake: 10K EXN."}
+                        placeholder={isNodeOwner ? "XNode Power: Your 15M seed will be added to your weight." : "State your rationale. Required total weight: 10K EXN."}
                         className="exn-input h-24 text-xs bg-background"
                       />
                       <div className="grid grid-cols-2 gap-2">
