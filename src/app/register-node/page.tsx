@@ -2,13 +2,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Upload, AlertCircle, ExternalLink, Wallet, Search, Ticket, ShieldCheck, Activity } from 'lucide-react';
+import { ArrowLeft, Upload, AlertCircle, Wallet, Ticket, ShieldCheck, MapPin, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { shortenAddress, getExplorerLink } from '@/lib/utils';
+import { shortenAddress } from '@/lib/utils';
 
 export default function RegisterNodePage() {
   const router = useRouter();
@@ -16,6 +16,7 @@ export default function RegisterNodePage() {
   const walletAddress = publicKey?.toBase58() || '';
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [mounted, setMounted] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -53,6 +54,20 @@ export default function RegisterNodePage() {
 
   const existingNode = state.validators.find(v => v.owner === walletAddress);
   const hasExistingNode = !!existingNode;
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) { // 1MB limit for Base64 efficiency
+        return setFeedback('error', 'Image size exceeds 1MB. Please use a smaller file.');
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, logo_uri: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleRegister = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
@@ -94,8 +109,12 @@ export default function RegisterNodePage() {
 
   const availableLicenses = state.licenses.filter(l => l.owner === walletAddress && !l.is_claimed && !l.is_burned);
 
+  // Preview Helpers
+  const isLogoSet = formData.logo_uri.length > 0;
+  const previewLogo = isLogoSet ? formData.logo_uri : `https://picsum.photos/seed/placeholder/800/400`;
+
   return (
-    <div className="max-w-4xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
       <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors uppercase text-xs font-bold tracking-widest">
         <ArrowLeft className="w-4 h-4" /> Back to Dashboard
       </Link>
@@ -103,7 +122,7 @@ export default function RegisterNodePage() {
       <div className="space-y-4">
         <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Provisioning</h1>
         <p className="text-muted-foreground max-w-xl">
-          Register a validator node by binding it to a verified **Node License NFT**.
+          Register a validator node by binding it to a verified **Node License NFT** and configuring your on-chain identity.
         </p>
       </div>
 
@@ -117,8 +136,8 @@ export default function RegisterNodePage() {
            <Link href="/manage-node" className="exn-button">Manage Existing Node</Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2 exn-card p-8 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-7 exn-card p-8 space-y-8">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                  <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">NFT Authorization</h3>
@@ -151,6 +170,21 @@ export default function RegisterNodePage() {
                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Location</label>
                 <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-12 text-sm" placeholder="e.g. Frankfurt, DE" />
               </div>
+              
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Logo (Upload Image)</label>
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer group"
+                >
+                  <Upload className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <p className="text-[10px] uppercase font-black text-muted-foreground group-hover:text-primary transition-colors">
+                    {isLogoSet ? 'Change Image' : 'Click to Upload Node Logo'}
+                  </p>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Commission (0-30%)</label>
                 <div className="relative">
@@ -158,6 +192,7 @@ export default function RegisterNodePage() {
                   <span className="absolute right-4 top-3.5 text-muted-foreground font-bold">%</span>
                 </div>
               </div>
+
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Validator Bio</label>
                 <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[100px] py-4 text-xs" placeholder="Describe your hardware and commitment..." />
@@ -173,13 +208,68 @@ export default function RegisterNodePage() {
             </button>
           </div>
 
-          <div className="space-y-6">
-            <div className="exn-card aspect-square relative flex items-center justify-center overflow-hidden border-primary/20 bg-black/40">
-              <div className="text-center space-y-4 p-6">
-                <div className="w-16 h-16 bg-foreground/5 rounded-full flex items-center justify-center mx-auto border border-border">
-                  <ShieldCheck className="w-8 h-8 text-muted-foreground/20" />
+          <div className="lg:col-span-5 space-y-6">
+            <div className="sticky top-28">
+              <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Identity Preview</h3>
+              <div className="exn-card overflow-hidden border-primary/20 bg-black/40 group">
+                <div className="relative h-48 w-full overflow-hidden">
+                  <Image 
+                    src={previewLogo}
+                    alt="Preview"
+                    fill
+                    className={`object-cover transition-opacity duration-500 ${isLogoSet ? 'opacity-60' : 'opacity-20 grayscale'}`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  
+                  <div className="absolute top-4 right-6">
+                    <div className="flex items-center gap-1.5 bg-emerald-500 text-black text-[9px] px-2 py-1 rounded font-black uppercase border border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)] animate-in fade-in zoom-in duration-500">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Protocol Identity Verified
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-6 left-8 space-y-1">
+                    <div className="flex items-center gap-2">
+                       <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]" />
+                       <h4 className="text-3xl font-bold text-white tracking-tighter uppercase">
+                         {formData.name || 'Your Node Name'}
+                       </h4>
+                    </div>
+                    {formData.location && (
+                      <div className="flex items-center gap-1.5 text-primary text-[10px] font-black uppercase tracking-widest">
+                        <MapPin className="w-3 h-3" />
+                        {formData.location}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <p className="text-[10px] uppercase font-black text-muted-foreground/40 tracking-widest">Identity Preview</p>
+                
+                <div className="p-8 space-y-6">
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-foreground/30 uppercase font-black tracking-widest">Network Bio</p>
+                    <p className="text-xs text-foreground/60 leading-relaxed italic min-h-[3rem]">
+                      {formData.description || "Describe your hardware and commitment to the Exnus network. This metadata will be visible to all stakers on the discovery dashboard."}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-1">
+                      <p className="text-[9px] uppercase font-black text-foreground/30">Target Node Fee</p>
+                      <p className="text-primary font-bold text-lg">{formData.commission.toFixed(1)}%</p>
+                    </div>
+                    <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-1">
+                      <p className="text-[9px] uppercase font-black text-foreground/30">Bound License</p>
+                      <p className="text-foreground font-mono text-[11px] truncate">{formData.licenseId ? shortenAddress(formData.licenseId) : 'N/A'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                    <ShieldCheck className="w-5 h-5 text-primary" />
+                    <p className="text-[10px] text-primary leading-tight uppercase font-black tracking-tighter">
+                      Previewing atomic binding between License NFT and Validator Identity. Changes are finalized upon registration.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

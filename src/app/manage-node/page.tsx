@@ -1,8 +1,8 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, AlertTriangle, LogOut, Trash2, Wallet, ExternalLink, Activity } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Save, AlertTriangle, LogOut, Trash2, Wallet, ExternalLink, Activity, Upload, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
@@ -16,6 +16,7 @@ export default function ManageNodePage() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
@@ -58,6 +59,20 @@ export default function ManageNodePage() {
       logo_uri: node.logo_uri,
       commission_rate: (node.commission_rate || 0) / 100,
     });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        return setFeedback('error', 'Image size exceeds 1MB.');
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, logo_uri: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleUpdate = () => {
@@ -179,16 +194,26 @@ export default function ManageNodePage() {
         <div className="grid grid-cols-1 gap-8">
           {myNodes.map((node) => {
             const isEditing = editingNodeId === node.id;
-            const isUrl = node.logo_uri?.startsWith('http') || node.logo_uri?.startsWith('data:');
-            const logoUrl = isUrl ? node.logo_uri : `https://picsum.photos/seed/${node.logo_uri}/400/400`;
+            const logoToDisplay = isEditing ? formData.logo_uri : node.logo_uri;
+            const isUrl = logoToDisplay?.startsWith('http') || logoToDisplay?.startsWith('data:');
+            const logoUrl = isUrl ? logoToDisplay : `https://picsum.photos/seed/${logoToDisplay}/400/400`;
 
             return (
               <div key={node.id} className="exn-card p-10 space-y-10 border-primary/20">
                 <div className="flex flex-col lg:flex-row justify-between gap-10">
                   <div className="w-full lg:w-1/3 space-y-8">
                     <div className="flex items-center gap-6">
-                      <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-border">
+                      <div 
+                        onClick={() => isEditing && fileInputRef.current?.click()}
+                        className={`relative w-24 h-24 rounded-2xl overflow-hidden border border-border group ${isEditing ? 'cursor-pointer hover:border-primary transition-all' : ''}`}
+                      >
                          <Image src={logoUrl} alt={node.name} fill className="object-cover" />
+                         {isEditing && (
+                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Upload className="w-6 h-6 text-white" />
+                           </div>
+                         )}
+                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                       </div>
                       <div>
                         <h2 className="text-2xl font-bold text-foreground uppercase">{node.name}</h2>
