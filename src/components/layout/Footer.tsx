@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -7,7 +8,6 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
-const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 
 export function Footer() {
   const { state } = useProtocolState();
@@ -29,7 +29,7 @@ export function Footer() {
     return () => clearInterval(timer);
   }, [state.networkStartDate]);
 
-  const isAdmin = walletAddress === ADMIN_WALLET;
+  const isAdmin = walletAddress === state.adminWallet;
 
   return (
     <footer className="fixed bottom-0 left-0 w-full z-40 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">

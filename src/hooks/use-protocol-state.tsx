@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
@@ -61,6 +62,7 @@ interface ProtocolContextType {
   claimFaucetAssets: (address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => void;
   adminFundVault: (address: string, amount: number, vault: string) => void;
   adminWithdrawUsdc: (address: string, amount: number) => void;
+  adminUpdateSettings: (settings: Partial<ProtocolState>) => void;
   mintLicense: (address: string, price: number, license: any) => void;
   resetProtocol: () => Promise<void>;
   
@@ -80,6 +82,8 @@ interface ProtocolContextType {
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
+
+const ADMIN_WALLET_ADDRESS = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 
 export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { publicKey } = useWallet();
@@ -150,8 +154,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     }, { merge: true }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ 
         path: ref.path, 
-        operation: 'write',
-        requestResourceData: { exnBalance: exn, usdcBalance: usdc }
+        operation: 'write'
       }));
     });
   }, [db]);
@@ -171,6 +174,14 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     updateDoc(gRef, { usdcVaultBalance: increment(-amount) });
     updateDoc(uRef, { usdcBalance: increment(amount) });
   }, [db]);
+
+  const adminUpdateSettings = useCallback((settings: Partial<ProtocolState>) => {
+    if (!db) return;
+    const gRef = doc(db, 'protocol', 'global');
+    updateDoc(gRef, settings).catch(err => {
+      setFeedback('error', 'Failed to update global protocol settings.');
+    });
+  }, [db, setFeedback]);
 
   const mintLicense = useCallback((address: string, price: number, license: any) => {
     if (!address || !db) return;
@@ -205,9 +216,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
     if (!db) return;
     const sRef = doc(db, 'stakes', stakeId);
-    const vRef = doc(db, 'validators', validatorId);
-    // Logic handles in crank, check checkpoints
-    updateDoc(sRef, { reward_checkpoint: increment(0) }); // placeholder
+    updateDoc(sRef, { reward_checkpoint: increment(0) });
     updateUserBalance(wallet, amount, 0);
   }, [db, updateUserBalance]);
 
@@ -217,9 +226,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const gRef = doc(db, 'protocol', 'global');
     updateDoc(pRef, {
       yes_votes: increment(support ? weight : 0),
-      no_votes: increment(!support ? weight : 0),
-      voters: increment(0), // placeholder for array update in transaction if needed
-      comments: increment(0) // placeholder
+      no_votes: increment(!support ? weight : 0)
     });
     updateDoc(gRef, { treasuryBalance: increment(3) });
   }, [db]);
@@ -246,7 +253,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
     if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
-    // Simplified crank logic for prototype persistence
     updateDoc(gRef, {
       lastCrankedEpoch: targetEpoch,
       rewardVaultBalance: increment(-totalPool)
@@ -294,7 +300,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       licenseLimit: 100,
       licensePrice: 5000,
       seedAmount: 15000000,
-      adminWallet: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
+      adminWallet: ADMIN_WALLET_ADDRESS,
       faucetExnLimit: 16000000,
       faucetUsdcLimit: 10000,
       exnPrice: 0.23,
@@ -314,10 +320,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     licenseLimit: globalData?.licenseLimit ?? 0,
     licensePrice: globalData?.licensePrice ?? 0,
     seedAmount: globalData?.seedAmount ?? 0,
-    adminWallet: globalData?.adminWallet ?? '',
+    adminWallet: globalData?.adminWallet || ADMIN_WALLET_ADDRESS,
     faucetExnLimit: globalData?.faucetExnLimit ?? 0,
     faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 0,
-    exnPrice: globalData?.exnPrice ?? 0,
+    exnPrice: globalData?.exnPrice ?? 0.23,
     isPaused: globalData?.isPaused ?? false,
     lastCrankedEpoch: globalData?.lastCrankedEpoch ?? 0,
     networkStartDate: globalData?.networkStartDate ?? Date.now(),
@@ -344,6 +350,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       claimFaucetAssets,
       adminFundVault,
       adminWithdrawUsdc,
+      adminUpdateSettings,
       mintLicense,
       resetProtocol,
       addStake,

@@ -16,7 +16,9 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ArrowDownLeft,
-  Banknote
+  Banknote,
+  Ticket,
+  Zap
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -28,18 +30,24 @@ export default function AdminPage() {
     setFeedback, 
     exnBalance, 
     adminFundVault, 
-    adminWithdrawUsdc 
+    adminWithdrawUsdc,
+    adminUpdateSettings
   } = useProtocolState();
   
   const [withdrawUsdcAmt, setWithdrawUsdcAmt] = useState('');
   const [fundRewardsAmt, setFundRewardsAmt] = useState('');
   const [fundTreasuryAmt, setFundTreasuryAmt] = useState('');
+  
+  const [newLicensePrice, setNewLicensePrice] = useState('');
+  const [newRewardCap, setNewRewardCap] = useState('');
 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (state.licensePrice) setNewLicensePrice(state.licensePrice.toString());
+    if (state.rewardCap) setNewRewardCap(state.rewardCap.toString());
+  }, [state.licensePrice, state.rewardCap]);
 
   const formatInput = (val: string) => {
     const raw = val.replace(/,/g, "");
@@ -87,6 +95,20 @@ export default function AdminPage() {
     adminFundVault(walletAddress!, amt, 'treasuryBalance');
     setFundTreasuryAmt('');
     setFeedback('success', `Injected ${amt.toLocaleString()} EXN into DAO Treasury.`);
+  };
+
+  const handleUpdateGlobals = () => {
+    const price = Number(newLicensePrice);
+    const cap = Number(newRewardCap);
+    
+    if (isNaN(price) || price < 0) return setFeedback('error', 'Invalid license price.');
+    if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid reward cap.');
+
+    adminUpdateSettings({
+      licensePrice: price,
+      rewardCap: cap
+    });
+    setFeedback('success', 'Global network parameters updated in cloud ledger.');
   };
 
   const handleFullProtocolReset = async () => {
@@ -141,6 +163,49 @@ export default function AdminPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
            <div className="lg:col-span-2 space-y-8">
+              {/* Global Network Controls */}
+              <div className="exn-card p-8 space-y-8 border-secondary/20">
+                 <div className="flex items-center gap-3">
+                    <Settings className="w-5 h-5 text-secondary" />
+                    <h3 className="text-lg font-bold uppercase tracking-widest">Network Governance</h3>
+                 </div>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Price (USDC)</p>
+                       <div className="relative">
+                          <Ticket className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
+                          <input 
+                            value={formatInput(newLicensePrice)} 
+                            onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} 
+                            className="exn-input h-12 pl-12" 
+                            placeholder="Price in USDC..." 
+                          />
+                       </div>
+                    </div>
+                    <div className="space-y-4">
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">Epoch Reward Cap (EXN)</p>
+                       <div className="relative">
+                          <Zap className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
+                          <input 
+                            value={formatInput(newRewardCap)} 
+                            onChange={e => handleTextChange(e.target.value, setNewRewardCap)} 
+                            className="exn-input h-12 pl-12" 
+                            placeholder="Reward Pool per Epoch..." 
+                          />
+                       </div>
+                    </div>
+                 </div>
+                 
+                 <button 
+                   onClick={handleUpdateGlobals}
+                   className="w-full h-12 bg-secondary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:opacity-90 transition-all shadow-xl shadow-secondary/10"
+                 >
+                   Apply Global Updates
+                 </button>
+              </div>
+
+              {/* Vault Management */}
               <div className="exn-card p-8 space-y-8 border-primary/20">
                  <div className="flex items-center gap-3">
                     <Banknote className="w-5 h-5 text-primary" />
@@ -203,6 +268,7 @@ export default function AdminPage() {
                  </div>
               </div>
 
+              {/* Reset Control */}
               <div className="exn-card p-8 space-y-8 border-destructive/20 bg-destructive/5">
                  <div className="flex items-center gap-3 text-destructive">
                     <RotateCcw className="w-5 h-5" />
