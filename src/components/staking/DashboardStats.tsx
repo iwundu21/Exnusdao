@@ -1,9 +1,7 @@
-
 "use client";
 
 import React from 'react';
-
-const EXN_PRICE = 0.23;
+import { useProtocolState } from '@/hooks/use-protocol-state';
 
 interface DashboardStatsProps {
   totalStaked?: number;
@@ -16,9 +14,11 @@ export function DashboardStats({
   totalStaked = 0, 
   treasuryBalance = 0 
 }: DashboardStatsProps) {
+  const { state } = useProtocolState();
+  const exnPrice = state.exnPrice || 0;
   
-  const stakedUsdValue = totalStaked * EXN_PRICE;
-  const treasuryUsdValue = treasuryBalance * EXN_PRICE;
+  const stakedUsdValue = totalStaked * exnPrice;
+  const treasuryUsdValue = treasuryBalance * exnPrice;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">

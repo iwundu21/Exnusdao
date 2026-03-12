@@ -35,6 +35,7 @@ export interface ProtocolState {
   adminWallet: string;
   faucetExnLimit: number;
   faucetUsdcLimit: number;
+  exnPrice: number;
   isPaused: boolean;
   lastCrankedEpoch: number;
   networkStartDate: number;
@@ -116,7 +117,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const registerUser = useCallback((address: string) => {
-    if (!address || !db || !firebaseUser) return;
+    if (!address || !db) return;
     const ref = doc(db, 'users', address);
     setDoc(ref, {
       address,
@@ -130,10 +131,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     }, { merge: true }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'create' }));
     });
-  }, [db, firebaseUser]);
+  }, [db]);
 
   const updateUserBalance = useCallback((address: string, exn: number, usdc: number) => {
-    if (!address || !db || !firebaseUser) return;
+    if (!address || !db) return;
     const ref = doc(db, 'users', address);
     updateDoc(ref, {
       exnBalance: (userProfile?.exnBalance || 0) + exn,
@@ -142,75 +143,75 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
-  }, [db, userProfile, firebaseUser]);
+  }, [db, userProfile]);
 
   const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
-    if (!address || !db || !firebaseUser) return;
+    if (!address || !db) return;
     const ref = doc(db, 'users', address);
     updateDoc(ref, {
       [type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim']: Date.now()
     }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
-  }, [db, firebaseUser]);
+  }, [db]);
 
   const adminFundVault = useCallback((address: string, amount: number, vault: string) => {
-    if (!address || !db || !globalData || !firebaseUser) return;
+    if (!address || !db || !globalData) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
     updateDoc(gRef, { [vault]: (globalData[vault] || 0) + amount });
     updateDoc(uRef, { exnBalance: (userProfile?.exnBalance || 0) - amount });
-  }, [db, globalData, userProfile, firebaseUser]);
+  }, [db, globalData, userProfile]);
 
   const adminWithdrawUsdc = useCallback((address: string, amount: number) => {
-    if (!address || !db || !globalData || !firebaseUser) return;
+    if (!address || !db || !globalData) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
     updateDoc(gRef, { usdcVaultBalance: (globalData.usdcVaultBalance || 0) - amount });
     updateDoc(uRef, { usdcBalance: (userProfile?.usdcBalance || 0) + amount });
-  }, [db, globalData, userProfile, firebaseUser]);
+  }, [db, globalData, userProfile]);
 
   const mintLicense = useCallback((address: string, price: number, license: any) => {
-    if (!address || !db || !firebaseUser) return;
+    if (!address || !db) return;
     const lRef = doc(db, 'licenses', license.id);
     const uRef = doc(db, 'users', address);
     const gRef = doc(db, 'protocol', 'global');
     setDoc(lRef, license);
     updateDoc(uRef, { usdcBalance: (userProfile?.usdcBalance || 0) - price });
     updateDoc(gRef, { usdcVaultBalance: (globalData?.usdcVaultBalance || 0) + price });
-  }, [db, userProfile, globalData, firebaseUser]);
+  }, [db, userProfile, globalData]);
 
   const addStake = useCallback((stake: any) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const sRef = doc(collection(db, 'stakes'));
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', stake.validator_id);
     setDoc(sRef, { ...stake, id: sRef.id });
     updateDoc(gRef, { stakedVaultBalance: (globalData?.stakedVaultBalance || 0) + stake.amount });
     updateDoc(vRef, { total_staked: (validatorsData?.find(v => v.id === stake.validator_id)?.total_staked || 0) + stake.amount });
-  }, [db, globalData, validatorsData, firebaseUser]);
+  }, [db, globalData, validatorsData]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const sRef = doc(db, 'stakes', stakeId);
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', validatorId);
     updateDoc(sRef, { unstaked: true });
     updateDoc(gRef, { stakedVaultBalance: Math.max(0, (globalData?.stakedVaultBalance || 0) - amount) });
     updateDoc(vRef, { total_staked: Math.max(0, (validatorsData?.find(v => v.id === validatorId)?.total_staked || 0) - amount) });
-  }, [db, globalData, validatorsData, firebaseUser]);
+  }, [db, globalData, validatorsData]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const sRef = doc(db, 'stakes', stakeId);
     const validator = validatorsData?.find(v => v.id === validatorId);
     if (!validator) return;
     updateDoc(sRef, { reward_checkpoint: validator.global_reward_index });
     updateUserBalance(wallet, amount, 0);
-  }, [db, validatorsData, updateUserBalance, firebaseUser]);
+  }, [db, validatorsData, updateUserBalance]);
 
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
     const prop = proposalsData?.find(p => p.id === pId);
@@ -222,18 +223,18 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       comments: [...(prop.comments || []), comment]
     });
     updateDoc(gRef, { treasuryBalance: (globalData?.treasuryBalance || 0) + 3 });
-  }, [db, proposalsData, walletAddress, globalData, firebaseUser]);
+  }, [db, proposalsData, walletAddress, globalData]);
 
   const createProposal = useCallback((proposal: any) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const pRef = doc(db, 'proposals', proposal.id.toString());
     const gRef = doc(db, 'protocol', 'global');
     setDoc(pRef, proposal);
     updateDoc(gRef, { treasuryBalance: (globalData?.treasuryBalance || 0) + 10 });
-  }, [db, globalData, firebaseUser]);
+  }, [db, globalData]);
 
   const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
     updateDoc(pRef, { executed: true });
@@ -241,10 +242,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       updateDoc(gRef, { treasuryBalance: Math.max(0, (globalData?.treasuryBalance || 0) - amount) });
       if (recipient === wallet) updateUserBalance(wallet, amount, 0);
     }
-  }, [db, globalData, updateUserBalance, firebaseUser]);
+  }, [db, globalData, updateUserBalance]);
 
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
     const epochShares: any[] = [];
     
@@ -267,39 +268,39 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       rewardVaultBalance: Math.max(0, (globalData?.rewardVaultBalance || 0) - totalPool),
       settledEpochs: [...(globalData?.settledEpochs || []), { epoch: targetEpoch, settledAt: Date.now(), totalPool, validatorShares: epochShares }]
     });
-  }, [db, globalData, firebaseUser]);
+  }, [db, globalData]);
 
   const registerValidator = useCallback((validator: any, licenseId: string) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const vRef = doc(db, 'validators', validator.id);
     const lRef = doc(db, 'licenses', licenseId);
     setDoc(vRef, validator);
     updateDoc(lRef, { is_claimed: true });
-  }, [db, firebaseUser]);
+  }, [db]);
 
   const updateValidator = useCallback((vId: string, data: any) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const vRef = doc(db, 'validators', vId);
     updateDoc(vRef, data);
-  }, [db, firebaseUser]);
+  }, [db]);
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const vRef = doc(db, 'validators', vId);
     const lRef = doc(db, 'licenses', licenseId);
     deleteDoc(vRef);
     updateDoc(lRef, { is_burned: true, is_claimed: false });
     updateUserBalance(wallet, seedRefund + rewards, 0);
-  }, [db, updateUserBalance, firebaseUser]);
+  }, [db, updateUserBalance]);
 
   const toggleValidator = useCallback((vId: string, status: boolean) => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const vRef = doc(db, 'validators', vId);
     updateDoc(vRef, { is_active: status });
-  }, [db, firebaseUser]);
+  }, [db]);
 
   const resetProtocol = useCallback(async () => {
-    if (!db || !firebaseUser) return;
+    if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
     await setDoc(gRef, {
       treasuryBalance: 3000000,
@@ -313,12 +314,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       adminWallet: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
       faucetExnLimit: 16000000,
       faucetUsdcLimit: 10000,
+      exnPrice: 0.23,
       isPaused: false,
       lastCrankedEpoch: 0,
       networkStartDate: Date.now(),
       settledEpochs: []
     });
-  }, [db, firebaseUser]);
+  }, [db]);
 
   const state: ProtocolState = {
     treasuryBalance: globalData?.treasuryBalance ?? 0,
@@ -328,10 +330,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     rewardCap: globalData?.rewardCap ?? 0,
     licenseLimit: globalData?.licenseLimit ?? 0,
     licensePrice: globalData?.licensePrice ?? 0,
-    seedAmount: globalData?.seedAmount ?? 15000000,
-    adminWallet: globalData?.adminWallet ?? '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
-    faucetExnLimit: globalData?.faucetExnLimit ?? 16000000,
-    faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 10000,
+    seedAmount: globalData?.seedAmount ?? 0,
+    adminWallet: globalData?.adminWallet ?? '',
+    faucetExnLimit: globalData?.faucetExnLimit ?? 0,
+    faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 0,
+    exnPrice: globalData?.exnPrice ?? 0.23,
     isPaused: globalData?.isPaused ?? false,
     lastCrankedEpoch: globalData?.lastCrankedEpoch ?? 0,
     networkStartDate: globalData?.networkStartDate ?? Date.now(),
