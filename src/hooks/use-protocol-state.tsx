@@ -1,10 +1,9 @@
-
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { doc, setDoc, updateDoc, collection, deleteDoc } from 'firebase/firestore';
-import { useFirestore, useDoc, useCollection } from '@/firebase';
+import { useFirestore, useDoc, useCollection, useUser } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -84,6 +83,7 @@ const ProtocolContext = createContext<ProtocolContextType | null>(null);
 export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { publicKey } = useWallet();
   const db = useFirestore();
+  const { user: firebaseUser, loading: authLoading } = useUser();
   const walletAddress = publicKey?.toBase58() || '';
 
   // Cloud Firestore References
@@ -105,7 +105,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const userRef = useMemo(() => (walletAddress ? doc(db, 'users', walletAddress) : null), [db, walletAddress]);
   const { data: userProfile, loading: profileLoading } = useDoc(userRef);
 
-  const isLoaded = !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
+  const isLoaded = !authLoading && !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
 
   const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
     errorEmitter.emit('feedback', { status, message });
@@ -116,7 +116,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const registerUser = useCallback((address: string) => {
-    if (!address || !db) return;
+    if (!address || !db || !firebaseUser) return;
     const ref = doc(db, 'users', address);
     setDoc(ref, {
       address,
@@ -130,83 +130,87 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     }, { merge: true }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'create' }));
     });
-  }, [db]);
+  }, [db, firebaseUser]);
 
   const updateUserBalance = useCallback((address: string, exn: number, usdc: number) => {
-    if (!address || !db) return;
+    if (!address || !db || !firebaseUser) return;
     const ref = doc(db, 'users', address);
     updateDoc(ref, {
       exnBalance: (userProfile?.exnBalance || 0) + exn,
       usdcBalance: (userProfile?.usdcBalance || 0) + usdc,
       lastActive: Date.now()
+    }).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
-  }, [db, userProfile]);
+  }, [db, userProfile, firebaseUser]);
 
   const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
-    if (!address || !db) return;
+    if (!address || !db || !firebaseUser) return;
     const ref = doc(db, 'users', address);
     updateDoc(ref, {
       [type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim']: Date.now()
+    }).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
-  }, [db]);
+  }, [db, firebaseUser]);
 
   const adminFundVault = useCallback((address: string, amount: number, vault: string) => {
-    if (!address || !db || !globalData) return;
+    if (!address || !db || !globalData || !firebaseUser) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
     updateDoc(gRef, { [vault]: (globalData[vault] || 0) + amount });
     updateDoc(uRef, { exnBalance: (userProfile?.exnBalance || 0) - amount });
-  }, [db, globalData, userProfile]);
+  }, [db, globalData, userProfile, firebaseUser]);
 
   const adminWithdrawUsdc = useCallback((address: string, amount: number) => {
-    if (!address || !db || !globalData) return;
+    if (!address || !db || !globalData || !firebaseUser) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
     updateDoc(gRef, { usdcVaultBalance: (globalData.usdcVaultBalance || 0) - amount });
     updateDoc(uRef, { usdcBalance: (userProfile?.usdcBalance || 0) + amount });
-  }, [db, globalData, userProfile]);
+  }, [db, globalData, userProfile, firebaseUser]);
 
   const mintLicense = useCallback((address: string, price: number, license: any) => {
-    if (!address || !db) return;
+    if (!address || !db || !firebaseUser) return;
     const lRef = doc(db, 'licenses', license.id);
     const uRef = doc(db, 'users', address);
     const gRef = doc(db, 'protocol', 'global');
     setDoc(lRef, license);
     updateDoc(uRef, { usdcBalance: (userProfile?.usdcBalance || 0) - price });
     updateDoc(gRef, { usdcVaultBalance: (globalData?.usdcVaultBalance || 0) + price });
-  }, [db, userProfile, globalData]);
+  }, [db, userProfile, globalData, firebaseUser]);
 
   const addStake = useCallback((stake: any) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const sRef = doc(collection(db, 'stakes'));
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', stake.validator_id);
     setDoc(sRef, { ...stake, id: sRef.id });
     updateDoc(gRef, { stakedVaultBalance: (globalData?.stakedVaultBalance || 0) + stake.amount });
     updateDoc(vRef, { total_staked: (validatorsData?.find(v => v.id === stake.validator_id)?.total_staked || 0) + stake.amount });
-  }, [db, globalData, validatorsData]);
+  }, [db, globalData, validatorsData, firebaseUser]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const sRef = doc(db, 'stakes', stakeId);
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', validatorId);
     updateDoc(sRef, { unstaked: true });
     updateDoc(gRef, { stakedVaultBalance: Math.max(0, (globalData?.stakedVaultBalance || 0) - amount) });
     updateDoc(vRef, { total_staked: Math.max(0, (validatorsData?.find(v => v.id === validatorId)?.total_staked || 0) - amount) });
-  }, [db, globalData, validatorsData]);
+  }, [db, globalData, validatorsData, firebaseUser]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const sRef = doc(db, 'stakes', stakeId);
     const validator = validatorsData?.find(v => v.id === validatorId);
     if (!validator) return;
     updateDoc(sRef, { reward_checkpoint: validator.global_reward_index });
     updateUserBalance(wallet, amount, 0);
-  }, [db, validatorsData, updateUserBalance]);
+  }, [db, validatorsData, updateUserBalance, firebaseUser]);
 
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
     const prop = proposalsData?.find(p => p.id === pId);
@@ -218,18 +222,18 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       comments: [...(prop.comments || []), comment]
     });
     updateDoc(gRef, { treasuryBalance: (globalData?.treasuryBalance || 0) + 3 });
-  }, [db, proposalsData, walletAddress, globalData]);
+  }, [db, proposalsData, walletAddress, globalData, firebaseUser]);
 
   const createProposal = useCallback((proposal: any) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const pRef = doc(db, 'proposals', proposal.id.toString());
     const gRef = doc(db, 'protocol', 'global');
     setDoc(pRef, proposal);
     updateDoc(gRef, { treasuryBalance: (globalData?.treasuryBalance || 0) + 10 });
-  }, [db, globalData]);
+  }, [db, globalData, firebaseUser]);
 
   const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
     updateDoc(pRef, { executed: true });
@@ -237,10 +241,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       updateDoc(gRef, { treasuryBalance: Math.max(0, (globalData?.treasuryBalance || 0) - amount) });
       if (recipient === wallet) updateUserBalance(wallet, amount, 0);
     }
-  }, [db, globalData, updateUserBalance]);
+  }, [db, globalData, updateUserBalance, firebaseUser]);
 
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const gRef = doc(db, 'protocol', 'global');
     const epochShares: any[] = [];
     
@@ -263,39 +267,39 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       rewardVaultBalance: Math.max(0, (globalData?.rewardVaultBalance || 0) - totalPool),
       settledEpochs: [...(globalData?.settledEpochs || []), { epoch: targetEpoch, settledAt: Date.now(), totalPool, validatorShares: epochShares }]
     });
-  }, [db, globalData]);
+  }, [db, globalData, firebaseUser]);
 
   const registerValidator = useCallback((validator: any, licenseId: string) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const vRef = doc(db, 'validators', validator.id);
     const lRef = doc(db, 'licenses', licenseId);
     setDoc(vRef, validator);
     updateDoc(lRef, { is_claimed: true });
-  }, [db]);
+  }, [db, firebaseUser]);
 
   const updateValidator = useCallback((vId: string, data: any) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const vRef = doc(db, 'validators', vId);
     updateDoc(vRef, data);
-  }, [db]);
+  }, [db, firebaseUser]);
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const vRef = doc(db, 'validators', vId);
     const lRef = doc(db, 'licenses', licenseId);
     deleteDoc(vRef);
     updateDoc(lRef, { is_burned: true, is_claimed: false });
     updateUserBalance(wallet, seedRefund + rewards, 0);
-  }, [db, updateUserBalance]);
+  }, [db, updateUserBalance, firebaseUser]);
 
   const toggleValidator = useCallback((vId: string, status: boolean) => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const vRef = doc(db, 'validators', vId);
     updateDoc(vRef, { is_active: status });
-  }, [db]);
+  }, [db, firebaseUser]);
 
   const resetProtocol = useCallback(async () => {
-    if (!db) return;
+    if (!db || !firebaseUser) return;
     const gRef = doc(db, 'protocol', 'global');
     await setDoc(gRef, {
       treasuryBalance: 3000000,
@@ -314,7 +318,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       networkStartDate: Date.now(),
       settledEpochs: []
     });
-  }, [db]);
+  }, [db, firebaseUser]);
 
   const state: ProtocolState = {
     treasuryBalance: globalData?.treasuryBalance ?? 0,

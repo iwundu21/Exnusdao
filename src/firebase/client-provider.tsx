@@ -1,9 +1,9 @@
 'use client';
 
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo, useEffect } from 'react';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 import { firebaseConfig } from './config';
 import { FirebaseProvider } from './provider';
 
@@ -14,6 +14,13 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     const auth = getAuth(app);
     return { app, firestore, auth };
   }, []);
+
+  useEffect(() => {
+    // Automatically sign in anonymously to satisfy Firestore Security Rules
+    signInAnonymously(auth).catch((error) => {
+      console.error("Firebase Anonymous Auth Error:", error);
+    });
+  }, [auth]);
 
   return (
     <FirebaseProvider app={app} firestore={firestore} auth={auth}>
