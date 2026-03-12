@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap, Info } from 'lucide-react';
+import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap, Info, ShieldCheck } from 'lucide-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
 function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votingEndsAt: number }) {
@@ -53,7 +53,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   );
 }
 
-export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAddress = '', onVote, onCreate, onExecute, setFeedback }: any) {
+export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOwner = false, walletAddress = '', onVote, onCreate, onExecute, setFeedback }: any) {
   const [showCreate, setShowCreate] = useState(false);
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
@@ -76,9 +76,12 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
 
   const handleConfirmVote = () => {
     if (!votingOn) return;
-    if (userStakeWeight < 10000) {
+    
+    // Check permission: either enough stake OR node owner
+    if (!isNodeOwner && userStakeWeight < 10000) {
       return setFeedback('error', 'Staking Requirement: 10,000 EXN minimum weight required to participate in DAO consensus.');
     }
+    
     if (!voteRationale.trim()) {
       return setFeedback('warning', 'Rationale Required: Please provide context for your consensus decision.');
     }
@@ -110,13 +113,20 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
              <User className="w-4 h-4 text-primary" />
              <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Your Voting Weight</p>
            </div>
-           <p className="text-xl font-bold text-primary">{userStakeWeight.toLocaleString()} EXN</p>
+           <div className="text-right">
+             <p className="text-xl font-bold text-primary">{userStakeWeight.toLocaleString()} EXN</p>
+             {isNodeOwner && (
+               <div className="flex items-center gap-1.5 justify-end text-[8px] text-emerald-500 font-black uppercase">
+                 <ShieldCheck className="w-2.5 h-2.5" /> Authority Granted via XNode
+               </div>
+             )}
+           </div>
         </div>
         <div className="p-4 bg-foreground/5 border border-border rounded-xl flex items-center gap-4">
            <Info className="w-4 h-4 text-muted-foreground" />
            <p className="text-[10px] text-muted-foreground uppercase font-black leading-tight tracking-tight">
              PROPOSAL: 1M EXN STAKE + 10 EXN FEE <br/>
-             VOTING: 10K EXN STAKE + 3 EXN FEE
+             VOTING: 10K EXN STAKE (OR XNODE OWNER) + 3 EXN FEE
            </p>
         </div>
       </div>
@@ -301,7 +311,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, walletAd
                       <textarea 
                         value={voteRationale}
                         onChange={e => setVoteRationale(e.target.value)}
-                        placeholder="State your rationale. Required stake: 10K EXN."
+                        placeholder={isNodeOwner ? "Node Owner access granted. State your rationale." : "State your rationale. Required stake: 10K EXN."}
                         className="exn-input h-24 text-xs bg-background"
                       />
                       <div className="grid grid-cols-2 gap-2">

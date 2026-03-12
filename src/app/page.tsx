@@ -39,6 +39,11 @@ export default function Home() {
       .reduce((acc, s) => acc + (s.amount || 0), 0);
   }, [state?.userStakes, walletAddress]);
 
+  const isNodeOwner = useMemo(() => {
+    if (!walletAddress || !state?.validators) return false;
+    return state.validators.some(v => v.owner === walletAddress);
+  }, [state?.validators, walletAddress]);
+
   const totalStakedReal = useMemo(() => {
     if (!state?.validators) return 0;
     return state.validators.reduce((acc, v) => acc + (v.total_staked || 0), 0);
@@ -73,11 +78,19 @@ export default function Home() {
 
   const handleVote = (pId: number, support: boolean, comment: string) => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
-    if (userStakeWeight < MIN_STAKE_FOR_VOTE) return setFeedback('error', `Minimum Staking Requirement: ${MIN_STAKE_FOR_VOTE.toLocaleString()} EXN required.`);
+    
+    // Check for stake requirement OR node ownership
+    if (!isNodeOwner && userStakeWeight < MIN_STAKE_FOR_VOTE) {
+      return setFeedback('error', `Minimum Staking Requirement: ${MIN_STAKE_FOR_VOTE.toLocaleString()} EXN required (unless you own an XNode).`);
+    }
+    
     if (exnBalance < VOTE_FEE) return setFeedback('error', `Insufficient EXN for voting fee.`);
 
     const proposal = state.proposals.find(p => p.id === pId);
     if (!proposal || proposal.voters?.includes(walletAddress)) return;
+
+    // Use a minimum weight of 1 for node owners with 0 stake so their vote is recorded
+    const effectiveWeight = Math.max(userStakeWeight, isNodeOwner ? 1 : 0);
 
     updateUserBalance(walletAddress, -VOTE_FEE, 0);
     setState(prev => ({
@@ -85,8 +98,8 @@ export default function Home() {
       treasuryBalance: prev.treasuryBalance + VOTE_FEE,
       proposals: prev.proposals.map(p => p.id === pId ? { 
         ...p, 
-        yes_votes: support ? (p.yes_votes || 0) + userStakeWeight : p.yes_votes, 
-        no_votes: !support ? (p.no_votes || 0) + userStakeWeight : p.no_votes,
+        yes_votes: support ? (p.yes_votes || 0) + effectiveWeight : p.yes_votes, 
+        no_votes: !support ? (p.no_votes || 0) + effectiveWeight : p.no_votes,
         voters: [...(p.voters || []), walletAddress],
         comments: [...(p.comments || []), { id: `c${Date.now()}`, author: walletAddress, text: comment, timestamp: Date.now(), vote_stance: support ? 'YES' : 'NO' }]
       } : p)
@@ -152,7 +165,6 @@ export default function Home() {
   };
 
   const handleCrank = (targetEpoch: number) => {
-    // Determine current epoch to enforce maturity rule
     const elapsed = Date.now() - (state.networkStartDate || Date.now());
     const currentEpoch = Math.floor(elapsed / EPOCH_DURATION) + 1;
 
@@ -293,6 +305,7 @@ export default function Home() {
         <GovernancePortal 
           proposals={state.proposals} 
           userStakeWeight={userStakeWeight}
+          isNodeOwner={isNodeOwner}
           walletAddress={walletAddress}
           onVote={handleVote}
           onCreate={handleCreateProposal}
