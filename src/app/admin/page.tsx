@@ -18,7 +18,9 @@ import {
   Banknote,
   Ticket,
   Zap,
-  Layers
+  Layers,
+  Activity,
+  Play
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -31,7 +33,8 @@ export default function AdminPage() {
     exnBalance, 
     adminFundVault, 
     adminWithdrawUsdc,
-    adminUpdateSettings
+    adminUpdateSettings,
+    crankEpoch
   } = useProtocolState();
   
   const [withdrawUsdcAmt, setWithdrawUsdcAmt] = useState('');
@@ -44,16 +47,19 @@ export default function AdminPage() {
 
   const [mounted, setMounted] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [now, setNow] = useState(Date.now());
 
   // Initialize form once when data is loaded to prevent "input fighting"
   useEffect(() => {
     setMounted(true);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
     if (isLoaded && !isInitialized) {
       setNewLicensePrice(state.licensePrice?.toString() || '0');
       setNewRewardCap(state.rewardCap?.toString() || '0');
       setNewLicenseLimit(state.licenseLimit?.toString() || '0');
       setIsInitialized(true);
     }
+    return () => clearInterval(timer);
   }, [isLoaded, state.licensePrice, state.rewardCap, state.licenseLimit, isInitialized]);
 
   const formatInput = (val: string) => {
@@ -120,6 +126,25 @@ export default function AdminPage() {
     });
   };
 
+  const handleStartEpochGenesis = () => {
+    adminUpdateSettings({
+      networkStartDate: Date.now(),
+      lastCrankedEpoch: 0
+    });
+    setFeedback('success', 'Network Genesis initialized. Protocol clock is now ticking.');
+  };
+
+  const handleManualCrank = () => {
+    const nextEpoch = state.lastCrankedEpoch + 1;
+    const activeValidators = state.validators.filter(v => v.is_active && v.total_staked > 0);
+    const totalWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
+    
+    if (totalWeight <= 0) return setFeedback('error', 'No active network weight to distribute rewards.');
+    
+    crankEpoch(nextEpoch, state.rewardCap, activeValidators, totalWeight);
+    setFeedback('success', `Admin Override: Epoch ${nextEpoch} has been sharded and settled.`);
+  };
+
   const handleFullProtocolReset = async () => {
     await resetProtocol();
     setFeedback('success', 'Master Reset Complete: Cloud global parameters re-anchored.');
@@ -153,6 +178,8 @@ export default function AdminPage() {
     );
   }
 
+  const currentEpoch = Math.floor((now - (state.networkStartDate || now)) / (30 * 24 * 60 * 60 * 1000)) + 1;
+
   return (
     <div className="max-w-7xl mx-auto px-10 py-12 space-y-12 animate-in fade-in duration-500">
       <div className="flex justify-between items-end">
@@ -173,6 +200,42 @@ export default function AdminPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
            <div className="lg:col-span-2 space-y-8">
+              {/* Epoch Control Section */}
+              <div className="exn-card p-8 space-y-8 border-primary/30 bg-primary/5">
+                 <div className="flex items-center gap-3">
+                    <Activity className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-bold uppercase tracking-widest">Epoch Protocol Control</h3>
+                 </div>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="p-6 bg-background/50 border border-primary/20 rounded-xl space-y-4">
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">Genesis Activation</p>
+                       <p className="text-xs text-muted-foreground leading-relaxed">
+                          Reset the network clock to <span className="text-primary font-bold">Now</span>. This will restart the 30-day countdown for Epoch 1.
+                       </p>
+                       <button 
+                         onClick={handleStartEpochGenesis}
+                         className="w-full h-12 bg-primary/20 text-primary border border-primary/40 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/30 transition-all flex items-center justify-center gap-2"
+                       >
+                         <Play className="w-3 h-3 fill-current" /> Initialize Network Genesis
+                       </button>
+                    </div>
+
+                    <div className="p-6 bg-background/50 border border-secondary/20 rounded-xl space-y-4">
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">Manual Settlement Override</p>
+                       <p className="text-xs text-muted-foreground leading-relaxed">
+                          Force the settlement of <span className="text-secondary font-bold">Epoch {state.lastCrankedEpoch + 1}</span> regardless of time remaining. Use for testing only.
+                       </p>
+                       <button 
+                         onClick={handleManualCrank}
+                         className="w-full h-12 bg-secondary/20 text-secondary border border-secondary/40 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-secondary/30 transition-all flex items-center justify-center gap-2"
+                       >
+                         <Zap className="w-3 h-3 fill-current" /> Force Manual Settlement
+                       </button>
+                    </div>
+                 </div>
+              </div>
+
               {/* Global Network Controls */}
               <div className="exn-card p-8 space-y-8 border-secondary/20">
                  <div className="flex items-center gap-3">
@@ -313,7 +376,7 @@ export default function AdminPage() {
                          }} 
                          className="w-full h-14 bg-destructive text-white text-xs font-black uppercase tracking-[0.2em] rounded-xl hover:bg-destructive/90 transition-all shadow-xl shadow-destructive/20"
                        >
-                         This should work now
+                         Master Reset Protocol
                        </button>
                     </div>
                  </div>
@@ -324,17 +387,26 @@ export default function AdminPage() {
               <div className="exn-card p-8 border-emerald-500/30 bg-emerald-500/5 space-y-6">
                  <h3 className="text-lg font-bold uppercase tracking-widest flex items-center gap-2"><Coins className="w-5 h-5" /> Protocol Vaults</h3>
                  <div className="space-y-4">
-                   <div>
-                     <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Vault (USDC)</p>
-                     <p className="text-2xl font-bold font-mono">{(state?.usdcVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
+                   <div className="flex justify-between items-end">
+                     <div>
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Vault</p>
+                       <p className="text-2xl font-bold font-mono">{(state?.usdcVaultBalance ?? 0).toLocaleString()}</p>
+                     </div>
+                     <span className="text-xs text-emerald-500 font-bold">USDC</span>
                    </div>
-                   <div>
-                     <p className="text-[10px] text-muted-foreground uppercase font-black">DAO Treasury Vault (EXN)</p>
-                     <p className="text-2xl font-bold font-mono">{(state?.treasuryBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
+                   <div className="flex justify-between items-end">
+                     <div>
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">DAO Treasury Vault</p>
+                       <p className="text-2xl font-bold font-mono">{(state?.treasuryBalance ?? 0).toLocaleString()}</p>
+                     </div>
+                     <span className="text-xs text-primary font-bold">EXN</span>
                    </div>
-                   <div>
-                     <p className="text-[10px] text-muted-foreground uppercase font-black">Global Reward Vault (EXN)</p>
-                     <p className="text-2xl font-bold font-mono">{(state?.rewardVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
+                   <div className="flex justify-between items-end">
+                     <div>
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">Global Reward Vault</p>
+                       <p className="text-2xl font-bold font-mono">{(state?.rewardVaultBalance ?? 0).toLocaleString()}</p>
+                     </div>
+                     <span className="text-xs text-primary font-bold">EXN</span>
                    </div>
                  </div>
               </div>
@@ -346,11 +418,12 @@ export default function AdminPage() {
                  </div>
                  <div className="space-y-2">
                     <p className="text-xs text-muted-foreground uppercase font-black">Origin Anchor</p>
-                    <p className="text-[10px] font-mono text-foreground">{new Date(state.networkStartDate).toLocaleString()}</p>
+                    <p className="text-[10px] font-mono text-foreground">{state.networkStartDate ? new Date(state.networkStartDate).toLocaleString() : 'NOT INITIALIZED'}</p>
                     <div className="flex items-center gap-2 mt-2">
-                       <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                       <p className="text-[11px] font-black uppercase text-primary">Active Epoch: {state.lastCrankedEpoch + 1}</p>
+                       <div className={`w-2 h-2 rounded-full ${state.networkStartDate ? 'bg-primary animate-pulse' : 'bg-destructive'}`} />
+                       <p className="text-[11px] font-black uppercase text-primary">Active Epoch: {state.networkStartDate ? currentEpoch : '0'}</p>
                     </div>
+                    <p className="text-[9px] text-muted-foreground font-bold uppercase mt-1">Last Settled: {state.lastCrankedEpoch}</p>
                  </div>
               </div>
            </div>
