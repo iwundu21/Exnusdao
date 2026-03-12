@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Save, AlertTriangle, LogOut, Trash2, Wallet, ExternalLink, Activity, Upload, MapPin } from 'lucide-react';
-import Link from 'link';
+import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
