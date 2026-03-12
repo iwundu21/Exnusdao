@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -19,8 +20,7 @@ export function Navbar() {
 
   const currentExn = isLoaded ? state.exnBalance : 0;
   const currentUsdc = isLoaded ? state.usdcBalance : 0;
-  const isAdmin = isLoaded && state.isInitialized && state.adminWallet === walletAddress;
-  const isInitialized = isLoaded && state.isInitialized;
+  const isAdmin = isLoaded && state.adminWallet === walletAddress;
 
   return (
     <nav className="flex items-center justify-between px-10 py-6 border-b border-border backdrop-blur-md fixed top-0 left-0 w-full z-50 bg-background/80">
@@ -37,21 +37,17 @@ export function Navbar() {
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </Link>
           
-          {isInitialized && (
-            <>
-              <Link href="/purchase-license" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-                <Ticket className="w-4 h-4" /> Buy License
-              </Link>
-              <Link href="/register-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-                <Hammer className="w-4 h-4" /> Register Node
-              </Link>
-              <Link href="/manage-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-                <Settings className="w-4 h-4" /> Manage Node
-              </Link>
-            </>
-          )}
+          <Link href="/purchase-license" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
+            <Ticket className="w-4 h-4" /> Buy License
+          </Link>
+          <Link href="/register-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
+            <Hammer className="w-4 h-4" /> Register Node
+          </Link>
+          <Link href="/manage-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
+            <Settings className="w-4 h-4" /> Manage Node
+          </Link>
 
-          {(isAdmin || (!isInitialized && connected && walletAddress)) && (
+          {(isAdmin || connected) && (
             <Link href="/admin" className="flex items-center gap-2 text-primary font-black hover:opacity-80 transition-all">
               <ShieldCheck className="w-4 h-4" /> Admin
             </Link>

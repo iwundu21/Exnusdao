@@ -9,7 +9,6 @@ import { GovernancePortal } from '@/components/governance/GovernancePortal';
 import { CrankTerminal } from '@/components/admin/CrankTerminal';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Activity, ShieldAlert } from 'lucide-react';
 
 const REWARD_PRECISION = 1_000_000;
 const PROPOSAL_FEE = 10;
@@ -132,21 +131,15 @@ export default function Home() {
     if (passed) {
       setState(prev => {
         let newState = { ...prev };
-        
-        // If it's a treasury distribution, subtract from treasury
         if (proposal.type === 1 && (proposal.amount || 0) > 0) {
           newState.treasuryBalance = Math.max(0, (prev.treasuryBalance || 0) - proposal.amount);
-          // If the recipient is the user, add to their balance (mock implementation)
           if (proposal.recipient === walletAddress) {
             newState.exnBalance += proposal.amount;
           }
         }
-        
-        // Mark as executed in history
         newState.proposals = prev.proposals.map(p => 
           p.id === pId ? { ...p, executed: true } : p
         );
-        
         return newState;
       });
       setFeedback('success', 'Proposal enacted. On-chain state updated.');
@@ -160,10 +153,6 @@ export default function Home() {
   };
 
   const handleCrank = () => {
-    if (!state.networkStartDate) {
-      return setFeedback('error', 'Network clock not anchored.');
-    }
-
     const currentBlock = Math.floor((Date.now() - state.networkStartDate) / BLOCK_DURATION_MS) + 1000;
     
     if (state.lastCrankedBlock >= currentBlock) {

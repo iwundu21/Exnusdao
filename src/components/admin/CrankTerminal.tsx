@@ -6,16 +6,17 @@ import { Activity, Clock, ShieldAlert } from 'lucide-react';
 
 const BLOCK_DURATION = 14 * 24 * 60 * 60 * 1000; // 14 days in ms
 
-export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock = 999, networkStartDate = null, onCrank, connected = false }: any) {
+export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock = 999, networkStartDate, onCrank, connected = false }: any) {
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [currentBlock, setCurrentBlock] = useState(1000);
 
+  // Fallback if somehow not present, although ensured in state hook
+  const effectiveStartDate = networkStartDate || Date.now() - BLOCK_DURATION;
+
   useEffect(() => {
-    if (!networkStartDate) return;
-    
     const updateTimer = () => {
       const now = Date.now();
-      const elapsed = now - networkStartDate;
+      const elapsed = now - effectiveStartDate;
       const block = Math.floor(elapsed / BLOCK_DURATION) + 1000; 
       const remainingMs = BLOCK_DURATION - (elapsed % BLOCK_DURATION);
 
@@ -33,7 +34,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
     const timer = setInterval(updateTimer, 1000);
 
     return () => clearInterval(timer);
-  }, [networkStartDate]);
+  }, [effectiveStartDate]);
 
   const activeValidators = validators.filter((v: any) => v.is_active);
   const totalNetworkWeight = useMemo(() => {
@@ -43,12 +44,11 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
   const isBlockCranked = lastCrankedBlock >= currentBlock;
 
   const blockHistory = useMemo(() => {
-    if (!networkStartDate) return [];
     return Array.from({ length: 8 }, (_, i) => {
       const bNum = currentBlock - i;
       if (bNum < 1000) return null;
       
-      const startMs = networkStartDate + (bNum - 1000) * BLOCK_DURATION;
+      const startMs = effectiveStartDate + (bNum - 1000) * BLOCK_DURATION;
       const endMs = startMs + BLOCK_DURATION;
       
       return {
@@ -59,17 +59,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedBlock
         endFormatted: new Date(endMs).toLocaleDateString()
       };
     }).filter(Boolean);
-  }, [currentBlock, lastCrankedBlock, networkStartDate]);
-
-  if (!networkStartDate) {
-    return (
-      <div className="exn-card p-20 text-center space-y-6 animate-in fade-in duration-500">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
-        <p className="text-xl font-bold uppercase tracking-widest text-amber-500">Network Lifespan Not Started</p>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">The Protocol Admin must anchor the network start date to begin the 10-year reward block cycle.</p>
-      </div>
-    );
-  }
+  }, [currentBlock, lastCrankedBlock, effectiveStartDate]);
 
   return (
     <div className="space-y-10 animate-in fade-in duration-500 pb-20">

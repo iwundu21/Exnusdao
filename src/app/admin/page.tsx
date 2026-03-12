@@ -8,11 +8,9 @@ import { shortenAddress } from '@/lib/utils';
 import { 
   ShieldCheck, 
   Settings, 
-  AlertTriangle,
   Lock,
   Calendar,
   Database,
-  Ticket,
   Coins,
   Zap
 } from 'lucide-react';
@@ -22,10 +20,6 @@ export default function AdminPage() {
   const walletAddress = publicKey?.toBase58() || '';
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
   
-  const [mints, setMints] = useState({ 
-    exn: state?.exnMint || 'EXN1111111111111111111111111111111111111111', 
-    usdc: state?.usdcMint || 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' 
-  });
   const [newCap, setNewCap] = useState('');
   const [newLicensePrice, setNewLicensePrice] = useState('');
   const [newLicenseLimit, setNewLicenseLimit] = useState('');
@@ -34,27 +28,6 @@ export default function AdminPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const handleInitialize = () => {
-    if (!connected) return setFeedback('error', 'Wallet connection required.');
-    
-    setState(prev => ({
-      ...prev,
-      isInitialized: true,
-      adminWallet: walletAddress,
-      exnMint: mints.exn,
-      usdcMint: mints.usdc,
-      rewardVaultPda: 'REWARD-PDA',
-      treasuryVaultPda: 'TREASURY-PDA',
-      usdcVaultPda: 'LICENSE-PDA',
-      stakedVaultPda: 'STAKED-PDA',
-      licensePrice: 0, // Set to 0 on initialization as requested
-      rewardCap: 0,    // Set to 0 on initialization as requested
-      licenseLimit: prev.licenseLimit || 100,
-      networkStartDate: Date.now() // Start the 10-year lifecycle clock immediately
-    }));
-    setFeedback('success', 'Protocol initialized. 10-year lifecycle clock started.');
-  };
 
   const handleUpdateCap = () => {
     const cap = Number(newCap);
@@ -80,6 +53,11 @@ export default function AdminPage() {
     setFeedback('success', `Total License Supply Cap updated to ${limit}.`);
   };
 
+  const handleResetTimeline = () => {
+    setState(prev => ({ ...prev, networkStartDate: Date.now() }));
+    setFeedback('success', 'Protocol timeline synchronized to current cluster time.');
+  };
+
   if (!mounted || !isLoaded) return null;
 
   if (!connected) {
@@ -102,11 +80,6 @@ export default function AdminPage() {
           </div>
           <h1 className="text-6xl font-bold exn-gradient-text uppercase">Command Center</h1>
         </div>
-        {!state.isInitialized && (
-          <button onClick={handleInitialize} className="exn-button h-16 px-12 text-sm flex items-center gap-2">
-            <Zap className="w-5 h-5" /> Execute Global Initialization
-          </button>
-        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -116,19 +89,13 @@ export default function AdminPage() {
                   <Calendar className="w-5 h-5 text-primary" />
                   <h3 className="text-lg font-bold uppercase tracking-widest">Network Timeline</h3>
                </div>
-               {!state.networkStartDate ? (
-                 <div className="p-6 bg-primary/5 border border-primary/20 rounded-xl space-y-4">
-                    <p className="text-sm text-muted-foreground">The 10-year reward cycle is inactive. Initialize the protocol to begin block index 1000.</p>
-                 </div>
-               ) : (
-                 <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex justify-between items-center">
-                    <div>
-                      <p className="text-xs font-black uppercase text-emerald-500">Lifecycle Active</p>
-                      <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Started: {new Date(state.networkStartDate).toLocaleString()}</p>
-                    </div>
-                    <button onClick={() => setState(prev => ({ ...prev, networkStartDate: Date.now() }))} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Restart Timeline</button>
-                 </div>
-               )}
+               <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex justify-between items-center">
+                  <div>
+                    <p className="text-xs font-black uppercase text-emerald-500">Lifecycle Active</p>
+                    <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Started: {new Date(state.networkStartDate).toLocaleString()}</p>
+                  </div>
+                  <button onClick={handleResetTimeline} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Sync Timeline</button>
+               </div>
             </div>
 
             <div className="exn-card p-8 space-y-8 border-border/20">

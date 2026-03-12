@@ -93,15 +93,15 @@ export interface ProtocolState {
   isPaused: boolean;
   lastTransaction: TransactionFeedback | null;
   lastCrankedBlock: number;
-  networkStartDate: number | null;
+  networkStartDate: number;
   isInitialized: boolean;
   adminWallet: string | null;
-  exnMint: string | null;
-  usdcMint: string | null;
-  rewardVaultPda: string | null;
-  treasuryVaultPda: string | null;
-  usdcVaultPda: string | null;
-  stakedVaultPda: string | null;
+  exnMint: string;
+  usdcMint: string;
+  rewardVaultPda: string;
+  treasuryVaultPda: string;
+  usdcVaultPda: string;
+  stakedVaultPda: string;
 }
 
 const INITIAL_STATE: ProtocolState = {
@@ -112,14 +112,14 @@ const INITIAL_STATE: ProtocolState = {
   rewardVaultBalance: 0,
   usdcVaultBalance: 0,
   stakedVaultBalance: 0,
-  rewardCap: 0,
+  rewardCap: 1250,
   licenseLimit: 100,
-  licensePrice: 0,
+  licensePrice: 500,
   isPaused: false,
   lastTransaction: null,
   lastCrankedBlock: 999,
-  networkStartDate: null,
-  isInitialized: false,
+  networkStartDate: Date.now() - (14 * 24 * 60 * 60 * 1000), // Default to 14 days ago
+  isInitialized: true, // Always true to enable functionality
   adminWallet: null,
   exnMint: 'EXN1111111111111111111111111111111111111111',
   usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -127,7 +127,23 @@ const INITIAL_STATE: ProtocolState = {
   treasuryVaultPda: 'TREASURY-PDA',
   usdcVaultPda: 'LICENSE-PDA',
   stakedVaultPda: 'STAKED-PDA',
-  validators: [],
+  validators: [
+    { 
+      id: 'v1', 
+      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
+      name: 'CyberCore-01', 
+      description: 'Primary edge node', 
+      logo_uri: '66', 
+      location: 'Singapore', 
+      is_active: true, 
+      seed_deposited: true, 
+      total_staked: 15000000, 
+      commission_rate: 500, 
+      accrued_node_rewards: 0, 
+      global_reward_index: 0, 
+      license_id: 'LIC-DEFAULT' 
+    }
+  ],
   userStakes: [],
   licenses: [],
   proposals: [],
@@ -152,7 +168,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setState(prev => ({ ...prev, ...parsed }));
+        // Ensure critical fields are always present
+        setState(prev => ({ 
+          ...prev, 
+          ...parsed,
+          isInitialized: true,
+          networkStartDate: parsed.networkStartDate || INITIAL_STATE.networkStartDate
+        }));
       } catch (e) {
         console.error("Failed to parse protocol state", e);
       }
