@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo } from 'react';
@@ -77,14 +78,14 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                        <TrendingUp className="w-3 h-3" />
                        <span>Total Staked</span>
                     </div>
-                    <p className="text-primary font-bold text-lg tracking-tight">{validator.total_staked.toLocaleString()} <span className="text-[10px] text-muted-foreground">EXN</span></p>
+                    <p className="text-primary font-bold text-base tracking-tight">{validator.total_staked.toLocaleString()} <span className="text-[10px] text-muted-foreground">EXN</span></p>
                   </div>
                   <div className="p-4 bg-foreground/5 rounded-2xl border border-border/10 space-y-1 group-hover:border-primary/20 transition-colors">
                     <div className="flex items-center gap-2 text-[9px] uppercase font-bold text-foreground/40">
                        <Users className="w-3 h-3" />
                        <span>Active Users</span>
                     </div>
-                    <p className="text-foreground font-bold text-lg tracking-tight">{stakerCount} <span className="text-[10px] text-muted-foreground">Accounts</span></p>
+                    <p className="text-foreground font-bold text-base tracking-tight">{stakerCount} <span className="text-[10px] text-muted-foreground">Accounts</span></p>
                   </div>
                 </div>
 

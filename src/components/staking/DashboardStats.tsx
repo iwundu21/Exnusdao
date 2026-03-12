@@ -81,12 +81,12 @@ export function DashboardStats({
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(0,245,255,0.5)]" />
                 <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.5em]">Real-Time Protocol TVL</p>
               </div>
-              <h3 className="text-5xl font-bold font-mono tracking-tighter text-white">
+              <h3 className="text-3xl font-bold font-mono tracking-tighter text-white">
                 {totalStaked.toLocaleString()} <span className="text-[10px] text-primary uppercase font-black ml-1">EXN</span>
               </h3>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold text-emerald-500 font-mono tracking-tighter">
+              <p className="text-base font-bold text-emerald-500 font-mono tracking-tighter">
                 ${stakedUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
               <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mt-1">Global Valuation (USD)</p>
@@ -150,11 +150,11 @@ export function DashboardStats({
               <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">Treasury</p>
               <div className="h-[2px] w-10 bg-secondary/30 rounded-full group-hover:w-16 transition-all" />
             </div>
-            <div className="space-y-1 text-right">
-              <p className="text-4xl font-mono font-bold text-white tracking-tighter">
-                {treasuryBalance.toLocaleString()} <span className="text-[10px] text-white/20">EXN</span>
+            <div className="flex justify-between items-end">
+              <p className="text-2xl font-mono font-bold text-white tracking-tighter">
+                {treasuryBalance.toLocaleString()} <span className="text-[10px] text-white/20 ml-1">EXN</span>
               </p>
-              <p className="text-xl font-bold text-secondary/70 font-mono uppercase tracking-tight">
+              <p className="text-sm font-bold text-secondary/70 font-mono uppercase tracking-tight">
                 ${treasuryUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>

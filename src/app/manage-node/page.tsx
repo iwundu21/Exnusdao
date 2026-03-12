@@ -107,7 +107,7 @@ export default function ManageNodePage() {
          <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">No Active XNodes</h1>
          <p className="text-muted-foreground max-w-md mx-auto">You do not currently have any XNodes registered to this wallet address.</p>
        </div>
-       <Link href="/register-node" className="exn-button inline-block">Register New XNode</Link>
+       <Link href="/register-node" className="exn-button inline-block text-xs">Register New XNode</Link>
     </div>
   );
 
@@ -151,18 +151,18 @@ export default function ManageNodePage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-6 bg-foreground/5 rounded-2xl border border-border/40 space-y-1">
                       <p className="text-[9px] uppercase font-black text-muted-foreground">Unique Stakers</p>
-                      <p className="text-2xl font-bold font-mono">{stakerCount}</p>
+                      <p className="text-lg font-bold font-mono">{stakerCount}</p>
                     </div>
                     <div className="p-6 bg-foreground/5 rounded-2xl border border-border/40 space-y-1">
                       <p className="text-[9px] uppercase font-black text-muted-foreground">Network Weight</p>
-                      <p className="text-2xl font-bold text-primary font-mono">{node.total_staked.toLocaleString()}</p>
+                      <p className="text-lg font-bold text-primary font-mono">{node.total_staked.toLocaleString()}</p>
                     </div>
                   </div>
 
                   <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-6">
                     <div className="space-y-1">
                       <p className="text-[10px] uppercase font-black text-emerald-500 tracking-widest">Commission Pool</p>
-                      <p className="text-3xl font-bold text-foreground font-mono">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-xs text-emerald-500">EXN</span></p>
+                      <p className="text-2xl font-bold text-foreground font-mono">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-xs text-emerald-500">EXN</span></p>
                     </div>
                     <button 
                       onClick={() => handleClaimCommission(node.id)} 
@@ -193,8 +193,8 @@ export default function ManageNodePage() {
                         </div>
                       </div>
                       <div className="flex gap-4">
-                        <button onClick={handleUpdate} className="exn-button flex-1 h-14 uppercase font-black tracking-widest">Save Changes</button>
-                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-14 uppercase font-black tracking-widest">Cancel</button>
+                        <button onClick={handleUpdate} className="exn-button flex-1 h-14 uppercase font-black tracking-widest text-xs">Save Changes</button>
+                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-14 uppercase font-black tracking-widest text-xs">Cancel</button>
                       </div>
                     </div>
                   ) : (
