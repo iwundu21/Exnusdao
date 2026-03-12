@@ -4,9 +4,9 @@
   "rewardVaultBalance": 0,
   "usdcVaultBalance": 500,
   "stakedVaultBalance": 2000000,
-  "rewardCap": 1500,
+  "rewardCap": 300000,
   "licenseLimit": 100,
-  "licensePrice": 500,
+  "licensePrice": 5000,
   "isPaused": false,
   "lastTransaction": null,
   "lastCrankedEpoch": 0,
@@ -115,7 +115,7 @@
       "lastExnFaucetClaim": 0,
       "lastUsdcFaucetClaim": 0,
       "registeredAt": 1773325524019,
-      "lastActive": 1773326567455,
+      "lastActive": 1773326662651,
       "totalTransactions": 3
     }
   },
