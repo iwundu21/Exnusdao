@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 
 export interface Validator {
   id: string;
@@ -85,6 +85,22 @@ export interface TransactionFeedback {
   timestamp: number;
 }
 
+export interface UserProfile {
+  address: string;
+  username: string;
+  bio: string;
+  registeredAt: number;
+  lastActive: number;
+  totalTransactions: number;
+}
+
+export interface NetworkMetadata {
+  version: string;
+  totalVolume: number;
+  totalUsers: number;
+  lastUpdate: number;
+}
+
 export interface ProtocolState {
   exnBalance: number;
   usdcBalance: number;
@@ -114,6 +130,8 @@ export interface ProtocolState {
   adminWallet?: string;
   lastExnFaucetClaim?: number;
   lastUsdcFaucetClaim?: number;
+  profiles: Record<string, UserProfile>;
+  metadata: NetworkMetadata;
 }
 
 const INITIAL_STATE: ProtocolState = {
@@ -169,6 +187,13 @@ const INITIAL_STATE: ProtocolState = {
   settledEpochs: [],
   lastExnFaucetClaim: 0,
   lastUsdcFaucetClaim: 0,
+  profiles: {},
+  metadata: {
+    version: '1.0.0-DEMO',
+    totalVolume: 0,
+    totalUsers: 1,
+    lastUpdate: Date.now()
+  }
 };
 
 interface ProtocolContextType {
@@ -177,6 +202,7 @@ interface ProtocolContextType {
   isLoaded: boolean;
   setFeedback: (status: 'success' | 'error' | 'warning', message: string) => void;
   clearFeedback: () => void;
+  registerUser: (address: string) => void;
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
@@ -186,7 +212,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('exnus_protocol_state_v6');
+    const saved = localStorage.getItem('exnus_general_memory_v1');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -195,7 +221,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
           ...parsed
         }));
       } catch (e) {
-        console.error("Failed to parse protocol state", e);
+        console.error("Failed to parse general memory", e);
       }
     }
     setIsLoaded(true);
@@ -203,11 +229,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('exnus_protocol_state_v6', JSON.stringify(state));
+      localStorage.setItem('exnus_general_memory_v1', JSON.stringify(state));
     }
   }, [state, isLoaded]);
 
-  const setFeedback = (status: 'success' | 'error' | 'warning', message: string) => {
+  const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
     const txHash = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     setState(prev => ({
       ...prev,
@@ -219,14 +245,54 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         timestamp: Date.now()
       }
     }));
-  };
+  }, []);
 
-  const clearFeedback = () => {
+  const clearFeedback = useCallback(() => {
     setState(prev => ({ ...prev, lastTransaction: null }));
-  };
+  }, []);
+
+  const registerUser = useCallback((address: string) => {
+    setState(prev => {
+      if (prev.profiles[address]) {
+        return {
+          ...prev,
+          profiles: {
+            ...prev.profiles,
+            [address]: {
+              ...prev.profiles[address],
+              lastActive: Date.now(),
+              totalTransactions: prev.profiles[address].totalTransactions + 1
+            }
+          }
+        };
+      }
+
+      const newProfile: UserProfile = {
+        address,
+        username: `XUser-${address.slice(0, 4)}`,
+        bio: 'Exnus Protocol Participant',
+        registeredAt: Date.now(),
+        lastActive: Date.now(),
+        totalTransactions: 1
+      };
+
+      return {
+        ...prev,
+        profiles: {
+          ...prev.profiles,
+          [address]: newProfile
+        },
+        metadata: {
+          ...prev.metadata,
+          totalUsers: Object.keys(prev.profiles).length + 1,
+          lastUpdate: Date.now()
+        }
+      };
+    });
+  }, []);
 
   return (
-    <ProtocolContext.Provider value={{ state, setState, isLoaded, setFeedback, clearFeedback }}>
+    <ProtocolContext.Provider value={{ state, setState, isLoaded, setFeedback, clearFeedback, registerUser }}>
       {children}
     </ProtocolContext.Provider>
   );
