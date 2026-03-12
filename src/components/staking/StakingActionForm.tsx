@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Info, Sparkles, Lock, Unlock, Clock, CalendarDays, ShieldCheck } from 'lucide-react';
+import { Wallet, Info, Sparkles, Lock, Unlock, Clock, CalendarDays, ShieldCheck, ChevronRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const STAKING_TIERS = [
-  { days: 30, multiplier: 3000, label: '30 Days' },
-  { days: 60, multiplier: 5000, label: '60 Days' },
-  { days: 90, multiplier: 7500, label: '90 Days' },
-  { days: 180, multiplier: 10000, label: '180 Days' },
+  { days: 30, multiplier: 3000, label: '30D' },
+  { days: 60, multiplier: 5000, label: '60D' },
+  { days: 90, multiplier: 7500, label: '90D' },
+  { days: 180, multiplier: 10000, label: '180D' },
 ];
 
 const REWARD_PRECISION = 1_000_000;
@@ -98,199 +98,206 @@ export function StakingActionForm({
   const currentTier = STAKING_TIERS.find(t => t.days.toString() === duration);
 
   return (
-    <div className="exn-card p-8 space-y-6 sticky top-28 border-border/10">
-      <div className="flex gap-1 p-1 bg-foreground/5 rounded-lg">
+    <div className="exn-card p-0 bg-black/40 border-white/5 sticky top-28 overflow-hidden backdrop-blur-xl">
+      <div className="flex border-b border-white/5">
         <button 
           onClick={() => setActiveTab('stake')}
-          className={`flex-1 py-2 text-[10px] font-bold rounded-md transition-all uppercase ${activeTab === 'stake' ? 'exn-gradient-bg text-black' : 'text-foreground/40 hover:bg-foreground/5'}`}
+          className={`flex-1 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === 'stake' ? 'text-primary border-primary bg-primary/5' : 'text-white/30 border-transparent hover:text-white/50'}`}
         >
-          Stake
+          Provision
         </button>
         <button 
           onClick={() => setActiveTab('my-stakes')}
-          className={`flex-1 py-2 text-[10px] font-bold rounded-md transition-all uppercase ${activeTab === 'my-stakes' ? 'exn-gradient-bg text-black' : 'text-foreground/40 hover:bg-foreground/5'}`}
+          className={`flex-1 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === 'my-stakes' ? 'text-secondary border-secondary bg-secondary/5' : 'text-white/30 border-transparent hover:text-white/50'}`}
         >
-          My Stakes
+          Inventory
         </button>
       </div>
 
-      {activeTab === 'stake' && (
-        <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs text-foreground/50 uppercase tracking-widest">Amount (EXN)</label>
-              <span className="text-[10px] text-foreground/30">Available: {connected ? exnBalance.toLocaleString() : '0'}</span>
+      <div className="p-8 space-y-8">
+        {activeTab === 'stake' && (
+          <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+            <div className="space-y-3">
+              <div className="flex justify-between items-end">
+                <label className="text-[9px] text-white/30 uppercase font-black tracking-widest">Quantum Amount</label>
+                <span className="text-[8px] font-mono text-primary/70">Bal: {connected ? exnBalance.toLocaleString() : '0.00'}</span>
+              </div>
+              <div className="relative group">
+                <input 
+                  type="text" 
+                  value={amountInput}
+                  disabled={!connected}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  className={`exn-input h-14 bg-white/5 border-white/10 text-xs font-mono tracking-tighter transition-all group-hover:border-primary/40 focus:border-primary ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
+                />
+                {connected && (
+                  <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-4 top-4.5 text-[8px] font-black text-primary hover:text-white transition-colors">MAX</button>
+                )}
+              </div>
             </div>
-            <div className="relative">
-              <input 
-                type="text" 
-                value={amountInput}
-                disabled={!connected}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                className={`exn-input h-12 text-xs ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
-              />
-              {connected && (
-                <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-3 top-2.5 text-[10px] text-primary font-bold hover:underline">MAX</button>
+
+            <div className="space-y-3">
+              <label className="text-[9px] text-white/30 uppercase font-black tracking-widest block">Lock Horizon</label>
+              <div className="grid grid-cols-4 gap-2">
+                {STAKING_TIERS.map((tier) => (
+                  <button
+                    key={tier.days}
+                    disabled={!connected}
+                    onClick={() => setDuration(tier.days.toString())}
+                    className={`h-16 border rounded-xl transition-all flex flex-col items-center justify-center gap-1 ${
+                      duration === tier.days.toString() 
+                        ? 'border-primary bg-primary/10 text-primary' 
+                        : 'border-white/5 bg-white/5 text-white/30 hover:border-white/20'
+                    } ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  >
+                    <span className="text-[10px] font-black">{tier.label}</span>
+                    <span className="text-[7px] font-bold opacity-60">{(tier.multiplier/1000).toFixed(1)}x</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[8px] text-white/20 uppercase font-black tracking-widest">Protocol Target</span>
+                <span className={`text-[10px] font-bold uppercase ${selectedNode ? 'text-primary' : 'text-white/10'}`}>
+                  {selectedNode ? selectedNode.name : 'Unassigned'}
+                </span>
+              </div>
+              <div className="h-px w-full bg-white/5" />
+              <div className="flex justify-between items-center">
+                <span className="text-[8px] text-white/20 uppercase font-black tracking-widest">Expected Multiplier</span>
+                <span className="text-[10px] font-bold text-emerald-500">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x Yield</span>
+              </div>
+            </div>
+
+            <button 
+              onClick={initiateStake} 
+              disabled={isStakeDisabled}
+              className={`w-full h-14 uppercase tracking-[0.3em] font-black text-[10px] flex items-center justify-center gap-3 transition-all ${
+                !isStakeDisabled ? 'exn-button' : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
+              }`}
+            >
+              Initialize Lock <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'my-stakes' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
+            <div className="p-8 bg-secondary/5 border border-secondary/20 rounded-2xl relative overflow-hidden group">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-secondary/10 blur-3xl group-hover:bg-secondary/20 transition-all" />
+              <div className="relative z-10 flex justify-between items-center">
+                <div className="space-y-1">
+                  <p className="text-[8px] text-white/30 uppercase font-black tracking-[0.3em]">Aggregate Yield</p>
+                  <p className="text-xl font-bold text-white font-mono tracking-tighter">{totalPendingRewards.toFixed(4)} <span className="text-[10px] text-secondary">EXN</span></p>
+                </div>
+                <button 
+                  onClick={onClaim}
+                  disabled={totalPendingRewards <= 0 || !connected}
+                  className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${totalPendingRewards > 0 && connected ? 'bg-secondary text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]' : 'bg-white/5 text-white/10 cursor-not-allowed'}`}
+                >
+                  Harvest
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4 max-h-[480px] overflow-auto pr-3 custom-scrollbar">
+              {activeUserStakes.length === 0 ? (
+                <div className="text-center py-20 opacity-20 border border-dashed border-white/5 rounded-2xl">
+                  <CalendarDays className="w-10 h-10 mx-auto mb-4" />
+                  <p className="text-[9px] uppercase font-black tracking-[0.2em]">No Active Positions</p>
+                </div>
+              ) : (
+                activeUserStakes.map((s: any) => {
+                  const isLocked = now < s.unlock_timestamp;
+                  const unlockDate = new Date(s.unlock_timestamp);
+                  const validator = validators?.find((v: any) => v.id === s.validator_id);
+                  const multiplier = s.lock_multiplier || 1000;
+                  const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000) : 0;
+                  
+                  return (
+                    <div key={s.id} className="p-6 bg-white/5 rounded-2xl border border-white/5 space-y-6 hover:border-white/10 transition-all">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                           <div className="flex items-center gap-2">
+                             <span className="text-xs font-bold text-white font-mono tracking-tighter">{s.amount.toLocaleString()}</span>
+                             <span className="text-[8px] text-white/30 uppercase font-black">EXN</span>
+                           </div>
+                           <p className="text-[9px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Unknown Cluster'}</p>
+                           
+                           <div className="flex flex-col gap-2 pt-1">
+                             <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest">
+                               {isLocked ? (
+                                 <div className="flex items-center gap-1.5 text-amber-500">
+                                   <Clock className="w-3 h-3" />
+                                   <span>Locked: {unlockDate.toLocaleDateString()}</span>
+                                 </div>
+                               ) : (
+                                 <div className="flex items-center gap-1.5 text-emerald-500">
+                                   <Unlock className="w-3 h-3" />
+                                   <span>Matured</span>
+                                 </div>
+                               )}
+                             </div>
+                           </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-bold text-emerald-500 font-mono tracking-tighter">+{pendingReward.toFixed(4)}</p>
+                          <p className="text-[7px] text-white/20 uppercase font-black mt-1">Multiplier: {(multiplier/1000).toFixed(1)}x</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button onClick={() => onClaimSingle(s.id)} disabled={pendingReward <= 0} className={`h-11 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${pendingReward > 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'}`}>Claim</button>
+                        <button onClick={() => onUnstake(s.id)} disabled={isLocked} className={`h-11 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${!isLocked ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'}`}>Withdraw</button>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
+        )}
+      </div>
 
-          <div>
-            <label className="text-xs text-foreground/50 uppercase tracking-widest mb-2 block">Lock-up Duration</label>
-            <div className="grid grid-cols-2 gap-2">
-              {STAKING_TIERS.map((tier) => (
-                <button
-                  key={tier.days}
-                  disabled={!connected}
-                  onClick={() => setDuration(tier.days.toString())}
-                  className={`py-3 px-2 border rounded-md transition-all flex flex-col items-center ${duration === tier.days.toString() ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground/50 hover:border-foreground/30'} ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <span className="text-xs font-bold">{tier.label}</span>
-                  <span className="text-[10px] opacity-70">{(tier.multiplier/1000).toFixed(1)}x Yield</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-foreground/50 uppercase tracking-tighter">Target Node</span>
-              <span className={`text-xs font-bold uppercase ${selectedNode ? 'text-primary' : 'text-foreground/20'}`}>
-                {selectedNode ? selectedNode.name : 'Selection Required'}
-              </span>
-            </div>
-          </div>
-
-          <button 
-            onClick={initiateStake} 
-            disabled={isStakeDisabled}
-            className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${!isStakeDisabled ? 'exn-button text-[10px]' : 'bg-foreground/5 text-foreground/20 border border-border cursor-not-allowed text-[10px]'}`}
-          >
-            Review Transaction
-          </button>
-        </div>
-      )}
-
-      {activeTab === 'my-stakes' && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-          <div className="flex justify-between items-center p-6 bg-secondary/10 border border-secondary/20 rounded-2xl">
-            <div className="space-y-1">
-              <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Global Claimable</p>
-              <p className="text-xs font-bold text-secondary font-mono">{totalPendingRewards.toFixed(2)} EXN</p>
-            </div>
-            <button 
-              onClick={onClaim}
-              disabled={totalPendingRewards <= 0 || !connected}
-              className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${totalPendingRewards > 0 && connected ? 'bg-secondary text-white' : 'bg-foreground/5 text-foreground/20 cursor-not-allowed'}`}
-            >
-              Claim All
-            </button>
-          </div>
-
-          <div className="space-y-4 max-h-[450px] overflow-auto pr-2 custom-scrollbar">
-            {activeUserStakes.length === 0 ? (
-              <div className="text-center py-10 opacity-20">
-                <CalendarDays className="w-10 h-10 mx-auto mb-2" />
-                <p className="text-[10px] uppercase font-black">No Active Stakes Found</p>
-              </div>
-            ) : (
-              activeUserStakes.map((s: any) => {
-                const isLocked = now < s.unlock_timestamp;
-                const unlockDate = new Date(s.unlock_timestamp);
-                const stakedDate = s.staked_at ? new Date(s.staked_at) : null;
-                const validator = validators?.find((v: any) => v.id === s.validator_id);
-                const multiplier = s.lock_multiplier || 1000;
-                const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000) : 0;
-                
-                return (
-                  <div key={s.id} className="p-5 bg-foreground/5 rounded-xl border border-border/10 space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                         <span className="text-xs font-bold text-foreground font-mono">{s.amount.toLocaleString()} EXN</span>
-                         <p className="text-[10px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Node'}</p>
-                         
-                         <div className="flex flex-col gap-1.5 pt-2">
-                           {stakedDate && (
-                             <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground font-bold uppercase">
-                               <CalendarDays className="w-2.5 h-2.5" />
-                               <span>Staked: {stakedDate.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                             </div>
-                           )}
-                           <div className="flex items-center gap-1.5">
-                             {isLocked ? (
-                               <div className="flex items-center gap-1.5 text-[8px] text-amber-500 font-black uppercase">
-                                 <Clock className="w-2.5 h-2.5" />
-                                 <span>Unlock: {unlockDate.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                               </div>
-                             ) : (
-                               <div className="flex items-center gap-1.5 text-[8px] text-emerald-500 font-black uppercase">
-                                 <Unlock className="w-2.5 h-2.5" />
-                                 <span>Matured: {unlockDate.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                               </div>
-                             )}
-                           </div>
-                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] font-black text-emerald-500 font-mono">+{pendingReward.toFixed(2)}</p>
-                        <p className="text-[8px] text-muted-foreground uppercase font-black">Yield: {(multiplier/1000).toFixed(1)}x</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button onClick={() => onClaimSingle(s.id)} disabled={pendingReward <= 0} className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all ${pendingReward > 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>Claim</button>
-                      <button onClick={() => onUnstake(s.id)} disabled={isLocked} className={`h-10 rounded-lg text-[9px] font-black uppercase transition-all ${!isLocked ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}>Unstake</button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Transaction Review Dialog */}
       <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary/40 bg-black/90 backdrop-blur-2xl">
+        <AlertDialogContent className="exn-card border-primary/40 bg-black/95 backdrop-blur-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
               <ShieldCheck className="w-6 h-6" />
-              Review Transaction
+              Review Lock Operation
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-6 pt-4">
-                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Action</span>
-                    <span className="text-foreground font-black">Lock Assets (Stake)</span>
+              <div className="space-y-6 pt-6">
+                <div className="p-6 bg-white/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                    <span className="text-white/30">Action</span>
+                    <span className="text-white font-black">Provision Stake</span>
                   </div>
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Amount</span>
+                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                    <span className="text-white/30">Amount</span>
                     <span className="text-primary font-mono font-bold">{amountInput} EXN</span>
                   </div>
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Validator</span>
-                    <span className="text-foreground font-bold">{selectedNode?.name}</span>
+                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                    <span className="text-white/30">Target Cluster</span>
+                    <span className="text-white font-bold">{selectedNode?.name}</span>
                   </div>
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Duration</span>
-                    <span className="text-amber-500 font-bold">{currentTier?.label}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Yield Multiplier</span>
+                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                    <span className="text-white/30">Yield Multiplier</span>
                     <span className="text-emerald-500 font-black">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
                   </div>
                 </div>
                 
-                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                  By confirming, your assets will be moved to the protocol's staked vault and locked for the selected duration. This action is irreversible once processed on-chain.
+                <p className="text-[10px] text-white/40 uppercase leading-relaxed font-bold">
+                  Proceeding will lock your assets in the protocol's vault for {duration} days. This transaction is atomic and final on the network ledger.
                 </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="pt-6">
-            <AlertDialogCancel className="exn-button-outline text-[10px] h-12 uppercase font-black">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStake} className="exn-button text-[10px] h-12 uppercase font-black">Confirm & Broadcast</AlertDialogAction>
+          <AlertDialogFooter className="pt-8">
+            <AlertDialogCancel className="exn-button-outline text-[9px] h-12 uppercase font-black border-white/10 text-white hover:bg-white/5">Abort</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStake} className="exn-button text-[9px] h-12 uppercase font-black">Confirm Provisioning</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
