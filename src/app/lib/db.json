@@ -1,7 +1,7 @@
 {
   "totalStaked": 0,
-  "treasuryBalance": 0,
-  "rewardVaultBalance": 0,
+  "treasuryBalance": 3000000,
+  "rewardVaultBalance": 20000000,
   "usdcVaultBalance": 0,
   "stakedVaultBalance": 0,
   "rewardCap": 300000,
@@ -23,11 +23,22 @@
   "licenses": [],
   "proposals": [],
   "settledEpochs": [],
-  "profiles": {},
+  "profiles": {
+    "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW": {
+      "address": "9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW",
+      "exnBalance": 2000000,
+      "usdcBalance": 10000,
+      "lastExnFaucetClaim": 0,
+      "lastUsdcFaucetClaim": 0,
+      "registeredAt": 1773327811797,
+      "lastActive": 1773327920132,
+      "totalTransactions": 2
+    }
+  },
   "metadata": {
     "version": "1.0.0-DEMO",
     "totalVolume": 0,
-    "totalUsers": 0,
-    "lastUpdate": 1773327477024
+    "totalUsers": 1,
+    "lastUpdate": 1773327811797
   }
 }
