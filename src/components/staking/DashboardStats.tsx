@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -33,11 +34,13 @@ export function DashboardStats({
               <div className="h-[1px] w-12 bg-primary/30 mt-2" />
             </div>
             
-            <div className="space-y-0">
-              <p className="text-lg font-mono font-bold text-white tracking-tighter leading-none">
-                {totalStaked.toLocaleString()} <span className="text-[8px] font-black text-white/30 ml-1 uppercase">EXN</span>
-              </p>
-              <p className="text-[9px] font-bold text-emerald-500/80 tracking-tight font-mono uppercase mt-1">
+            <div className="flex justify-between items-end w-full">
+              <div className="space-y-0">
+                <p className="text-xl font-mono font-bold text-white tracking-tighter leading-none">
+                  {totalStaked.toLocaleString()} <span className="text-[10px] font-black text-white/30 ml-1 uppercase">EXN</span>
+                </p>
+              </div>
+              <p className="text-[10px] font-bold text-emerald-500/80 tracking-tight font-mono uppercase pb-0.5">
                 ≈ ${stakedUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
               </p>
             </div>
@@ -56,11 +59,13 @@ export function DashboardStats({
               <div className="h-[1px] w-12 bg-secondary/30 mt-2" />
             </div>
             
-            <div className="space-y-0">
-              <p className="text-lg font-mono font-bold text-white tracking-tighter leading-none">
-                {treasuryBalance.toLocaleString()} <span className="text-[8px] font-black text-white/30 ml-1 uppercase">EXN</span>
-              </p>
-              <p className="text-[9px] font-bold text-secondary/80 tracking-tight font-mono uppercase mt-1">
+            <div className="flex justify-between items-end w-full">
+              <div className="space-y-0">
+                <p className="text-xl font-mono font-bold text-white tracking-tighter leading-none">
+                  {treasuryBalance.toLocaleString()} <span className="text-[10px] font-black text-white/30 ml-1 uppercase">EXN</span>
+                </p>
+              </div>
+              <p className="text-[10px] font-bold text-secondary/80 tracking-tight font-mono uppercase pb-0.5">
                 ≈ ${treasuryUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
               </p>
             </div>
