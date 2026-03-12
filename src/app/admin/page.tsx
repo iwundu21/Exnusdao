@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -57,8 +58,18 @@ export default function AdminPage() {
   };
 
   const handleResetTimeline = () => {
-    setState(prev => ({ ...prev, networkStartDate: Date.now(), lastCrankedEpoch: 0, settledEpochs: [] }));
-    setFeedback('success', 'Protocol timeline re-anchored. Epoch 1 is now active.');
+    setState(prev => ({ 
+      ...prev, 
+      networkStartDate: Date.now(), 
+      lastCrankedEpoch: 0, 
+      settledEpochs: [],
+      validators: [],
+      userStakes: [],
+      licenses: [],
+      proposals: [],
+      profiles: {}
+    }));
+    setFeedback('success', 'Protocol timeline re-anchored and all state cleared. Epoch 1 is now active.');
   };
 
   if (!mounted || !isLoaded) return null;
@@ -109,11 +120,18 @@ export default function AdminPage() {
                </div>
                <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex justify-between items-center">
                   <div>
-                    <p className="text-xs font-black uppercase text-emerald-500">Timeline Live</p>
-                    <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Last Reset: {new Date(state.networkStartDate).toLocaleString()}</p>
-                    <p className="text-[10px] text-primary font-bold uppercase mt-2">Current Active Epoch: {state.lastCrankedEpoch + 1}</p>
+                    <p className="text-xs font-black uppercase text-emerald-500">Timeline Management</p>
+                    <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Origin: {new Date(state.networkStartDate).toLocaleString()}</p>
+                    <p className="text-[10px] text-primary font-bold uppercase mt-2">Active Epoch: {state.lastCrankedEpoch + 1}</p>
                   </div>
-                  <button onClick={handleResetTimeline} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Re-anchor Epoch 1</button>
+                  <button 
+                    onClick={() => {
+                      if(window.confirm("This will wipe all network state and restart the timeline at Epoch 1. Proceed?")) handleResetTimeline();
+                    }} 
+                    className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black"
+                  >
+                    Reset All & Re-anchor
+                  </button>
                </div>
             </div>
 
