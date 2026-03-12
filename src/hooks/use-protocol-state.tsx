@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useRef } from 'react';
@@ -147,7 +146,7 @@ const INITIAL_LOCAL_STATE: ProtocolState = {
   isPaused: false,
   lastTransaction: null,
   lastCrankedEpoch: 0, 
-  networkStartDate: Date.now(), 
+  networkStartDate: 1741176000000, 
   exnMint: 'EXN1111111111111111111111111111111111111111',
   usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   rewardVaultPda: 'REWARD-PDA',
@@ -165,7 +164,7 @@ const INITIAL_LOCAL_STATE: ProtocolState = {
     version: '1.0.0-DEMO',
     totalVolume: 0,
     totalUsers: 0,
-    lastUpdate: Date.now()
+    lastUpdate: 1741176000000
   }
 };
 
@@ -192,7 +191,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const isSyncing = useRef(false);
 
-  // Initial load from Server File DB
   useEffect(() => {
     async function load() {
       const serverState = await getProtocolState();
@@ -204,7 +202,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     load();
   }, []);
 
-  // Sync state to Server File DB on change
   useEffect(() => {
     if (isLoaded && !isSyncing.current) {
       isSyncing.current = true;
