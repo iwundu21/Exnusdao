@@ -9,6 +9,16 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function RegisterNodePage() {
   const router = useRouter();
@@ -17,6 +27,7 @@ export default function RegisterNodePage() {
   const { state, isLoaded, setFeedback, registerValidator } = useProtocolState();
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showReview, setShowReview] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -69,7 +80,7 @@ export default function RegisterNodePage() {
     }
   };
 
-  const handleRegister = () => {
+  const handleRegisterInitiate = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     if (hasExistingNode) return setFeedback('warning', 'Only one XNode registration permitted per wallet.');
     
@@ -83,6 +94,10 @@ export default function RegisterNodePage() {
       return setFeedback('error', 'All required fields must be completed.');
     }
 
+    setShowReview(true);
+  };
+
+  const confirmRegistration = () => {
     const newNode: Validator = {
       id: `v${Date.now()}`,
       owner: walletAddress,
@@ -100,9 +115,9 @@ export default function RegisterNodePage() {
     };
 
     registerValidator(newNode, formData.licenseId);
+    setShowReview(false);
     
-    setFeedback('success', 'On-chain XNode registration successful.');
-    setTimeout(() => router.push('/manage-node'), 1500);
+    setTimeout(() => router.push('/manage-node'), 7000);
   };
 
   const availableLicenses = state.licenses.filter(l => l.owner === walletAddress && !l.is_claimed && !l.is_burned);
@@ -130,7 +145,7 @@ export default function RegisterNodePage() {
            <AlertCircle className="w-12 h-12 text-amber-500" />
            <div className="space-y-2">
              <h2 className="text-2xl font-bold text-foreground uppercase">Active XNode Detected</h2>
-             <p className="text-xs text-muted-foreground uppercase tracking-widest">Only one XNode registration permitted per wallet address.</p>
+             <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Only one XNode registration permitted per wallet address.</p>
            </div>
            <Link href="/manage-node" className="exn-button">Manage Existing XNode</Link>
         </div>
@@ -199,11 +214,11 @@ export default function RegisterNodePage() {
             </div>
             
             <button 
-              onClick={handleRegister} 
+              onClick={handleRegisterInitiate} 
               disabled={isRegistrationDisabled} 
               className={`w-full h-14 uppercase tracking-widest font-black transition-all ${isRegistrationDisabled ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed opacity-50' : 'exn-button'}`}
             >
-              {isRegistrationDisabled ? 'Complete All Required Fields' : 'Register XNode On-Chain'}
+              Review Registration
             </button>
           </div>
 
@@ -230,7 +245,7 @@ export default function RegisterNodePage() {
                   <div className="absolute bottom-6 left-8 space-y-1">
                     <div className="flex items-center gap-2">
                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]" />
-                       <h4 className="text-3xl font-bold text-white tracking-tighter uppercase">
+                       <h4 className="text-xl font-bold text-white tracking-tighter uppercase">
                          {formData.name || 'Your XNode Name'}
                        </h4>
                     </div>
@@ -254,19 +269,12 @@ export default function RegisterNodePage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-1">
                       <p className="text-[9px] uppercase font-black text-foreground/30">Node Fee</p>
-                      <p className="text-primary font-bold text-lg">{formData.commission.toFixed(1)}%</p>
+                      <p className="text-primary font-bold text-xs">{(formData.commission).toFixed(1)}%</p>
                     </div>
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-1">
                       <p className="text-[9px] uppercase font-black text-foreground/30">Bound License</p>
-                      <p className="text-foreground font-mono text-[11px] truncate">{formData.licenseId ? shortenAddress(formData.licenseId) : 'N/A'}</p>
+                      <p className="text-foreground font-mono text-[10px] truncate">{formData.licenseId ? shortenAddress(formData.licenseId) : 'N/A'}</p>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
-                    <ShieldCheck className="w-5 h-5 text-primary" />
-                    <p className="text-[10px] text-primary leading-tight uppercase font-black tracking-tighter">
-                      Previewing atomic binding between XNode License and Validator Identity.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -274,6 +282,46 @@ export default function RegisterNodePage() {
           </div>
         </div>
       )}
+
+      {/* Registration Review Dialog */}
+      <AlertDialog open={showReview} onOpenChange={setShowReview}>
+        <AlertDialogContent className="exn-card border-primary/40 bg-black/90 backdrop-blur-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
+              <ShieldCheck className="w-6 h-6" />
+              Review XNode Binding
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Action</span>
+                  <span className="text-foreground font-black">Validator Registration</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">License NFT</span>
+                  <span className="text-foreground font-mono font-bold">{shortenAddress(formData.licenseId)}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Identity Name</span>
+                  <span className="text-primary font-bold">{formData.name}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Node Fee</span>
+                  <span className="text-emerald-500 font-bold">{formData.commission}%</span>
+                </div>
+              </div>
+              
+              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                By confirming, you are binding your XNode License NFT to this validator identity. This process is atomic and will permanently mark the license as "Bound" in the network ledger.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-6">
+            <AlertDialogCancel className="exn-button-outline text-[10px] h-12 uppercase font-black">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRegistration} className="exn-button text-[10px] h-12 uppercase font-black">Confirm & Register</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

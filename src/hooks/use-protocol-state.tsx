@@ -51,7 +51,7 @@ export interface ProtocolState {
 interface ProtocolContextType {
   state: ProtocolState;
   isLoaded: boolean;
-  setFeedback: (status: 'success' | 'error' | 'warning', message: string) => void;
+  setFeedback: (status: 'success' | 'error' | 'warning', message: string, txHash?: string) => void;
   clearFeedback: () => void;
   registerUser: (address: string) => void;
   exnBalance: number;
@@ -108,13 +108,15 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const isLoaded = !globalLoading && !valLoading && !stakesLoading && !propsLoading && !licLoading && !profileLoading;
 
-  const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
-    errorEmitter.emit('feedback', { status, message });
+  const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string, txHash?: string) => {
+    errorEmitter.emit('feedback', { status, message, txHash });
   }, []);
 
   const clearFeedback = useCallback(() => {
     errorEmitter.emit('feedback', null);
   }, []);
+
+  const generateTxHash = () => `0x${Math.random().toString(16).slice(2, 10)}${Math.random().toString(16).slice(2, 10)}${Math.random().toString(16).slice(2, 10)}`;
 
   const registerUser = useCallback((address: string) => {
     if (!address || !db) return;
@@ -141,21 +143,28 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const claimFaucetAssets = useCallback((address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
-    const ref = doc(db, 'users', address);
-    const timestampField = type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim';
+    setFeedback('warning', 'Processing claim request... (6s simulation)');
     
-    setDoc(ref, {
-      exnBalance: increment(exn),
-      usdcBalance: increment(usdc),
-      [timestampField]: Date.now(),
-      lastActive: Date.now()
-    }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ 
-        path: ref.path, 
-        operation: 'write'
-      }));
-    });
-  }, [db]);
+    setTimeout(() => {
+      const ref = doc(db, 'users', address);
+      const timestampField = type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim';
+      const hash = generateTxHash();
+      
+      setDoc(ref, {
+        exnBalance: increment(exn),
+        usdcBalance: increment(usdc),
+        [timestampField]: Date.now(),
+        lastActive: Date.now()
+      }, { merge: true }).then(() => {
+        setFeedback('success', `${type.toUpperCase()} assets deposited successfully.`, hash);
+      }).catch(err => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ 
+          path: ref.path, 
+          operation: 'write'
+        }));
+      });
+    }, 6000);
+  }, [db, setFeedback]);
 
   const adminFundVault = useCallback((address: string, amount: number, vault: string) => {
     if (!address || !db) return;
@@ -185,93 +194,153 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const mintLicense = useCallback((address: string, price: number, license: any) => {
     if (!address || !db) return;
-    const lRef = doc(db, 'licenses', license.id);
-    const uRef = doc(db, 'users', address);
-    const gRef = doc(db, 'protocol', 'global');
-    setDoc(lRef, license);
-    setDoc(uRef, { usdcBalance: increment(-price) }, { merge: true });
-    setDoc(gRef, { usdcVaultBalance: increment(price) }, { merge: true });
-  }, [db]);
+    setFeedback('warning', 'Minting XNode License NFT... (6s simulation)');
+    
+    setTimeout(() => {
+      const lRef = doc(db, 'licenses', license.id);
+      const uRef = doc(db, 'users', address);
+      const gRef = doc(db, 'protocol', 'global');
+      const hash = generateTxHash();
+      
+      setDoc(lRef, license);
+      setDoc(uRef, { usdcBalance: increment(-price) }, { merge: true });
+      setDoc(gRef, { usdcVaultBalance: increment(price) }, { merge: true });
+      setFeedback('success', `XNode License ${license.id} minted successfully.`, hash);
+    }, 6000);
+  }, [db, setFeedback]);
 
   const addStake = useCallback((stake: any) => {
     if (!db) return;
-    const sRef = doc(collection(db, 'stakes'));
-    const gRef = doc(db, 'protocol', 'global');
-    const vRef = doc(db, 'validators', stake.validator_id);
-    setDoc(sRef, { ...stake, id: sRef.id });
-    setDoc(gRef, { stakedVaultBalance: increment(stake.amount) }, { merge: true });
-    setDoc(vRef, { total_staked: increment(stake.amount) }, { merge: true });
-  }, [db]);
+    setFeedback('warning', 'Executing on-chain stake... (6s simulation)');
+    
+    setTimeout(() => {
+      const sRef = doc(collection(db, 'stakes'));
+      const gRef = doc(db, 'protocol', 'global');
+      const vRef = doc(db, 'validators', stake.validator_id);
+      const hash = generateTxHash();
+      
+      setDoc(sRef, { ...stake, id: sRef.id });
+      setDoc(gRef, { stakedVaultBalance: increment(stake.amount) }, { merge: true });
+      setDoc(vRef, { total_staked: increment(stake.amount) }, { merge: true });
+      setFeedback('success', `${stake.amount.toLocaleString()} EXN successfully locked.`, hash);
+    }, 6000);
+  }, [db, setFeedback]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
     if (!db) return;
-    const sRef = doc(db, 'stakes', stakeId);
-    const gRef = doc(db, 'protocol', 'global');
-    const vRef = doc(db, 'validators', validatorId);
-    setDoc(sRef, { unstaked: true }, { merge: true });
-    setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
-    setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
-  }, [db]);
+    setFeedback('warning', 'Processing unstake request... (6s simulation)');
+    
+    setTimeout(() => {
+      const sRef = doc(db, 'stakes', stakeId);
+      const gRef = doc(db, 'protocol', 'global');
+      const vRef = doc(db, 'validators', validatorId);
+      const hash = generateTxHash();
+      
+      setDoc(sRef, { unstaked: true }, { merge: true });
+      setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
+      setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
+      setFeedback('success', 'Principal returned to wallet.', hash);
+    }, 6000);
+  }, [db, setFeedback]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, newCheckpoint: number, wallet: string) => {
     if (!db) return;
-    const sRef = doc(db, 'stakes', stakeId);
-    setDoc(sRef, { reward_checkpoint: newCheckpoint }, { merge: true });
-    updateUserBalance(wallet, amount, 0);
-  }, [db, updateUserBalance]);
+    setFeedback('warning', 'Harvesting yield... (6s simulation)');
+    
+    setTimeout(() => {
+      const sRef = doc(db, 'stakes', stakeId);
+      const hash = generateTxHash();
+      setDoc(sRef, { reward_checkpoint: newCheckpoint }, { merge: true });
+      updateUserBalance(wallet, amount, 0);
+      setFeedback('success', 'Rewards successfully harvested.', hash);
+    }, 6000);
+  }, [db, updateUserBalance, setFeedback]);
 
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
     if (!db || !walletAddress) return;
-    const pRef = doc(db, 'proposals', pId.toString());
-    const gRef = doc(db, 'protocol', 'global');
-    setDoc(pRef, {
-      yes_votes: increment(support ? weight : 0),
-      no_votes: increment(!support ? weight : 0),
-      comments: arrayUnion(comment),
-      voters: arrayUnion(walletAddress)
-    }, { merge: true });
-    setDoc(gRef, { treasuryBalance: increment(3) }, { merge: true });
-  }, [db, walletAddress]);
+    setFeedback('warning', 'Recording consensus decision... (6s simulation)');
+    
+    setTimeout(() => {
+      const pRef = doc(db, 'proposals', pId.toString());
+      const gRef = doc(db, 'protocol', 'global');
+      const hash = generateTxHash();
+      
+      setDoc(pRef, {
+        yes_votes: increment(support ? weight : 0),
+        no_votes: increment(!support ? weight : 0),
+        comments: arrayUnion(comment),
+        voters: arrayUnion(walletAddress)
+      }, { merge: true });
+      setDoc(gRef, { treasuryBalance: increment(3) }, { merge: true });
+      setFeedback('success', 'Vote recorded on-chain.', hash);
+    }, 6000);
+  }, [db, walletAddress, setFeedback]);
 
   const createProposal = useCallback((proposal: any) => {
     if (!db) return;
-    const pRef = doc(db, 'proposals', proposal.id.toString());
-    const gRef = doc(db, 'protocol', 'global');
-    setDoc(pRef, proposal);
-    setDoc(gRef, { treasuryBalance: increment(10) }, { merge: true });
-  }, [db]);
+    setFeedback('warning', 'Broadcasting proposal to network... (6s simulation)');
+    
+    setTimeout(() => {
+      const pRef = doc(db, 'proposals', proposal.id.toString());
+      const gRef = doc(db, 'protocol', 'global');
+      const hash = generateTxHash();
+      
+      setDoc(pRef, proposal);
+      setDoc(gRef, { treasuryBalance: increment(10) }, { merge: true });
+      setFeedback('success', 'Proposal broadcast successfully.', hash);
+    }, 6000);
+  }, [db, setFeedback]);
 
   const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
     if (!db) return;
-    const pRef = doc(db, 'proposals', pId.toString());
-    const gRef = doc(db, 'protocol', 'global');
-    setDoc(pRef, { executed: true }, { merge: true });
-    if (passed && type === 1) {
-      setDoc(gRef, { treasuryBalance: increment(-amount) }, { merge: true });
-      if (recipient === wallet) updateUserBalance(wallet, amount, 0);
-    }
-  }, [db, updateUserBalance]);
+    setFeedback('warning', 'Enacting DAO consensus... (6s simulation)');
+    
+    setTimeout(() => {
+      const pRef = doc(db, 'proposals', pId.toString());
+      const gRef = doc(db, 'protocol', 'global');
+      const hash = generateTxHash();
+      
+      setDoc(pRef, { executed: true }, { merge: true });
+      if (passed && type === 1) {
+        setDoc(gRef, { treasuryBalance: increment(-amount) }, { merge: true });
+        if (recipient === wallet) updateUserBalance(wallet, amount, 0);
+      }
+      setFeedback('success', 'Proposal execution complete.', hash);
+    }, 6000);
+  }, [db, updateUserBalance, setFeedback]);
 
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
     if (!db) return;
-    const gRef = doc(db, 'protocol', 'global');
-    setDoc(gRef, {
-      lastCrankedEpoch: targetEpoch,
-      rewardVaultBalance: increment(-totalPool)
-    }, { merge: true });
-  }, [db]);
+    setFeedback('warning', 'Settling epoch rewards... (6s simulation)');
+    
+    setTimeout(() => {
+      const gRef = doc(db, 'protocol', 'global');
+      const hash = generateTxHash();
+      setDoc(gRef, {
+        lastCrankedEpoch: targetEpoch,
+        rewardVaultBalance: increment(-totalPool)
+      }, { merge: true });
+      setFeedback('success', `Epoch ${targetEpoch} successfully settled.`, hash);
+    }, 6000);
+  }, [db, setFeedback]);
 
   const registerValidator = useCallback((validator: any, licenseId: string) => {
     if (!db) return;
-    const vRef = doc(db, 'validators', validator.id);
-    const lRef = doc(db, 'licenses', licenseId);
-    setDoc(vRef, validator).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'create' }));
-    });
-    setDoc(lRef, { is_claimed: true }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: lRef.path, operation: 'update' }));
-    });
-  }, [db]);
+    setFeedback('warning', 'Provisioning XNode sector... (6s simulation)');
+    
+    setTimeout(() => {
+      const vRef = doc(db, 'validators', validator.id);
+      const lRef = doc(db, 'licenses', licenseId);
+      const hash = generateTxHash();
+      
+      setDoc(vRef, validator).then(() => {
+        setDoc(lRef, { is_claimed: true }, { merge: true });
+        setFeedback('success', 'XNode identity registered.', hash);
+      }).catch(err => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'create' }));
+      });
+    }, 6000);
+  }, [db, setFeedback]);
 
   const updateValidator = useCallback((vId: string, data: any) => {
     if (!db) return;
@@ -283,16 +352,22 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
     if (!db) return;
-    const vRef = doc(db, 'validators', vId);
-    const lRef = doc(db, 'licenses', licenseId);
-    deleteDoc(vRef).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'delete' }));
-    });
-    setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: lRef.path, operation: 'update' }));
-    });
-    updateUserBalance(wallet, seedRefund + rewards, 0);
-  }, [db, updateUserBalance]);
+    setFeedback('warning', 'Decommissioning XNode identity... (6s simulation)');
+    
+    setTimeout(() => {
+      const vRef = doc(db, 'validators', vId);
+      const lRef = doc(db, 'licenses', licenseId);
+      const hash = generateTxHash();
+      
+      deleteDoc(vRef).then(() => {
+        setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true });
+        updateUserBalance(wallet, seedRefund + rewards, 0);
+        setFeedback('success', 'Registration terminated and license burned.', hash);
+      }).catch(err => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'delete' }));
+      });
+    }, 6000);
+  }, [db, updateUserBalance, setFeedback]);
 
   const toggleValidator = useCallback((vId: string, status: boolean) => {
     if (!db) return;

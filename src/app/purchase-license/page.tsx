@@ -8,6 +8,16 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 import Image from 'next/image';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function PurchaseLicensePage() {
   const { publicKey, connected } = useWallet();
@@ -15,7 +25,7 @@ export default function PurchaseLicensePage() {
   const { state, isLoaded, setFeedback, mintLicense, usdcBalance } = useProtocolState();
   const [mounted, setMounted] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
-  const [mintPhase, setMintPhase] = useState<string | null>(null);
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -50,40 +60,35 @@ export default function PurchaseLicensePage() {
   const myLicenses = state.licenses.filter(l => l.owner === walletAddress);
   const hasLicense = myLicenses.length > 0;
 
-  const handlePurchase = () => {
+  const handleMintInitiate = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     if (hasLicense) return setFeedback('warning', 'Only one XNode License permitted per wallet.');
     if (totalLimit > 0 && currentMintedCount >= totalLimit) return setFeedback('warning', 'Maximum license supply cap reached.');
-    
-    if (licensePrice > 0 && usdcBalance < licensePrice) return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
+    if (licensePrice > 0 && usdcBalance < licensePrice) return setFeedback('error', `Insufficient USDC balance.`);
 
+    setShowReview(true);
+  };
+
+  const confirmMint = () => {
     setIsMinting(true);
-    setMintPhase('Provisioning NFT Mint Account...');
+    setShowReview(false);
     
+    const mintAddress = `XNODE-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+    const newLicense = { 
+      id: mintAddress, 
+      owner: walletAddress, 
+      is_claimed: false, 
+      is_burned: false,
+      metadata_uri: `https://arweave.net/${Math.random().toString(36).substring(2, 12)}`,
+      image_url: `https://picsum.photos/seed/${mintAddress}/400/400`
+    };
+
+    mintLicense(walletAddress, licensePrice, newLicense);
+    
+    // Reset minting state after standard 6s delay (handled in state hook)
     setTimeout(() => {
-      setMintPhase('Creating Metaplex Metadata Account...');
-      setTimeout(() => {
-        setMintPhase('Uploading Logo to Arweave...');
-        setTimeout(() => {
-          const mintAddress = `XNODE-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-          const newLicense = { 
-            id: mintAddress, 
-            owner: walletAddress, 
-            is_claimed: false, 
-            is_burned: false,
-            metadata_uri: `https://arweave.net/${Math.random().toString(36).substring(2, 12)}`,
-            image_url: `https://picsum.photos/seed/${mintAddress}/400/400`
-          };
-
-          // Use the consolidated atomic minting function
-          mintLicense(walletAddress, licensePrice, newLicense);
-
-          setIsMinting(false);
-          setMintPhase(null);
-          setFeedback('success', `XNode License NFT ${shortenAddress(mintAddress)} minted successfully.`);
-        }, 1500);
-      }, 1500);
-    }, 1500);
+      setIsMinting(false);
+    }, 6500);
   };
 
   return (
@@ -113,7 +118,7 @@ export default function PurchaseLicensePage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-emerald-500">{licensePrice.toLocaleString()} USDC</p>
+                <p className="text-sm font-bold text-emerald-500 font-mono">{licensePrice.toLocaleString()} USDC</p>
               </div>
             </div>
 
@@ -136,14 +141,14 @@ export default function PurchaseLicensePage() {
               
               <div className="space-y-4">
                 <button 
-                  onClick={handlePurchase} 
+                  onClick={handleMintInitiate} 
                   disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || isMinting || hasLicense} 
                   className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
                 >
                   {isMinting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                      {mintPhase || 'Executing On-Chain Mint...'}
+                      Provisioning NFT Sector...
                     </>
                   ) : hasLicense ? (
                     'License Already Owned'
@@ -154,11 +159,6 @@ export default function PurchaseLicensePage() {
                     </>
                   )}
                 </button>
-                {hasLicense && (
-                  <p className="text-[10px] text-center text-amber-500 uppercase font-black tracking-widest">
-                    Only one XNode License permitted per wallet address.
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -202,6 +202,42 @@ export default function PurchaseLicensePage() {
            </div>
         </div>
       </div>
+
+      {/* Mint Review Dialog */}
+      <AlertDialog open={showReview} onOpenChange={setShowReview}>
+        <AlertDialogContent className="exn-card border-primary/40 bg-black/90 backdrop-blur-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
+              <ShieldCheck className="w-6 h-6" />
+              Review NFT Minting
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Action</span>
+                  <span className="text-foreground font-black">Mint XNode License NFT</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Standard</span>
+                  <span className="text-foreground font-bold">Metaplex Master Edition</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Mint Cost</span>
+                  <span className="text-emerald-500 font-mono font-bold">{licensePrice.toLocaleString()} USDC</span>
+                </div>
+              </div>
+              
+              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                By confirming, the mint cost will be deducted from your USDC balance. The XNode License is required to register a validator on the network. This transaction is final.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-6">
+            <AlertDialogCancel className="exn-button-outline text-[10px] h-12 uppercase font-black">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmMint} className="exn-button text-[10px] h-12 uppercase font-black">Confirm & Mint</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

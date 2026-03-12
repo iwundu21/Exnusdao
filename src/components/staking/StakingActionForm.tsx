@@ -2,7 +2,17 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Info, Sparkles, Lock, Unlock, Clock, CalendarDays } from 'lucide-react';
+import { Wallet, Info, Sparkles, Lock, Unlock, Clock, CalendarDays, ShieldCheck } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -30,6 +40,7 @@ export function StakingActionForm({
   const [duration, setDuration] = useState('30');
   const [activeTab, setActiveTab] = useState<'stake' | 'my-stakes'>('stake');
   const [now, setNow] = useState(Date.now());
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -52,15 +63,22 @@ export function StakingActionForm({
     }
   };
 
-  const handleAction = () => {
+  const initiateStake = () => {
     if (!connected) return setFeedback('warning', 'Please connect your wallet to initiate staking.');
     const rawAmount = amountInput.replace(/,/g, '');
     const numAmt = Number(rawAmount);
     if (!rawAmount || isNaN(numAmt) || numAmt <= 0) return setFeedback('error', 'Invalid amount specified.');
     if (numAmt > exnBalance) return setFeedback('error', 'Insufficient EXN balance.');
     if (!selectedNode) return setFeedback('warning', 'Target validator selection required.');
+    
+    setShowReview(true);
+  };
 
+  const confirmStake = () => {
+    const rawAmount = amountInput.replace(/,/g, '');
+    const numAmt = Number(rawAmount);
     const tier = STAKING_TIERS.find(t => t.days.toString() === duration);
+    
     onStake({
       validator_id: selectedNode.id,
       amount: numAmt,
@@ -72,10 +90,12 @@ export function StakingActionForm({
       unstaked: false
     });
     setAmountInput('');
+    setShowReview(false);
   };
 
   const activeUserStakes = userStakes.filter((s: any) => !s.unstaked);
   const isStakeDisabled = !selectedNode || !amountInput || Number(amountInput.replace(/,/g, '')) <= 0 || !connected;
+  const currentTier = STAKING_TIERS.find(t => t.days.toString() === duration);
 
   return (
     <div className="exn-card p-8 space-y-6 sticky top-28 border-border/10">
@@ -143,11 +163,11 @@ export function StakingActionForm({
           </div>
 
           <button 
-            onClick={handleAction} 
+            onClick={initiateStake} 
             disabled={isStakeDisabled}
             className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${!isStakeDisabled ? 'exn-button text-[10px]' : 'bg-foreground/5 text-foreground/20 border border-border cursor-not-allowed text-[10px]'}`}
           >
-            Stake EXN
+            Review Transaction
           </button>
         </div>
       )}
@@ -157,7 +177,7 @@ export function StakingActionForm({
           <div className="flex justify-between items-center p-6 bg-secondary/10 border border-secondary/20 rounded-2xl">
             <div className="space-y-1">
               <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Global Claimable</p>
-              <p className="text-base font-bold text-secondary">{totalPendingRewards.toFixed(2)} EXN</p>
+              <p className="text-sm font-bold text-secondary font-mono">{totalPendingRewards.toFixed(2)} EXN</p>
             </div>
             <button 
               onClick={onClaim}
@@ -187,7 +207,7 @@ export function StakingActionForm({
                   <div key={s.id} className="p-5 bg-foreground/5 rounded-xl border border-border/10 space-y-4">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
-                         <span className="text-base font-bold text-foreground font-mono">{s.amount.toLocaleString()} EXN</span>
+                         <span className="text-sm font-bold text-foreground font-mono">{s.amount.toLocaleString()} EXN</span>
                          <p className="text-[10px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Node'}</p>
                          
                          <div className="flex flex-col gap-1.5 pt-2">
@@ -228,6 +248,50 @@ export function StakingActionForm({
           </div>
         </div>
       )}
+
+      {/* Transaction Review Dialog */}
+      <AlertDialog open={showReview} onOpenChange={setShowReview}>
+        <AlertDialogContent className="exn-card border-primary/40 bg-black/90 backdrop-blur-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
+              <ShieldCheck className="w-6 h-6" />
+              Review Transaction
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Action</span>
+                  <span className="text-foreground font-black">Lock Assets (Stake)</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Amount</span>
+                  <span className="text-primary font-mono font-bold">{amountInput} EXN</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Validator</span>
+                  <span className="text-foreground font-bold">{selectedNode?.name}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Duration</span>
+                  <span className="text-amber-500 font-bold">{currentTier?.label}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Yield Multiplier</span>
+                  <span className="text-emerald-500 font-black">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
+                </div>
+              </div>
+              
+              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                By confirming, your assets will be moved to the protocol's staked vault and locked for the selected duration. This action is irreversible once processed on-chain.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-6">
+            <AlertDialogCancel className="exn-button-outline text-[10px] h-12 uppercase font-black">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStake} className="exn-button text-[10px] h-12 uppercase font-black">Confirm & Broadcast</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

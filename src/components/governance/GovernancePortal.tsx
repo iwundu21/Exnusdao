@@ -5,6 +5,16 @@ import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap, Info, ShieldCheck, Wallet } from 'lucide-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votingEndsAt: number }) {
   const [timeLeft, setTimeLeft] = useState<{ label: string; value: string; colorClass: string }>({
@@ -17,13 +27,11 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
     const updateCountdown = () => {
       const now = Date.now();
       
-      // Phase 3: Concluded
       if (now > deadline) {
         setTimeLeft({ label: 'Proposal Concluded', value: '', colorClass: 'text-muted-foreground' });
         return true;
       }
 
-      // Phase 2: Voting Locked (Last 24 hours)
       if (now > votingEndsAt) {
         const diff = Math.max(0, deadline - now);
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -40,7 +48,6 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
         return false;
       }
 
-      // Phase 1: Voting Active (First 6 days)
       const diff = Math.max(0, votingEndsAt - now);
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -52,7 +59,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
         label: 'Voting Ends In: ', 
         value: `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`,
         colorClass: 'text-emerald-500' 
-  });
+      });
       return false;
     };
 
@@ -79,37 +86,46 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
   const [votingOn, setVotingOn] = useState<{ id: number; support: boolean } | null>(null);
   const [voteRationale, setVoteRationale] = useState('');
+  
+  const [reviewAction, setReviewAction] = useState<'create' | 'vote' | null>(null);
 
   const connected = !!walletAddress;
 
-  const handleCreate = () => {
+  const handleCreateRequest = () => {
     if (!connected) return setFeedback('warning', 'Please connect your wallet to submit proposals.');
     if (userStakeWeight < 1000000) {
-      return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum weight required to propose network changes.');
+      return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum weight required.');
     }
+    setReviewAction('create');
+  };
 
+  const handleVoteRequest = () => {
+    if (!connected) return setFeedback('warning', 'Please connect your wallet to participate in DAO consensus.');
+    if (!votingOn) return;
+    if (!isNodeOwner && userStakeWeight < 10000) {
+      return setFeedback('error', 'Consensus Requirement: 10,000 EXN minimum weight required.');
+    }
+    if (!voteRationale.trim()) {
+      return setFeedback('warning', 'Rationale Required: Please provide context for your consensus decision.');
+    }
+    setReviewAction('vote');
+  };
+
+  const confirmCreate = () => {
     onCreate({
       ...newProp,
       amount: Number(newProp.amount) || 0
     });
-    
     setShowCreate(false);
+    setReviewAction(null);
     setNewProp({ title: '', description: '', type: 0, amount: '', recipient: '' });
   };
 
-  const handleConfirmVote = () => {
-    if (!connected) return setFeedback('warning', 'Please connect your wallet to participate in DAO consensus.');
+  const confirmVote = () => {
     if (!votingOn) return;
-    
-    if (!isNodeOwner && userStakeWeight < 10000) {
-      return setFeedback('error', 'Consensus Requirement: 10,000 EXN minimum weight required to participate in DAO consensus.');
-    }
-    
-    if (!voteRationale.trim()) {
-      return setFeedback('warning', 'Rationale Required: Please provide context for your consensus decision.');
-    }
     onVote(votingOn.id, votingOn.support, voteRationale);
     setVotingOn(null);
+    setReviewAction(null);
     setVoteRationale('');
   };
 
@@ -140,7 +156,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
              <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Combined Consensus Weight</p>
            </div>
            <div className="text-right">
-             <p className="text-xl font-bold text-primary">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
+             <p className="text-base font-bold text-primary font-mono">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
              {connected && isNodeOwner && (
                <div className="flex items-center gap-1.5 justify-end text-[8px] text-emerald-500 font-black uppercase">
                  <ShieldCheck className="w-2.5 h-2.5" /> Includes 15M Seed Power
@@ -204,11 +220,11 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
           <div className="flex gap-4 mt-10">
             <button 
-              onClick={handleCreate} 
+              onClick={handleCreateRequest} 
               disabled={isProposalDisabled}
               className={`px-10 text-[10px] transition-all h-12 flex items-center justify-center font-black uppercase ${!isProposalDisabled ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
             >
-              Broadcast (10 EXN Fee)
+              Review & Broadcast
             </button>
             <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 text-[10px]">Cancel</button>
           </div>
@@ -282,7 +298,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                         className="exn-input h-24 text-xs bg-background"
                       />
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={handleConfirmVote} disabled={!voteRationale.trim()} className={`py-2 text-[10px] font-black uppercase ${voteRationale.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}>Confirm</button>
+                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim()} className={`py-2 text-[10px] font-black uppercase ${voteRationale.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}>Review</button>
                         <button onClick={() => setVotingOn(null)} className="exn-button-outline py-2 text-[10px]">Cancel</button>
                       </div>
                     </div>
@@ -302,7 +318,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 </div>
               </div>
 
-              {/* Voter Rationales Section */}
               <div className="bg-background/40">
                 <button 
                   onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
@@ -343,6 +358,63 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           );
         })}
       </div>
+
+      {/* Governance Review Dialog */}
+      <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
+        <AlertDialogContent className="exn-card border-primary/40 bg-black/90 backdrop-blur-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
+              <ShieldCheck className="w-6 h-6" />
+              Review Governance Action
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                  <span className="text-muted-foreground">Action</span>
+                  <span className="text-foreground font-black">{reviewAction === 'create' ? 'Broadcast Proposal' : 'Cast Consensus Vote'}</span>
+                </div>
+                {reviewAction === 'create' ? (
+                  <>
+                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                      <span className="text-muted-foreground">Title</span>
+                      <span className="text-foreground font-bold truncate max-w-[200px]">{newProp.title}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                      <span className="text-muted-foreground">Network Fee</span>
+                      <span className="text-primary font-mono font-bold">10 EXN</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                      <span className="text-muted-foreground">Vote Stance</span>
+                      <span className={votingOn?.support ? "text-emerald-500 font-bold" : "text-destructive font-bold"}>
+                        {votingOn?.support ? 'YES / SUPPORT' : 'NO / REJECT'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                      <span className="text-muted-foreground">Consensus Weight</span>
+                      <span className="text-primary font-mono font-bold">{userStakeWeight.toLocaleString()} EXN</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                      <span className="text-muted-foreground">Network Fee</span>
+                      <span className="text-primary font-mono font-bold">3 EXN</span>
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                By confirming, your decision will be recorded on the global protocol ledger. Governance actions require network fees to prevent consensus spam.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-6">
+            <AlertDialogCancel className="exn-button-outline text-[10px] h-12 uppercase font-black">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={reviewAction === 'create' ? confirmCreate : confirmVote} className="exn-button text-[10px] h-12 uppercase font-black">Confirm & Broadcast</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
