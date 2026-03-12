@@ -3,7 +3,7 @@
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, collection, deleteDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, collection, deleteDoc, increment, arrayUnion } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -221,15 +221,17 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   }, [db, updateUserBalance]);
 
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
-    if (!db) return;
+    if (!db || !walletAddress) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
     setDoc(pRef, {
       yes_votes: increment(support ? weight : 0),
-      no_votes: increment(!support ? weight : 0)
+      no_votes: increment(!support ? weight : 0),
+      comments: arrayUnion(comment),
+      voters: arrayUnion(walletAddress)
     }, { merge: true });
     setDoc(gRef, { treasuryBalance: increment(3) }, { merge: true });
-  }, [db]);
+  }, [db, walletAddress]);
 
   const createProposal = useCallback((proposal: any) => {
     if (!db) return;
