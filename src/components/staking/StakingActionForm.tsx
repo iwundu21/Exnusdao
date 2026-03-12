@@ -191,7 +191,7 @@ export function StakingActionForm({
               <div className="relative z-10 flex justify-between items-center">
                 <div className="space-y-1">
                   <p className="text-[8px] text-white/30 uppercase font-black tracking-[0.3em]">Aggregate Yield</p>
-                  <p className="text-xl font-bold text-white font-mono tracking-tighter">{totalPendingRewards.toFixed(4)} <span className="text-[10px] text-secondary">EXN</span></p>
+                  <p className="text-sm font-bold text-white font-mono tracking-tighter">{totalPendingRewards.toFixed(4)} <span className="text-[10px] text-secondary">EXN</span></p>
                 </div>
                 <button 
                   onClick={onClaim}
@@ -212,7 +212,6 @@ export function StakingActionForm({
               ) : (
                 activeUserStakes.map((s: any) => {
                   const isLocked = now < s.unlock_timestamp;
-                  const unlockDate = new Date(s.unlock_timestamp);
                   const validator = validators?.find((v: any) => v.id === s.validator_id);
                   const multiplier = s.lock_multiplier || 1000;
                   const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000) : 0;
@@ -227,19 +226,14 @@ export function StakingActionForm({
                            </div>
                            <p className="text-[9px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Unknown Cluster'}</p>
                            
-                           <div className="flex flex-col gap-2 pt-1">
-                             <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest">
-                               {isLocked ? (
-                                 <div className="flex items-center gap-1.5 text-amber-500">
-                                   <Clock className="w-3 h-3" />
-                                   <span>Locked: {unlockDate.toLocaleDateString()}</span>
-                                 </div>
-                               ) : (
-                                 <div className="flex items-center gap-1.5 text-emerald-500">
-                                   <Unlock className="w-3 h-3" />
-                                   <span>Matured</span>
-                                 </div>
-                               )}
+                           <div className="flex flex-col gap-1.5 pt-2 border-t border-white/5 mt-2">
+                             <div className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-widest text-white/40">
+                               <Lock className="w-2.5 h-2.5" />
+                               <span>Locked: {new Date(s.staked_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                             </div>
+                             <div className={`flex items-center gap-1.5 text-[7px] font-black uppercase tracking-widest ${isLocked ? 'text-amber-500' : 'text-emerald-500'}`}>
+                               {isLocked ? <Clock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
+                               <span>Unlock: {new Date(s.unlock_timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
                              </div>
                            </div>
                         </div>
@@ -262,43 +256,45 @@ export function StakingActionForm({
       </div>
 
       <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary/40 bg-black/95 backdrop-blur-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6" />
-              Review Lock Operation
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-6 pt-6">
-                <div className="p-6 bg-white/5 rounded-2xl border border-white/5 space-y-4">
-                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                    <span className="text-white/30">Action</span>
-                    <span className="text-white font-black">Provision Stake</span>
+        <AlertDialogContent asChild>
+          <div className="exn-card border-primary/40 bg-black/95 backdrop-blur-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
+                <ShieldCheck className="w-6 h-6" />
+                Review Lock Operation
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-6 pt-6">
+                  <div className="p-6 bg-white/5 rounded-2xl border border-white/5 space-y-4">
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white/30">Action</span>
+                      <span className="text-white font-black">Provision Stake</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white/30">Amount</span>
+                      <span className="text-primary font-mono font-bold">{amountInput} EXN</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white/30">Target Cluster</span>
+                      <span className="text-white font-bold">{selectedNode?.name}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white/30">Yield Multiplier</span>
+                      <span className="text-emerald-500 font-black">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                    <span className="text-white/30">Amount</span>
-                    <span className="text-primary font-mono font-bold">{amountInput} EXN</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                    <span className="text-white/30">Target Cluster</span>
-                    <span className="text-white font-bold">{selectedNode?.name}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                    <span className="text-white/30">Yield Multiplier</span>
-                    <span className="text-emerald-500 font-black">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
-                  </div>
+                  
+                  <p className="text-[10px] text-white/40 uppercase leading-relaxed font-bold">
+                    Proceeding will lock your assets in the protocol's vault for {duration} days. This transaction is atomic and final on the network ledger.
+                  </p>
                 </div>
-                
-                <p className="text-[10px] text-white/40 uppercase leading-relaxed font-bold">
-                  Proceeding will lock your assets in the protocol's vault for {duration} days. This transaction is atomic and final on the network ledger.
-                </p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="pt-8">
-            <AlertDialogCancel className="exn-button-outline text-[9px] h-12 uppercase font-black border-white/10 text-white hover:bg-white/5">Abort</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStake} className="exn-button text-[9px] h-12 uppercase font-black">Confirm Provisioning</AlertDialogAction>
-          </AlertDialogFooter>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="pt-8">
+              <AlertDialogCancel className="exn-button-outline text-[9px] h-12 uppercase font-black border-white/10 text-white hover:bg-white/5">Abort</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmStake} className="exn-button text-[9px] h-12 uppercase font-black">Confirm Provisioning</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
