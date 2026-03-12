@@ -12,9 +12,8 @@ export const metadata: Metadata = {
   title: 'Exnus protocol | Network',
   description: 'Stake EXN tokens with top-tier validators on Solana.',
   icons: {
-    icon: [],
-    apple: [],
-    shortcut: [],
+    icon: 'data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    apple: 'data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
   },
 };
 
