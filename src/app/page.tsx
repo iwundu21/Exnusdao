@@ -255,7 +255,8 @@ export default function Home() {
               <ValidatorDiscovery 
                 validators={state.validators} 
                 onSelect={setSelectedValidator} 
-                userStakes={state.userStakes.filter(s => s.owner === walletAddress)} 
+                userStakes={state.userStakes} 
+                walletAddress={walletAddress}
                 selectedId={selectedValidator?.id}
                 setFeedback={setFeedback}
               />

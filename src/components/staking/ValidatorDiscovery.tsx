@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { Users, TrendingUp, MapPin, Info } from 'lucide-react';
 
-export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate, selectedId, setFeedback }: any) {
+export function ValidatorDiscovery({ validators, onSelect, userStakes = [], walletAddress, onMigrate, selectedId, setFeedback }: any) {
   // Dynamic calculation of total network weight for percentage share
   const totalNetworkWeight = useMemo(() => {
     return validators.reduce((acc: number, v: any) => acc + (v.total_staked || 0), 0);
@@ -25,11 +25,11 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
           const isUrl = validator.logo_uri?.startsWith('http') || validator.logo_uri?.startsWith('data:');
           const logoUrl = isUrl ? validator.logo_uri : `https://picsum.photos/seed/${validator.logo_uri}/800/400`;
           const isSelected = selectedId === validator.id;
-          const isUserStaked = userStakes.some((s: any) => s.validator_id === validator.id && !s.unstaked);
           
-          // Calculate staker count for this specific node
-          // Note: In a real app we'd fetch this from the shared state's userStakes
-          const stakerCount = validator.total_staked > 0 ? Math.floor(validator.total_staked / 500000) + 1 : 0;
+          // Real staker count calculation
+          const nodeStakes = userStakes.filter((s: any) => s.validator_id === validator.id && !s.unstaked);
+          const stakerCount = Array.from(new Set(nodeStakes.map((s: any) => s.owner))).length;
+          const isUserStaked = nodeStakes.some((s: any) => s.owner === walletAddress);
           
           // Calculate dynamic percentage share of total network weight
           const weightShare = totalNetworkWeight > 0 ? (validator.total_staked / totalNetworkWeight) * 100 : 0;
@@ -115,7 +115,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
                      <button 
                        onClick={() => {
                           const activeNode = validators.find((v: any) => v.is_active);
-                          const stake = userStakes.find((s: any) => s.validator_id === validator.id && !s.unstaked);
+                          const stake = nodeStakes.find((s: any) => s.owner === walletAddress);
                           if (activeNode && stake) onMigrate(stake.id, activeNode.id);
                           else setFeedback('error', 'Protocol Migration Failed: No active target node available.');
                        }}
