@@ -10,7 +10,7 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 export function Navbar() {
   const { connected, publicKey } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const { state, isLoaded, registerUser } = useProtocolState();
+  const { isLoaded, registerUser, exnBalance, usdcBalance } = useProtocolState();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -22,9 +22,6 @@ export function Navbar() {
       registerUser(walletAddress);
     }
   }, [connected, walletAddress, isLoaded, registerUser]);
-
-  const currentExn = isLoaded ? state.exnBalance : 0;
-  const currentUsdc = isLoaded ? state.usdcBalance : 0;
 
   return (
     <nav className="flex items-center justify-between px-10 py-6 border-b border-border backdrop-blur-md fixed top-0 left-0 w-full z-50 bg-background/80">
@@ -53,11 +50,11 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-4 animate-in fade-in duration-300">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/5 rounded-full border border-border">
               <Coins className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold text-primary">{currentExn.toLocaleString()} EXN</span>
+              <span className="text-xs font-bold text-primary">{exnBalance.toLocaleString()} EXN</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/5 rounded-full border border-border">
               <CircleDollarSign className="w-4 h-4 text-emerald-500" />
-              <span className="text-xs font-bold text-emerald-500">{currentUsdc.toLocaleString()} USDC</span>
+              <span className="text-xs font-bold text-emerald-500">{usdcBalance.toLocaleString()} USDC</span>
             </div>
           </div>
         )}

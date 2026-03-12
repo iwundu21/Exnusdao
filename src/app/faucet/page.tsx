@@ -11,8 +11,9 @@ const DAILY_USDC_MAX = 10000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function FaucetPage() {
-  const { connected } = useWallet();
-  const { state, setState, isLoaded, setFeedback } = useProtocolState();
+  const { connected, publicKey } = useWallet();
+  const walletAddress = publicKey?.toBase58() || '';
+  const { isLoaded, setFeedback, updateUserBalance, updateFaucetClaim, lastExnFaucetClaim, lastUsdcFaucetClaim } = useProtocolState();
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(Date.now());
 
@@ -43,8 +44,8 @@ export default function FaucetPage() {
     );
   }
 
-  const exnTimeLeft = Math.max(0, (state.lastExnFaucetClaim || 0) + DAY_MS - now);
-  const usdcTimeLeft = Math.max(0, (state.lastUsdcFaucetClaim || 0) + DAY_MS - now);
+  const exnTimeLeft = Math.max(0, (lastExnFaucetClaim || 0) + DAY_MS - now);
+  const usdcTimeLeft = Math.max(0, (lastUsdcFaucetClaim || 0) + DAY_MS - now);
 
   const formatTime = (ms: number) => {
     const h = Math.floor(ms / (1000 * 60 * 60));
@@ -56,22 +57,16 @@ export default function FaucetPage() {
   const handleClaimExn = () => {
     if (exnTimeLeft > 0) return setFeedback('warning', `Faucet cooling down. Available in ${formatTime(exnTimeLeft)}.`);
     
-    setState(prev => ({
-      ...prev,
-      exnBalance: prev.exnBalance + DAILY_EXN_MAX,
-      lastExnFaucetClaim: Date.now()
-    }));
+    updateUserBalance(walletAddress, DAILY_EXN_MAX, 0);
+    updateFaucetClaim(walletAddress, 'exn');
     setFeedback('success', `${DAILY_EXN_MAX.toLocaleString()} EXN provisioned to wallet.`);
   };
 
   const handleClaimUsdc = () => {
     if (usdcTimeLeft > 0) return setFeedback('warning', `Faucet cooling down. Available in ${formatTime(usdcTimeLeft)}.`);
     
-    setState(prev => ({
-      ...prev,
-      usdcBalance: prev.usdcBalance + DAILY_USDC_MAX,
-      lastUsdcFaucetClaim: Date.now()
-    }));
+    updateUserBalance(walletAddress, 0, DAILY_USDC_MAX);
+    updateFaucetClaim(walletAddress, 'usdc');
     setFeedback('success', `${DAILY_USDC_MAX.toLocaleString()} USDC provisioned to wallet.`);
   };
 
@@ -89,7 +84,6 @@ export default function FaucetPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* EXN Faucet */}
         <div className="exn-card p-8 space-y-8 border-primary/20 bg-primary/5">
           <div className="flex justify-between items-start">
              <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
@@ -121,7 +115,6 @@ export default function FaucetPage() {
           </button>
         </div>
 
-        {/* USDC Faucet */}
         <div className="exn-card p-8 space-y-8 border-emerald-500/20 bg-emerald-500/5">
           <div className="flex justify-between items-start">
              <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">

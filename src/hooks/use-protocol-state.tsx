@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 export interface Validator {
   id: string;
@@ -87,8 +88,10 @@ export interface TransactionFeedback {
 
 export interface UserProfile {
   address: string;
-  username: string;
-  bio: string;
+  exnBalance: number;
+  usdcBalance: number;
+  lastExnFaucetClaim: number;
+  lastUsdcFaucetClaim: number;
   registeredAt: number;
   lastActive: number;
   totalTransactions: number;
@@ -102,8 +105,6 @@ export interface NetworkMetadata {
 }
 
 export interface ProtocolState {
-  exnBalance: number;
-  usdcBalance: number;
   totalStaked: number;
   treasuryBalance: number;
   rewardVaultBalance: number;
@@ -128,15 +129,11 @@ export interface ProtocolState {
   usdcVaultPda: string;
   stakedVaultPda: string;
   adminWallet?: string;
-  lastExnFaucetClaim?: number;
-  lastUsdcFaucetClaim?: number;
   profiles: Record<string, UserProfile>;
   metadata: NetworkMetadata;
 }
 
 const INITIAL_STATE: ProtocolState = {
-  exnBalance: 25000000, 
-  usdcBalance: 10000,
   totalStaked: 15000000, 
   treasuryBalance: 50000,
   rewardVaultBalance: 100000,
@@ -185,13 +182,11 @@ const INITIAL_STATE: ProtocolState = {
   ],
   proposals: [],
   settledEpochs: [],
-  lastExnFaucetClaim: 0,
-  lastUsdcFaucetClaim: 0,
   profiles: {},
   metadata: {
     version: '1.0.0-DEMO',
     totalVolume: 0,
-    totalUsers: 1,
+    totalUsers: 0,
     lastUpdate: Date.now()
   }
 };
@@ -203,11 +198,19 @@ interface ProtocolContextType {
   setFeedback: (status: 'success' | 'error' | 'warning', message: string) => void;
   clearFeedback: () => void;
   registerUser: (address: string) => void;
+  // Per-user derived state helpers
+  exnBalance: number;
+  usdcBalance: number;
+  lastExnFaucetClaim: number;
+  lastUsdcFaucetClaim: number;
+  updateUserBalance: (address: string, exn: number, usdc: number) => void;
+  updateFaucetClaim: (address: string, type: 'exn' | 'usdc') => void;
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
 
 export function ProtocolProvider({ children }: { children: ReactNode }) {
+  const { publicKey } = useWallet();
   const [state, setState] = useState<ProtocolState>(INITIAL_STATE);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -269,8 +272,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
       const newProfile: UserProfile = {
         address,
-        username: `XUser-${address.slice(0, 4)}`,
-        bio: 'Exnus Protocol Participant',
+        exnBalance: 25000000,
+        usdcBalance: 10000,
+        lastExnFaucetClaim: 0,
+        lastUsdcFaucetClaim: 0,
         registeredAt: Date.now(),
         lastActive: Date.now(),
         totalTransactions: 1
@@ -291,8 +296,62 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const updateUserBalance = useCallback((address: string, exnDelta: number, usdcDelta: number) => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile) return prev;
+      return {
+        ...prev,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            exnBalance: Math.max(0, profile.exnBalance + exnDelta),
+            usdcBalance: Math.max(0, profile.usdcBalance + usdcDelta),
+            lastActive: Date.now(),
+            totalTransactions: profile.totalTransactions + 1
+          }
+        }
+      };
+    });
+  }, []);
+
+  const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile) return prev;
+      return {
+        ...prev,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            [type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim']: Date.now(),
+            lastActive: Date.now()
+          }
+        }
+      };
+    });
+  }, []);
+
+  const walletAddress = publicKey?.toBase58();
+  const activeProfile = walletAddress ? state.profiles[walletAddress] : null;
+
   return (
-    <ProtocolContext.Provider value={{ state, setState, isLoaded, setFeedback, clearFeedback, registerUser }}>
+    <ProtocolContext.Provider value={{ 
+      state, 
+      setState, 
+      isLoaded, 
+      setFeedback, 
+      clearFeedback, 
+      registerUser,
+      exnBalance: activeProfile?.exnBalance ?? 0,
+      usdcBalance: activeProfile?.usdcBalance ?? 0,
+      lastExnFaucetClaim: activeProfile?.lastExnFaucetClaim ?? 0,
+      lastUsdcFaucetClaim: activeProfile?.lastUsdcFaucetClaim ?? 0,
+      updateUserBalance,
+      updateFaucetClaim
+    }}>
       {children}
     </ProtocolContext.Provider>
   );
