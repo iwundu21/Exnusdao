@@ -9,7 +9,7 @@
   "licensePrice": 500,
   "isPaused": false,
   "lastTransaction": null,
-  "lastCrankedEpoch": 1,
+  "lastCrankedEpoch": 0,
   "networkStartDate": 1739800000000,
   "exnMint": "EXN1111111111111111111111111111111111111111",
   "usdcMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
@@ -30,8 +30,8 @@
       "seed_deposited": true,
       "total_staked": 15000000,
       "commission_rate": 500,
-      "accrued_node_rewards": 75,
-      "global_reward_index": 95,
+      "accrued_node_rewards": 0,
+      "global_reward_index": 0,
       "license_id": "XNODE-DEFAULT"
     }
   ],
@@ -46,20 +46,7 @@
     }
   ],
   "proposals": [],
-  "settledEpochs": [
-    {
-      "epoch": 1,
-      "settledAt": 1773322544740,
-      "totalPool": 1500,
-      "validatorShares": [
-        {
-          "validatorId": "v1",
-          "share": 1425,
-          "commission": 75
-        }
-      ]
-    }
-  ],
+  "settledEpochs": [],
   "profiles": {
     "64V8MAj1ZPt34DC3quXcDYJinLho31KH5CtrLy7NjSpL": {
       "address": "64V8MAj1ZPt34DC3quXcDYJinLho31KH5CtrLy7NjSpL",
@@ -68,8 +55,8 @@
       "lastExnFaucetClaim": 0,
       "lastUsdcFaucetClaim": 0,
       "registeredAt": 1773322434857,
-      "lastActive": 1773322434857,
-      "totalTransactions": 1
+      "lastActive": 1773322607065,
+      "totalTransactions": 2
     }
   },
   "metadata": {
