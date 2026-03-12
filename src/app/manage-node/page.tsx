@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -17,7 +18,7 @@ export default function ManageNodePage() {
   const walletAddress = publicKey?.toBase58() || '';
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { state, setState, isLoaded, setFeedback } = useProtocolState();
+  const { state, setState, isLoaded, setFeedback, exnBalance, updateUserBalance } = useProtocolState();
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
@@ -100,21 +101,23 @@ export default function ManageNodePage() {
     const validator = state.validators.find(v => v.id === vId);
     if (!validator || (validator.accrued_node_rewards || 0) <= 0) return;
     const reward = validator.accrued_node_rewards;
+    
+    updateUserBalance(walletAddress, reward, 0);
     setState(prev => ({
       ...prev,
-      exnBalance: prev.exnBalance + reward,
       validators: prev.validators.map(v => v.id === vId ? { ...v, accrued_node_rewards: 0 } : v)
     }));
     setFeedback('success', `Withdrew ${reward.toFixed(2)} EXN performance commission.`);
   };
 
   const handleDepositSeed = (vId: string) => {
-    if (state.exnBalance < SEED_DEPOSIT_AMOUNT) {
-      return setFeedback('error', `Insufficient EXN. Seed deposit: ${SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN.`);
+    if (exnBalance < SEED_DEPOSIT_AMOUNT) {
+      return setFeedback('error', `Insufficient EXN. Seed deposit of ${SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN required.`);
     }
+    
+    updateUserBalance(walletAddress, -SEED_DEPOSIT_AMOUNT, 0);
     setState(prev => ({
       ...prev,
-      exnBalance: Math.max(0, prev.exnBalance - SEED_DEPOSIT_AMOUNT),
       validators: prev.validators.map(v => v.id === vId ? { 
         ...v, 
         seed_deposited: true, 
@@ -128,9 +131,10 @@ export default function ManageNodePage() {
   const handleWithdrawSeed = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node?.seed_deposited) return;
+
+    updateUserBalance(walletAddress, SEED_DEPOSIT_AMOUNT, 0);
     setState(prev => ({
       ...prev,
-      exnBalance: prev.exnBalance + SEED_DEPOSIT_AMOUNT,
       validators: prev.validators.map(v => v.id === vId ? { 
         ...v, 
         seed_deposited: false, 
@@ -146,17 +150,21 @@ export default function ManageNodePage() {
     if (!node) return;
     const delegatorStake = (node.total_staked || 0) - (node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0);
     const activeDelegators = state.userStakes.filter(s => s.validator_id === vId && !s.unstaked);
+    
     if (delegatorStake > 0.01 || activeDelegators.length > 0) {
-       return setFeedback('error', 'Active delegator capital found. Cannot decommission.');
+       return setFeedback('error', 'Active delegator capital found. Cannot decommission while capital is locked.');
     }
+
     const seedRefund = node.seed_deposited ? SEED_DEPOSIT_AMOUNT : 0;
     const rewards = node.accrued_node_rewards || 0;
+    
+    updateUserBalance(walletAddress, seedRefund + rewards, 0);
     setState(prev => ({
       ...prev,
-      exnBalance: prev.exnBalance + seedRefund + rewards,
       validators: prev.validators.filter(v => v.id !== vId),
       licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_burned: true, is_claimed: false } : l)
     }));
+    
     setFeedback('success', 'XNode account terminated. Associated XNode License burned.');
     router.push('/');
   };
@@ -231,7 +239,7 @@ export default function ManageNodePage() {
                           <p className="text-[10px] uppercase font-black tracking-widest">Initialization Required</p>
                         </div>
                         <p className="text-xs text-muted-foreground leading-relaxed">
-                          A minimum seed deposit of <span className="text-foreground font-bold">{SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN</span> is required.
+                          A minimum seed deposit of <span className="text-foreground font-bold">{SEED_DEPOSIT_AMOUNT.toLocaleString()} EXN</span> is required to start sharding rewards.
                         </p>
                         <button onClick={() => handleDepositSeed(node.id)} className="w-full py-3 bg-amber-500 text-black text-[10px] font-black uppercase rounded-lg hover:bg-amber-400 transition-all">
                           Deposit Protocol Seed
@@ -333,7 +341,7 @@ export default function ManageNodePage() {
                           <div className="space-y-1">
                              <p className="text-sm font-bold text-foreground uppercase">Close XNode Account</p>
                              <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                               Decommissioning is permanent. The associated XNode license will be burned 🔥 and cannot be reused.
+                               Decommissioning is permanent. The associated XNode license will be burned 🔥 and cannot be reused. Accrued commissions and protocol seed will be refunded.
                              </p>
                           </div>
                           <button onClick={() => { if (window.confirm("Permanent closure will burn your XNode license. Proceed?")) handleCloseAccount(node.id); }} className="px-8 py-3 bg-destructive/10 text-destructive border border-destructive/40 rounded-lg text-[10px] font-black uppercase hover:bg-destructive hover:text-white transition-all flex items-center gap-2">
