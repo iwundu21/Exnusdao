@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Settings, LayoutDashboard, Ticket, Hammer, Coins, CircleDollarSign, User } from 'lucide-react';
+import { Settings, LayoutDashboard, Ticket, Hammer, Coins, CircleDollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -25,7 +25,6 @@ export function Navbar() {
 
   const currentExn = isLoaded ? state.exnBalance : 0;
   const currentUsdc = isLoaded ? state.usdcBalance : 0;
-  const profile = isLoaded && walletAddress ? state.profiles[walletAddress] : null;
 
   return (
     <nav className="flex items-center justify-between px-10 py-6 border-b border-border backdrop-blur-md fixed top-0 left-0 w-full z-50 bg-background/80">
@@ -55,10 +54,6 @@ export function Navbar() {
 
         {mounted && connected && isLoaded && (
           <div className="hidden lg:flex items-center gap-4 animate-in fade-in duration-300">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/5 rounded-full border border-border">
-              <User className="w-4 h-4 text-secondary" />
-              <span className="text-[10px] font-black text-secondary uppercase">{profile?.username || 'Guest'}</span>
-            </div>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/5 rounded-full border border-border">
               <Coins className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-primary">{currentExn.toLocaleString()} EXN</span>
