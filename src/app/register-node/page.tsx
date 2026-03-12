@@ -78,6 +78,11 @@ export default function RegisterNodePage() {
     if (license.is_burned) return setFeedback('error', 'License NFT has been burned.');
     if (license.is_claimed) return setFeedback('error', 'License is already bound to another node.');
 
+    // Final field check before submission
+    if (!formData.name.trim() || !formData.location.trim() || !formData.description.trim() || !formData.licenseId) {
+      return setFeedback('error', 'All required fields must be completed.');
+    }
+
     const newNode = {
       id: `v${Date.now()}`,
       owner: walletAddress,
@@ -100,7 +105,7 @@ export default function RegisterNodePage() {
       licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
     }));
     
-    setFeedback('success', 'NFT-Bound node registration successful.');
+    setFeedback('success', 'On-chain node registration successful.');
     setTimeout(() => router.push('/manage-node'), 1500);
   };
 
@@ -110,6 +115,7 @@ export default function RegisterNodePage() {
   const isLogoSet = formData.logo_uri.length > 0;
   const previewLogo = isLogoSet ? formData.logo_uri : `https://picsum.photos/seed/placeholder/800/400`;
 
+  // Dynamic Button Disable Logic
   const isRegistrationDisabled = !formData.licenseId || !formData.name.trim() || !formData.location.trim() || !formData.description.trim();
 
   return (
@@ -143,7 +149,7 @@ export default function RegisterNodePage() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Select License NFT</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Select License NFT *</label>
                 <div className="relative">
                    <Ticket className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
                    <select 
@@ -162,11 +168,11 @@ export default function RegisterNodePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Node Name</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Node Name *</label>
                 <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 text-sm" placeholder="e.g. CyberCore-01" />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Location</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Location *</label>
                 <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-12 text-sm" placeholder="e.g. Frankfurt, DE" />
               </div>
               
@@ -193,7 +199,7 @@ export default function RegisterNodePage() {
               </div>
 
               <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Validator Bio</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Validator Bio *</label>
                 <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[100px] py-4 text-xs" placeholder="Describe your hardware and commitment..." />
               </div>
             </div>
@@ -201,9 +207,9 @@ export default function RegisterNodePage() {
             <button 
               onClick={handleRegister} 
               disabled={isRegistrationDisabled} 
-              className={`w-full h-14 uppercase tracking-widest font-black transition-all ${isRegistrationDisabled ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed' : 'exn-button'}`}
+              className={`w-full h-14 uppercase tracking-widest font-black transition-all ${isRegistrationDisabled ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed opacity-50' : 'exn-button'}`}
             >
-              Bind Node to NFT
+              {isRegistrationDisabled ? 'Complete All Required Fields' : 'Register Node On-Chain'}
             </button>
           </div>
 
