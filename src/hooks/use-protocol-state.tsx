@@ -94,8 +94,6 @@ export interface ProtocolState {
   lastTransaction: TransactionFeedback | null;
   lastCrankedEpoch: number;
   networkStartDate: number;
-  isInitialized: boolean;
-  adminWallet: string | null;
   exnMint: string;
   usdcMint: string;
   rewardVaultPda: string;
@@ -107,20 +105,18 @@ export interface ProtocolState {
 const INITIAL_STATE: ProtocolState = {
   exnBalance: 25000000, 
   usdcBalance: 10000,
-  totalStaked: 0, 
-  treasuryBalance: 0,
-  rewardVaultBalance: 0,
-  usdcVaultBalance: 0,
-  stakedVaultBalance: 0,
+  totalStaked: 15000000, 
+  treasuryBalance: 50000,
+  rewardVaultBalance: 100000,
+  usdcVaultBalance: 5000,
+  stakedVaultBalance: 15000000,
   rewardCap: 1250,
   licenseLimit: 100,
   licensePrice: 500,
   isPaused: false,
   lastTransaction: null,
-  lastCrankedEpoch: 0,
-  networkStartDate: Date.now() - (14 * 24 * 60 * 60 * 1000), // Default to 14 days ago (Epoch 1 started)
-  isInitialized: true,
-  adminWallet: null,
+  lastCrankedEpoch: 0, // 0 means Epoch 1 is the first target
+  networkStartDate: Date.now(), // Dynamic start from "now"
   exnMint: 'EXN1111111111111111111111111111111111111111',
   usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   rewardVaultPda: 'REWARD-PDA',
@@ -164,16 +160,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('exnus_protocol_state');
+    const saved = localStorage.getItem('exnus_protocol_state_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setState(prev => ({ 
           ...prev, 
-          ...parsed,
-          isInitialized: true,
-          // Migration from block to epoch terminology if needed
-          lastCrankedEpoch: parsed.lastCrankedEpoch || parsed.lastCrankedBlock || 0
+          ...parsed
         }));
       } catch (e) {
         console.error("Failed to parse protocol state", e);
@@ -184,7 +177,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('exnus_protocol_state', JSON.stringify(state));
+      localStorage.setItem('exnus_protocol_state_v2', JSON.stringify(state));
     }
   }, [state, isLoaded]);
 

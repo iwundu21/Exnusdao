@@ -17,7 +17,6 @@ import {
 
 export default function AdminPage() {
   const { connected, publicKey } = useWallet();
-  const walletAddress = publicKey?.toBase58() || '';
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
   
   const [newCap, setNewCap] = useState('');
@@ -54,8 +53,8 @@ export default function AdminPage() {
   };
 
   const handleResetTimeline = () => {
-    setState(prev => ({ ...prev, networkStartDate: Date.now() }));
-    setFeedback('success', 'Protocol timeline synchronized to current cluster time.');
+    setState(prev => ({ ...prev, networkStartDate: Date.now(), lastCrankedEpoch: 0 }));
+    setFeedback('success', 'Protocol timeline synchronized to current cluster time. Epoch 1 re-anchored.');
   };
 
   if (!mounted || !isLoaded) return null;
@@ -93,8 +92,9 @@ export default function AdminPage() {
                   <div>
                     <p className="text-xs font-black uppercase text-emerald-500">Lifecycle Active</p>
                     <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Started: {new Date(state.networkStartDate).toLocaleString()}</p>
+                    <p className="text-[10px] text-primary font-bold uppercase mt-2">Last Finalized Epoch: {state.lastCrankedEpoch}</p>
                   </div>
-                  <button onClick={handleResetTimeline} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Sync Timeline</button>
+                  <button onClick={handleResetTimeline} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Re-anchor Epoch 1</button>
                </div>
             </div>
 

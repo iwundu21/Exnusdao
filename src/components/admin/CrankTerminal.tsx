@@ -10,12 +10,12 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [currentEpoch, setCurrentEpoch] = useState(1);
 
-  const effectiveStartDate = networkStartDate || Date.now() - EPOCH_DURATION;
+  const effectiveStartDate = networkStartDate || Date.now();
 
   useEffect(() => {
     const updateTimer = () => {
       const now = Date.now();
-      const elapsed = now - effectiveStartDate;
+      const elapsed = Math.max(0, now - effectiveStartDate);
       const epoch = Math.floor(elapsed / EPOCH_DURATION) + 1; 
       const remainingMs = EPOCH_DURATION - (elapsed % EPOCH_DURATION);
 
@@ -35,7 +35,8 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
     return () => clearInterval(timer);
   }, [effectiveStartDate]);
 
-  const isEpochCranked = lastCrankedEpoch >= currentEpoch;
+  // An epoch is cranked if the last finalized epoch is the current one or greater
+  const isCurrentEpochFinalized = lastCrankedEpoch >= currentEpoch;
 
   const epochHistory = useMemo(() => {
     return Array.from({ length: 10 }, (_, i) => {
@@ -45,9 +46,11 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
       const startMs = effectiveStartDate + (eNum - 1) * EPOCH_DURATION;
       const endMs = startMs + EPOCH_DURATION;
       
+      const status = eNum <= lastCrankedEpoch ? 'FINALIZED' : eNum === currentEpoch ? 'ACTIVE' : 'UPCOMING';
+
       return {
         number: eNum,
-        status: eNum <= lastCrankedEpoch ? 'FINALIZED' : eNum === currentEpoch ? 'ACTIVE' : 'UPCOMING',
+        status,
         isCurrent: eNum === currentEpoch,
         startFormatted: new Date(startMs).toLocaleDateString(),
         endFormatted: new Date(endMs).toLocaleDateString()
@@ -61,7 +64,7 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">Network Crank Terminal</h2>
           <p className="text-muted-foreground text-sm max-w-xl">
-            Settle the 14-day reward epochs. The system operates on a 10-year sharding cycle, distributing the {(rewardCap || 0).toLocaleString()} EXN pool permissionlessly starting from Epoch 1.
+            Settle the 14-day reward epochs. The system operates on a 10-year sharding cycle, distributing the {(rewardCap || 0).toLocaleString()} EXN pool permissionlessly.
           </p>
         </div>
         <div className="px-6 py-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center gap-6">
@@ -81,16 +84,23 @@ export function CrankTerminal({ validators = [], rewardCap = 0, lastCrankedEpoch
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         <div className="exn-card p-10 border-primary/30 flex flex-col items-center justify-center text-center space-y-8">
-          <Activity className="w-12 h-12 text-primary animate-pulse" />
-          <h3 className="text-2xl font-bold uppercase tracking-widest">Execute Epoch {currentEpoch} Crank</h3>
-          <p className="text-sm text-muted-foreground">Authorize sharding of {(rewardCap || 0).toLocaleString()} EXN to all active network weight shards.</p>
+          <Activity className={`w-12 h-12 text-primary ${!isCurrentEpochFinalized ? 'animate-pulse' : ''}`} />
+          <h3 className="text-2xl font-bold uppercase tracking-widest">
+            {isCurrentEpochFinalized ? `Epoch ${currentEpoch} Settled` : `Execute Epoch ${currentEpoch} Crank`}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {isCurrentEpochFinalized 
+              ? `Consensus yield for Epoch ${currentEpoch} has been distributed to the network shards.`
+              : `Authorize sharding of ${(rewardCap || 0).toLocaleString()} EXN to all active network weight shards.`
+            }
+          </p>
           
           <button 
             onClick={onCrank}
-            disabled={!connected || isEpochCranked}
-            className={`w-full py-5 rounded-xl font-black uppercase text-sm tracking-[0.3em] transition-all ${!isEpochCranked && connected ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+            disabled={!connected || isCurrentEpochFinalized}
+            className={`w-full py-5 rounded-xl font-black uppercase text-sm tracking-[0.3em] transition-all ${!isCurrentEpochFinalized && connected ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
           >
-            {isEpochCranked ? `Epoch ${currentEpoch} Finalized` : `Settle Epoch ${currentEpoch}`}
+            {isCurrentEpochFinalized ? `Epoch ${currentEpoch} Finalized` : `Settle Epoch ${currentEpoch}`}
           </button>
         </div>
 
