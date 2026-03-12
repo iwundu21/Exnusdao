@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo } from 'react';
@@ -13,7 +12,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold exn-gradient-text uppercase tracking-widest">Active Validators</h2>
+        <h2 className="text-2xl font-bold exn-gradient-text uppercase tracking-widest">Active XNodes</h2>
         <div className="flex gap-2">
           <span className="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full border border-primary/20">{validators.length} Total</span>
           <span className="bg-emerald-500/10 text-emerald-500 text-xs px-3 py-1 rounded-full border border-emerald-500/20">{validators.filter((v: any) => v.is_active).length} Online</span>
@@ -67,9 +66,9 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes, onMigrate
               
               <div className="p-6 space-y-5">
                 <div className="space-y-2">
-                  <p className="text-[10px] text-foreground/30 uppercase font-black tracking-widest">Node Description</p>
+                  <p className="text-[10px] text-foreground/30 uppercase font-black tracking-widest">XNode Description</p>
                   <p className="text-xs text-foreground/60 leading-relaxed italic line-clamp-2">
-                    {validator.description || "High-performance decentralized validator node serving the Exnus network protocol with guaranteed uptime."}
+                    {validator.description || "High-performance decentralized XNode serving the Exnus network protocol with guaranteed uptime."}
                   </p>
                 </div>
 
