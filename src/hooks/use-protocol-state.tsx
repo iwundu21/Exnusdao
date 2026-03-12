@@ -112,14 +112,14 @@ const INITIAL_STATE: ProtocolState = {
   rewardVaultBalance: 0,
   usdcVaultBalance: 0,
   stakedVaultBalance: 0,
-  rewardCap: 1500,
+  rewardCap: 0,
   licenseLimit: 100,
-  licensePrice: 500,
+  licensePrice: 0,
   isPaused: false,
   lastTransaction: null,
   lastCrankedBlock: 999,
-  networkStartDate: Date.now() - (1000 * 60 * 60 * 2), // 2 hours ago
-  isInitialized: true,
+  networkStartDate: null,
+  isInitialized: false,
   adminWallet: null,
   exnMint: 'EXN1111111111111111111111111111111111111111',
   usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -152,7 +152,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setState(prev => ({ ...prev, ...parsed, isLoaded: true }));
+        setState(prev => ({ ...prev, ...parsed }));
       } catch (e) {
         console.error("Failed to parse protocol state", e);
       }

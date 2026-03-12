@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -13,11 +14,8 @@ export default function RegisterNodePage() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, setState, isLoaded, setFeedback } = useProtocolState();
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -38,21 +36,6 @@ export default function RegisterNodePage() {
       <p className="exn-gradient-text font-bold uppercase tracking-widest animate-pulse">Syncing Network State</p>
     </div>
   );
-
-  if (!state.isInitialized) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
-         <Activity className="w-12 h-12 text-amber-500" />
-         <div className="space-y-4">
-           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Protocol Standby</h1>
-           <p className="text-muted-foreground max-w-md mx-auto uppercase text-xs font-black tracking-widest">
-             Node registration is locked until global protocol initialization is complete.
-           </p>
-         </div>
-         <Link href="/" className="exn-button px-8">Return to Dashboard</Link>
-      </div>
-    );
-  }
 
   if (!connected) {
     return (
@@ -120,7 +103,7 @@ export default function RegisterNodePage() {
       <div className="space-y-4">
         <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Provisioning</h1>
         <p className="text-muted-foreground max-w-xl">
-          Register a validator node by binding it to a verified **Node License NFT**. Ownership of the NFT must be proven via cryptographic wallet signature.
+          Register a validator node by binding it to a verified **Node License NFT**.
         </p>
       </div>
 
@@ -198,12 +181,6 @@ export default function RegisterNodePage() {
                 </div>
                 <p className="text-[10px] uppercase font-black text-muted-foreground/40 tracking-widest">Identity Preview</p>
               </div>
-            </div>
-            
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-2">
-               <p className="text-[10px] text-muted-foreground font-bold uppercase leading-relaxed">
-                 <span className="text-primary">Verification:</span> Upon binding, the License NFT metadata is updated on-chain to reflect the active node identity.
-               </p>
             </div>
           </div>
         </div>

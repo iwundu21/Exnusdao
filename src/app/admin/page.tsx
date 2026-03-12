@@ -13,7 +13,8 @@ import {
   Calendar,
   Database,
   Ticket,
-  Coins
+  Coins,
+  Zap
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -47,17 +48,12 @@ export default function AdminPage() {
       treasuryVaultPda: 'TREASURY-PDA',
       usdcVaultPda: 'LICENSE-PDA',
       stakedVaultPda: 'STAKED-PDA',
-      licensePrice: prev.licensePrice || 0,
-      rewardCap: prev.rewardCap || 0,
-      licenseLimit: prev.licenseLimit || 0,
-      networkStartDate: prev.networkStartDate || null
+      licensePrice: 0, // Set to 0 on initialization as requested
+      rewardCap: 0,    // Set to 0 on initialization as requested
+      licenseLimit: prev.licenseLimit || 100,
+      networkStartDate: Date.now() // Start the 10-year lifecycle clock immediately
     }));
-    setFeedback('success', 'Protocol parameters anchored and vaults provisioned.');
-  };
-
-  const handleSetNetworkStart = () => {
-    setState(prev => ({ ...prev, networkStartDate: Date.now() }));
-    setFeedback('success', '10-Year Network Lifecycle Clock Started.');
+    setFeedback('success', 'Protocol initialized. 10-year lifecycle clock started.');
   };
 
   const handleUpdateCap = () => {
@@ -106,6 +102,11 @@ export default function AdminPage() {
           </div>
           <h1 className="text-6xl font-bold exn-gradient-text uppercase">Command Center</h1>
         </div>
+        {!state.isInitialized && (
+          <button onClick={handleInitialize} className="exn-button h-16 px-12 text-sm flex items-center gap-2">
+            <Zap className="w-5 h-5" /> Execute Global Initialization
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -117,8 +118,7 @@ export default function AdminPage() {
                </div>
                {!state.networkStartDate ? (
                  <div className="p-6 bg-primary/5 border border-primary/20 rounded-xl space-y-4">
-                    <p className="text-sm text-muted-foreground">The 10-year reward cycle is inactive. Set the start date to begin block index 1000.</p>
-                    <button onClick={handleSetNetworkStart} className="exn-button px-10 text-xs uppercase font-black">Set Network Start Date</button>
+                    <p className="text-sm text-muted-foreground">The 10-year reward cycle is inactive. Initialize the protocol to begin block index 1000.</p>
                  </div>
                ) : (
                  <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex justify-between items-center">
@@ -126,7 +126,7 @@ export default function AdminPage() {
                       <p className="text-xs font-black uppercase text-emerald-500">Lifecycle Active</p>
                       <p className="text-sm text-muted-foreground mt-1 font-mono text-[11px]">Started: {new Date(state.networkStartDate).toLocaleString()}</p>
                     </div>
-                    <button onClick={handleSetNetworkStart} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Reset Timeline</button>
+                    <button onClick={() => setState(prev => ({ ...prev, networkStartDate: Date.now() }))} className="exn-button-outline text-[9px] px-4 py-2 uppercase font-black">Restart Timeline</button>
                  </div>
                )}
             </div>
@@ -194,9 +194,6 @@ export default function AdminPage() {
                   <p>STAKED PDA: {shortenAddress(state?.stakedVaultPda || '')}</p>
                   <p>REWARD PDA: {shortenAddress(state?.rewardVaultPda || '')}</p>
                </div>
-               <button onClick={handleInitialize} className="w-full py-2 bg-primary/10 border border-primary/30 rounded text-[9px] font-black uppercase text-primary hover:bg-primary hover:text-black transition-all mt-4">
-                 Re-Anchor Metadata
-               </button>
             </div>
          </div>
       </div>

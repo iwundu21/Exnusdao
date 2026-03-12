@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -26,21 +27,6 @@ export default function PurchaseLicensePage() {
       <p className="exn-gradient-text font-bold uppercase tracking-widest animate-pulse">Syncing Network State</p>
     </div>
   );
-
-  if (!state.isInitialized) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
-         <Activity className="w-12 h-12 text-amber-500" />
-         <div className="space-y-4">
-           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Protocol Standby</h1>
-           <p className="text-muted-foreground max-w-md mx-auto uppercase text-xs font-black tracking-widest">
-             Licensing is locked until the Global Initialization instruction is executed by the Protocol Authority.
-           </p>
-         </div>
-         <Link href="/" className="exn-button px-8">Return to Dashboard</Link>
-      </div>
-    );
-  }
 
   if (!connected) {
     return (
@@ -72,7 +58,7 @@ export default function PurchaseLicensePage() {
     setTimeout(() => {
       setMintPhase('Creating Metaplex Metadata Account...');
       setTimeout(() => {
-        setMintPhase('Uploading Logo to Decentralized Storage (Arweave)...');
+        setMintPhase('Uploading Logo to Arweave...');
         setTimeout(() => {
           const mintAddress = `LIC-NFT-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
           const newLicense = { 
@@ -158,7 +144,7 @@ export default function PurchaseLicensePage() {
                   {isMinting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                      Executing On-Chain Mint...
+                      {mintPhase || 'Executing On-Chain Mint...'}
                     </>
                   ) : (
                     <>
