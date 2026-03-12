@@ -3,7 +3,7 @@
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, updateDoc, collection, deleteDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, collection, deleteDoc, increment } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -162,22 +162,23 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!address || !db) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
-    updateDoc(gRef, { [vault]: increment(amount) });
-    updateDoc(uRef, { exnBalance: increment(-amount) });
+    // Use setDoc with merge to ensure doc exists
+    setDoc(gRef, { [vault]: increment(amount) }, { merge: true });
+    setDoc(uRef, { exnBalance: increment(-amount) }, { merge: true });
   }, [db]);
 
   const adminWithdrawUsdc = useCallback((address: string, amount: number) => {
     if (!address || !db) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
-    updateDoc(gRef, { usdcVaultBalance: increment(-amount) });
-    updateDoc(uRef, { usdcBalance: increment(amount) });
+    // Use setDoc with merge to ensure doc exists
+    setDoc(gRef, { usdcVaultBalance: increment(-amount) }, { merge: true });
+    setDoc(uRef, { usdcBalance: increment(amount) }, { merge: true });
   }, [db]);
 
   const adminUpdateSettings = useCallback((settings: Partial<ProtocolState>) => {
     if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
-    // Using setDoc with merge to ensure doc creation if it doesn't exist
     setDoc(gRef, settings, { merge: true }).then(() => {
       setFeedback('success', 'Global network parameters updated in cloud ledger.');
     }).catch(err => {
@@ -192,8 +193,8 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const uRef = doc(db, 'users', address);
     const gRef = doc(db, 'protocol', 'global');
     setDoc(lRef, license);
-    updateDoc(uRef, { usdcBalance: increment(-price) });
-    updateDoc(gRef, { usdcVaultBalance: increment(price) });
+    setDoc(uRef, { usdcBalance: increment(-price) }, { merge: true });
+    setDoc(gRef, { usdcVaultBalance: increment(price) }, { merge: true });
   }, [db]);
 
   const addStake = useCallback((stake: any) => {
@@ -202,8 +203,8 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', stake.validator_id);
     setDoc(sRef, { ...stake, id: sRef.id });
-    updateDoc(gRef, { stakedVaultBalance: increment(stake.amount) });
-    updateDoc(vRef, { total_staked: increment(stake.amount) });
+    setDoc(gRef, { stakedVaultBalance: increment(stake.amount) }, { merge: true });
+    setDoc(vRef, { total_staked: increment(stake.amount) }, { merge: true });
   }, [db]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
@@ -211,15 +212,15 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const sRef = doc(db, 'stakes', stakeId);
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', validatorId);
-    updateDoc(sRef, { unstaked: true });
-    updateDoc(gRef, { stakedVaultBalance: increment(-amount) });
-    updateDoc(vRef, { total_staked: increment(-amount) });
+    setDoc(sRef, { unstaked: true }, { merge: true });
+    setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
+    setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
   }, [db]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
     if (!db) return;
     const sRef = doc(db, 'stakes', stakeId);
-    updateDoc(sRef, { reward_checkpoint: increment(0) });
+    setDoc(sRef, { reward_checkpoint: increment(0) }, { merge: true }); // Simplified for prototype
     updateUserBalance(wallet, amount, 0);
   }, [db, updateUserBalance]);
 
@@ -227,11 +228,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!db) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
-    updateDoc(pRef, {
+    setDoc(pRef, {
       yes_votes: increment(support ? weight : 0),
       no_votes: increment(!support ? weight : 0)
-    });
-    updateDoc(gRef, { treasuryBalance: increment(3) });
+    }, { merge: true });
+    setDoc(gRef, { treasuryBalance: increment(3) }, { merge: true });
   }, [db]);
 
   const createProposal = useCallback((proposal: any) => {
@@ -239,16 +240,16 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const pRef = doc(db, 'proposals', proposal.id.toString());
     const gRef = doc(db, 'protocol', 'global');
     setDoc(pRef, proposal);
-    updateDoc(gRef, { treasuryBalance: increment(10) });
+    setDoc(gRef, { treasuryBalance: increment(10) }, { merge: true });
   }, [db]);
 
   const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
     if (!db) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
-    updateDoc(pRef, { executed: true });
+    setDoc(pRef, { executed: true }, { merge: true });
     if (passed && type === 1) {
-      updateDoc(gRef, { treasuryBalance: increment(-amount) });
+      setDoc(gRef, { treasuryBalance: increment(-amount) }, { merge: true });
       if (recipient === wallet) updateUserBalance(wallet, amount, 0);
     }
   }, [db, updateUserBalance]);
@@ -256,10 +257,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
     if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
-    updateDoc(gRef, {
+    setDoc(gRef, {
       lastCrankedEpoch: targetEpoch,
       rewardVaultBalance: increment(-totalPool)
-    });
+    }, { merge: true });
   }, [db]);
 
   const registerValidator = useCallback((validator: any, licenseId: string) => {
@@ -267,13 +268,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const vRef = doc(db, 'validators', validator.id);
     const lRef = doc(db, 'licenses', licenseId);
     setDoc(vRef, validator);
-    updateDoc(lRef, { is_claimed: true });
+    setDoc(lRef, { is_claimed: true }, { merge: true });
   }, [db]);
 
   const updateValidator = useCallback((vId: string, data: any) => {
     if (!db) return;
     const vRef = doc(db, 'validators', vId);
-    updateDoc(vRef, data);
+    setDoc(vRef, data, { merge: true });
   }, [db]);
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
@@ -281,14 +282,14 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const vRef = doc(db, 'validators', vId);
     const lRef = doc(db, 'licenses', licenseId);
     deleteDoc(vRef);
-    updateDoc(lRef, { is_burned: true, is_claimed: false });
+    setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true });
     updateUserBalance(wallet, seedRefund + rewards, 0);
   }, [db, updateUserBalance]);
 
   const toggleValidator = useCallback((vId: string, status: boolean) => {
     if (!db) return;
     const vRef = doc(db, 'validators', vId);
-    updateDoc(vRef, { is_active: status });
+    setDoc(vRef, { is_active: status }, { merge: true });
   }, [db]);
 
   const resetProtocol = useCallback(async () => {
