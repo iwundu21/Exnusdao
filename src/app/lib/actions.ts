@@ -1,8 +1,9 @@
+
 'use server';
 
 /**
  * DEPRECATED: Local filesystem actions removed.
- * All mutations occur via client-side Firebase SDK.
+ * All mutations occur via atomic cloud updates in Firestore.
  */
 
 export async function getProtocolState() {

@@ -1,8 +1,9 @@
+
 'use server';
 
 /**
- * DEPRECATED: Filesystem local database logic removed.
- * Protocol state is now managed via exnusdao Firebase project.
+ * DEPRECATED: Local filesystem database logic removed.
+ * Protocol state is now managed exclusively via Cloud Firestore.
  */
 
 export async function readDb() {

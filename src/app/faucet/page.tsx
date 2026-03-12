@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -42,6 +43,9 @@ export default function FaucetPage() {
     );
   }
 
+  const exnLimit = state.faucetExnLimit || 16000000;
+  const usdcLimit = state.faucetUsdcLimit || 10000;
+
   const exnTimeLeft = Math.max(0, (lastExnFaucetClaim || 0) + DAY_MS - now);
   const usdcTimeLeft = Math.max(0, (lastUsdcFaucetClaim || 0) + DAY_MS - now);
 
@@ -54,16 +58,16 @@ export default function FaucetPage() {
 
   const handleClaimExn = () => {
     if (exnTimeLeft > 0) return setFeedback('warning', `Cooldown active. Ready in ${formatTime(exnTimeLeft)}.`);
-    updateUserBalance(walletAddress, state.faucetExnLimit, 0);
+    updateUserBalance(walletAddress, exnLimit, 0);
     updateFaucetClaim(walletAddress, 'exn');
-    setFeedback('success', `${state.faucetExnLimit.toLocaleString()} EXN provisioned to your wallet.`);
+    setFeedback('success', `${exnLimit.toLocaleString()} EXN dynamically generated for your wallet.`);
   };
 
   const handleClaimUsdc = () => {
     if (usdcTimeLeft > 0) return setFeedback('warning', `Cooldown active. Ready in ${formatTime(usdcTimeLeft)}.`);
-    updateUserBalance(walletAddress, 0, state.faucetUsdcLimit);
+    updateUserBalance(walletAddress, 0, usdcLimit);
     updateFaucetClaim(walletAddress, 'usdc');
-    setFeedback('success', `${state.faucetUsdcLimit.toLocaleString()} USDC provisioned to your wallet.`);
+    setFeedback('success', `${usdcLimit.toLocaleString()} USDC dynamically generated for your wallet.`);
   };
 
   return (
@@ -75,12 +79,11 @@ export default function FaucetPage() {
       <div className="space-y-4">
         <h1 className="text-6xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Token Faucet</h1>
         <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
-          Request testnet assets to participate in the Exnus network. Limits: **{state.faucetExnLimit.toLocaleString()} EXN** and **{state.faucetUsdcLimit.toLocaleString()} USDC** every 24 hours.
+          Dynamically generate testnet assets to participate in the Exnus network. Limits: **{exnLimit.toLocaleString()} EXN** and **{usdcLimit.toLocaleString()} USDC** every 24 hours.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* EXN Faucet Card */}
         <div className="exn-card p-10 space-y-10 border-primary/20 bg-primary/5 relative overflow-hidden group">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 blur-[80px] group-hover:bg-primary/20 transition-all" />
           
@@ -97,8 +100,8 @@ export default function FaucetPage() {
           </div>
 
           <div className="space-y-1 relative z-10">
-            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Available Supply</p>
-            <h3 className="text-4xl font-bold text-foreground">{state.faucetExnLimit.toLocaleString()} <span className="text-xs text-primary font-black uppercase">EXN</span></h3>
+            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
+            <h3 className="text-4xl font-bold text-foreground">{exnLimit.toLocaleString()} <span className="text-xs text-primary font-black uppercase">EXN</span></h3>
           </div>
 
           <button 
@@ -106,11 +109,10 @@ export default function FaucetPage() {
             disabled={exnTimeLeft > 0} 
             className={`w-full h-16 uppercase tracking-[0.2em] font-black transition-all rounded-xl relative z-10 ${exnTimeLeft === 0 ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
           >
-            {exnTimeLeft > 0 ? 'Cooldown Active' : 'Request EXN Drop'}
+            {exnTimeLeft > 0 ? 'Cooldown Active' : 'Generate EXN Drop'}
           </button>
         </div>
 
-        {/* USDC Faucet Card */}
         <div className="exn-card p-10 space-y-10 border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/10 blur-[80px] group-hover:bg-emerald-500/20 transition-all" />
 
@@ -127,8 +129,8 @@ export default function FaucetPage() {
           </div>
 
           <div className="space-y-1 relative z-10">
-            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Available Supply</p>
-            <h3 className="text-4xl font-bold text-foreground">{state.faucetUsdcLimit.toLocaleString()} <span className="text-xs text-emerald-500 font-black uppercase">USDC</span></h3>
+            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
+            <h3 className="text-4xl font-bold text-foreground">{usdcLimit.toLocaleString()} <span className="text-xs text-emerald-500 font-black uppercase">USDC</span></h3>
           </div>
 
           <button 
@@ -136,19 +138,9 @@ export default function FaucetPage() {
             disabled={usdcTimeLeft > 0} 
             className={`w-full h-16 uppercase tracking-[0.2em] font-black transition-all rounded-xl relative z-10 ${usdcTimeLeft === 0 ? 'exn-button bg-none border-emerald-500 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
           >
-            {usdcTimeLeft > 0 ? 'Cooldown Active' : 'Request USDC Drop'}
+            {usdcTimeLeft > 0 ? 'Cooldown Active' : 'Generate USDC Drop'}
           </button>
         </div>
-      </div>
-
-      <div className="p-8 bg-primary/5 border border-primary/20 rounded-2xl space-y-4">
-        <div className="flex items-center gap-3 text-primary">
-          <Wallet className="w-5 h-5" />
-          <h4 className="text-sm font-black uppercase tracking-widest">Protocol Transparency</h4>
-        </div>
-        <p className="text-xs text-muted-foreground leading-relaxed uppercase font-black tracking-tighter">
-          Faucet distributions are finalized on the cloud ledger. Cooldown timers are globally enforced based on your wallet address. If you encounter issues, ensure your wallet is connected to the Mainnet cluster.
-        </p>
       </div>
     </div>
   );

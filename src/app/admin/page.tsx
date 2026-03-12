@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -90,7 +91,7 @@ export default function AdminPage() {
 
   const handleFullProtocolReset = async () => {
     await resetProtocol();
-    setFeedback('success', 'Master Reset Complete: Protocol global parameters re-anchored.');
+    setFeedback('success', 'Master Reset Complete: Cloud global parameters re-anchored.');
   };
 
   if (!mounted) return null;
@@ -214,7 +215,7 @@ export default function AdminPage() {
                           <div className="space-y-2">
                              <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
                              <p className="text-xs text-muted-foreground leading-relaxed">
-                                Executing a Master Reset will purge all cloud-anchored global parameters. 
+                                Executing a Master Reset will purge all cloud-anchored global parameters and re-initialize limits. 
                              </p>
                           </div>
                        </div>
@@ -237,15 +238,15 @@ export default function AdminPage() {
                  <div className="space-y-4">
                    <div>
                      <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Vault (USDC)</p>
-                     <p className="text-2xl font-bold">{(state?.usdcVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
+                     <p className="text-2xl font-bold font-mono">{(state?.usdcVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
                    </div>
                    <div>
                      <p className="text-[10px] text-muted-foreground uppercase font-black">DAO Treasury Vault (EXN)</p>
-                     <p className="text-2xl font-bold">{(state?.treasuryBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
+                     <p className="text-2xl font-bold font-mono">{(state?.treasuryBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
                    </div>
                    <div>
                      <p className="text-[10px] text-muted-foreground uppercase font-black">Global Reward Vault (EXN)</p>
-                     <p className="text-2xl font-bold">{(state?.rewardVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
+                     <p className="text-2xl font-bold font-mono">{(state?.rewardVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-primary">EXN</span></p>
                    </div>
                  </div>
               </div>

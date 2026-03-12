@@ -1,8 +1,9 @@
+
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, updateDoc, collection, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, collection, deleteDoc, increment } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection, useUser } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -137,13 +138,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
     updateDoc(ref, {
-      exnBalance: (userProfile?.exnBalance || 0) + exn,
-      usdcBalance: (userProfile?.usdcBalance || 0) + usdc,
+      exnBalance: increment(exn),
+      usdcBalance: increment(usdc),
       lastActive: Date.now()
     }).catch(err => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'update' }));
     });
-  }, [db, userProfile]);
+  }, [db]);
 
   const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
@@ -159,17 +160,17 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!address || !db || !globalData) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
-    updateDoc(gRef, { [vault]: (globalData[vault] || 0) + amount });
-    updateDoc(uRef, { exnBalance: (userProfile?.exnBalance || 0) - amount });
-  }, [db, globalData, userProfile]);
+    updateDoc(gRef, { [vault]: increment(amount) });
+    updateDoc(uRef, { exnBalance: increment(-amount) });
+  }, [db, globalData]);
 
   const adminWithdrawUsdc = useCallback((address: string, amount: number) => {
     if (!address || !db || !globalData) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
-    updateDoc(gRef, { usdcVaultBalance: (globalData.usdcVaultBalance || 0) - amount });
-    updateDoc(uRef, { usdcBalance: (userProfile?.usdcBalance || 0) + amount });
-  }, [db, globalData, userProfile]);
+    updateDoc(gRef, { usdcVaultBalance: increment(-amount) });
+    updateDoc(uRef, { usdcBalance: increment(amount) });
+  }, [db, globalData]);
 
   const mintLicense = useCallback((address: string, price: number, license: any) => {
     if (!address || !db) return;
@@ -177,9 +178,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const uRef = doc(db, 'users', address);
     const gRef = doc(db, 'protocol', 'global');
     setDoc(lRef, license);
-    updateDoc(uRef, { usdcBalance: (userProfile?.usdcBalance || 0) - price });
-    updateDoc(gRef, { usdcVaultBalance: (globalData?.usdcVaultBalance || 0) + price });
-  }, [db, userProfile, globalData]);
+    updateDoc(uRef, { usdcBalance: increment(-price) });
+    updateDoc(gRef, { usdcVaultBalance: increment(price) });
+  }, [db]);
 
   const addStake = useCallback((stake: any) => {
     if (!db) return;
@@ -187,9 +188,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', stake.validator_id);
     setDoc(sRef, { ...stake, id: sRef.id });
-    updateDoc(gRef, { stakedVaultBalance: (globalData?.stakedVaultBalance || 0) + stake.amount });
-    updateDoc(vRef, { total_staked: (validatorsData?.find(v => v.id === stake.validator_id)?.total_staked || 0) + stake.amount });
-  }, [db, globalData, validatorsData]);
+    updateDoc(gRef, { stakedVaultBalance: increment(stake.amount) });
+    updateDoc(vRef, { total_staked: increment(stake.amount) });
+  }, [db]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
     if (!db) return;
@@ -197,9 +198,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const gRef = doc(db, 'protocol', 'global');
     const vRef = doc(db, 'validators', validatorId);
     updateDoc(sRef, { unstaked: true });
-    updateDoc(gRef, { stakedVaultBalance: Math.max(0, (globalData?.stakedVaultBalance || 0) - amount) });
-    updateDoc(vRef, { total_staked: Math.max(0, (validatorsData?.find(v => v.id === validatorId)?.total_staked || 0) - amount) });
-  }, [db, globalData, validatorsData]);
+    updateDoc(gRef, { stakedVaultBalance: increment(-amount) });
+    updateDoc(vRef, { total_staked: increment(-amount) });
+  }, [db]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
     if (!db) return;
@@ -217,21 +218,21 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const prop = proposalsData?.find(p => p.id === pId);
     if (!prop) return;
     updateDoc(pRef, {
-      yes_votes: support ? (prop.yes_votes || 0) + weight : prop.yes_votes,
-      no_votes: !support ? (prop.no_votes || 0) + weight : prop.no_votes,
+      yes_votes: increment(support ? weight : 0),
+      no_votes: increment(!support ? weight : 0),
       voters: [...(prop.voters || []), walletAddress],
       comments: [...(prop.comments || []), comment]
     });
-    updateDoc(gRef, { treasuryBalance: (globalData?.treasuryBalance || 0) + 3 });
-  }, [db, proposalsData, walletAddress, globalData]);
+    updateDoc(gRef, { treasuryBalance: increment(3) });
+  }, [db, proposalsData, walletAddress]);
 
   const createProposal = useCallback((proposal: any) => {
     if (!db) return;
     const pRef = doc(db, 'proposals', proposal.id.toString());
     const gRef = doc(db, 'protocol', 'global');
     setDoc(pRef, proposal);
-    updateDoc(gRef, { treasuryBalance: (globalData?.treasuryBalance || 0) + 10 });
-  }, [db, globalData]);
+    updateDoc(gRef, { treasuryBalance: increment(10) });
+  }, [db]);
 
   const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
     if (!db) return;
@@ -239,10 +240,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const gRef = doc(db, 'protocol', 'global');
     updateDoc(pRef, { executed: true });
     if (passed && type === 1) {
-      updateDoc(gRef, { treasuryBalance: Math.max(0, (globalData?.treasuryBalance || 0) - amount) });
+      updateDoc(gRef, { treasuryBalance: increment(-amount) });
       if (recipient === wallet) updateUserBalance(wallet, amount, 0);
     }
-  }, [db, globalData, updateUserBalance]);
+  }, [db, updateUserBalance]);
 
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
     if (!db) return;
@@ -258,14 +259,14 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       
       epochShares.push({ validatorId: v.id, share: stakerPool, commission: commission });
       updateDoc(vRef, {
-        accrued_node_rewards: (v.accrued_node_rewards || 0) + commission,
-        global_reward_index: (v.global_reward_index || 0) + rewardIndexDelta
+        accrued_node_rewards: increment(commission),
+        global_reward_index: increment(rewardIndexDelta)
       });
     });
 
     updateDoc(gRef, {
       lastCrankedEpoch: targetEpoch,
-      rewardVaultBalance: Math.max(0, (globalData?.rewardVaultBalance || 0) - totalPool),
+      rewardVaultBalance: increment(-totalPool),
       settledEpochs: [...(globalData?.settledEpochs || []), { epoch: targetEpoch, settledAt: Date.now(), totalPool, validatorShares: epochShares }]
     });
   }, [db, globalData]);
@@ -332,8 +333,8 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     licensePrice: globalData?.licensePrice ?? 0,
     seedAmount: globalData?.seedAmount ?? 0,
     adminWallet: globalData?.adminWallet ?? '',
-    faucetExnLimit: globalData?.faucetExnLimit ?? 0,
-    faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 0,
+    faucetExnLimit: globalData?.faucetExnLimit ?? 16000000,
+    faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 10000,
     exnPrice: globalData?.exnPrice ?? 0.23,
     isPaused: globalData?.isPaused ?? false,
     lastCrankedEpoch: globalData?.lastCrankedEpoch ?? 0,
