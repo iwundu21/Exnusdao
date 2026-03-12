@@ -17,8 +17,6 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Automatically sign in anonymously to satisfy Firestore Security Rules.
-    // If the 'auth/configuration-not-found' error persists, please ensure 
-    // Anonymous Auth is enabled in the Firebase Console.
     signInAnonymously(auth).catch((error) => {
       if (error.code === 'auth/configuration-not-found') {
         console.warn("Firebase Anonymous Auth is not enabled in the console. Proceeding as unauthenticated.");
