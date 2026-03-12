@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -27,8 +26,8 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased selection:bg-[#00f5ff] selection:text-black">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <ProtocolProvider>
-            <SolanaWalletProvider>
+          <SolanaWalletProvider>
+            <ProtocolProvider>
               <div className="min-h-screen flex flex-col">
                 <Navbar />
                 <main className="flex-grow pb-24 lg:pb-32">
@@ -37,8 +36,8 @@ export default function RootLayout({
                 <TransactionStatus />
                 <Footer />
               </div>
-            </SolanaWalletProvider>
-          </ProtocolProvider>
+            </ProtocolProvider>
+          </SolanaWalletProvider>
           <Toaster />
         </ThemeProvider>
       </body>
