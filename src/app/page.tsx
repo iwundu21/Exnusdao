@@ -15,7 +15,7 @@ const PROPOSAL_FEE = 10;
 const VOTE_FEE = 3;
 const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
 const MIN_STAKE_FOR_VOTE = 10_000;
-const BLOCK_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+const EPOCH_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -153,10 +153,10 @@ export default function Home() {
   };
 
   const handleCrank = () => {
-    const currentBlock = Math.floor((Date.now() - state.networkStartDate) / BLOCK_DURATION_MS) + 1000;
+    const currentEpoch = Math.floor((Date.now() - state.networkStartDate) / EPOCH_DURATION_MS) + 1;
     
-    if (state.lastCrankedBlock >= currentBlock) {
-      return setFeedback('warning', `Reward Block ${currentBlock} has already been settled.`);
+    if (state.lastCrankedEpoch >= currentEpoch) {
+      return setFeedback('warning', `Epoch ${currentEpoch} has already been settled.`);
     }
 
     const totalPool = state.rewardCap || 0;
@@ -183,11 +183,11 @@ export default function Home() {
       return {
         ...prev,
         validators: newValidators,
-        lastCrankedBlock: currentBlock
+        lastCrankedEpoch: currentEpoch
       };
     });
 
-    setFeedback('success', `Reward Block ${currentBlock} finalized. yield sharded.`);
+    setFeedback('success', `Epoch ${currentEpoch} finalized. yield sharded.`);
   };
 
   const handleClaim = () => {
@@ -278,7 +278,7 @@ export default function Home() {
         <CrankTerminal 
           validators={state.validators} 
           rewardCap={state.rewardCap}
-          lastCrankedBlock={state.lastCrankedBlock}
+          lastCrankedEpoch={state.lastCrankedEpoch}
           networkStartDate={state.networkStartDate}
           onCrank={handleCrank}
           connected={connected}

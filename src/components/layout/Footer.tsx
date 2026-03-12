@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -6,24 +7,24 @@ import { Twitter, MessageSquare, ExternalLink } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 
-const BLOCK_DURATION = 14 * 24 * 60 * 60 * 1000;
+const EPOCH_DURATION = 14 * 24 * 60 * 60 * 1000;
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { state } = useProtocolState();
-  const [currentBlock, setCurrentBlock] = useState(1000);
+  const [currentEpoch, setCurrentEpoch] = useState(1);
 
   useEffect(() => {
     if (!state.networkStartDate) return;
-    const updateBlock = () => {
+    const updateEpoch = () => {
       const now = Date.now();
       const elapsed = now - state.networkStartDate!;
-      const block = Math.floor(elapsed / BLOCK_DURATION) + 1000;
-      setCurrentBlock(block);
+      const epoch = Math.floor(elapsed / EPOCH_DURATION) + 1;
+      setCurrentEpoch(epoch);
     };
 
-    updateBlock();
-    const timer = setInterval(updateBlock, 60000);
+    updateEpoch();
+    const timer = setInterval(updateEpoch, 60000);
     return () => clearInterval(timer);
   }, [state.networkStartDate]);
 
@@ -41,7 +42,7 @@ export function Footer() {
               <span className="text-[9px] font-black text-emerald-500 uppercase">Mainnet-Beta</span>
             </div>
             <span className="text-[9px] text-muted-foreground uppercase font-black">
-              {state.networkStartDate ? `Block ${currentBlock}` : 'Standby'}
+              {state.networkStartDate ? `Epoch ${currentEpoch}` : 'Active'}
             </span>
           </div>
         </div>

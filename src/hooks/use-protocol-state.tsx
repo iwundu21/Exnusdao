@@ -92,7 +92,7 @@ export interface ProtocolState {
   proposals: Proposal[];
   isPaused: boolean;
   lastTransaction: TransactionFeedback | null;
-  lastCrankedBlock: number;
+  lastCrankedEpoch: number;
   networkStartDate: number;
   isInitialized: boolean;
   adminWallet: string | null;
@@ -117,9 +117,9 @@ const INITIAL_STATE: ProtocolState = {
   licensePrice: 500,
   isPaused: false,
   lastTransaction: null,
-  lastCrankedBlock: 999,
-  networkStartDate: Date.now() - (14 * 24 * 60 * 60 * 1000), // Default to 14 days ago
-  isInitialized: true, // Always true to enable functionality
+  lastCrankedEpoch: 0,
+  networkStartDate: Date.now() - (14 * 24 * 60 * 60 * 1000), // Default to 14 days ago (Epoch 1 started)
+  isInitialized: true,
   adminWallet: null,
   exnMint: 'EXN1111111111111111111111111111111111111111',
   usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -168,12 +168,12 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Ensure critical fields are always present
         setState(prev => ({ 
           ...prev, 
           ...parsed,
           isInitialized: true,
-          networkStartDate: parsed.networkStartDate || INITIAL_STATE.networkStartDate
+          // Migration from block to epoch terminology if needed
+          lastCrankedEpoch: parsed.lastCrankedEpoch || parsed.lastCrankedBlock || 0
         }));
       } catch (e) {
         console.error("Failed to parse protocol state", e);
