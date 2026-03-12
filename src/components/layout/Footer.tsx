@@ -8,6 +8,7 @@ import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
+const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -30,11 +31,11 @@ export function Footer() {
     return () => clearInterval(timer);
   }, [state.networkStartDate]);
 
-  const isAdmin = state.adminWallet === walletAddress;
+  const isAdmin = walletAddress === ADMIN_WALLET;
 
   return (
     <footer className="fixed bottom-0 left-0 w-full z-40 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="max-w-7xl auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-6">
           <div className="flex flex-col">
             <h2 className="text-sm font-bold exn-gradient-text tracking-widest leading-none uppercase">EXNUS</h2>
@@ -60,7 +61,7 @@ export function Footer() {
             <Link href="/faucet" className="flex items-center gap-1.5 hover:text-primary transition-colors">
               <Droplets className="w-3 h-3" /> Faucet
             </Link>
-            {(isAdmin || connected) && (
+            {isAdmin && (
               <Link href="/admin" className="flex items-center gap-1.5 hover:text-primary transition-colors">
                 <ShieldCheck className="w-3 h-3" /> Admin
               </Link>

@@ -11,9 +11,10 @@ import {
   Calendar,
   Database,
   Coins,
-  Zap,
-  Power
+  ShieldAlert
 } from 'lucide-react';
+
+const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 
 export default function AdminPage() {
   const { connected, publicKey } = useWallet();
@@ -27,6 +28,9 @@ export default function AdminPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const walletAddress = publicKey?.toBase58();
+  const isAdmin = walletAddress === ADMIN_WALLET;
 
   const handleUpdateCap = () => {
     const cap = Number(newCap);
@@ -61,10 +65,25 @@ export default function AdminPage() {
 
   if (!connected) {
     return (
-      <div className="flex flex-col items-center justify-center py-40 text-center space-y-8">
+      <div className="flex flex-col items-center justify-center py-40 text-center space-y-8 animate-in fade-in duration-500">
          <Lock className="w-12 h-12 text-primary" />
          <h1 className="text-4xl font-bold uppercase">Authority Required</h1>
          <p className="text-muted-foreground">Please connect your wallet to access the terminal.</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center py-40 text-center space-y-8 animate-in fade-in duration-500">
+         <div className="p-6 bg-destructive/10 rounded-full border border-destructive/20">
+            <ShieldAlert className="w-12 h-12 text-destructive" />
+         </div>
+         <h1 className="text-4xl font-bold uppercase text-destructive">Unauthorized Access</h1>
+         <p className="text-muted-foreground max-w-md mx-auto">
+            This terminal is restricted to the designated Protocol Authority wallet: <br/>
+            <span className="font-mono text-primary break-all">{ADMIN_WALLET}</span>
+         </p>
       </div>
     );
   }
@@ -75,7 +94,7 @@ export default function AdminPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-3">
              <ShieldCheck className="w-5 h-5 text-primary" />
-             <p className="text-xs font-black uppercase tracking-widest text-primary">Protocol Admin</p>
+             <p className="text-xs font-black uppercase tracking-widest text-primary">Protocol Authority</p>
           </div>
           <h1 className="text-6xl font-bold exn-gradient-text uppercase">Command Center</h1>
         </div>
@@ -119,7 +138,7 @@ export default function AdminPage() {
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                    <div className="space-y-4">
-                      <p className="text-[10px] text-muted-foreground uppercase font-black">License Mint Price (USDC)</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Price (USDC)</p>
                       <div className="flex gap-2">
                          <input value={newLicensePrice} onChange={e => setNewLicensePrice(e.target.value)} className="exn-input h-12" placeholder={(state?.licensePrice ?? 0).toString()} />
                          <button 
@@ -154,7 +173,7 @@ export default function AdminPage() {
                <h3 className="text-lg font-bold uppercase tracking-widest flex items-center gap-2"><Coins className="w-5 h-5" /> Protocol Vaults</h3>
                <div className="space-y-4">
                  <div>
-                   <p className="text-[10px] text-muted-foreground uppercase font-black">License Vault (USDC)</p>
+                   <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Vault (USDC)</p>
                    <p className="text-2xl font-bold">{(state?.usdcVaultBalance ?? 0).toLocaleString()} <span className="text-sm text-emerald-500">USDC</span></p>
                  </div>
                  <div>

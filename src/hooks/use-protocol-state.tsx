@@ -152,11 +152,11 @@ const INITIAL_STATE: ProtocolState = {
   treasuryVaultPda: 'TREASURY-PDA',
   usdcVaultPda: 'LICENSE-PDA',
   stakedVaultPda: 'STAKED-PDA',
-  adminWallet: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
+  adminWallet: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
   validators: [
     { 
       id: 'v1', 
-      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
+      owner: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
       name: 'CyberCore-01', 
       description: 'Primary edge node', 
       logo_uri: '66', 
@@ -174,7 +174,7 @@ const INITIAL_STATE: ProtocolState = {
   licenses: [
     {
       id: 'XNODE-DEFAULT',
-      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
+      owner: '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW',
       is_claimed: true,
       is_burned: false,
       image_url: 'https://picsum.photos/seed/XNODE-DEFAULT/400/400'
@@ -198,7 +198,6 @@ interface ProtocolContextType {
   setFeedback: (status: 'success' | 'error' | 'warning', message: string) => void;
   clearFeedback: () => void;
   registerUser: (address: string) => void;
-  // Per-user derived state helpers
   exnBalance: number;
   usdcBalance: number;
   lastExnFaucetClaim: number;
