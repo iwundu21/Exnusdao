@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -51,7 +52,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
         label: 'Voting Ends In: ', 
         value: `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`,
         colorClass: 'text-emerald-500' 
-      });
+  });
       return false;
     };
 
@@ -251,12 +252,18 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
                 <div className="w-full md:w-80 space-y-6 bg-foreground/5 p-6 rounded-2xl">
                   <div className="space-y-4">
-                    <div className="flex justify-between items-start text-[10px] font-black uppercase tracking-widest">
-                        <span className="text-emerald-500">YES {yesPercent.toFixed(1)}%</span>
-                        <span className="text-destructive">NO {(100 - yesPercent).toFixed(1)}%</span>
+                    <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest">
+                        <div className="flex flex-col">
+                          <span className="text-emerald-500">YES: {(prop.yes_votes || 0).toLocaleString()}</span>
+                          <span className="text-[8px] text-emerald-500/50">{yesPercent.toFixed(1)}%</span>
+                        </div>
+                        <div className="flex flex-col text-right">
+                          <span className="text-destructive">NO: {(prop.no_votes || 0).toLocaleString()}</span>
+                          <span className="text-[8px] text-destructive/50">{(100 - yesPercent).toFixed(1)}%</span>
+                        </div>
                     </div>
                     <Progress value={yesPercent} className="h-2 bg-destructive/20" />
-                    <p className="text-[8px] text-muted-foreground uppercase font-bold text-center">Total Weight: {totalVotes.toLocaleString()} EXN</p>
+                    <p className="text-[8px] text-muted-foreground uppercase font-bold text-center">Total Consensus Weight: {totalVotes.toLocaleString()} EXN</p>
                   </div>
 
                   {!isExpired && !isVotingLocked && !hasVoted && !isVotingForThis && (
