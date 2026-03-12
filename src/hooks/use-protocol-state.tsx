@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
@@ -162,7 +161,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!address || !db) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
-    // Use setDoc with merge to ensure doc exists
     setDoc(gRef, { [vault]: increment(amount) }, { merge: true });
     setDoc(uRef, { exnBalance: increment(-amount) }, { merge: true });
   }, [db]);
@@ -171,7 +169,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!address || !db) return;
     const gRef = doc(db, 'protocol', 'global');
     const uRef = doc(db, 'users', address);
-    // Use setDoc with merge to ensure doc exists
     setDoc(gRef, { usdcVaultBalance: increment(-amount) }, { merge: true });
     setDoc(uRef, { usdcBalance: increment(amount) }, { merge: true });
   }, [db]);
@@ -220,7 +217,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
     if (!db) return;
     const sRef = doc(db, 'stakes', stakeId);
-    setDoc(sRef, { reward_checkpoint: increment(0) }, { merge: true }); // Simplified for prototype
+    setDoc(sRef, { reward_checkpoint: increment(0) }, { merge: true });
     updateUserBalance(wallet, amount, 0);
   }, [db, updateUserBalance]);
 
@@ -323,14 +320,14 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     rewardCap: globalData?.rewardCap ?? 0,
     licenseLimit: globalData?.licenseLimit ?? 0,
     licensePrice: globalData?.licensePrice ?? 0,
-    seedAmount: globalData?.seedAmount ?? 0,
+    seedAmount: globalData?.seedAmount ?? 15000000,
     adminWallet: globalData?.adminWallet || ADMIN_WALLET_ADDRESS,
-    faucetExnLimit: globalData?.faucetExnLimit ?? 0,
-    faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 0,
+    faucetExnLimit: globalData?.faucetExnLimit ?? 16000000,
+    faucetUsdcLimit: globalData?.faucetUsdcLimit ?? 10000,
     exnPrice: globalData?.exnPrice ?? 0.23,
     isPaused: globalData?.isPaused ?? false,
     lastCrankedEpoch: globalData?.lastCrankedEpoch ?? 0,
-    networkStartDate: globalData?.networkStartDate ?? Date.now(),
+    networkStartDate: globalData?.networkStartDate ?? 0,
     validators: (validatorsData || []) as Validator[],
     userStakes: (stakesData || []) as any[],
     licenses: (licensesData || []) as any[],
