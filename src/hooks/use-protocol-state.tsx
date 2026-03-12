@@ -140,13 +140,13 @@ const INITIAL_LOCAL_STATE: ProtocolState = {
   rewardVaultBalance: 0,
   usdcVaultBalance: 0,
   stakedVaultBalance: 0,
-  rewardCap: 1500,
+  rewardCap: 300000,
   licenseLimit: 100,
-  licensePrice: 500,
+  licensePrice: 5000,
   isPaused: false,
   lastTransaction: null,
   lastCrankedEpoch: 0, 
-  networkStartDate: 1741176000000, 
+  networkStartDate: Date.now(), 
   exnMint: 'EXN1111111111111111111111111111111111111111',
   usdcMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   rewardVaultPda: 'REWARD-PDA',
@@ -164,7 +164,7 @@ const INITIAL_LOCAL_STATE: ProtocolState = {
     version: '1.0.0-DEMO',
     totalVolume: 0,
     totalUsers: 0,
-    lastUpdate: 1741176000000
+    lastUpdate: Date.now()
   }
 };
 
@@ -181,6 +181,8 @@ interface ProtocolContextType {
   lastUsdcFaucetClaim: number;
   updateUserBalance: (address: string, exn: number, usdc: number) => void;
   updateFaucetClaim: (address: string, type: 'exn' | 'usdc') => void;
+  adminFundVault: (address: string, amount: number, vault: 'rewardVaultBalance' | 'treasuryBalance') => void;
+  adminWithdrawUsdc: (address: string, amount: number) => void;
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
@@ -290,6 +292,46 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const adminFundVault = useCallback((address: string, amount: number, vault: 'rewardVaultBalance' | 'treasuryBalance') => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile || profile.exnBalance < amount) return prev;
+      return {
+        ...prev,
+        [vault]: (prev[vault] || 0) + amount,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            exnBalance: profile.exnBalance - amount,
+            lastActive: Date.now(),
+            totalTransactions: profile.totalTransactions + 1
+          }
+        }
+      };
+    });
+  }, []);
+
+  const adminWithdrawUsdc = useCallback((address: string, amount: number) => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile || prev.usdcVaultBalance < amount) return prev;
+      return {
+        ...prev,
+        usdcVaultBalance: Math.max(0, prev.usdcVaultBalance - amount),
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            usdcBalance: profile.usdcBalance + amount,
+            lastActive: Date.now(),
+            totalTransactions: profile.totalTransactions + 1
+          }
+        }
+      };
+    });
+  }, []);
+
   const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
     setState(prev => {
       const profile = prev.profiles[address];
@@ -324,7 +366,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       lastExnFaucetClaim: activeProfile?.lastExnFaucetClaim ?? 0,
       lastUsdcFaucetClaim: activeProfile?.lastUsdcFaucetClaim ?? 0,
       updateUserBalance,
-      updateFaucetClaim
+      updateFaucetClaim,
+      adminFundVault,
+      adminWithdrawUsdc
     }}>
       {children}
     </ProtocolContext.Provider>

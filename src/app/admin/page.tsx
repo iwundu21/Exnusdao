@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -24,7 +23,15 @@ const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 
 export default function AdminPage() {
   const { connected, publicKey } = useWallet();
-  const { state, setState, isLoaded, setFeedback, updateUserBalance, exnBalance } = useProtocolState();
+  const { 
+    state, 
+    setState, 
+    isLoaded, 
+    setFeedback, 
+    exnBalance, 
+    adminFundVault, 
+    adminWithdrawUsdc 
+  } = useProtocolState();
   
   const [newCap, setNewCap] = useState('');
   const [newLicensePrice, setNewLicensePrice] = useState('');
@@ -72,8 +79,7 @@ export default function AdminPage() {
     if (isNaN(amt) || amt <= 0) return setFeedback('error', 'Invalid withdrawal amount.');
     if (amt > state.usdcVaultBalance) return setFeedback('error', 'Insufficient USDC in vault.');
 
-    updateUserBalance(walletAddress!, 0, amt);
-    setState(prev => ({ ...prev, usdcVaultBalance: Math.max(0, prev.usdcVaultBalance - amt) }));
+    adminWithdrawUsdc(walletAddress!, amt);
     setWithdrawUsdcAmt('');
     setFeedback('success', `Successfully withdrew ${amt.toLocaleString()} USDC from license vault.`);
   };
@@ -83,8 +89,7 @@ export default function AdminPage() {
     if (isNaN(amt) || amt <= 0) return setFeedback('error', 'Invalid funding amount.');
     if (amt > exnBalance) return setFeedback('error', 'Insufficient personal EXN balance.');
 
-    updateUserBalance(walletAddress!, -amt, 0);
-    setState(prev => ({ ...prev, rewardVaultBalance: (prev.rewardVaultBalance || 0) + amt }));
+    adminFundVault(walletAddress!, amt, 'rewardVaultBalance');
     setFundRewardsAmt('');
     setFeedback('success', `Injected ${amt.toLocaleString()} EXN into Global Reward Pool.`);
   };
@@ -94,8 +99,7 @@ export default function AdminPage() {
     if (isNaN(amt) || amt <= 0) return setFeedback('error', 'Invalid funding amount.');
     if (amt > exnBalance) return setFeedback('error', 'Insufficient personal EXN balance.');
 
-    updateUserBalance(walletAddress!, -amt, 0);
-    setState(prev => ({ ...prev, treasuryBalance: (prev.treasuryBalance || 0) + amt }));
+    adminFundVault(walletAddress!, amt, 'treasuryBalance');
     setFundTreasuryAmt('');
     setFeedback('success', `Injected ${amt.toLocaleString()} EXN into DAO Treasury.`);
   };
