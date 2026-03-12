@@ -25,7 +25,8 @@ export function CrankTerminal({
   const effectiveStartDate = networkStartDate || now;
   const elapsed = now - effectiveStartDate;
   
-  const currentEpoch = Math.floor(elapsed / EPOCH_DURATION) + 1;
+  // Ensure we don't calculate negative or huge epochs if the date is weird
+  const currentEpoch = Math.max(1, Math.floor(elapsed / EPOCH_DURATION) + 1);
   const currentEpochEndTime = effectiveStartDate + (currentEpoch * EPOCH_DURATION);
 
   const nextTargetToSettle = lastCrankedEpoch + 1;
@@ -41,7 +42,7 @@ export function CrankTerminal({
   }, [now, currentEpochEndTime]);
 
   const epochHistory = useMemo(() => {
-    // Show 12 epochs starting from Epoch 1
+    // Show 12 epochs starting from the anchored start
     return Array.from({ length: 12 }, (_, i) => {
       const eNum = i + 1;
       
