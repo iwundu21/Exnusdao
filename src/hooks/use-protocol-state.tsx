@@ -91,16 +91,16 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { data: globalData, loading: globalLoading } = useDoc(globalRef);
 
   const validatorsQuery = useMemo(() => collection(db, 'validators'), [db]);
-  const { data: validators, loading: valLoading } = useCollection(validatorsQuery);
+  const { data: validatorsData, loading: valLoading } = useCollection<Validator>(validatorsQuery);
 
   const stakesQuery = useMemo(() => collection(db, 'stakes'), [db]);
-  const { data: userStakes, loading: stakesLoading } = useCollection(stakesQuery);
+  const { data: stakesData, loading: stakesLoading } = useCollection(stakesQuery);
 
   const proposalsQuery = useMemo(() => collection(db, 'proposals'), [db]);
-  const { data: proposals, loading: propsLoading } = useCollection(proposalsQuery);
+  const { data: proposalsData, loading: propsLoading } = useCollection(proposalsQuery);
 
   const licensesQuery = useMemo(() => collection(db, 'licenses'), [db]);
-  const { data: licenses, loading: licLoading } = useCollection(licensesQuery);
+  const { data: licensesData, loading: licLoading } = useCollection(licensesQuery);
 
   const userRef = useMemo(() => (walletAddress ? doc(db, 'users', walletAddress) : null), [db, walletAddress]);
   const { data: userProfile, loading: profileLoading } = useDoc(userRef);
@@ -183,8 +183,8 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const vRef = doc(db, 'validators', stake.validator_id);
     setDoc(sRef, { ...stake, id: sRef.id });
     updateDoc(gRef, { stakedVaultBalance: (globalData?.stakedVaultBalance || 0) + stake.amount });
-    updateDoc(vRef, { total_staked: (validators?.find(v => v.id === stake.validator_id)?.total_staked || 0) + stake.amount });
-  }, [db, globalData, validators]);
+    updateDoc(vRef, { total_staked: (validatorsData?.find(v => v.id === stake.validator_id)?.total_staked || 0) + stake.amount });
+  }, [db, globalData, validatorsData]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
     if (!db) return;
@@ -193,23 +193,23 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const vRef = doc(db, 'validators', validatorId);
     updateDoc(sRef, { unstaked: true });
     updateDoc(gRef, { stakedVaultBalance: Math.max(0, (globalData?.stakedVaultBalance || 0) - amount) });
-    updateDoc(vRef, { total_staked: Math.max(0, (validators?.find(v => v.id === validatorId)?.total_staked || 0) - amount) });
-  }, [db, globalData, validators]);
+    updateDoc(vRef, { total_staked: Math.max(0, (validatorsData?.find(v => v.id === validatorId)?.total_staked || 0) - amount) });
+  }, [db, globalData, validatorsData]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, validatorId: string, wallet: string) => {
     if (!db) return;
     const sRef = doc(db, 'stakes', stakeId);
-    const validator = validators?.find(v => v.id === validatorId);
+    const validator = validatorsData?.find(v => v.id === validatorId);
     if (!validator) return;
     updateDoc(sRef, { reward_checkpoint: validator.global_reward_index });
     updateUserBalance(wallet, amount, 0);
-  }, [db, validators, updateUserBalance]);
+  }, [db, validatorsData, updateUserBalance]);
 
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
     if (!db) return;
     const pRef = doc(db, 'proposals', pId.toString());
     const gRef = doc(db, 'protocol', 'global');
-    const prop = proposals?.find(p => p.id === pId);
+    const prop = proposalsData?.find(p => p.id === pId);
     if (!prop) return;
     updateDoc(pRef, {
       yes_votes: support ? (prop.yes_votes || 0) + weight : prop.yes_votes,
@@ -218,7 +218,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       comments: [...(prop.comments || []), comment]
     });
     updateDoc(gRef, { treasuryBalance: (globalData?.treasuryBalance || 0) + 3 });
-  }, [db, proposals, walletAddress, globalData]);
+  }, [db, proposalsData, walletAddress, globalData]);
 
   const createProposal = useCallback((proposal: any) => {
     if (!db) return;
@@ -331,10 +331,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     isPaused: globalData?.isPaused ?? false,
     lastCrankedEpoch: globalData?.lastCrankedEpoch ?? 0,
     networkStartDate: globalData?.networkStartDate ?? Date.now(),
-    validators: (validators || []) as Validator[],
-    userStakes: (userStakes || []) as any[],
-    licenses: (licenses || []) as any[],
-    proposals: (proposals || []) as any[],
+    validators: (validatorsData || []) as Validator[],
+    userStakes: (stakesData || []) as any[],
+    licenses: (licensesData || []) as any[],
+    proposals: (proposalsData || []) as any[],
     settledEpochs: globalData?.settledEpochs ?? [],
     lastTransaction: null
   };

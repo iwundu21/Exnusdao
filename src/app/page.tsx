@@ -16,7 +16,6 @@ const VOTE_FEE = 3;
 const MIN_STAKE_FOR_PROPOSAL = 1_000_000;
 const MIN_STAKE_FOR_VOTE = 10_000;
 const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000;
-const SEED_DEPOSIT_AMOUNT = 15000000;
 
 export default function Home() {
   const { connected, publicKey } = useWallet();
@@ -57,10 +56,10 @@ export default function Home() {
       
     const seedWeight = state.validators
       .filter(v => v.owner === walletAddress && v.seed_deposited)
-      .length * SEED_DEPOSIT_AMOUNT;
+      .length * (state.seedAmount || 15000000);
       
     return stakesWeight + seedWeight;
-  }, [state?.userStakes, state?.validators, walletAddress]);
+  }, [state?.userStakes, state?.validators, walletAddress, state.seedAmount]);
 
   const isNodeOwner = useMemo(() => {
     if (!walletAddress || !state?.validators) return false;
@@ -185,7 +184,7 @@ export default function Home() {
     setFeedback('success', 'Principal unstaked.');
   };
 
-  if (!isMounted || !isLoaded) return null;
+  if (!isMounted) return null;
 
   return (
     <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
@@ -195,65 +194,74 @@ export default function Home() {
         <button onClick={() => setActiveTab('crank')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Network Crank</button>
       </div>
 
-      {activeTab === 'staking' && (
+      {!isLoaded ? (
+        <div className="py-40 flex flex-col items-center justify-center space-y-4">
+           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+           <p className="text-[10px] uppercase font-black tracking-widest text-primary animate-pulse">Syncing Cloud Ledger</p>
+        </div>
+      ) : (
         <>
-          <DashboardStats 
-            totalStaked={totalStakedReal} 
-            treasuryBalance={state.treasuryBalance || 0} 
-            rewardVaultBalance={state.rewardVaultBalance || 0}
-            usdcVaultBalance={state.usdcVaultBalance || 0}
-          />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div className="lg:col-span-2">
-              <ValidatorDiscovery 
-                validators={state.validators} 
-                onSelect={setSelectedValidator} 
-                userStakes={state.userStakes} 
-                walletAddress={walletAddress}
-                selectedId={selectedValidator?.id}
-                setFeedback={setFeedback}
+          {activeTab === 'staking' && (
+            <>
+              <DashboardStats 
+                totalStaked={totalStakedReal} 
+                treasuryBalance={state.treasuryBalance || 0} 
+                rewardVaultBalance={state.rewardVaultBalance || 0}
+                usdcVaultBalance={state.usdcVaultBalance || 0}
               />
-            </div>
-            <StakingActionForm 
-              selectedNode={selectedValidator} 
-              exnBalance={exnBalance} 
-              onStake={handleStake} 
-              userStakes={state.userStakes.filter(s => s.owner === walletAddress)} 
-              validators={state.validators} 
-              totalPendingRewards={pendingRewardsTotal} 
-              connected={connected}
-              onClaim={handleClaim}
-              onClaimSingle={handleClaimSingle}
-              onUnstake={handleUnstake}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="lg:col-span-2">
+                  <ValidatorDiscovery 
+                    validators={state.validators} 
+                    onSelect={setSelectedValidator} 
+                    userStakes={state.userStakes} 
+                    walletAddress={walletAddress}
+                    selectedId={selectedValidator?.id}
+                    setFeedback={setFeedback}
+                  />
+                </div>
+                <StakingActionForm 
+                  selectedNode={selectedValidator} 
+                  exnBalance={exnBalance} 
+                  onStake={handleStake} 
+                  userStakes={state.userStakes.filter(s => s.owner === walletAddress)} 
+                  validators={state.validators} 
+                  totalPendingRewards={pendingRewardsTotal} 
+                  connected={connected}
+                  onClaim={handleClaim}
+                  onClaimSingle={handleClaimSingle}
+                  onUnstake={handleUnstake}
+                  setFeedback={setFeedback}
+                />
+              </div>
+            </>
+          )}
+
+          {activeTab === 'governance' && (
+            <GovernancePortal 
+              proposals={state.proposals} 
+              userStakeWeight={userStakeWeight}
+              isNodeOwner={isNodeOwner}
+              walletAddress={walletAddress}
+              onVote={handleVote}
+              onCreate={handleCreateProposal}
+              onExecute={handleExecute}
               setFeedback={setFeedback}
             />
-          </div>
+          )}
+
+          {activeTab === 'crank' && (
+            <CrankTerminal 
+              validators={state.validators} 
+              rewardCap={state.rewardCap}
+              lastCrankedEpoch={state.lastCrankedEpoch}
+              networkStartDate={state.networkStartDate}
+              onCrank={handleCrank}
+              connected={connected}
+              settledEpochs={state.settledEpochs}
+            />
+          )}
         </>
-      )}
-
-      {activeTab === 'governance' && (
-        <GovernancePortal 
-          proposals={state.proposals} 
-          userStakeWeight={userStakeWeight}
-          isNodeOwner={isNodeOwner}
-          walletAddress={walletAddress}
-          onVote={handleVote}
-          onCreate={handleCreateProposal}
-          onExecute={handleExecute}
-          setFeedback={setFeedback}
-        />
-      )}
-
-      {activeTab === 'crank' && (
-        <CrankTerminal 
-          validators={state.validators} 
-          rewardCap={state.rewardCap}
-          lastCrankedEpoch={state.lastCrankedEpoch}
-          networkStartDate={state.networkStartDate}
-          onCrank={handleCrank}
-          connected={connected}
-          settledEpochs={state.settledEpochs}
-        />
       )}
     </div>
   );
