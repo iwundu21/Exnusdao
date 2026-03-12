@@ -165,12 +165,21 @@ export default function Home() {
       return setFeedback('warning', 'No active validators with stake weight detected.');
     }
 
+    const epochShares: any[] = [];
+
     setState(prev => {
       const newValidators = prev.validators.map(v => {
         if (!v.is_active || v.total_staked <= 0) return v;
         const poolShare = (v.total_staked / totalActiveWeight) * totalPool;
         const commission = (poolShare * (v.commission_rate / 10000));
         const stakerPool = poolShare - commission;
+        
+        epochShares.push({
+          validatorId: v.id,
+          share: stakerPool,
+          commission: commission
+        });
+
         return {
           ...v,
           accrued_node_rewards: (v.accrued_node_rewards || 0) + commission,
@@ -178,14 +187,22 @@ export default function Home() {
         };
       });
 
+      const newEpochRecord = {
+        epoch: targetEpoch,
+        settledAt: Date.now(),
+        totalPool: totalPool,
+        validatorShares: epochShares
+      };
+
       return {
         ...prev,
         validators: newValidators,
-        lastCrankedEpoch: targetEpoch
+        lastCrankedEpoch: targetEpoch,
+        settledEpochs: [...prev.settledEpochs, newEpochRecord]
       };
     });
 
-    setFeedback('success', `Epoch ${targetEpoch} finalized. yield sharded.`);
+    setFeedback('success', `Epoch ${targetEpoch} finalized. Block rewards sharded.`);
   };
 
   const handleClaim = () => {
@@ -280,6 +297,7 @@ export default function Home() {
           networkStartDate={state.networkStartDate}
           onCrank={handleCrank}
           connected={connected}
+          settledEpochs={state.settledEpochs}
         />
       )}
     </div>

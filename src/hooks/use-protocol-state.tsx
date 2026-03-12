@@ -67,6 +67,17 @@ export interface Proposal {
   comments: ProposalComment[];
 }
 
+export interface EpochRecord {
+  epoch: number;
+  settledAt: number;
+  totalPool: number;
+  validatorShares: {
+    validatorId: string;
+    share: number;
+    commission: number;
+  }[];
+}
+
 export interface TransactionFeedback {
   id: string;
   status: 'success' | 'error' | 'warning';
@@ -90,6 +101,7 @@ export interface ProtocolState {
   userStakes: UserStake[];
   licenses: License[];
   proposals: Proposal[];
+  settledEpochs: EpochRecord[];
   isPaused: boolean;
   lastTransaction: TransactionFeedback | null;
   lastCrankedEpoch: number;
@@ -143,6 +155,7 @@ const INITIAL_STATE: ProtocolState = {
   userStakes: [],
   licenses: [],
   proposals: [],
+  settledEpochs: [],
 };
 
 interface ProtocolContextType {
@@ -160,7 +173,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('exnus_protocol_state_v3');
+    const saved = localStorage.getItem('exnus_protocol_state_v4');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -177,7 +190,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('exnus_protocol_state_v3', JSON.stringify(state));
+      localStorage.setItem('exnus_protocol_state_v4', JSON.stringify(state));
     }
   }, [state, isLoaded]);
 
