@@ -43,13 +43,18 @@ export default function AdminPage() {
   const [newLicenseLimit, setNewLicenseLimit] = useState('');
 
   const [mounted, setMounted] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // Initialize form once when data is loaded to prevent "input fighting"
   useEffect(() => {
     setMounted(true);
-    if (state.licensePrice) setNewLicensePrice(state.licensePrice.toString());
-    if (state.rewardCap) setNewRewardCap(state.rewardCap.toString());
-    if (state.licenseLimit) setNewLicenseLimit(state.licenseLimit.toString());
-  }, [state.licensePrice, state.rewardCap, state.licenseLimit]);
+    if (isLoaded && !isInitialized) {
+      setNewLicensePrice(state.licensePrice?.toString() || '0');
+      setNewRewardCap(state.rewardCap?.toString() || '0');
+      setNewLicenseLimit(state.licenseLimit?.toString() || '0');
+      setIsInitialized(true);
+    }
+  }, [isLoaded, state.licensePrice, state.rewardCap, state.licenseLimit, isInitialized]);
 
   const formatInput = (val: string) => {
     const raw = val.replace(/,/g, "");
@@ -70,7 +75,7 @@ export default function AdminPage() {
   const isAdmin = walletAddress === state.adminWallet;
 
   const handleWithdrawUsdc = () => {
-    const amt = Number(withdrawUsdcAmt);
+    const amt = Number(withdrawUsdcAmt.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) return setFeedback('error', 'Invalid withdrawal amount.');
     if (amt > state.usdcVaultBalance) return setFeedback('error', 'Insufficient USDC in vault.');
 
@@ -80,7 +85,7 @@ export default function AdminPage() {
   };
 
   const handleFundRewards = () => {
-    const amt = Number(fundRewardsAmt);
+    const amt = Number(fundRewardsAmt.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) return setFeedback('error', 'Invalid funding amount.');
     if (amt > exnBalance) return setFeedback('error', 'Insufficient personal EXN balance.');
 
@@ -90,7 +95,7 @@ export default function AdminPage() {
   };
 
   const handleFundTreasury = () => {
-    const amt = Number(fundTreasuryAmt);
+    const amt = Number(fundTreasuryAmt.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) return setFeedback('error', 'Invalid funding amount.');
     if (amt > exnBalance) return setFeedback('error', 'Insufficient personal EXN balance.');
 
@@ -100,9 +105,9 @@ export default function AdminPage() {
   };
 
   const handleUpdateGlobals = () => {
-    const price = Number(newLicensePrice);
-    const cap = Number(newRewardCap);
-    const limit = Number(newLicenseLimit);
+    const price = Number(newLicensePrice.replace(/,/g, ''));
+    const cap = Number(newRewardCap.replace(/,/g, ''));
+    const limit = Number(newLicenseLimit.replace(/,/g, ''));
     
     if (isNaN(price) || price < 0) return setFeedback('error', 'Invalid license price.');
     if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid reward cap.');
@@ -118,6 +123,7 @@ export default function AdminPage() {
   const handleFullProtocolReset = async () => {
     await resetProtocol();
     setFeedback('success', 'Master Reset Complete: Cloud global parameters re-anchored.');
+    setIsInitialized(false); // Allow re-initialization of form fields
   };
 
   if (!mounted) return null;
@@ -182,7 +188,7 @@ export default function AdminPage() {
                           <input 
                             value={formatInput(newLicensePrice)} 
                             onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} 
-                            className="exn-input h-12 pl-12" 
+                            className="exn-input h-12 pl-12 font-mono" 
                             placeholder="Price in USDC..." 
                           />
                        </div>
@@ -194,7 +200,7 @@ export default function AdminPage() {
                           <input 
                             value={formatInput(newRewardCap)} 
                             onChange={e => handleTextChange(e.target.value, setNewRewardCap)} 
-                            className="exn-input h-12 pl-12" 
+                            className="exn-input h-12 pl-12 font-mono" 
                             placeholder="Reward Pool per Epoch..." 
                           />
                        </div>
@@ -206,7 +212,7 @@ export default function AdminPage() {
                           <input 
                             value={formatInput(newLicenseLimit)} 
                             onChange={e => handleTextChange(e.target.value, setNewLicenseLimit)} 
-                            className="exn-input h-12 pl-12" 
+                            className="exn-input h-12 pl-12 font-mono" 
                             placeholder="Max Licenses permitted..." 
                           />
                        </div>
@@ -235,10 +241,10 @@ export default function AdminPage() {
                         <p className="text-[10px] text-emerald-500 font-bold uppercase">Vault: {state.usdcVaultBalance.toLocaleString()} USDC</p>
                       </div>
                       <div className="flex gap-2">
-                         <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-12" placeholder="Amount..." />
+                         <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-12 font-mono" placeholder="Amount..." />
                          <button 
                            onClick={handleWithdrawUsdc} 
-                           disabled={!withdrawUsdcAmt.trim() || Number(withdrawUsdcAmt) > state.usdcVaultBalance}
+                           disabled={!withdrawUsdcAmt.trim() || Number(withdrawUsdcAmt.replace(/,/g, '')) > state.usdcVaultBalance}
                            className={`px-6 h-12 text-[9px] uppercase font-black transition-all flex items-center gap-2 ${withdrawUsdcAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
                          >
                            <ArrowDownLeft className="w-3 h-3" /> Withdraw USDC
@@ -253,10 +259,10 @@ export default function AdminPage() {
                           <p className="text-[9px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                           <input value={formatInput(fundRewardsAmt)} onChange={e => handleTextChange(e.target.value, setFundRewardsAmt)} className="exn-input h-12" placeholder="EXN to add..." />
+                           <input value={formatInput(fundRewardsAmt)} onChange={e => handleTextChange(e.target.value, setFundRewardsAmt)} className="exn-input h-12 font-mono" placeholder="EXN to add..." />
                            <button 
                              onClick={handleFundRewards} 
-                             disabled={!fundRewardsAmt.trim() || Number(fundRewardsAmt) > exnBalance}
+                             disabled={!fundRewardsAmt.trim() || Number(fundRewardsAmt.replace(/,/g, '')) > exnBalance}
                              className={`w-full h-12 text-[9px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundRewardsAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
                            >
                              <ArrowUpRight className="w-3 h-3" /> Fund Rewards
@@ -270,10 +276,10 @@ export default function AdminPage() {
                           <p className="text-[9px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                           <input value={formatInput(fundTreasuryAmt)} onChange={e => handleTextChange(e.target.value, setFundTreasuryAmt)} className="exn-input h-12" placeholder="EXN to add..." />
+                           <input value={formatInput(fundTreasuryAmt)} onChange={e => handleTextChange(e.target.value, setFundTreasuryAmt)} className="exn-input h-12 font-mono" placeholder="EXN to add..." />
                            <button 
                              onClick={handleFundTreasury} 
-                             disabled={!fundTreasuryAmt.trim() || Number(fundTreasuryAmt) > exnBalance}
+                             disabled={!fundTreasuryAmt.trim() || Number(fundTreasuryAmt.replace(/,/g, '')) > exnBalance}
                              className={`w-full h-12 text-[9px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundTreasuryAmt.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
                            >
                              <ArrowUpRight className="w-3 h-3" /> Fund Treasury
