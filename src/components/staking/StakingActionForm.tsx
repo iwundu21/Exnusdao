@@ -35,6 +35,20 @@ export function StakingActionForm({
     return () => clearInterval(interval);
   }, []);
 
+  const formatInput = (val: string) => {
+    if (!val) return "";
+    const parts = val.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  };
+
+  const onAmountChange = (val: string) => {
+    const raw = val.replace(/,/g, "");
+    if (raw === "" || /^\d*\.?\d*$/.test(raw)) {
+      setAmount(raw);
+    }
+  };
+
   const handleAction = () => {
     if (!connected) return setFeedback('warning', 'Please connect your wallet to initiate staking.');
     const numAmt = Number(amount);
@@ -84,10 +98,10 @@ export function StakingActionForm({
             </div>
             <div className="relative">
               <input 
-                type="number" 
-                value={amount}
+                type="text" 
+                value={formatInput(amount)}
                 disabled={!connected}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => onAmountChange(e.target.value)}
                 placeholder="0.00"
                 className={`exn-input h-12 ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
               />

@@ -69,6 +69,20 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
   const connected = !!walletAddress;
 
+  const formatInput = (val: string) => {
+    if (!val) return "";
+    const parts = val.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  };
+
+  const onAmountChange = (val: string) => {
+    const raw = val.replace(/,/g, "");
+    if (raw === "" || /^\d*\.?\d*$/.test(raw)) {
+      setNewProp({...newProp, amount: raw});
+    }
+  };
+
   const handleCreate = () => {
     if (!connected) return setFeedback('warning', 'Please connect your wallet to submit proposals.');
     if (userStakeWeight < 1000000) {
@@ -196,9 +210,9 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     <div className="space-y-2">
                       <label className="text-[10px] text-secondary uppercase font-black tracking-widest">Amount (EXN)</label>
                       <input 
-                        type="number"
-                        value={newProp.amount}
-                        onChange={e => setNewProp({...newProp, amount: e.target.value})}
+                        type="text"
+                        value={formatInput(newProp.amount)}
+                        onChange={e => onAmountChange(e.target.value)}
                         className="exn-input text-[10px]" 
                         placeholder="0.00" 
                       />

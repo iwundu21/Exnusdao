@@ -47,6 +47,20 @@ export default function AdminPage() {
     setMounted(true);
   }, []);
 
+  const formatInput = (val: string) => {
+    if (!val) return "";
+    const parts = val.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  };
+
+  const handleTextChange = (val: string, setter: (v: string) => void) => {
+    const raw = val.replace(/,/g, "");
+    if (raw === "" || /^\d*\.?\d*$/.test(raw)) {
+      setter(raw);
+    }
+  };
+
   const walletAddress = publicKey?.toBase58();
   const isAdmin = walletAddress === ADMIN_WALLET;
 
@@ -186,7 +200,7 @@ export default function AdminPage() {
                       <p className="text-[10px] text-emerald-500 font-bold uppercase">Vault: {state.usdcVaultBalance.toLocaleString()} USDC</p>
                     </div>
                     <div className="flex gap-2">
-                       <input value={withdrawUsdcAmt} onChange={e => setWithdrawUsdcAmt(e.target.value)} className="exn-input h-12" placeholder="Amount to withdraw..." />
+                       <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-12" placeholder="Amount to withdraw..." />
                        <button 
                          onClick={handleWithdrawUsdc} 
                          disabled={!withdrawUsdcAmt.trim() || Number(withdrawUsdcAmt) > state.usdcVaultBalance}
@@ -205,7 +219,7 @@ export default function AdminPage() {
                         <p className="text-[9px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                       </div>
                       <div className="flex flex-col gap-2">
-                         <input value={fundRewardsAmt} onChange={e => setFundRewardsAmt(e.target.value)} className="exn-input h-12" placeholder="EXN to add..." />
+                         <input value={formatInput(fundRewardsAmt)} onChange={e => handleTextChange(e.target.value, setFundRewardsAmt)} className="exn-input h-12" placeholder="EXN to add..." />
                          <button 
                            onClick={handleFundRewards} 
                            disabled={!fundRewardsAmt.trim() || Number(fundRewardsAmt) > exnBalance}
@@ -223,7 +237,7 @@ export default function AdminPage() {
                         <p className="text-[9px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                       </div>
                       <div className="flex flex-col gap-2">
-                         <input value={fundTreasuryAmt} onChange={e => setFundTreasuryAmt(e.target.value)} className="exn-input h-12" placeholder="EXN to add..." />
+                         <input value={formatInput(fundTreasuryAmt)} onChange={e => handleTextChange(e.target.value, setFundTreasuryAmt)} className="exn-input h-12" placeholder="EXN to add..." />
                          <button 
                            onClick={handleFundTreasury} 
                            disabled={!fundTreasuryAmt.trim() || Number(fundTreasuryAmt) > exnBalance}
@@ -246,7 +260,7 @@ export default function AdminPage() {
                  <div className="space-y-4">
                     <p className="text-[10px] text-muted-foreground uppercase font-black">30-Day Reward Block Pool (EXN)</p>
                     <div className="flex gap-2">
-                       <input value={newCap} onChange={e => setNewCap(e.target.value)} className="exn-input h-12" placeholder={(state?.rewardCap ?? 0).toString()} />
+                       <input value={formatInput(newCap)} onChange={e => handleTextChange(e.target.value, setNewCap)} className="exn-input h-12" placeholder={(state?.rewardCap ?? 0).toString()} />
                        <button 
                          onClick={handleUpdateCap} 
                          disabled={!newCap.trim()}
@@ -260,7 +274,7 @@ export default function AdminPage() {
                    <div className="space-y-4">
                       <p className="text-[10px] text-muted-foreground uppercase font-black">XNode License Price (USDC)</p>
                       <div className="flex gap-2">
-                         <input value={newLicensePrice} onChange={e => setNewLicensePrice(e.target.value)} className="exn-input h-12" placeholder={(state?.licensePrice ?? 0).toString()} />
+                         <input value={formatInput(newLicensePrice)} onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} className="exn-input h-12" placeholder={(state?.licensePrice ?? 0).toString()} />
                          <button 
                            onClick={handleUpdateLicensePrice} 
                            disabled={!newLicensePrice.trim()}
@@ -273,7 +287,7 @@ export default function AdminPage() {
                    <div className="space-y-4">
                       <p className="text-[10px] text-muted-foreground uppercase font-black">Total License Supply Cap</p>
                       <div className="flex gap-2">
-                         <input value={newLicenseLimit} onChange={e => setNewLicenseLimit(e.target.value)} className="exn-input h-12" placeholder={(state?.licenseLimit ?? 0).toString()} />
+                         <input value={formatInput(newLicenseLimit)} onChange={e => handleTextChange(e.target.value, setNewLicenseLimit)} className="exn-input h-12" placeholder={(state?.licenseLimit ?? 0).toString()} />
                          <button 
                            onClick={handleUpdateLicenseLimit} 
                            disabled={!newLicenseLimit.trim()}
@@ -342,7 +356,7 @@ export default function AdminPage() {
             </div>
 
             <div className="exn-card p-6 space-y-4 border-primary/20 bg-primary/5">
-               <div className="flex items-center gap-2">
+               <div className="flex items-center gap-2 text-primary">
                  <Calendar className="w-4 h-4 text-primary" />
                  <p className="text-[10px] font-black uppercase tracking-widest">Network Timeline</p>
                </div>
