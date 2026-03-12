@@ -1,0 +1,137 @@
+
+{
+  "entities": {
+    "ProtocolGlobal": {
+      "title": "Protocol Global State",
+      "description": "Global settings and vault balances for the Exnus protocol.",
+      "type": "object",
+      "properties": {
+        "treasuryBalance": { "type": "number" },
+        "rewardVaultBalance": { "type": "number" },
+        "usdcVaultBalance": { "type": "number" },
+        "stakedVaultBalance": { "type": "number" },
+        "rewardCap": { "type": "number" },
+        "licenseLimit": { "type": "number" },
+        "licensePrice": { "type": "number" },
+        "lastCrankedEpoch": { "type": "number" },
+        "networkStartDate": { "type": "number" },
+        "isPaused": { "type": "boolean" }
+      }
+    },
+    "Validator": {
+      "title": "XNode Validator",
+      "description": "A validator node registered in the network.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "owner": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "logo_uri": { "type": "string" },
+        "location": { "type": "string" },
+        "is_active": { "type": "boolean" },
+        "seed_deposited": { "type": "boolean" },
+        "total_staked": { "type": "number" },
+        "commission_rate": { "type": "number" },
+        "accrued_node_rewards": { "type": "number" },
+        "global_reward_index": { "type": "number" },
+        "license_id": { "type": "string" }
+      }
+    },
+    "UserStake": {
+      "title": "Staking Position",
+      "description": "An active staking position created by a user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "owner": { "type": "string" },
+        "validator_id": { "type": "string" },
+        "amount": { "type": "number" },
+        "lock_multiplier": { "type": "number" },
+        "staked_at": { "type": "number" },
+        "unlock_timestamp": { "type": "number" },
+        "reward_checkpoint": { "type": "number" },
+        "claimed": { "type": "boolean" },
+        "unstaked": { "type": "boolean" }
+      }
+    },
+    "License": {
+      "title": "XNode License NFT",
+      "description": "An NFT license that grants validator rights.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "owner": { "type": "string" },
+        "is_claimed": { "type": "boolean" },
+        "is_burned": { "type": "boolean" },
+        "metadata_uri": { "type": "string" },
+        "image_url": { "type": "string" }
+      }
+    },
+    "Proposal": {
+      "title": "Governance Proposal",
+      "description": "A DAO proposal for protocol changes.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "proposer": { "type": "string" },
+        "type": { "type": "number" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "recipient": { "type": "string" },
+        "yes_votes": { "type": "number" },
+        "no_votes": { "type": "number" },
+        "created_at": { "type": "number" },
+        "deadline": { "type": "number" },
+        "voting_ends_at": { "type": "number" },
+        "executed": { "type": "boolean" },
+        "voters": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Persistent wallet profile data.",
+      "type": "object",
+      "properties": {
+        "address": { "type": "string" },
+        "exnBalance": { "type": "number" },
+        "usdcBalance": { "type": "number" },
+        "lastExnFaucetClaim": { "type": "number" },
+        "lastUsdcFaucetClaim": { "type": "number" },
+        "registeredAt": { "type": "number" },
+        "lastActive": { "type": "number" },
+        "totalTransactions": { "type": "number" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["anonymous"]
+  },
+  "firestore": {
+    "/protocol/global": {
+      "schema": "ProtocolGlobal",
+      "description": "Singleton document for global protocol state."
+    },
+    "/validators/{validatorId}": {
+      "schema": "Validator",
+      "description": "Collection of network validators."
+    },
+    "/licenses/{licenseId}": {
+      "schema": "License",
+      "description": "Collection of minted XNode licenses."
+    },
+    "/stakes/{stakeId}": {
+      "schema": "UserStake",
+      "description": "Collection of user staking positions."
+    },
+    "/proposals/{proposalId}": {
+      "schema": "Proposal",
+      "description": "Collection of governance proposals."
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Collection of user profiles keyed by wallet address."
+    }
+  }
+}
