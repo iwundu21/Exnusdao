@@ -209,7 +209,6 @@ export default function Home() {
               <DashboardStats 
                 totalStaked={totalStakedReal} 
                 treasuryBalance={state.treasuryBalance || 0} 
-                rewardVaultBalance={state.rewardVaultBalance || 0}
                 usdcVaultBalance={state.usdcVaultBalance || 0}
               />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">

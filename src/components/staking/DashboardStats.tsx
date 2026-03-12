@@ -15,7 +15,6 @@ import {
 interface DashboardStatsProps {
   totalStaked?: number;
   treasuryBalance?: number;
-  rewardVaultBalance?: number;
   usdcVaultBalance?: number;
 }
 
@@ -164,15 +163,15 @@ export function DashboardStats({
 
           <div className="flex-1 exn-card p-10 bg-black/40 border-white/5 flex flex-col justify-between group hover:border-emerald-500/40 transition-all duration-500">
             <div className="space-y-1">
-              <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">Reward Vault</p>
+              <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em]">License Vault</p>
               <div className="h-[2px] w-10 bg-emerald-500/30 rounded-full group-hover:w-16 transition-all" />
             </div>
             <div className="space-y-0.5 text-right">
               <p className="text-3xl font-mono font-bold text-white tracking-tighter">
-                {(state.rewardVaultBalance || 0).toLocaleString()} <span className="text-[10px] text-white/20">EXN</span>
+                {(state.usdcVaultBalance || 0).toLocaleString()} <span className="text-[10px] text-white/20">USDC</span>
               </p>
               <p className="text-[11px] font-bold text-emerald-500/70 font-mono uppercase tracking-tight">
-                ${((state.rewardVaultBalance || 0) * exnPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ${(state.usdcVaultBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
