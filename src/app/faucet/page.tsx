@@ -122,7 +122,7 @@ export default function FaucetPage() {
 
           <div className="space-y-1 relative z-10">
             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
-            <h3 className="text-2xl font-bold text-foreground font-mono">{exnLimit.toLocaleString()} <span className="text-[10px] text-primary font-black uppercase">EXN</span></h3>
+            <h3 className="text-xl font-bold text-foreground font-mono">{exnLimit.toLocaleString()} <span className="text-[10px] text-primary font-black uppercase">EXN</span></h3>
           </div>
 
           <button 
@@ -151,7 +151,7 @@ export default function FaucetPage() {
 
           <div className="space-y-1 relative z-10">
             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">Dynamic Supply</p>
-            <h3 className="text-2xl font-bold text-foreground font-mono">{usdcLimit.toLocaleString()} <span className="text-[10px] text-emerald-500 font-black uppercase">USDC</span></h3>
+            <h3 className="text-xl font-bold text-foreground font-mono">{usdcLimit.toLocaleString()} <span className="text-[10px] text-emerald-500 font-black uppercase">USDC</span></h3>
           </div>
 
           <button 
@@ -172,29 +172,31 @@ export default function FaucetPage() {
               <ShieldCheck className="w-6 h-6" />
               Review Drop Request
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Action</span>
-                  <span className="text-foreground font-black">Dynamic Asset Generation</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Action</span>
+                    <span className="text-foreground font-black">Dynamic Asset Generation</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Asset</span>
+                    <span className={reviewType === 'exn' ? "text-primary font-bold" : "text-emerald-500 font-bold"}>
+                      {reviewType === 'exn' ? 'EXN Protocol Token' : 'USDC Stablecoin'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Amount</span>
+                    <span className="text-foreground font-mono font-bold">
+                      {reviewType === 'exn' ? exnLimit.toLocaleString() : usdcLimit.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Asset</span>
-                  <span className={reviewType === 'exn' ? "text-primary font-bold" : "text-emerald-500 font-bold"}>
-                    {reviewType === 'exn' ? 'EXN Protocol Token' : 'USDC Stablecoin'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Amount</span>
-                  <span className="text-foreground font-mono font-bold">
-                    {reviewType === 'exn' ? exnLimit.toLocaleString() : usdcLimit.toLocaleString()}
-                  </span>
-                </div>
+                
+                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                  Faucet drops are restricted to once every 24 hours per asset. Confirming this request will initiate the on-chain minting of these testnet tokens to your active wallet address.
+                </p>
               </div>
-              
-              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                Faucet drops are restricted to once every 24 hours per asset. Confirming this request will initiate the on-chain minting of these testnet tokens to your active wallet address.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-6">

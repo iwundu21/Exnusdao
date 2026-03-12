@@ -156,7 +156,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
              <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Combined Consensus Weight</p>
            </div>
            <div className="text-right">
-             <p className="text-base font-bold text-primary font-mono">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
+             <p className="text-sm font-bold text-primary font-mono">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
              {connected && isNodeOwner && (
                <div className="flex items-center gap-1.5 justify-end text-[8px] text-emerald-500 font-black uppercase">
                  <ShieldCheck className="w-2.5 h-2.5" /> Includes 15M Seed Power
@@ -367,46 +367,48 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
               <ShieldCheck className="w-6 h-6" />
               Review Governance Action
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Action</span>
-                  <span className="text-foreground font-black">{reviewAction === 'create' ? 'Broadcast Proposal' : 'Cast Consensus Vote'}</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Action</span>
+                    <span className="text-foreground font-black">{reviewAction === 'create' ? 'Broadcast Proposal' : 'Cast Consensus Vote'}</span>
+                  </div>
+                  {reviewAction === 'create' ? (
+                    <>
+                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                        <span className="text-muted-foreground">Title</span>
+                        <span className="text-foreground font-bold truncate max-w-[200px]">{newProp.title}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                        <span className="text-muted-foreground">Network Fee</span>
+                        <span className="text-primary font-mono font-bold">10 EXN</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                        <span className="text-muted-foreground">Vote Stance</span>
+                        <span className={votingOn?.support ? "text-emerald-500 font-bold" : "text-destructive font-bold"}>
+                          {votingOn?.support ? 'YES / SUPPORT' : 'NO / REJECT'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                        <span className="text-muted-foreground">Consensus Weight</span>
+                        <span className="text-primary font-mono font-bold">{userStakeWeight.toLocaleString()} EXN</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                        <span className="text-muted-foreground">Network Fee</span>
+                        <span className="text-primary font-mono font-bold">3 EXN</span>
+                      </div>
+                    </>
+                  )}
                 </div>
-                {reviewAction === 'create' ? (
-                  <>
-                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                      <span className="text-muted-foreground">Title</span>
-                      <span className="text-foreground font-bold truncate max-w-[200px]">{newProp.title}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                      <span className="text-muted-foreground">Network Fee</span>
-                      <span className="text-primary font-mono font-bold">10 EXN</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                      <span className="text-muted-foreground">Vote Stance</span>
-                      <span className={votingOn?.support ? "text-emerald-500 font-bold" : "text-destructive font-bold"}>
-                        {votingOn?.support ? 'YES / SUPPORT' : 'NO / REJECT'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                      <span className="text-muted-foreground">Consensus Weight</span>
-                      <span className="text-primary font-mono font-bold">{userStakeWeight.toLocaleString()} EXN</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                      <span className="text-muted-foreground">Network Fee</span>
-                      <span className="text-primary font-mono font-bold">3 EXN</span>
-                    </div>
-                  </>
-                )}
+                
+                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                  By confirming, your decision will be recorded on the global protocol ledger. Governance actions require network fees to prevent consensus spam.
+                </p>
               </div>
-              
-              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                By confirming, your decision will be recorded on the global protocol ledger. Governance actions require network fees to prevent consensus spam.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-6">

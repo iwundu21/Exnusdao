@@ -118,7 +118,7 @@ export default function PurchaseLicensePage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold text-emerald-500 font-mono">{licensePrice.toLocaleString()} USDC</p>
+                <p className="text-xs font-bold text-emerald-500 font-mono">{licensePrice.toLocaleString()} USDC</p>
               </div>
             </div>
 
@@ -211,25 +211,27 @@ export default function PurchaseLicensePage() {
               <ShieldCheck className="w-6 h-6" />
               Review NFT Minting
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Action</span>
-                  <span className="text-foreground font-black">Mint XNode License NFT</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Action</span>
+                    <span className="text-foreground font-black">Mint XNode License NFT</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Standard</span>
+                    <span className="text-foreground font-bold">Metaplex Master Edition</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Mint Cost</span>
+                    <span className="text-emerald-500 font-mono font-bold">{licensePrice.toLocaleString()} USDC</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Standard</span>
-                  <span className="text-foreground font-bold">Metaplex Master Edition</span>
-                </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Mint Cost</span>
-                  <span className="text-emerald-500 font-mono font-bold">{licensePrice.toLocaleString()} USDC</span>
-                </div>
+                
+                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                  By confirming, the mint cost will be deducted from your USDC balance. The XNode License is required to register a validator on the network. This transaction is final.
+                </p>
               </div>
-              
-              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                By confirming, the mint cost will be deducted from your USDC balance. The XNode License is required to register a validator on the network. This transaction is final.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-6">

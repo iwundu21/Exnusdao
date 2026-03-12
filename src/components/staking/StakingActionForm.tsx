@@ -128,10 +128,10 @@ export function StakingActionForm({
                 disabled={!connected}
                 onChange={handleInputChange}
                 placeholder="0.00"
-                className={`exn-input h-12 text-sm ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`exn-input h-12 text-xs ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
               {connected && (
-                <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-3 top-2.5 text-xs text-primary font-bold hover:underline">MAX</button>
+                <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-3 top-2.5 text-[10px] text-primary font-bold hover:underline">MAX</button>
               )}
             </div>
           </div>
@@ -156,7 +156,7 @@ export function StakingActionForm({
           <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
             <div className="flex justify-between items-center text-xs">
               <span className="text-foreground/50 uppercase tracking-tighter">Target Node</span>
-              <span className={`font-bold uppercase ${selectedNode ? 'text-primary' : 'text-foreground/20'}`}>
+              <span className={`text-xs font-bold uppercase ${selectedNode ? 'text-primary' : 'text-foreground/20'}`}>
                 {selectedNode ? selectedNode.name : 'Selection Required'}
               </span>
             </div>
@@ -177,7 +177,7 @@ export function StakingActionForm({
           <div className="flex justify-between items-center p-6 bg-secondary/10 border border-secondary/20 rounded-2xl">
             <div className="space-y-1">
               <p className="text-[10px] text-foreground/50 uppercase font-black tracking-widest">Global Claimable</p>
-              <p className="text-sm font-bold text-secondary font-mono">{totalPendingRewards.toFixed(2)} EXN</p>
+              <p className="text-xs font-bold text-secondary font-mono">{totalPendingRewards.toFixed(2)} EXN</p>
             </div>
             <button 
               onClick={onClaim}
@@ -207,7 +207,7 @@ export function StakingActionForm({
                   <div key={s.id} className="p-5 bg-foreground/5 rounded-xl border border-border/10 space-y-4">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
-                         <span className="text-sm font-bold text-foreground font-mono">{s.amount.toLocaleString()} EXN</span>
+                         <span className="text-xs font-bold text-foreground font-mono">{s.amount.toLocaleString()} EXN</span>
                          <p className="text-[10px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Node'}</p>
                          
                          <div className="flex flex-col gap-1.5 pt-2">
@@ -233,7 +233,7 @@ export function StakingActionForm({
                          </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-black text-emerald-500 font-mono">+{pendingReward.toFixed(2)}</p>
+                        <p className="text-[10px] font-black text-emerald-500 font-mono">+{pendingReward.toFixed(2)}</p>
                         <p className="text-[8px] text-muted-foreground uppercase font-black">Yield: {(multiplier/1000).toFixed(1)}x</p>
                       </div>
                     </div>
@@ -257,33 +257,35 @@ export function StakingActionForm({
               <ShieldCheck className="w-6 h-6" />
               Review Transaction
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Action</span>
-                  <span className="text-foreground font-black">Lock Assets (Stake)</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Action</span>
+                    <span className="text-foreground font-black">Lock Assets (Stake)</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Amount</span>
+                    <span className="text-primary font-mono font-bold">{amountInput} EXN</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Validator</span>
+                    <span className="text-foreground font-bold">{selectedNode?.name}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Duration</span>
+                    <span className="text-amber-500 font-bold">{currentTier?.label}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Yield Multiplier</span>
+                    <span className="text-emerald-500 font-black">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Amount</span>
-                  <span className="text-primary font-mono font-bold">{amountInput} EXN</span>
-                </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Validator</span>
-                  <span className="text-foreground font-bold">{selectedNode?.name}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Duration</span>
-                  <span className="text-amber-500 font-bold">{currentTier?.label}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Yield Multiplier</span>
-                  <span className="text-emerald-500 font-black">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
-                </div>
+                
+                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                  By confirming, your assets will be moved to the protocol's staked vault and locked for the selected duration. This action is irreversible once processed on-chain.
+                </p>
               </div>
-              
-              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                By confirming, your assets will be moved to the protocol's staked vault and locked for the selected duration. This action is irreversible once processed on-chain.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-6">

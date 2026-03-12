@@ -245,7 +245,7 @@ export default function RegisterNodePage() {
                   <div className="absolute bottom-6 left-8 space-y-1">
                     <div className="flex items-center gap-2">
                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]" />
-                       <h4 className="text-xl font-bold text-white tracking-tighter uppercase">
+                       <h4 className="text-lg font-bold text-white tracking-tighter uppercase">
                          {formData.name || 'Your XNode Name'}
                        </h4>
                     </div>
@@ -291,29 +291,31 @@ export default function RegisterNodePage() {
               <ShieldCheck className="w-6 h-6" />
               Review XNode Binding
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Action</span>
-                  <span className="text-foreground font-black">Validator Registration</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Action</span>
+                    <span className="text-foreground font-black">Validator Registration</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">License NFT</span>
+                    <span className="text-foreground font-mono font-bold">{shortenAddress(formData.licenseId)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Identity Name</span>
+                    <span className="text-primary font-bold">{formData.name}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
+                    <span className="text-muted-foreground">Node Fee</span>
+                    <span className="text-emerald-500 font-bold">{formData.commission}%</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">License NFT</span>
-                  <span className="text-foreground font-mono font-bold">{shortenAddress(formData.licenseId)}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Identity Name</span>
-                  <span className="text-primary font-bold">{formData.name}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                  <span className="text-muted-foreground">Node Fee</span>
-                  <span className="text-emerald-500 font-bold">{formData.commission}%</span>
-                </div>
+                
+                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
+                  By confirming, you are binding your XNode License NFT to this validator identity. This process is atomic and will permanently mark the license as "Bound" in the network ledger.
+                </p>
               </div>
-              
-              <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                By confirming, you are binding your XNode License NFT to this validator identity. This process is atomic and will permanently mark the license as "Bound" in the network ledger.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-6">
