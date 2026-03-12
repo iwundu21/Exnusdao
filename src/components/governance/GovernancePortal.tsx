@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap, Info, ShieldCheck } from 'lucide-react';
+import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, ExternalLink, Zap, Info, ShieldCheck, Wallet } from 'lucide-react';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
 function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votingEndsAt: number }) {
@@ -37,7 +36,6 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      // Add leading zeros for "correct" time formatting
       const f = (n: number) => n.toString().padStart(2, '0');
       const value = `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`;
       
@@ -69,7 +67,10 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const [votingOn, setVotingOn] = useState<{ id: number; support: boolean } | null>(null);
   const [voteRationale, setVoteRationale] = useState('');
 
+  const connected = !!walletAddress;
+
   const handleCreate = () => {
+    if (!connected) return setFeedback('warning', 'Please connect your wallet to submit proposals.');
     if (userStakeWeight < 1000000) {
       return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum weight (Stakes + Seed) required to propose network changes.');
     }
@@ -84,6 +85,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   };
 
   const handleConfirmVote = () => {
+    if (!connected) return setFeedback('warning', 'Please connect your wallet to participate in DAO consensus.');
     if (!votingOn) return;
     
     if (!isNodeOwner && userStakeWeight < 10000) {
@@ -98,18 +100,21 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
     setVoteRationale('');
   };
 
-  const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0));
+  const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || !connected || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0));
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">DAO Governance</h2>
           <p className="text-muted-foreground text-sm">Direct stake-weighted voting. Outcomes determined by majority consensus over a 7-day window.</p>
         </div>
         <button 
-          onClick={() => setShowCreate(!showCreate)}
-          className="exn-button uppercase tracking-widest text-xs font-black"
+          onClick={() => {
+            if (!connected) return setFeedback('warning', 'Connect wallet to create a new proposal.');
+            setShowCreate(!showCreate);
+          }}
+          className={`exn-button uppercase tracking-widest text-xs font-black ${!connected ? 'opacity-50' : ''}`}
         >
           {showCreate ? 'Close Form' : 'New Proposal'}
         </button>
@@ -122,10 +127,15 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
              <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Combined Consensus Weight</p>
            </div>
            <div className="text-right">
-             <p className="text-xl font-bold text-primary">{userStakeWeight.toLocaleString()} EXN</p>
-             {isNodeOwner && (
+             <p className="text-xl font-bold text-primary">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
+             {connected && isNodeOwner && (
                <div className="flex items-center gap-1.5 justify-end text-[8px] text-emerald-500 font-black uppercase">
                  <ShieldCheck className="w-2.5 h-2.5" /> Includes 15M Seed Power
+               </div>
+             )}
+             {!connected && (
+               <div className="flex items-center gap-1.5 justify-end text-[8px] text-muted-foreground font-black uppercase">
+                 <Wallet className="w-2.5 h-2.5" /> Disconnected
                </div>
              )}
            </div>
@@ -139,7 +149,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
         </div>
       </div>
 
-      {showCreate && (
+      {showCreate && connected && (
         <div className="exn-card p-8 border-secondary/40 animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center gap-2 mb-6">
             <div className="p-2 bg-secondary/20 rounded-lg">
@@ -230,9 +240,9 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           const now = Date.now();
           const isExpired = now > prop.deadline;
           const isLocked = now > (prop.voting_ends_at || prop.deadline - 14400000) && !isExpired;
-          const hasVoted = prop.voters?.includes(walletAddress) || false;
+          const hasVoted = connected && prop.voters?.includes(walletAddress) || false;
           const comments = prop.comments || [];
-          const isVotingForThis = votingOn?.id === prop.id;
+          const isVotingForThis = connected && votingOn?.id === prop.id;
 
           return (
             <div key={prop.id} className="exn-card p-0 border-border overflow-hidden">
@@ -306,8 +316,24 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
                   {!isExpired && !isLocked && !hasVoted && !isVotingForThis && (
                     <div className="grid grid-cols-2 gap-3">
-                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-bold py-3 rounded-lg border border-emerald-500/20 text-[10px] uppercase">Vote Yes</button>
-                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg border border-destructive/20 text-[10px] uppercase">Vote No</button>
+                      <button 
+                        onClick={() => {
+                          if (!connected) return setFeedback('warning', 'Connect wallet to vote.');
+                          setVotingOn({ id: prop.id, support: true });
+                        }} 
+                        className={`bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-bold py-3 rounded-lg border border-emerald-500/20 text-[10px] uppercase ${!connected ? 'opacity-50' : ''}`}
+                      >
+                        Vote Yes
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (!connected) return setFeedback('warning', 'Connect wallet to vote.');
+                          setVotingOn({ id: prop.id, support: false });
+                        }} 
+                        className={`bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg border border-destructive/20 text-[10px] uppercase ${!connected ? 'opacity-50' : ''}`}
+                      >
+                        Vote No
+                      </button>
                     </div>
                   )}
 
@@ -353,8 +379,12 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                         {yesPercent >= 50 ? 'Proposal Passed' : 'Proposal Failed'}
                       </div>
                       <button 
-                        onClick={() => onExecute(prop.id)}
-                        className="w-full h-12 exn-button uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2"
+                        onClick={() => {
+                          if (!connected) return setFeedback('warning', 'Connect wallet to execute action.');
+                          onExecute(prop.id);
+                        }}
+                        disabled={!connected}
+                        className={`w-full h-12 exn-button uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2 ${!connected ? 'opacity-50' : ''}`}
                       >
                         <Zap className="w-4 h-4 fill-current" /> Execute Protocol Action
                       </button>
@@ -364,6 +394,12 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                   {prop.executed && (
                     <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 50 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-foreground/10 text-muted-foreground'}`}>
                       {yesPercent >= 50 ? 'Passed & Finalized' : 'Failed & Archived'}
+                    </div>
+                  )}
+
+                  {!connected && !isExpired && (
+                    <div className="flex items-center justify-center gap-2 text-[9px] text-muted-foreground uppercase font-black py-2">
+                       <Wallet className="w-3 h-3" /> Connect Wallet to Vote
                     </div>
                   )}
                 </div>

@@ -16,7 +16,7 @@ export function StakingActionForm({
   selectedNode, 
   exnBalance, 
   onStake, 
-  userStakes, 
+  userStakes = [], 
   validators,
   onUnstake,
   onClaim,
@@ -36,7 +36,7 @@ export function StakingActionForm({
   }, []);
 
   const handleAction = () => {
-    if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    if (!connected) return setFeedback('warning', 'Please connect your wallet to initiate staking.');
     const numAmt = Number(amount);
     if (!amount || isNaN(numAmt) || numAmt <= 0) return setFeedback('error', 'Invalid amount specified for protocol lock.');
     if (numAmt > exnBalance) return setFeedback('error', 'Insufficient EXN balance for this staking weight.');
@@ -56,19 +56,7 @@ export function StakingActionForm({
   };
 
   const activeUserStakes = userStakes.filter((s: any) => !s.unstaked);
-
-  const isStakeDisabled = !selectedNode || !amount || Number(amount) <= 0;
-
-  if (!connected) {
-    return (
-      <div className="exn-card p-8 space-y-6 sticky top-28 border-border/10 flex flex-col items-center justify-center text-center py-20">
-        <Wallet className="w-10 h-10 text-foreground/20 mb-4" />
-        <p className="text-xs text-foreground/40 uppercase font-black tracking-widest leading-relaxed">
-          Connect your Solana wallet <br/> to start staking
-        </p>
-      </div>
-    );
-  }
+  const isStakeDisabled = !selectedNode || !amount || Number(amount) <= 0 || !connected;
 
   return (
     <div className="exn-card p-8 space-y-6 sticky top-28 border-border/10">
@@ -92,17 +80,20 @@ export function StakingActionForm({
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs text-foreground/50 uppercase tracking-widest">Amount (EXN)</label>
-              <span className="text-[10px] text-foreground/30">Available: {exnBalance.toLocaleString()}</span>
+              <span className="text-[10px] text-foreground/30">Available: {connected ? exnBalance.toLocaleString() : '0'}</span>
             </div>
             <div className="relative">
               <input 
                 type="number" 
                 value={amount}
+                disabled={!connected}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="exn-input h-12"
+                className={`exn-input h-12 ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
-              <button onClick={() => setAmount(exnBalance.toString())} className="absolute right-3 top-2.5 text-xs text-primary font-bold hover:underline">MAX</button>
+              {connected && (
+                <button onClick={() => setAmount(exnBalance.toString())} className="absolute right-3 top-2.5 text-xs text-primary font-bold hover:underline">MAX</button>
+              )}
             </div>
           </div>
 
@@ -112,8 +103,9 @@ export function StakingActionForm({
               {STAKING_TIERS.map((tier) => (
                 <button
                   key={tier.days}
+                  disabled={!connected}
                   onClick={() => setDuration(tier.days.toString())}
-                  className={`py-3 px-2 border rounded-md transition-all flex flex-col items-center ${duration === tier.days.toString() ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground/50 hover:border-foreground/30'}`}
+                  className={`py-3 px-2 border rounded-md transition-all flex flex-col items-center ${duration === tier.days.toString() ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground/50 hover:border-foreground/30'} ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span className="text-sm font-bold">{tier.label}</span>
                   <span className="text-[10px] opacity-70">{(tier.multiplier/1000).toFixed(1)}x Yield</span>
@@ -142,7 +134,7 @@ export function StakingActionForm({
             disabled={isStakeDisabled}
             className={`w-full h-14 uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${!isStakeDisabled ? 'exn-button' : 'bg-foreground/5 text-foreground/20 border border-border cursor-not-allowed'}`}
           >
-            {selectedNode ? `Confirm Stake with ${selectedNode.name}` : 'Confirm Stake'}
+            {!connected ? 'Connect Wallet to Stake' : (selectedNode ? `Stake with ${selectedNode.name}` : 'Confirm Stake')}
           </button>
         </div>
       )}
@@ -159,15 +151,20 @@ export function StakingActionForm({
             </div>
             <button 
               onClick={onClaim}
-              disabled={totalPendingRewards <= 0}
-              className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${totalPendingRewards > 0 ? 'bg-secondary text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:opacity-90 active:scale-95' : 'bg-foreground/5 text-foreground/20 cursor-not-allowed'}`}
+              disabled={totalPendingRewards <= 0 || !connected}
+              className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${totalPendingRewards > 0 && connected ? 'bg-secondary text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:opacity-90 active:scale-95' : 'bg-foreground/5 text-foreground/20 cursor-not-allowed'}`}
             >
               Claim All
             </button>
           </div>
 
           <div className="space-y-4 max-h-[450px] overflow-auto pr-2 custom-scrollbar">
-            {activeUserStakes.length === 0 ? (
+            {!connected ? (
+               <div className="flex flex-col items-center justify-center py-10 space-y-4 text-foreground/10 border border-dashed border-border rounded-xl">
+                 <Wallet className="w-8 h-8 opacity-20" />
+                 <p className="text-center text-[10px] uppercase font-bold tracking-widest">Wallet Disconnected</p>
+               </div>
+            ) : activeUserStakes.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 space-y-4 text-foreground/10 border border-dashed border-border rounded-xl">
                  <p className="text-center text-[10px] uppercase font-bold tracking-widest">No active positions</p>
               </div>

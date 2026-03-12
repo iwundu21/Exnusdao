@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Activity, Clock, ChevronRight, History, Zap, ShieldCheck } from 'lucide-react';
+import { Activity, Clock, ChevronRight, History, Zap, ShieldCheck, Wallet } from 'lucide-react';
 
 const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
@@ -43,7 +43,6 @@ export function CrankTerminal({
   }, [now, currentEpochEndTime]);
 
   const epochHistory = useMemo(() => {
-    // Only show 2 dynamic entries starting from nextTargetToSettle
     return Array.from({ length: 2 }, (_, i) => {
       const eNum = nextTargetToSettle + i;
       
@@ -118,7 +117,11 @@ export function CrankTerminal({
                 disabled={!isTargetMatured || !connected}
                 className={`w-full py-5 rounded-xl font-black uppercase text-sm tracking-[0.3em] transition-all ${isTargetMatured && connected ? 'exn-button shadow-[0_0_30px_rgba(0,245,255,0.2)]' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
               >
-                {isTargetMatured ? (connected ? `Settle Epoch ${nextTargetToSettle}` : 'Connect Wallet to Settle') : 'Waiting for Maturity'}
+                {!connected ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Wallet className="w-4 h-4" /> Connect Wallet to Settle
+                  </span>
+                ) : isTargetMatured ? `Settle Epoch ${nextTargetToSettle}` : 'Waiting for Maturity'}
               </button>
             </div>
           </div>
