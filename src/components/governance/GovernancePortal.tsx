@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -6,40 +7,52 @@ import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp,
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 
 function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votingEndsAt: number }) {
-  const [timeLeft, setTimeLeft] = useState<{ label: string; value: string; isLock: boolean }>({
-    label: 'Loading...',
+  const [timeLeft, setTimeLeft] = useState<{ label: string; value: string; colorClass: string }>({
+    label: 'Syncing...',
     value: '',
-    isLock: false
+    colorClass: 'text-muted-foreground'
   });
 
   useEffect(() => {
     const updateCountdown = () => {
       const now = Date.now();
-      let target = votingEndsAt;
-      let label = 'Voting Ends: ';
-      let isLock = false;
-
+      
+      // Phase 3: Concluded
       if (now > deadline) {
-        setTimeLeft({ label: 'Proposal Concluded', value: '', isLock: false });
-        return true; // Stop timer
+        setTimeLeft({ label: 'Proposal Concluded', value: '', colorClass: 'text-muted-foreground' });
+        return true;
       }
 
+      // Phase 2: Voting Locked (Last 24 hours)
       if (now > votingEndsAt) {
-        target = deadline;
-        label = 'Results In: ';
-        isLock = true;
+        const diff = Math.max(0, deadline - now);
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        const f = (n: number) => n.toString().padStart(2, '0');
+        setTimeLeft({ 
+          label: 'Voting Locked | Final Results In: ', 
+          value: `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`,
+          colorClass: 'text-destructive' 
+        });
+        return false;
       }
 
-      const diff = Math.max(0, target - now);
+      // Phase 1: Voting Active (First 6 days)
+      const diff = Math.max(0, votingEndsAt - now);
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
       const f = (n: number) => n.toString().padStart(2, '0');
-      const value = `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`;
-      
-      setTimeLeft({ label, value, isLock });
+      setTimeLeft({ 
+        label: 'Voting Ends In: ', 
+        value: `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`,
+        colorClass: 'text-emerald-500' 
+      });
       return false;
     };
 
@@ -52,7 +65,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   }, [deadline, votingEndsAt]);
 
   return (
-    <div className={`flex items-center gap-2 text-[10px] uppercase font-black tracking-widest ${timeLeft.isLock ? 'text-amber-500' : 'text-foreground/40'}`}>
+    <div className={`flex items-center gap-2 text-[10px] uppercase font-black tracking-widest ${timeLeft.colorClass}`}>
       <Clock className="w-3 h-3" />
       <span>{timeLeft.label}</span>
       <span className="font-mono text-foreground">{timeLeft.value}</span>
@@ -69,24 +82,10 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
   const connected = !!walletAddress;
 
-  const formatInput = (val: string) => {
-    if (!val) return "";
-    const parts = val.split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
-  };
-
-  const onAmountChange = (val: string) => {
-    const raw = val.replace(/,/g, "");
-    if (raw === "" || /^\d*\.?\d*$/.test(raw)) {
-      setNewProp({...newProp, amount: raw});
-    }
-  };
-
   const handleCreate = () => {
     if (!connected) return setFeedback('warning', 'Please connect your wallet to submit proposals.');
     if (userStakeWeight < 1000000) {
-      return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum weight (Stakes + Seed) required to propose network changes.');
+      return setFeedback('error', 'Stake Requirement Not Met: 1,000,000 EXN minimum weight required to propose network changes.');
     }
 
     onCreate({
@@ -147,18 +146,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                  <ShieldCheck className="w-2.5 h-2.5" /> Includes 15M Seed Power
                </div>
              )}
-             {!connected && (
-               <div className="flex items-center gap-1.5 justify-end text-[8px] text-muted-foreground font-black uppercase">
-                 <Wallet className="w-2.5 h-2.5" /> Disconnected
-               </div>
-             )}
            </div>
         </div>
         <div className="p-4 bg-foreground/5 border border-border rounded-xl flex items-center gap-4">
            <Info className="w-4 h-4 text-muted-foreground" />
            <p className="text-[10px] text-muted-foreground uppercase font-black leading-tight tracking-tight">
-             PROPOSAL: 1M EXN TOTAL WEIGHT + 10 EXN FEE <br/>
-             VOTING: 10K EXN TOTAL WEIGHT (OR XNODE OWNER) + 3 EXN FEE
+             7-DAY LIFECYCLE: 6 DAYS VOTING (EMERALD) <br/>
+             FINAL 24H: VOTING LOCK & CONSENSUS FREEZE (RED)
            </p>
         </div>
       </div>
@@ -192,33 +186,9 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                    className="exn-input text-xs"
                  >
                    <option value={0}>Protocol Parameter Change</option>
-                   <option value={1}>Treasury Distribution (Transaction)</option>
+                   <option value={1}>Treasury Distribution</option>
                  </select>
                </div>
-
-               {newProp.type === 1 && (
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-foreground/5 rounded-xl border border-border animate-in slide-in-from-left-2">
-                    <div className="space-y-2">
-                      <label className="text-[10px] text-secondary uppercase font-black tracking-widest">Recipient Address</label>
-                      <input 
-                        value={newProp.recipient}
-                        onChange={e => setNewProp({...newProp, recipient: e.target.value})}
-                        className="exn-input text-[10px] font-mono" 
-                        placeholder="Solana Address..." 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] text-secondary uppercase font-black tracking-widest">Amount (EXN)</label>
-                      <input 
-                        type="text"
-                        value={formatInput(newProp.amount)}
-                        onChange={e => onAmountChange(e.target.value)}
-                        className="exn-input text-[10px]" 
-                        placeholder="0.00" 
-                      />
-                    </div>
-                 </div>
-               )}
             </div>
 
             <div className="space-y-2">
@@ -249,13 +219,11 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
         {proposals.map((prop: any) => {
           const totalVotes = (prop.yes_votes || 0) + (prop.no_votes || 0);
           const yesPercent = totalVotes > 0 ? (prop.yes_votes / totalVotes) * 100 : 0;
-          const noPercent = totalVotes > 0 ? (prop.no_votes / totalVotes) * 100 : 0;
           
           const now = Date.now();
           const isExpired = now > prop.deadline;
-          const isLocked = now > (prop.voting_ends_at || prop.deadline - 14400000) && !isExpired;
-          const hasVoted = connected && prop.voters?.includes(walletAddress) || false;
-          const comments = prop.comments || [];
+          const isVotingLocked = now > prop.voting_ends_at && !isExpired;
+          const hasVoted = connected && prop.voters?.includes(walletAddress);
           const isVotingForThis = connected && votingOn?.id === prop.id;
 
           return (
@@ -270,38 +238,12 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                   </div>
                   <p className="text-muted-foreground text-sm leading-relaxed">{prop.description}</p>
                   
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <div className="flex flex-col gap-1">
-                      <p className="text-[8px] text-muted-foreground uppercase font-black">Proposer</p>
-                      <a href={getExplorerLink(prop.proposer)} target="_blank" rel="noopener noreferrer" className="text-xs font-mono text-primary hover:underline flex items-center gap-1">{shortenAddress(prop.proposer)} <ExternalLink className="w-2.5 h-2.5" /></a>
-                    </div>
-                    {prop.type === 1 && prop.recipient && (
-                      <div className="flex items-center gap-6 p-4 bg-foreground/5 rounded-xl border border-border w-fit">
-                        <div className="space-y-1">
-                          <p className="text-[8px] text-muted-foreground uppercase font-black">Recipient</p>
-                          <a href={getExplorerLink(prop.recipient)} target="_blank" rel="noopener noreferrer" className="text-xs font-mono text-secondary hover:underline flex items-center gap-1">{shortenAddress(prop.recipient)} <ExternalLink className="w-2.5 h-2.5" /></a>
-                        </div>
-                        <div className="w-px h-8 bg-border" />
-                        <div className="space-y-1">
-                          <p className="text-[8px] text-muted-foreground uppercase font-black">Transfer Amount</p>
-                          <p className="text-sm font-bold text-secondary">{prop.amount.toLocaleString()} EXN</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-6 pt-2">
+                  <div className="flex items-center gap-6 pt-2">
                     <ProposalCountdown deadline={prop.deadline} votingEndsAt={prop.voting_ends_at} />
-                    {isLocked && (
-                      <div className="flex items-center gap-2 text-[10px] text-amber-500 uppercase font-black">
+                    {isVotingLocked && (
+                      <div className="flex items-center gap-2 text-[10px] text-destructive uppercase font-black bg-destructive/10 px-3 py-1 rounded-full border border-destructive/20 animate-pulse">
                         <ShieldAlert className="w-3 h-3" />
-                        Voting Lock Active
-                      </div>
-                    )}
-                    {prop.executed && (
-                      <div className="flex items-center gap-2 text-[10px] text-primary uppercase font-black">
-                        <Zap className="w-3 h-3 fill-current" />
-                        Finalized & Executed
+                        Voting Locked
                       </div>
                     )}
                   </div>
@@ -310,162 +252,47 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 <div className="w-full md:w-80 space-y-6 bg-foreground/5 p-6 rounded-2xl">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start text-[10px] font-black uppercase tracking-widest">
-                      <div className="flex flex-col items-start gap-1">
                         <span className="text-emerald-500">YES {yesPercent.toFixed(1)}%</span>
-                        <span className="text-muted-foreground text-[8px] font-mono">{(prop.yes_votes || 0).toLocaleString()} EXN</span>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 text-right">
-                        <span className="text-destructive">NO {noPercent.toFixed(1)}%</span>
-                        <span className="text-muted-foreground text-[8px] font-mono">{(prop.no_votes || 0).toLocaleString()} EXN</span>
-                      </div>
+                        <span className="text-destructive">NO {(100 - yesPercent).toFixed(1)}%</span>
                     </div>
-                    
                     <Progress value={yesPercent} className="h-2 bg-destructive/20" />
-                    
-                    <div className="flex justify-between items-center px-1">
-                       <p className="text-[8px] text-muted-foreground uppercase font-bold">Consensus Weight</p>
-                       <p className="text-[8px] text-muted-foreground uppercase font-bold">Total: {totalVotes.toLocaleString()} EXN</p>
-                    </div>
+                    <p className="text-[8px] text-muted-foreground uppercase font-bold text-center">Total Weight: {totalVotes.toLocaleString()} EXN</p>
                   </div>
 
-                  {!isExpired && !isLocked && !hasVoted && !isVotingForThis && (
+                  {!isExpired && !isVotingLocked && !hasVoted && !isVotingForThis && (
                     <div className="grid grid-cols-2 gap-3">
-                      <button 
-                        onClick={() => {
-                          if (!connected) return setFeedback('warning', 'Connect wallet to vote.');
-                          setVotingOn({ id: prop.id, support: true });
-                        }} 
-                        className={`bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-bold py-3 rounded-lg border border-emerald-500/20 text-[10px] uppercase ${!connected ? 'opacity-50' : ''}`}
-                      >
-                        Vote Yes
-                      </button>
-                      <button 
-                        onClick={() => {
-                          if (!connected) return setFeedback('warning', 'Connect wallet to vote.');
-                          setVotingOn({ id: prop.id, support: false });
-                        }} 
-                        className={`bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg border border-destructive/20 text-[10px] uppercase ${!connected ? 'opacity-50' : ''}`}
-                      >
-                        Vote No
-                      </button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-bold py-3 rounded-lg border border-emerald-500/20 text-[10px] uppercase">Vote Yes</button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg border border-destructive/20 text-[10px] uppercase">Vote No</button>
                     </div>
                   )}
 
                   {isVotingForThis && (
                     <div className="space-y-4 animate-in zoom-in-95">
-                      <div className={`p-3 rounded-lg text-center text-[10px] font-black uppercase ${votingOn.support ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
-                        Stance: {votingOn.support ? 'YES' : 'NO'} (3 EXN Fee)
-                      </div>
                       <textarea 
                         value={voteRationale}
                         onChange={e => setVoteRationale(e.target.value)}
-                        placeholder={isNodeOwner ? "XNode Power: Your 15M seed will be added to your weight." : "State your rationale. Required total weight: 10K EXN."}
+                        placeholder="State your rationale... (3 EXN Fee)"
                         className="exn-input h-24 text-xs bg-background"
                       />
                       <div className="grid grid-cols-2 gap-2">
-                        <button 
-                          onClick={handleConfirmVote} 
-                          disabled={!voteRationale.trim()}
-                          className={`py-2 text-[10px] transition-all h-10 flex items-center justify-center font-black uppercase ${voteRationale.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
-                        >
-                          Confirm Vote
-                        </button>
+                        <button onClick={handleConfirmVote} disabled={!voteRationale.trim()} className={`py-2 text-[10px] font-black uppercase ${voteRationale.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}>Confirm</button>
                         <button onClick={() => setVotingOn(null)} className="exn-button-outline py-2 text-[10px]">Cancel</button>
                       </div>
                     </div>
                   )}
 
-                  {hasVoted && !isExpired && (
-                    <div className="py-3 bg-foreground/5 border border-border rounded-lg text-center text-[10px] text-muted-foreground uppercase font-black">
-                      Your Vote Cast
+                  {isVotingLocked && !isExpired && (
+                    <div className="py-3 bg-destructive/5 border border-destructive/20 rounded-lg text-center text-[10px] text-destructive uppercase font-black">
+                      Consensus Freeze
                     </div>
                   )}
 
-                  {isLocked && !isExpired && (
-                    <div className="py-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center text-[10px] text-amber-500 uppercase font-black">
-                      Locked for Finalization
-                    </div>
-                  )}
-
-                  {isExpired && !prop.executed && (
-                    <div className="space-y-3">
-                      <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 50 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
-                        {yesPercent >= 50 ? 'Proposal Passed' : 'Proposal Failed'}
-                      </div>
-                      <button 
-                        onClick={() => {
-                          if (!connected) return setFeedback('warning', 'Connect wallet to execute action.');
-                          onExecute(prop.id);
-                        }}
-                        disabled={!connected}
-                        className={`w-full h-12 exn-button uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2 ${!connected ? 'opacity-50' : ''}`}
-                      >
-                        <Zap className="w-4 h-4 fill-current" /> Execute Protocol Action
-                      </button>
-                    </div>
-                  )}
-
-                  {prop.executed && (
-                    <div className={`py-3 rounded-lg text-center text-[10px] uppercase font-black ${yesPercent >= 50 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-foreground/10 text-muted-foreground'}`}>
-                      {yesPercent >= 50 ? 'Passed & Finalized' : 'Failed & Archived'}
-                    </div>
-                  )}
-
-                  {!connected && !isExpired && (
-                    <div className="flex items-center justify-center gap-2 text-[9px] text-muted-foreground uppercase font-black py-2">
-                       <Wallet className="w-3 h-3" /> Connect Wallet to Vote
-                    </div>
+                  {isExpired && (
+                    <button onClick={() => onExecute(prop.id)} disabled={prop.executed} className={`w-full h-12 uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2 ${prop.executed ? 'bg-foreground/5 text-muted-foreground border border-border' : 'exn-button'}`}>
+                      <Zap className="w-4 h-4 fill-current" /> {prop.executed ? 'Finalized' : 'Execute Action'}
+                    </button>
                   )}
                 </div>
-              </div>
-
-              <div className="bg-foreground/[0.02] p-6">
-                 <div className="flex items-center justify-between mb-6">
-                    <button 
-                      onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
-                      className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase font-black hover:text-foreground transition-colors"
-                    >
-                      <MessageSquare className="w-4 h-4" /> Voter Rationales ({comments.length})
-                      {activeCommentId === prop.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                    </button>
-                 </div>
-
-                 {activeCommentId === prop.id && (
-                   <div className="space-y-8 animate-in slide-in-from-top-2">
-                      <div className="space-y-6 max-h-[400px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-foreground/10">
-                        {comments.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center py-10 opacity-20">
-                             <MessageSquare className="w-10 h-10 mb-2" />
-                             <p className="text-[10px] uppercase font-black tracking-widest text-center">No rationales provided yet</p>
-                          </div>
-                        ) : (
-                          [...comments].sort((a, b) => b.timestamp - a.timestamp).map((c: any) => {
-                            return (
-                              <div key={c.id} className="flex gap-4 items-start group">
-                                 <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border bg-primary/10 border-primary/30 text-primary">
-                                    <User className="w-5 h-5" />
-                                 </div>
-                                 <div className="flex-1 space-y-1.5 bg-foreground/5 p-4 rounded-2xl border border-border group-hover:border-primary/10 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-3">
-                                        <a href={getExplorerLink(c.author)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-mono font-bold text-primary hover:underline flex items-center gap-1">{shortenAddress(c.author)} <ExternalLink className="w-2.5 h-2.5" /></a>
-                                        {c.vote_stance && (
-                                          <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase ${c.vote_stance === 'YES' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/20 text-destructive'}`}>
-                                            Stance: {c.vote_stance}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <span className="text-[9px] text-muted-foreground font-bold">{new Date(c.timestamp).toLocaleDateString()}</span>
-                                    </div>
-                                    <p className="text-sm text-foreground/70 leading-relaxed">{c.text}</p>
-                                 </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                   </div>
-                 )}
               </div>
             </div>
           );

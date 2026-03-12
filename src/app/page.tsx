@@ -98,7 +98,7 @@ export default function Home() {
     if (!isNodeOwner && userStakeWeight < MIN_STAKE_FOR_VOTE) return setFeedback('error', 'Min stake 10k EXN required.');
     if (exnBalance < VOTE_FEE) return setFeedback('error', 'Insufficient EXN fee.');
 
-    const weight = Math.max(userStakeWeight, isNodeOwner ? 1 : 0);
+    const weight = userStakeWeight;
     updateUserBalance(walletAddress, -VOTE_FEE, 0);
     castVote(pId, support, weight, {
       id: `c${Date.now()}`,
@@ -122,8 +122,8 @@ export default function Home() {
       id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: nowTime,
-      deadline: nowTime + (7 * 24 * 60 * 60 * 1000),
-      voting_ends_at: nowTime + (6 * 24 * 60 * 60 * 1000),
+      deadline: nowTime + (7 * 24 * 60 * 60 * 1000), // 7 Full Days
+      voting_ends_at: nowTime + (6 * 24 * 60 * 60 * 1000), // 6 Days Active, 1 Day Locked
       yes_votes: 0,
       no_votes: 0,
       executed: false,
