@@ -1,7 +1,8 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Info, Sparkles, Lock, Unlock, ArrowUpRight } from 'lucide-react';
+import { Wallet, Info, Sparkles, Lock, Unlock } from 'lucide-react';
 
 const STAKING_TIERS = [
   { days: 30, multiplier: 3000, label: '30 Days' },
@@ -25,7 +26,7 @@ export function StakingActionForm({
   connected = false,
   setFeedback
 }: any) {
-  const [amount, setAmount] = useState('');
+  const [amountInput, setAmountInput] = useState('');
   const [duration, setDuration] = useState('30');
   const [activeTab, setActiveTab] = useState<'stake' | 'my-stakes'>('stake');
   const [now, setNow] = useState(Date.now());
@@ -35,24 +36,28 @@ export function StakingActionForm({
     return () => clearInterval(interval);
   }, []);
 
-  const formatInput = (val: string) => {
-    if (!val) return "";
-    const parts = val.split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
+  // Format with commas for human-readable display
+  const formatForDisplay = (val: string) => {
+    const raw = val.replace(/,/g, '');
+    if (!raw) return '';
+    const parts = raw.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
   };
 
-  const onAmountChange = (val: string) => {
-    const raw = val.replace(/,/g, "");
-    if (raw === "" || /^\d*\.?\d*$/.test(raw)) {
-      setAmount(raw);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const raw = val.replace(/,/g, '');
+    if (raw === '' || /^\d*\.?\d*$/.test(raw)) {
+      setAmountInput(formatForDisplay(raw));
     }
   };
 
   const handleAction = () => {
     if (!connected) return setFeedback('warning', 'Please connect your wallet to initiate staking.');
-    const numAmt = Number(amount);
-    if (!amount || isNaN(numAmt) || numAmt <= 0) return setFeedback('error', 'Invalid amount specified for protocol lock.');
+    const rawAmount = amountInput.replace(/,/g, '');
+    const numAmt = Number(rawAmount);
+    if (!rawAmount || isNaN(numAmt) || numAmt <= 0) return setFeedback('error', 'Invalid amount specified for protocol lock.');
     if (numAmt > exnBalance) return setFeedback('error', 'Insufficient EXN balance for this staking weight.');
     if (!selectedNode) return setFeedback('warning', 'Target validator selection required to initiate stake.');
 
@@ -66,11 +71,11 @@ export function StakingActionForm({
       claimed: false,
       unstaked: false
     });
-    setAmount('');
+    setAmountInput('');
   };
 
   const activeUserStakes = userStakes.filter((s: any) => !s.unstaked);
-  const isStakeDisabled = !selectedNode || !amount || Number(amount) <= 0 || !connected;
+  const isStakeDisabled = !selectedNode || !amountInput || Number(amountInput.replace(/,/g, '')) <= 0 || !connected;
 
   return (
     <div className="exn-card p-8 space-y-6 sticky top-28 border-border/10">
@@ -99,14 +104,14 @@ export function StakingActionForm({
             <div className="relative">
               <input 
                 type="text" 
-                value={formatInput(amount)}
+                value={amountInput}
                 disabled={!connected}
-                onChange={(e) => onAmountChange(e.target.value)}
+                onChange={handleInputChange}
                 placeholder="0.00"
                 className={`exn-input h-12 ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
               {connected && (
-                <button onClick={() => setAmount(exnBalance.toString())} className="absolute right-3 top-2.5 text-xs text-primary font-bold hover:underline">MAX</button>
+                <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-3 top-2.5 text-xs text-primary font-bold hover:underline">MAX</button>
               )}
             </div>
           </div>
@@ -244,30 +249,11 @@ export function StakingActionForm({
       )}
 
       <div className="flex items-start gap-2 p-4 bg-primary/5 border border-primary/10 rounded-xl">
-        <div className="w-4 h-4 text-primary/40 mt-0.5 flex-shrink-0">
-          <Info className="w-full h-full" />
-        </div>
+        <Info className="w-4 h-4 text-primary/40 mt-0.5 flex-shrink-0" />
         <p className="text-[10px] text-primary/40 leading-tight uppercase font-black tracking-tighter">
           Earned rewards can be harvested at any time. Unstaking of principal is only permitted after the account lock-up duration has expired.
         </p>
       </div>
-
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.02);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
-        }
-      `}</style>
     </div>
   );
 }

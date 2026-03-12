@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Droplets, ShieldCheck, Ticket } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 
@@ -11,9 +10,8 @@ const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 const ADMIN_WALLET = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
   const { state } = useProtocolState();
-  const { connected, publicKey } = useWallet();
+  const { publicKey } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const [currentEpoch, setCurrentEpoch] = useState(1);
 
@@ -66,9 +64,6 @@ export function Footer() {
                 <ShieldCheck className="w-3 h-3" /> Admin
               </Link>
             )}
-          </div>
-          <div className="flex items-center gap-4 border-l border-border pl-6">
-            <ThemeToggle />
           </div>
         </div>
       </div>

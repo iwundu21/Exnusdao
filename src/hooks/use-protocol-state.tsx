@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, createContext, useContext, ReactNode, useCallback, useEffect, useRef } from 'react';
@@ -75,6 +76,7 @@ export interface ProtocolState {
   licenses: any[];
   proposals: Proposal[];
   profiles: Record<string, any>;
+  settledEpochs: any[];
   lastTransaction: TransactionFeedback | null;
 }
 
@@ -108,12 +110,13 @@ const DEFAULT_STATE: ProtocolState = {
   licensePrice: 5000,
   isPaused: false,
   lastCrankedEpoch: 0,
-  networkStartDate: 1773335083050,
+  networkStartDate: Date.now(),
   validators: [],
   userStakes: [],
   licenses: [],
   proposals: [],
   profiles: {},
+  settledEpochs: [],
   lastTransaction: null,
 };
 
@@ -121,21 +124,20 @@ export function ProtocolProvider({ children, initialState }: { children: ReactNo
   const { publicKey } = useWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const [state, setInternalState] = useState<ProtocolState>(initialState || DEFAULT_STATE);
-  const [isLoaded, setIsLoaded] = useState(!!initialState);
+  
   const stateRef = useRef(state);
-
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
-  // Handle updates and persistence
-  const setState = useCallback(async (updater: (prev: ProtocolState) => ProtocolState) => {
+  const setState = useCallback((updater: (prev: ProtocolState) => ProtocolState) => {
     const nextState = updater(stateRef.current);
     setInternalState(nextState);
     
-    // Fire-and-forget server persistence
+    // Decouple Server Action from render cycle using a background task
+    // This avoids the 'Cannot update Router while rendering' conflict
     Promise.resolve().then(() => {
-      saveProtocolState(nextState);
+      saveProtocolState(nextState).catch(console.error);
     });
   }, []);
 
@@ -160,25 +162,24 @@ export function ProtocolProvider({ children, initialState }: { children: ReactNo
 
   const registerUser = useCallback((address: string) => {
     if (!address) return;
-    setState(prev => {
-      if (prev.profiles[address]) return prev;
-      return {
-        ...prev,
-        profiles: {
-          ...prev.profiles,
-          [address]: {
-            address,
-            exnBalance: 25000000,
-            usdcBalance: 10000,
-            lastExnFaucetClaim: 0,
-            lastUsdcFaucetClaim: 0,
-            registeredAt: Date.now(),
-            lastActive: Date.now(),
-            totalTransactions: 0
-          }
+    if (stateRef.current.profiles[address]) return;
+    
+    setState(prev => ({
+      ...prev,
+      profiles: {
+        ...prev.profiles,
+        [address]: {
+          address,
+          exnBalance: 25000000,
+          usdcBalance: 10000,
+          lastExnFaucetClaim: 0,
+          lastUsdcFaucetClaim: 0,
+          registeredAt: Date.now(),
+          lastActive: Date.now(),
+          totalTransactions: 0
         }
-      };
-    });
+      }
+    }));
   }, [setState]);
 
   const updateUserBalance = useCallback((address: string, exn: number, usdc: number) => {
@@ -194,7 +195,7 @@ export function ProtocolProvider({ children, initialState }: { children: ReactNo
             exnBalance: profile.exnBalance + exn,
             usdcBalance: profile.usdcBalance + usdc,
             lastActive: Date.now(),
-            totalTransactions: profile.totalTransactions + 1
+            totalTransactions: (profile.totalTransactions || 0) + 1
           }
         }
       };
@@ -260,7 +261,7 @@ export function ProtocolProvider({ children, initialState }: { children: ReactNo
       if (!profile || profile.usdcBalance < price) return prev;
       return {
         ...prev,
-        usdcVaultBalance: prev.usdcVaultBalance + price,
+        usdcVaultBalance: (prev.usdcVaultBalance || 0) + price,
         licenses: [...prev.licenses, license],
         profiles: {
           ...prev.profiles,
@@ -276,7 +277,7 @@ export function ProtocolProvider({ children, initialState }: { children: ReactNo
   return (
     <ProtocolContext.Provider value={{
       state,
-      isLoaded,
+      isLoaded: true,
       setFeedback,
       clearFeedback,
       registerUser,

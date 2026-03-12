@@ -122,8 +122,8 @@ export default function AdminPage() {
     setState(prev => ({ 
       ...prev, 
       totalStaked: 0,
-      treasuryBalance: 0,
-      rewardVaultBalance: 0,
+      treasuryBalance: 3000000,
+      rewardVaultBalance: 20000000,
       usdcVaultBalance: 0,
       stakedVaultBalance: 0,
       networkStartDate: Date.now(), 
@@ -133,13 +133,7 @@ export default function AdminPage() {
       userStakes: [],
       licenses: [],
       proposals: [],
-      profiles: {}, // WIPE ALL USER DATA
-      metadata: {
-        version: prev.metadata.version,
-        totalVolume: 0,
-        totalUsers: 0,
-        lastUpdate: Date.now()
-      }
+      profiles: {}
     }));
     setFeedback('success', 'Master Reset Complete: All protocol activities wiped. Epoch 1 re-anchored.');
   };
@@ -314,8 +308,7 @@ export default function AdminPage() {
                            <p className="text-sm font-bold text-foreground uppercase tracking-tight">Danger Zone: Irreversible Operation</p>
                            <p className="text-xs text-muted-foreground leading-relaxed">
                               Executing a Master Reset will permanently purge all on-chain simulation data. 
-                              This includes XNodes, staking positions, governance proposals, user profiles, balances, and historical sharding records. 
-                              The network timeline will be re-anchored to the current second, starting the cluster at Epoch 1.
+                              This includes XNodes, staking positions, governance proposals, user profiles, balances, and historical records.
                            </p>
                         </div>
                      </div>
@@ -376,10 +369,8 @@ export default function AdminPage() {
                  <p className="text-[10px] font-black uppercase tracking-widest">Protocol Context</p>
                </div>
                <div className="space-y-2 font-mono text-[9px] text-muted-foreground">
-                  <p>EXN MINT: {shortenAddress(state?.exnMint || '')}</p>
-                  <p>USDC MINT: {shortenAddress(state?.usdcMint || '')}</p>
-                  <p>STAKED PDA: {shortenAddress(state?.stakedVaultPda || '')}</p>
-                  <p>REWARD PDA: {shortenAddress(state?.rewardVaultPda || '')}</p>
+                  <p>Status: Local DB Synchronized</p>
+                  <p>Target: mainnet-cluster-01</p>
                </div>
             </div>
          </div>
