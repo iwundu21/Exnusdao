@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Droplets, ShieldCheck } from 'lucide-react';
+import { Droplets, ShieldCheck, Ticket } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -54,6 +54,9 @@ export function Footer() {
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-6 text-[9px] text-muted-foreground uppercase font-black tracking-widest">
             <Link href="/" className="hover:text-primary transition-colors">Dashboard</Link>
+            <Link href="/purchase-license" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Ticket className="w-3 h-3" /> Buy XNode
+            </Link>
             <Link href="/faucet" className="flex items-center gap-1.5 hover:text-primary transition-colors">
               <Droplets className="w-3 h-3" /> Faucet
             </Link>

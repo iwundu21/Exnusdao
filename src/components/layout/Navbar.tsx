@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Settings, LayoutDashboard, Ticket, Hammer, Coins, CircleDollarSign } from 'lucide-react';
+import { Settings, LayoutDashboard, Hammer, Coins, CircleDollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -41,9 +41,6 @@ export function Navbar() {
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </Link>
           
-          <Link href="/purchase-license" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-            <Ticket className="w-4 h-4" /> Buy XNode
-          </Link>
           <Link href="/register-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
             <Hammer className="w-4 h-4" /> Register XNode
           </Link>
