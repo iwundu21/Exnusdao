@@ -25,11 +25,9 @@ export function CrankTerminal({
   const effectiveStartDate = networkStartDate || now;
   const elapsed = now - effectiveStartDate;
   
-  // The current chronological epoch that hasn't finished yet
   const currentEpoch = Math.floor(elapsed / EPOCH_DURATION) + 1;
   const currentEpochEndTime = effectiveStartDate + (currentEpoch * EPOCH_DURATION);
 
-  // The next epoch that is ELIGIBLE for settlement (must be a past epoch)
   const nextTargetToSettle = lastCrankedEpoch + 1;
   const isTargetMatured = nextTargetToSettle < currentEpoch;
 
@@ -43,9 +41,9 @@ export function CrankTerminal({
   }, [now, currentEpochEndTime]);
 
   const epochHistory = useMemo(() => {
-    return Array.from({ length: 8 }, (_, i) => {
-      const eNum = Math.max(1, currentEpoch + 2) - i;
-      if (eNum < 1) return null;
+    // Show 12 epochs starting from Epoch 1
+    return Array.from({ length: 12 }, (_, i) => {
+      const eNum = i + 1;
       
       const startMs = effectiveStartDate + (eNum - 1) * EPOCH_DURATION;
       const endMs = startMs + EPOCH_DURATION;
@@ -63,7 +61,7 @@ export function CrankTerminal({
         startFormatted: new Date(startMs).toLocaleDateString(),
         endFormatted: new Date(endMs).toLocaleDateString()
       };
-    }).filter(Boolean);
+    });
   }, [currentEpoch, lastCrankedEpoch, nextTargetToSettle, effectiveStartDate]);
 
   return (
