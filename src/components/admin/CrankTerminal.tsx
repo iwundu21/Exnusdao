@@ -30,7 +30,7 @@ export function CrankTerminal({
 
   const nextTargetToSettle = lastCrankedEpoch + 1;
   
-  // Simulation Logic: Allow settling the current epoch for testing rewards
+  // Simulation Logic: Allow settling the current epoch or matured ones
   const isTargetMatured = nextTargetToSettle <= currentEpoch;
 
   useEffect(() => {
@@ -43,8 +43,9 @@ export function CrankTerminal({
   }, [now, currentEpochEndTime]);
 
   const epochHistory = useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => {
-      const eNum = i + 1;
+    // Only show 2 dynamic entries starting from nextTargetToSettle
+    return Array.from({ length: 2 }, (_, i) => {
+      const eNum = nextTargetToSettle + i;
       
       const startMs = effectiveStartDate + (eNum - 1) * EPOCH_DURATION;
       const endMs = startMs + EPOCH_DURATION;
@@ -102,12 +103,12 @@ export function CrankTerminal({
             <div className="flex-grow space-y-6">
               <div className="space-y-1">
                 <h3 className="text-2xl font-bold uppercase tracking-widest text-foreground">
-                   {nextTargetToSettle === currentEpoch ? `Current: Epoch ${nextTargetToSettle}` : `Matured: Epoch ${nextTargetToSettle}`}
+                   {nextTargetToSettle === currentEpoch ? `Current: Epoch ${nextTargetToSettle}` : `Target: Epoch ${nextTargetToSettle}`}
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {nextTargetToSettle === currentEpoch 
                     ? `Execute settlement for the current active epoch. This will distribute proportional rewards based on current network weight.`
-                    : `Chronological maturity reached. Execute settlement to shard rewards for all active network shards in Epoch ${nextTargetToSettle}.`
+                    : `Chronological maturity reached for Epoch ${nextTargetToSettle}. Execute settlement to shard rewards for all active network shards.`
                   }
                 </p>
               </div>
@@ -179,7 +180,7 @@ export function CrankTerminal({
         <div className="space-y-6">
           <div className="exn-card p-0 border-border overflow-hidden">
             <div className="p-4 bg-foreground/5 border-b border-border">
-               <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Epoch Roadmap (10-Year)</p>
+               <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Immediate Epoch Roadmap</p>
             </div>
             <div className="divide-y divide-border">
                {epochHistory.map((epoch: any) => (
