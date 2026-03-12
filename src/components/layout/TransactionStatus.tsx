@@ -71,16 +71,18 @@ export function TransactionStatus() {
               <p className="text-sm text-foreground font-medium leading-relaxed">
                 {tx.message}
               </p>
-              <div className="pt-3 flex items-center gap-4">
-                <a 
-                  href={getExplorerLink(tx.txHash)} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-all flex items-center gap-1.5"
-                >
-                  View on Chain <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
+              {tx.status === 'success' && (
+                <div className="pt-3 flex items-center gap-4">
+                  <a 
+                    href={getExplorerLink(tx.txHash)} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-all flex items-center gap-1.5"
+                  >
+                    View on Chain <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
             </div>
           </div>
           
