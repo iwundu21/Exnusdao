@@ -9,7 +9,6 @@ import {
   Settings, 
   Lock,
   Calendar,
-  Database,
   Coins,
   ShieldAlert,
   RotateCcw,
@@ -18,7 +17,8 @@ import {
   ArrowDownLeft,
   Banknote,
   Ticket,
-  Zap
+  Zap,
+  Layers
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -40,6 +40,7 @@ export default function AdminPage() {
   
   const [newLicensePrice, setNewLicensePrice] = useState('');
   const [newRewardCap, setNewRewardCap] = useState('');
+  const [newLicenseLimit, setNewLicenseLimit] = useState('');
 
   const [mounted, setMounted] = useState(false);
 
@@ -47,7 +48,8 @@ export default function AdminPage() {
     setMounted(true);
     if (state.licensePrice) setNewLicensePrice(state.licensePrice.toString());
     if (state.rewardCap) setNewRewardCap(state.rewardCap.toString());
-  }, [state.licensePrice, state.rewardCap]);
+    if (state.licenseLimit) setNewLicenseLimit(state.licenseLimit.toString());
+  }, [state.licensePrice, state.rewardCap, state.licenseLimit]);
 
   const formatInput = (val: string) => {
     const raw = val.replace(/,/g, "");
@@ -100,15 +102,17 @@ export default function AdminPage() {
   const handleUpdateGlobals = () => {
     const price = Number(newLicensePrice);
     const cap = Number(newRewardCap);
+    const limit = Number(newLicenseLimit);
     
     if (isNaN(price) || price < 0) return setFeedback('error', 'Invalid license price.');
     if (isNaN(cap) || cap < 0) return setFeedback('error', 'Invalid reward cap.');
+    if (isNaN(limit) || limit < 0) return setFeedback('error', 'Invalid license supply cap.');
 
     adminUpdateSettings({
       licensePrice: price,
-      rewardCap: cap
+      rewardCap: cap,
+      licenseLimit: limit
     });
-    setFeedback('success', 'Global network parameters updated in cloud ledger.');
   };
 
   const handleFullProtocolReset = async () => {
@@ -192,6 +196,18 @@ export default function AdminPage() {
                             onChange={e => handleTextChange(e.target.value, setNewRewardCap)} 
                             className="exn-input h-12 pl-12" 
                             placeholder="Reward Pool per Epoch..." 
+                          />
+                       </div>
+                    </div>
+                    <div className="space-y-4 md:col-span-2">
+                       <p className="text-[10px] text-muted-foreground uppercase font-black">Max XNode License Supply (Total Supply)</p>
+                       <div className="relative">
+                          <Layers className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
+                          <input 
+                            value={formatInput(newLicenseLimit)} 
+                            onChange={e => handleTextChange(e.target.value, setNewLicenseLimit)} 
+                            className="exn-input h-12 pl-12" 
+                            placeholder="Max Licenses permitted..." 
                           />
                        </div>
                     </div>

@@ -66,7 +66,6 @@ interface ProtocolContextType {
   mintLicense: (address: string, price: number, license: any) => void;
   resetProtocol: () => Promise<void>;
   
-  // Protocol Mutations
   addStake: (stake: any) => void;
   unstake: (stakeId: string, amount: number, validatorId: string) => void;
   claimRewards: (stakeId: string, amount: number, validatorId: string, wallet: string) => void;
@@ -178,7 +177,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const adminUpdateSettings = useCallback((settings: Partial<ProtocolState>) => {
     if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
-    updateDoc(gRef, settings).catch(err => {
+    // Using setDoc with merge to ensure doc creation if it doesn't exist
+    setDoc(gRef, settings, { merge: true }).then(() => {
+      setFeedback('success', 'Global network parameters updated in cloud ledger.');
+    }).catch(err => {
+      console.error(err);
       setFeedback('error', 'Failed to update global protocol settings.');
     });
   }, [db, setFeedback]);
