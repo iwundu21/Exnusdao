@@ -1,21 +1,9 @@
 
 "use client";
 
-import { useState, createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
+import { useState, createContext, useContext, ReactNode, useCallback, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { 
-  doc, 
-  setDoc, 
-  updateDoc, 
-  collection, 
-  deleteDoc, 
-  increment 
-} from 'firebase/firestore';
-import { 
-  useFirestore, 
-  useDoc, 
-  useCollection 
-} from '@/firebase';
+import { getProtocolState, saveProtocolState } from '@/app/lib/actions';
 
 export interface Validator {
   id: string;
@@ -33,15 +21,6 @@ export interface Validator {
   license_id?: string;
 }
 
-export interface License {
-  id: string;
-  owner: string;
-  is_claimed: boolean;
-  is_burned?: boolean;
-  metadata_uri?: string;
-  image_url?: string;
-}
-
 export interface UserStake {
   id: string;
   owner: string;
@@ -55,18 +34,10 @@ export interface UserStake {
   unstaked: boolean;
 }
 
-export interface ProposalComment {
-  id: string;
-  author: string;
-  text: string;
-  timestamp: number;
-  vote_stance?: 'YES' | 'NO';
-}
-
 export interface Proposal {
-  id: string;
+  id: number;
   proposer: string;
-  type: number; 
+  type: number;
   title: string;
   description: string;
   amount: number;
@@ -78,7 +49,7 @@ export interface Proposal {
   voting_ends_at: number;
   executed: boolean;
   voters: string[];
-  comments: ProposalComment[];
+  comments: any[];
 }
 
 export interface TransactionFeedback {
@@ -87,17 +58,6 @@ export interface TransactionFeedback {
   message: string;
   txHash: string;
   timestamp: number;
-}
-
-export interface UserProfile {
-  address: string;
-  exnBalance: number;
-  usdcBalance: number;
-  lastExnFaucetClaim: number;
-  lastUsdcFaucetClaim: number;
-  registeredAt: number;
-  lastActive: number;
-  totalTransactions: number;
 }
 
 export interface ProtocolState {
@@ -113,8 +73,9 @@ export interface ProtocolState {
   networkStartDate: number;
   validators: Validator[];
   userStakes: UserStake[];
-  licenses: License[];
+  licenses: any[];
   proposals: Proposal[];
+  profiles: Record<string, any>;
   lastTransaction: TransactionFeedback | null;
 }
 
@@ -132,151 +93,204 @@ interface ProtocolContextType {
   updateFaucetClaim: (address: string, type: 'exn' | 'usdc') => void;
   adminFundVault: (address: string, amount: number, vault: string) => void;
   adminWithdrawUsdc: (address: string, amount: number) => void;
-  mintLicense: (address: string, price: number, license: License) => void;
+  mintLicense: (address: string, price: number, license: any) => void;
   setState: (updater: (prev: ProtocolState) => ProtocolState) => void;
 }
 
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
 
+const DEFAULT_STATE: ProtocolState = {
+  treasuryBalance: 3000000,
+  rewardVaultBalance: 20000000,
+  usdcVaultBalance: 0,
+  stakedVaultBalance: 0,
+  rewardCap: 300000,
+  licenseLimit: 100,
+  licensePrice: 5000,
+  isPaused: false,
+  lastCrankedEpoch: 0,
+  networkStartDate: Date.now(),
+  validators: [],
+  userStakes: [],
+  licenses: [],
+  proposals: [],
+  profiles: {},
+  lastTransaction: null,
+};
+
 export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { publicKey } = useWallet();
-  const db = useFirestore();
-  const [lastFeedback, setLastFeedback] = useState<TransactionFeedback | null>(null);
-
-  // 1. Real-time Singleton State
-  const protocolRef = useMemo(() => doc(db, 'protocol', 'global'), [db]);
-  const { data: globalState, loading: globalLoading } = useDoc(protocolRef);
-
-  // 2. Real-time Collections
-  const validatorsRef = useMemo(() => collection(db, 'validators'), [db]);
-  const { data: validators = [], loading: validatorsLoading } = useCollection(validatorsRef);
-
-  const stakesRef = useMemo(() => collection(db, 'stakes'), [db]);
-  const { data: stakes = [], loading: stakesLoading } = useCollection(stakesRef);
-
-  const licensesRef = useMemo(() => collection(db, 'licenses'), [db]);
-  const { data: licenses = [], loading: licensesLoading } = useCollection(licensesRef);
-
-  const proposalsRef = useMemo(() => collection(db, 'proposals'), [db]);
-  const { data: proposals = [], loading: proposalsLoading } = useCollection(proposalsRef);
-
   const walletAddress = publicKey?.toBase58() || '';
-  const userProfileRef = useMemo(() => walletAddress ? doc(db, 'users', walletAddress) : null, [db, walletAddress]);
-  const { data: userProfile } = useDoc(userProfileRef);
+  const [state, setInternalState] = useState<ProtocolState>(DEFAULT_STATE);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const isLoaded = !globalLoading && !validatorsLoading && !stakesLoading && !licensesLoading && !proposalsLoading;
+  const fetchState = useCallback(async () => {
+    const data = await getProtocolState();
+    if (data) {
+      setInternalState(prev => ({ ...data, lastTransaction: prev.lastTransaction }));
+    }
+    setIsLoaded(true);
+  }, []);
 
-  const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
-    setLastFeedback({
-      id: `tx-${Date.now()}`,
-      status,
-      message,
-      txHash: Math.random().toString(36).substring(2, 15),
-      timestamp: Date.now()
+  useEffect(() => {
+    fetchState();
+  }, [fetchState]);
+
+  const setState = useCallback(async (updater: (prev: ProtocolState) => ProtocolState) => {
+    setInternalState(prev => {
+      const next = updater(prev);
+      saveProtocolState(next);
+      return next;
     });
   }, []);
 
-  const clearFeedback = useCallback(() => setLastFeedback(null), []);
+  const setFeedback = useCallback((status: 'success' | 'error' | 'warning', message: string) => {
+    setInternalState(prev => ({
+      ...prev,
+      lastTransaction: {
+        id: `tx-${Date.now()}`,
+        status,
+        message,
+        txHash: Math.random().toString(36).substring(2, 15),
+        timestamp: Date.now()
+      }
+    }));
+  }, []);
 
-  const registerUser = useCallback(async (address: string) => {
-    if (!db || !address) return;
-    const ref = doc(db, 'users', address);
-    setDoc(ref, {
-      address,
-      exnBalance: 25000000,
-      usdcBalance: 10000,
-      lastExnFaucetClaim: 0,
-      lastUsdcFaucetClaim: 0,
-      registeredAt: Date.now(),
-      lastActive: Date.now(),
-      totalTransactions: 0
-    }, { merge: true });
-  }, [db]);
+  const clearFeedback = useCallback(() => {
+    setInternalState(prev => ({ ...prev, lastTransaction: null }));
+  }, []);
 
-  const updateUserBalance = useCallback((address: string, exnDelta: number, usdcDelta: number) => {
-    if (!db || !address) return;
-    const ref = doc(db, 'users', address);
-    updateDoc(ref, {
-      exnBalance: increment(exnDelta),
-      usdcBalance: increment(usdcDelta),
-      lastActive: Date.now(),
-      totalTransactions: increment(1)
+  const userProfile = state.profiles[walletAddress] || null;
+
+  const registerUser = useCallback((address: string) => {
+    if (!address) return;
+    setState(prev => {
+      if (prev.profiles[address]) return prev;
+      return {
+        ...prev,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            address,
+            exnBalance: 25000000,
+            usdcBalance: 10000,
+            lastExnFaucetClaim: 0,
+            lastUsdcFaucetClaim: 0,
+            registeredAt: Date.now(),
+            lastActive: Date.now(),
+            totalTransactions: 0
+          }
+        }
+      };
     });
-  }, [db]);
+  }, [setState]);
+
+  const updateUserBalance = useCallback((address: string, exn: number, usdc: number) => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile) return prev;
+      return {
+        ...prev,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            exnBalance: profile.exnBalance + exn,
+            usdcBalance: profile.usdcBalance + usdc,
+            lastActive: Date.now(),
+            totalTransactions: profile.totalTransactions + 1
+          }
+        }
+      };
+    });
+  }, [setState]);
+
+  const updateFaucetClaim = useCallback((address: string, type: 'exn' | 'usdc') => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile) return prev;
+      return {
+        ...prev,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            [type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim']: Date.now()
+          }
+        }
+      };
+    });
+  }, [setState]);
 
   const adminFundVault = useCallback((address: string, amount: number, vault: string) => {
-    if (!db || !address) return;
-    updateUserBalance(address, -amount, 0);
-    updateDoc(protocolRef, { [vault]: increment(amount) });
-  }, [db, protocolRef, updateUserBalance]);
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile || profile.exnBalance < amount) return prev;
+      return {
+        ...prev,
+        [vault]: (prev[vault as keyof ProtocolState] as number) + amount,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            exnBalance: profile.exnBalance - amount
+          }
+        }
+      };
+    });
+  }, [setState]);
 
   const adminWithdrawUsdc = useCallback((address: string, amount: number) => {
-    if (!db || !address) return;
-    updateUserBalance(address, 0, amount);
-    updateDoc(protocolRef, { usdcVaultBalance: increment(-amount) });
-  }, [db, protocolRef, updateUserBalance]);
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile || prev.usdcVaultBalance < amount) return prev;
+      return {
+        ...prev,
+        usdcVaultBalance: prev.usdcVaultBalance - amount,
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            usdcBalance: profile.usdcBalance + amount
+          }
+        }
+      };
+    });
+  }, [setState]);
 
-  const mintLicense = useCallback((address: string, price: number, license: License) => {
-    if (!db || !address) return;
-    updateUserBalance(address, 0, -price);
-    updateDoc(protocolRef, { usdcVaultBalance: increment(price) });
-    setDoc(doc(db, 'licenses', license.id), license);
-  }, [db, protocolRef, updateUserBalance]);
-
-  const setState = useCallback((updater: (prev: ProtocolState) => ProtocolState) => {
-    // This is a bridge for legacy setState calls
-    // Real implementations should use the mutation functions above
-    const current = { 
-      ...globalState, 
-      validators, 
-      userStakes: stakes, 
-      licenses, 
-      proposals, 
-      lastTransaction: lastFeedback 
-    } as any;
-    const next = updater(current);
-    
-    // Attempting atomic update of the singleton doc
-    if (globalState) {
-      const { validators, userStakes, licenses, proposals, lastTransaction, ...rest } = next as any;
-      setDoc(protocolRef, rest, { merge: true });
-    }
-  }, [globalState, protocolRef, validators, stakes, licenses, proposals, lastFeedback]);
-
-  const state: ProtocolState = {
-    treasuryBalance: globalState?.treasuryBalance ?? 3000000,
-    rewardVaultBalance: globalState?.rewardVaultBalance ?? 20000000,
-    usdcVaultBalance: globalState?.usdcVaultBalance ?? 0,
-    stakedVaultBalance: globalState?.stakedVaultBalance ?? 0,
-    rewardCap: globalState?.rewardCap ?? 300000,
-    licenseLimit: globalState?.licenseLimit ?? 100,
-    licensePrice: globalState?.licensePrice ?? 5000,
-    isPaused: globalState?.isPaused ?? false,
-    lastCrankedEpoch: globalState?.lastCrankedEpoch ?? 0,
-    networkStartDate: globalState?.networkStartDate ?? Date.now(),
-    validators: validators as Validator[],
-    userStakes: stakes as UserStake[],
-    licenses: licenses as License[],
-    proposals: proposals as Proposal[],
-    lastTransaction: lastFeedback
-  };
+  const mintLicense = useCallback((address: string, price: number, license: any) => {
+    setState(prev => {
+      const profile = prev.profiles[address];
+      if (!profile || profile.usdcBalance < price) return prev;
+      return {
+        ...prev,
+        usdcVaultBalance: prev.usdcVaultBalance + price,
+        licenses: [...prev.licenses, license],
+        profiles: {
+          ...prev.profiles,
+          [address]: {
+            ...profile,
+            usdcBalance: profile.usdcBalance - price
+          }
+        }
+      };
+    });
+  }, [setState]);
 
   return (
-    <ProtocolContext.Provider value={{ 
-      state, 
-      isLoaded, 
-      setFeedback, 
-      clearFeedback, 
+    <ProtocolContext.Provider value={{
+      state,
+      isLoaded,
+      setFeedback,
+      clearFeedback,
       registerUser,
       exnBalance: userProfile?.exnBalance ?? 0,
       usdcBalance: userProfile?.usdcBalance ?? 0,
       lastExnFaucetClaim: userProfile?.lastExnFaucetClaim ?? 0,
       lastUsdcFaucetClaim: userProfile?.lastUsdcFaucetClaim ?? 0,
       updateUserBalance,
-      updateFaucetClaim: (address, type) => {
-        const ref = doc(db, 'users', address);
-        updateDoc(ref, { [type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim']: Date.now() });
-      },
+      updateFaucetClaim,
       adminFundVault,
       adminWithdrawUsdc,
       mintLicense,
@@ -289,8 +303,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
 export function useProtocolState() {
   const context = useContext(ProtocolContext);
-  if (!context) {
-    throw new Error("useProtocolState must be used within a ProtocolProvider");
-  }
+  if (!context) throw new Error("useProtocolState must be used within a ProtocolProvider");
   return context;
 }
