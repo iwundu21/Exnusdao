@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -112,6 +111,7 @@ export interface ProtocolState {
   treasuryVaultPda: string;
   usdcVaultPda: string;
   stakedVaultPda: string;
+  adminWallet?: string;
 }
 
 const INITIAL_STATE: ProtocolState = {
@@ -135,6 +135,7 @@ const INITIAL_STATE: ProtocolState = {
   treasuryVaultPda: 'TREASURY-PDA',
   usdcVaultPda: 'LICENSE-PDA',
   stakedVaultPda: 'STAKED-PDA',
+  adminWallet: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
   validators: [
     { 
       id: 'v1', 
@@ -149,11 +150,19 @@ const INITIAL_STATE: ProtocolState = {
       commission_rate: 500, 
       accrued_node_rewards: 0, 
       global_reward_index: 0, 
-      license_id: 'LIC-DEFAULT' 
+      license_id: 'XNODE-DEFAULT' 
     }
   ],
   userStakes: [],
-  licenses: [],
+  licenses: [
+    {
+      id: 'XNODE-DEFAULT',
+      owner: 'ExnUs99d2f1f8e7d6c5b4a32109876543210',
+      is_claimed: true,
+      is_burned: false,
+      image_url: 'https://picsum.photos/seed/XNODE-DEFAULT/400/400'
+    }
+  ],
   proposals: [],
   settledEpochs: [],
 };
@@ -173,7 +182,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('exnus_protocol_state_v4');
+    const saved = localStorage.getItem('exnus_protocol_state_v5');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -190,7 +199,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('exnus_protocol_state_v4', JSON.stringify(state));
+      localStorage.setItem('exnus_protocol_state_v5', JSON.stringify(state));
     }
   }, [state, isLoaded]);
 

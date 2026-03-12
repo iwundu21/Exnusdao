@@ -44,8 +44,8 @@ export default function RegisterNodePage() {
            <Wallet className="w-12 h-12 text-primary" />
          </div>
          <div className="space-y-4">
-           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Connection Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to verify License NFT ownership.</p>
+           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
+           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to verify XNode License ownership.</p>
          </div>
       </div>
     );
@@ -57,8 +57,8 @@ export default function RegisterNodePage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 1024 * 1024) { // 1MB limit for Base64 efficiency
-        return setFeedback('error', 'Image size exceeds 1MB. Please use a smaller file.');
+      if (file.size > 1024 * 1024) { 
+        return setFeedback('error', 'Image size exceeds 1MB.');
       }
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -70,15 +70,14 @@ export default function RegisterNodePage() {
 
   const handleRegister = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
-    if (hasExistingNode) return setFeedback('warning', 'Only one node registration permitted per wallet.');
+    if (hasExistingNode) return setFeedback('warning', 'Only one XNode registration permitted per wallet.');
     
     const license = state.licenses.find(l => l.id === formData.licenseId);
     if (!license) return setFeedback('error', 'Invalid license NFT selected.');
-    if (license.owner !== walletAddress) return setFeedback('error', 'License NFT ownership verification failed.');
-    if (license.is_burned) return setFeedback('error', 'License NFT has been burned.');
+    if (license.owner !== walletAddress) return setFeedback('error', 'License ownership verification failed.');
+    if (license.is_burned) return setFeedback('error', 'XNode License has been burned.');
     if (license.is_claimed) return setFeedback('error', 'License is already bound to another node.');
 
-    // Final field check before submission
     if (!formData.name.trim() || !formData.location.trim() || !formData.description.trim() || !formData.licenseId) {
       return setFeedback('error', 'All required fields must be completed.');
     }
@@ -105,17 +104,15 @@ export default function RegisterNodePage() {
       licenses: prev.licenses.map(l => l.id === formData.licenseId ? { ...l, is_claimed: true } : l)
     }));
     
-    setFeedback('success', 'On-chain node registration successful.');
+    setFeedback('success', 'On-chain XNode registration successful.');
     setTimeout(() => router.push('/manage-node'), 1500);
   };
 
   const availableLicenses = state.licenses.filter(l => l.owner === walletAddress && !l.is_claimed && !l.is_burned);
 
-  // Preview Helpers
   const isLogoSet = formData.logo_uri.length > 0;
   const previewLogo = isLogoSet ? formData.logo_uri : `https://picsum.photos/seed/placeholder/800/400`;
 
-  // Dynamic Button Disable Logic
   const isRegistrationDisabled = !formData.licenseId || !formData.name.trim() || !formData.location.trim() || !formData.description.trim();
 
   return (
@@ -125,9 +122,9 @@ export default function RegisterNodePage() {
       </Link>
 
       <div className="space-y-4">
-        <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Provisioning</h1>
+        <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">XNode Provisioning</h1>
         <p className="text-muted-foreground max-w-xl">
-          Register a validator node by binding it to a verified **Node License NFT** and configuring your on-chain identity.
+          Register an XNode by binding it to a verified **XNode License NFT** and configuring your identity.
         </p>
       </div>
 
@@ -135,10 +132,10 @@ export default function RegisterNodePage() {
         <div className="exn-card p-12 flex flex-col items-center justify-center text-center space-y-8 border-amber-500/20 bg-amber-500/5">
            <AlertCircle className="w-12 h-12 text-amber-500" />
            <div className="space-y-2">
-             <h2 className="text-2xl font-bold text-foreground uppercase">Active Node Detected</h2>
-             <p className="text-xs text-muted-foreground uppercase tracking-widest">Only one node registration permitted per wallet address.</p>
+             <h2 className="text-2xl font-bold text-foreground uppercase">Active XNode Detected</h2>
+             <p className="text-xs text-muted-foreground uppercase tracking-widest">Only one XNode registration permitted per wallet address.</p>
            </div>
-           <Link href="/manage-node" className="exn-button">Manage Existing Node</Link>
+           <Link href="/manage-node" className="exn-button">Manage Existing XNode</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -149,7 +146,7 @@ export default function RegisterNodePage() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Select License NFT *</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Select XNode License *</label>
                 <div className="relative">
                    <Ticket className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground/40" />
                    <select 
@@ -157,7 +154,7 @@ export default function RegisterNodePage() {
                     onChange={e => setFormData({...formData, licenseId: e.target.value})} 
                     className="exn-input h-12 pl-12 text-[10px] font-mono"
                    >
-                    <option value="">Select a Minted License...</option>
+                    <option value="">Select a Minted XNode...</option>
                     {availableLicenses.map(l => (
                       <option key={l.id} value={l.id}>{l.id}</option>
                     ))}
@@ -168,7 +165,7 @@ export default function RegisterNodePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Node Name *</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">XNode Name *</label>
                 <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 text-sm" placeholder="e.g. CyberCore-01" />
               </div>
               <div className="space-y-2">
@@ -184,7 +181,7 @@ export default function RegisterNodePage() {
                 >
                   <Upload className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                   <p className="text-[10px] uppercase font-black text-muted-foreground group-hover:text-primary transition-colors">
-                    {isLogoSet ? 'Change Image' : 'Click to Upload Node Logo'}
+                    {isLogoSet ? 'Change Image' : 'Click to Upload XNode Logo'}
                   </p>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
@@ -199,7 +196,7 @@ export default function RegisterNodePage() {
               </div>
 
               <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Validator Bio *</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">XNode Bio *</label>
                 <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[100px] py-4 text-xs" placeholder="Describe your hardware and commitment..." />
               </div>
             </div>
@@ -209,7 +206,7 @@ export default function RegisterNodePage() {
               disabled={isRegistrationDisabled} 
               className={`w-full h-14 uppercase tracking-widest font-black transition-all ${isRegistrationDisabled ? 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed opacity-50' : 'exn-button'}`}
             >
-              {isRegistrationDisabled ? 'Complete All Required Fields' : 'Register Node On-Chain'}
+              {isRegistrationDisabled ? 'Complete All Required Fields' : 'Register XNode On-Chain'}
             </button>
           </div>
 
@@ -229,7 +226,7 @@ export default function RegisterNodePage() {
                   <div className="absolute top-4 right-6">
                     <div className="flex items-center gap-1.5 bg-emerald-500 text-black text-[9px] px-2 py-1 rounded font-black uppercase border border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)] animate-in fade-in zoom-in duration-500">
                       <CheckCircle2 className="w-3 h-3" />
-                      Protocol Identity Verified
+                      XNode Identity Verified
                     </div>
                   </div>
 
@@ -237,7 +234,7 @@ export default function RegisterNodePage() {
                     <div className="flex items-center gap-2">
                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]" />
                        <h4 className="text-3xl font-bold text-white tracking-tighter uppercase">
-                         {formData.name || 'Your Node Name'}
+                         {formData.name || 'Your XNode Name'}
                        </h4>
                     </div>
                     {formData.location && (
@@ -259,7 +256,7 @@ export default function RegisterNodePage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-1">
-                      <p className="text-[9px] uppercase font-black text-foreground/30">Target Node Fee</p>
+                      <p className="text-[9px] uppercase font-black text-foreground/30">Node Fee</p>
                       <p className="text-primary font-bold text-lg">{formData.commission.toFixed(1)}%</p>
                     </div>
                     <div className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-1">
@@ -271,7 +268,7 @@ export default function RegisterNodePage() {
                   <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
                     <ShieldCheck className="w-5 h-5 text-primary" />
                     <p className="text-[10px] text-primary leading-tight uppercase font-black tracking-tighter">
-                      Previewing atomic binding between License NFT and Validator Identity. Changes are finalized upon registration.
+                      Previewing atomic binding between XNode License and Validator Identity.
                     </p>
                   </div>
                 </div>

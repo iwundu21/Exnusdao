@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Ticket, Wallet, ArrowLeft, Sparkles, ShieldCheck, Database, ExternalLink, Activity } from 'lucide-react';
+import { Ticket, Wallet, ArrowLeft, Sparkles, ShieldCheck, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -36,7 +35,7 @@ export default function PurchaseLicensePage() {
          </div>
          <div className="space-y-4">
            <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Connect your wallet to mint your Node License NFT.</p>
+           <p className="text-muted-foreground max-w-md mx-auto">Connect your wallet to mint your XNode License NFT.</p>
          </div>
       </div>
     );
@@ -47,8 +46,12 @@ export default function PurchaseLicensePage() {
   const totalLimit = state.licenseLimit || 0;
   const remainingSlots = Math.max(0, totalLimit - currentMintedCount);
 
+  const myLicenses = state.licenses.filter(l => l.owner === walletAddress);
+  const hasLicense = myLicenses.length > 0;
+
   const handlePurchase = () => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    if (hasLicense) return setFeedback('warning', 'Only one XNode License permitted per wallet.');
     if (totalLimit > 0 && currentMintedCount >= totalLimit) return setFeedback('warning', 'Maximum license supply cap reached.');
     if (licensePrice > 0 && state.usdcBalance < licensePrice) return setFeedback('error', `Insufficient USDC balance. Required: ${licensePrice} USDC.`);
 
@@ -60,7 +63,7 @@ export default function PurchaseLicensePage() {
       setTimeout(() => {
         setMintPhase('Uploading Logo to Arweave...');
         setTimeout(() => {
-          const mintAddress = `LIC-NFT-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+          const mintAddress = `XNODE-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
           const newLicense = { 
             id: mintAddress, 
             owner: walletAddress, 
@@ -73,19 +76,17 @@ export default function PurchaseLicensePage() {
           setState(prev => ({
             ...prev,
             usdcBalance: Math.max(0, prev.usdcBalance - licensePrice),
-            usdcVaultBalance: prev.usdcVaultBalance + licensePrice,
+            usdcVaultBalance: (prev.usdcVaultBalance || 0) + licensePrice,
             licenses: [...prev.licenses, newLicense]
           }));
 
           setIsMinting(false);
           setMintPhase(null);
-          setFeedback('success', `Node License NFT ${shortenAddress(mintAddress)} minted successfully.`);
+          setFeedback('success', `XNode License NFT ${shortenAddress(mintAddress)} minted successfully.`);
         }, 1500);
       }, 1500);
     }, 1500);
   };
-
-  const myLicenses = state.licenses.filter(l => l.owner === walletAddress);
 
   return (
     <div className="max-w-4xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
@@ -96,9 +97,9 @@ export default function PurchaseLicensePage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
         <div className="lg:col-span-3 space-y-8">
           <div className="space-y-4">
-            <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">License Minting</h1>
+            <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">XNode Minting</h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Mint your unique Node License NFT to gain validator registration rights. The supply and price are dynamically managed by the Protocol Authority.
+              Mint your unique XNode License NFT to gain validator registration rights. Each wallet is restricted to one license.
             </p>
           </div>
 
@@ -109,8 +110,8 @@ export default function PurchaseLicensePage() {
                   <Ticket className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">Purchase to Mint</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black">NFT Standard Authorization</p>
+                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">XNode Authorization</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black">NFT Standard Mint</p>
                 </div>
               </div>
               <div className="text-right">
@@ -138,21 +139,28 @@ export default function PurchaseLicensePage() {
               <div className="space-y-4">
                 <button 
                   onClick={handlePurchase} 
-                  disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || isMinting} 
-                  className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting) ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                  disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || isMinting || hasLicense} 
+                  className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
                 >
                   {isMinting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                       {mintPhase || 'Executing On-Chain Mint...'}
                     </>
+                  ) : hasLicense ? (
+                    'License Already Owned'
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5" />
-                      Mint Node License NFT
+                      Mint XNode License NFT
                     </>
                   )}
                 </button>
+                {hasLicense && (
+                  <p className="text-[10px] text-center text-amber-500 uppercase font-black tracking-widest">
+                    Only one XNode License permitted per wallet address.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -161,14 +169,14 @@ export default function PurchaseLicensePage() {
         <div className="lg:col-span-2 space-y-6">
            <div className="exn-card p-6 border-border/10">
               <h3 className="text-xs font-black text-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-primary" /> Your NFT Inventory
+                <ShieldCheck className="w-4 h-4 text-primary" /> Your Inventory
               </h3>
               
               <div className="space-y-4">
                 {myLicenses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 opacity-20 border border-dashed border-border rounded-xl">
                      <Ticket className="w-8 h-8 mb-2" />
-                     <p className="text-[10px] uppercase font-black text-center">No License NFTs Found</p>
+                     <p className="text-[10px] uppercase font-black text-center">No XNode NFTs Found</p>
                   </div>
                 ) : (
                   myLicenses.map((lic) => (

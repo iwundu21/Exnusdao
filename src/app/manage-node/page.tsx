@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Save, AlertTriangle, LogOut, Trash2, Wallet, ExternalLink, Activity, Upload, MapPin } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -41,7 +41,7 @@ export default function ManageNodePage() {
          </div>
          <div className="space-y-4">
            <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Connection Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to manage your validator nodes.</p>
+           <p className="text-muted-foreground max-w-md mx-auto">Please connect your Solana wallet to manage your XNode.</p>
          </div>
       </div>
     );
@@ -93,7 +93,7 @@ export default function ManageNodePage() {
       } : v)
     }));
     setEditingNodeId(null);
-    setFeedback('success', 'Node metadata synchronized with network.');
+    setFeedback('success', 'XNode metadata synchronized with network.');
   };
 
   const handleClaimCommission = (vId: string) => {
@@ -122,7 +122,7 @@ export default function ManageNodePage() {
         total_staked: (v.total_staked || 0) + SEED_DEPOSIT_AMOUNT 
       } : v)
     }));
-    setFeedback('success', 'Protocol seed deposited. Validator node initialized.');
+    setFeedback('success', 'Protocol seed deposited. XNode initialized.');
   };
 
   const handleWithdrawSeed = (vId: string) => {
@@ -138,7 +138,7 @@ export default function ManageNodePage() {
         total_staked: Math.max(0, (v.total_staked || 0) - SEED_DEPOSIT_AMOUNT) 
       } : v)
     }));
-    setFeedback('success', 'Protocol seed returned to wallet. Node deactivated.');
+    setFeedback('success', 'Protocol seed returned to wallet. XNode deactivated.');
   };
 
   const handleCloseAccount = (vId: string) => {
@@ -157,20 +157,20 @@ export default function ManageNodePage() {
       validators: prev.validators.filter(v => v.id !== vId),
       licenses: prev.licenses.map(l => l.id === node.license_id ? { ...l, is_burned: true, is_claimed: false } : l)
     }));
-    setFeedback('success', 'Node account terminated. Associated license burned.');
+    setFeedback('success', 'XNode account terminated. Associated XNode License burned.');
     router.push('/');
   };
 
   const toggleNodeStatus = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node?.seed_deposited) {
-      return setFeedback('warning', 'Seed deposit required to activate node.');
+      return setFeedback('warning', 'Seed deposit required to activate XNode.');
     }
     setState(prev => ({
       ...prev,
       validators: prev.validators.map(v => v.id === vId ? { ...v, is_active: !v.is_active } : v)
     }));
-    setFeedback('success', `Node operational status updated: ${!node.is_active ? 'ONLINE' : 'PAUSED'}.`);
+    setFeedback('success', `XNode operational status updated: ${!node.is_active ? 'ONLINE' : 'PAUSED'}.`);
   };
 
   return (
@@ -180,7 +180,7 @@ export default function ManageNodePage() {
       </Link>
 
       <div className="space-y-4">
-        <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">Node Management</h1>
+        <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">XNode Management</h1>
         <p className="text-muted-foreground max-w-xl">
           Optimize your validator parameters, manage protocol seed, and harvest performance commissions.
         </p>
@@ -188,8 +188,8 @@ export default function ManageNodePage() {
 
       {myNodes.length === 0 ? (
         <div className="exn-card p-20 flex flex-col items-center justify-center text-center space-y-6">
-          <p className="text-muted-foreground uppercase font-black tracking-widest">No nodes registered to this wallet</p>
-          <Link href="/register-node" className="exn-button">Register New Node</Link>
+          <p className="text-muted-foreground uppercase font-black tracking-widest">No XNodes registered to this wallet</p>
+          <Link href="/register-node" className="exn-button">Register New XNode</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-8">
@@ -271,7 +271,7 @@ export default function ManageNodePage() {
 
                     <div className="space-y-4">
                       <button onClick={() => toggleNodeStatus(node.id)} disabled={!node.seed_deposited} className={`w-full py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${!node.seed_deposited ? 'bg-foreground/5 text-muted-foreground cursor-not-allowed' : node.is_active ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30' : 'bg-destructive/10 text-destructive border border-destructive/30'}`}>
-                        {node.is_active ? '● Node Active' : node.seed_deposited ? '○ Node Paused' : '○ Pending Seed'}
+                        {node.is_active ? '● XNode Active' : node.seed_deposited ? '○ XNode Paused' : '○ Pending Seed'}
                       </button>
                     </div>
                   </div>
@@ -288,7 +288,7 @@ export default function ManageNodePage() {
                       <div className={`space-y-6 transition-opacity ${isEditing ? 'opacity-100' : 'opacity-60 pointer-events-none'}`}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Node Name</label>
+                            <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">XNode Name</label>
                             <input value={isEditing ? formData.name : node.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12" readOnly={!isEditing} />
                           </div>
                           <div className="space-y-2">
@@ -331,13 +331,13 @@ export default function ManageNodePage() {
                        <h3 className="text-xs font-black text-destructive uppercase tracking-[0.3em] mb-6">Danger Zone</h3>
                        <div className="p-8 bg-destructive/5 border border-destructive/10 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
                           <div className="space-y-1">
-                             <p className="text-sm font-bold text-foreground uppercase">Close Node Account</p>
+                             <p className="text-sm font-bold text-foreground uppercase">Close XNode Account</p>
                              <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                               Decommissioning is permanent. The associated license will be burned 🔥 and cannot be reused.
+                               Decommissioning is permanent. The associated XNode license will be burned 🔥 and cannot be reused.
                              </p>
                           </div>
-                          <button onClick={() => { if (window.confirm("Permanent closure will burn your license. Proceed?")) handleCloseAccount(node.id); }} className="px-8 py-3 bg-destructive/10 text-destructive border border-destructive/40 rounded-lg text-[10px] font-black uppercase hover:bg-destructive hover:text-white transition-all flex items-center gap-2">
-                            <Trash2 className="w-4 h-4" /> Terminate Node Account
+                          <button onClick={() => { if (window.confirm("Permanent closure will burn your XNode license. Proceed?")) handleCloseAccount(node.id); }} className="px-8 py-3 bg-destructive/10 text-destructive border border-destructive/40 rounded-lg text-[10px] font-black uppercase hover:bg-destructive hover:text-white transition-all flex items-center gap-2">
+                            <Trash2 className="w-4 h-4" /> Terminate XNode Account
                           </button>
                        </div>
                     </div>
