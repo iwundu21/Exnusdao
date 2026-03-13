@@ -3,7 +3,7 @@
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, collection, deleteDoc, increment, arrayUnion, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, collection, deleteDoc, increment, arrayUnion } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -123,12 +123,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const registerUser = useCallback((address: string) => {
     if (!address || !db) return;
     const ref = doc(db, 'users', address);
-    setDoc(ref, {
-      address,
-      lastActive: Date.now()
-    }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'write' }));
-    });
+    setDoc(ref, { address, lastActive: Date.now() }, { merge: true });
   }, [db]);
 
   const updateUserBalance = useCallback((address: string, exn: number, usdc: number) => {
@@ -138,32 +133,23 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       exnBalance: increment(exn),
       usdcBalance: increment(usdc),
       lastActive: Date.now()
-    }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: ref.path, operation: 'write' }));
-    });
+    }, { merge: true });
   }, [db]);
 
   const claimFaucetAssets = useCallback((address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
-    setFeedback('warning', `ESTABLISHING ${type.toUpperCase()} ASSET DROP...`);
-    
+    setFeedback('warning', `BROADCASTING ${type.toUpperCase()} ASSET DROP...`);
     setTimeout(() => {
       const ref = doc(db, 'users', address);
       const timestampField = type === 'exn' ? 'lastExnFaucetClaim' : 'lastUsdcFaucetClaim';
       const hash = generateTxHash();
-      
       setDoc(ref, {
         exnBalance: increment(exn),
         usdcBalance: increment(usdc),
         [timestampField]: Date.now(),
         lastActive: Date.now()
       }, { merge: true }).then(() => {
-        setFeedback('success', `${type.toUpperCase()} ASSETS DEPOSITED.`, hash);
-      }).catch(err => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ 
-          path: ref.path, 
-          operation: 'write'
-        }));
+        setFeedback('success', `${type.toUpperCase()} ASSETS CONFIRMED.`, hash);
       });
     }, SIMULATED_DELAY);
   }, [db, setFeedback]);
@@ -189,21 +175,17 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     const gRef = doc(db, 'protocol', 'global');
     setDoc(gRef, settings, { merge: true }).then(() => {
       setFeedback('success', 'PROTOCOL SETTINGS SYNCHRONIZED.');
-    }).catch(err => {
-      setFeedback('error', 'FAILED TO UPDATE PROTOCOL SETTINGS.');
     });
   }, [db, setFeedback]);
 
   const mintLicense = useCallback((address: string, price: number, license: any) => {
     if (!address || !db) return;
     setFeedback('warning', 'PROVISIONING XNODE LICENSE NFT...');
-    
     setTimeout(() => {
       const lRef = doc(db, 'licenses', license.id);
       const uRef = doc(db, 'users', address);
       const gRef = doc(db, 'protocol', 'global');
       const hash = generateTxHash();
-      
       setDoc(lRef, license);
       setDoc(uRef, { usdcBalance: increment(-price) }, { merge: true });
       setDoc(gRef, { usdcVaultBalance: increment(price) }, { merge: true });
@@ -214,13 +196,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const addStake = useCallback((stake: any) => {
     if (!db) return;
     setFeedback('warning', 'ESTABLISHING STAKING LOCK...');
-    
     setTimeout(() => {
       const sRef = doc(collection(db, 'stakes'));
       const gRef = doc(db, 'protocol', 'global');
       const vRef = doc(db, 'validators', stake.validator_id);
       const hash = generateTxHash();
-      
       setDoc(sRef, { ...stake, id: sRef.id });
       setDoc(gRef, { stakedVaultBalance: increment(stake.amount) }, { merge: true });
       setDoc(vRef, { total_staked: increment(stake.amount) }, { merge: true });
@@ -231,13 +211,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
     if (!db) return;
     setFeedback('warning', 'EXECUTING PRINCIPAL WITHDRAWAL...');
-    
     setTimeout(() => {
       const sRef = doc(db, 'stakes', stakeId);
       const gRef = doc(db, 'protocol', 'global');
       const vRef = doc(db, 'validators', validatorId);
       const hash = generateTxHash();
-      
       setDoc(sRef, { unstaked: true }, { merge: true });
       setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
       setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
@@ -247,15 +225,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const migrateStake = useCallback((stakeId: string, amount: number, oldValidatorId: string, newValidatorId: string) => {
     if (!db) return;
-    setFeedback('warning', 'EXECUTING STAKE MIGRATION...');
-    
+    setFeedback('warning', 'EXECUTING SECTOR MIGRATION...');
     setTimeout(() => {
       const sRef = doc(db, 'stakes', stakeId);
       const oldVRef = doc(db, 'validators', oldValidatorId);
       const newVRef = doc(db, 'validators', newValidatorId);
       const hash = generateTxHash();
-      
-      setDoc(sRef, { validator_id: newValidatorId }, { merge: true });
+      setDoc(sRef, { validator_id: newValidatorId, reward_checkpoint: 0 }, { merge: true });
       setDoc(oldVRef, { total_staked: increment(-amount) }, { merge: true });
       setDoc(newVRef, { total_staked: increment(amount) }, { merge: true });
       setFeedback('success', 'STAKE MIGRATED TO NEW SECTOR.', hash);
@@ -265,7 +241,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const claimRewards = useCallback((stakeId: string, amount: number, newCheckpoint: number, wallet: string) => {
     if (!db) return;
     setFeedback('warning', 'HARVESTING ACCRUED YIELD...');
-    
     setTimeout(() => {
       const sRef = doc(db, 'stakes', stakeId);
       const hash = generateTxHash();
@@ -278,12 +253,10 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
     if (!db || !walletAddress) return;
     setFeedback('warning', 'ESTABLISHING CONSENSUS DECISION...');
-    
     setTimeout(() => {
       const pRef = doc(db, 'proposals', pId.toString());
       const gRef = doc(db, 'protocol', 'global');
       const hash = generateTxHash();
-      
       setDoc(pRef, {
         yes_votes: increment(support ? weight : 0),
         no_votes: increment(!support ? weight : 0),
@@ -298,40 +271,30 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const createProposal = useCallback((proposal: any) => {
     if (!db) return;
     setFeedback('warning', 'BROADCASTING PROPOSAL TO NETWORK...');
-    
     setTimeout(() => {
       const pRef = doc(db, 'proposals', proposal.id.toString());
       const gRef = doc(db, 'protocol', 'global');
       const hash = generateTxHash();
-      
       setDoc(pRef, proposal);
       setDoc(gRef, { treasuryBalance: increment(10) }, { merge: true });
       setFeedback('success', 'PROPOSAL BROADCAST SUCCESSFUL.', hash);
     }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
-  const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
+  const executeProposal = useCallback((pId: number) => {
     if (!db) return;
     setFeedback('warning', 'ENACTING DAO CONSENSUS...');
-    
     setTimeout(() => {
       const pRef = doc(db, 'proposals', pId.toString());
-      const gRef = doc(db, 'protocol', 'global');
       const hash = generateTxHash();
-      
       setDoc(pRef, { executed: true }, { merge: true });
-      if (passed && type === 1) {
-        setDoc(gRef, { treasuryBalance: increment(-amount) }, { merge: true });
-        if (recipient === wallet) updateUserBalance(wallet, amount, 0);
-      }
       setFeedback('success', 'PROPOSAL ENACTED.', hash);
     }, SIMULATED_DELAY);
-  }, [db, updateUserBalance, setFeedback]);
+  }, [db, setFeedback]);
 
-  const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
+  const crankEpoch = useCallback((targetEpoch: number, totalPool: number) => {
     if (!db) return;
     setFeedback('warning', 'SETTLING EPOCH REWARDS...');
-    
     setTimeout(() => {
       const gRef = doc(db, 'protocol', 'global');
       const hash = generateTxHash();
@@ -346,17 +309,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const registerValidator = useCallback((validator: any, licenseId: string) => {
     if (!db) return;
     setFeedback('warning', 'PROVISIONING XNODE SECTOR...');
-    
     setTimeout(() => {
       const vRef = doc(db, 'validators', validator.id);
       const lRef = doc(db, 'licenses', licenseId);
       const hash = generateTxHash();
-      
       setDoc(vRef, validator).then(() => {
         setDoc(lRef, { is_claimed: true }, { merge: true });
         setFeedback('success', 'XNODE IDENTITY REGISTERED.', hash);
-      }).catch(err => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'create' }));
       });
     }, SIMULATED_DELAY);
   }, [db, setFeedback]);
@@ -364,14 +323,11 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const updateValidator = useCallback((vId: string, data: any) => {
     if (!db) return;
     setFeedback('warning', 'PROPAGATING IDENTITY UPDATES...');
-    
     setTimeout(() => {
       const vRef = doc(db, 'validators', vId);
       const hash = generateTxHash();
       setDoc(vRef, data, { merge: true }).then(() => {
         setFeedback('success', 'IDENTITY SYNCHRONIZED.', hash);
-      }).catch(err => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
       });
     }, SIMULATED_DELAY);
   }, [db, setFeedback]);
@@ -379,18 +335,14 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
     if (!db) return;
     setFeedback('warning', 'DECOMMISSIONING XNODE IDENTITY...');
-    
     setTimeout(() => {
       const vRef = doc(db, 'validators', vId);
       const lRef = doc(db, 'licenses', licenseId);
       const hash = generateTxHash();
-      
       deleteDoc(vRef).then(() => {
         setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true });
         updateUserBalance(wallet, seedRefund + rewards, 0);
         setFeedback('success', 'REGISTRATION TERMINATED.', hash);
-      }).catch(err => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'delete' }));
       });
     }, SIMULATED_DELAY);
   }, [db, updateUserBalance, setFeedback]);
@@ -398,9 +350,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const toggleValidator = useCallback((vId: string, status: boolean) => {
     if (!db) return;
     const vRef = doc(db, 'validators', vId);
-    setDoc(vRef, { is_active: status }, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
-    });
+    setDoc(vRef, { is_active: status }, { merge: true });
   }, [db]);
 
   const resetProtocol = useCallback(async () => {
@@ -452,34 +402,15 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProtocolContext.Provider value={{
-      state,
-      isLoaded,
-      setFeedback,
-      clearFeedback,
-      registerUser,
+      state, isLoaded, setFeedback, clearFeedback, registerUser,
       exnBalance: userProfile?.exnBalance ?? 0,
       usdcBalance: userProfile?.usdcBalance ?? 0,
       lastExnFaucetClaim: userProfile?.lastExnFaucetClaim ?? 0,
       lastUsdcFaucetClaim: userProfile?.lastUsdcFaucetClaim ?? 0,
-      updateUserBalance,
-      claimFaucetAssets,
-      adminFundVault,
-      adminWithdrawUsdc,
-      adminUpdateSettings,
-      mintLicense,
-      resetProtocol,
-      addStake,
-      unstake,
-      migrateStake,
-      claimRewards,
-      castVote,
-      createProposal,
-      executeProposal,
-      crankEpoch,
-      registerValidator,
-      updateValidator,
-      terminateValidator,
-      toggleValidator
+      updateUserBalance, claimFaucetAssets, adminFundVault, adminWithdrawUsdc,
+      adminUpdateSettings, mintLicense, resetProtocol, addStake, unstake,
+      migrateStake, claimRewards, castVote, createProposal, executeProposal,
+      crankEpoch, registerValidator, updateValidator, terminateValidator, toggleValidator
     }}>
       {children}
     </ProtocolContext.Provider>
@@ -488,6 +419,6 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
 export function useProtocolState() {
   const context = useContext(ProtocolContext);
-  if (!context) throw new Error("useProtocolState must be used within a FirebaseProvider");
+  if (!context) throw new Error("useProtocolState error");
   return context;
 }

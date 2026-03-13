@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Unlock, Clock, ShieldCheck, ChevronRight, LockIcon, ArrowRightLeft } from 'lucide-react';
+import { Wallet, Unlock, Clock, ShieldCheck, ChevronRight, LockIcon, ArrowRightLeft, Database, MapPin, Zap } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,8 +41,20 @@ export function StakingActionForm({
   const [duration, setDuration] = useState('30');
   const [activeTab, setActiveTab] = useState<'stake' | 'my-stakes'>('stake');
   const [now, setNow] = useState(Date.now());
-  const [showReview, setShowReview] = useState(false);
-  const [migrationPending, setMigrationPending] = useState<any>(null);
+  
+  // Action States
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  
+  // Review States
+  const [showStakeReview, setShowStakeReview] = useState(false);
+  const [showClaimReview, setShowClaimReview] = useState(false);
+  const [showUnstakeReview, setShowUnstakeReview] = useState<string | null>(null);
+  const [showClaimSingleReview, setShowClaimSingleReview] = useState<any | null>(null);
+  
+  // Migration States
+  const [migrationStake, setMigrationStake] = useState<any | null>(null);
+  const [migrationTarget, setMigrationTarget] = useState<any | null>(null);
+  const [showMigrationReview, setShowMigrationReview] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -65,54 +77,84 @@ export function StakingActionForm({
     }
   };
 
+  const startProcessing = (action: string, callback: () => void) => {
+    setIsProcessing(action);
+    callback();
+    setTimeout(() => {
+      setIsProcessing(null);
+    }, 6500);
+  };
+
   const initiateStake = () => {
-    if (!connected) return setFeedback('warning', 'Please connect your wallet to initiate staking.');
-    const rawAmount = amountInput.replace(/,/g, '');
-    const numAmt = Number(rawAmount);
-    if (!rawAmount || isNaN(numAmt) || numAmt <= 0) return setFeedback('error', 'Invalid amount specified.');
+    if (!connected) return setFeedback('warning', 'Please connect your wallet.');
+    const numAmt = Number(amountInput.replace(/,/g, ''));
+    if (!numAmt || numAmt <= 0) return setFeedback('error', 'Invalid amount.');
     if (numAmt > exnBalance) return setFeedback('error', 'Insufficient EXN balance.');
-    if (!selectedNode) return setFeedback('warning', 'Target validator selection required.');
-    
-    setShowReview(true);
+    if (!selectedNode) return setFeedback('warning', 'Select a validator first.');
+    setShowStakeReview(true);
   };
 
   const confirmStake = () => {
-    const rawAmount = amountInput.replace(/,/g, '');
-    const numAmt = Number(rawAmount);
+    const numAmt = Number(amountInput.replace(/,/g, ''));
     const tier = STAKING_TIERS.find(t => t.days.toString() === duration);
-    
-    onStake({
-      validator_id: selectedNode.id,
-      amount: numAmt,
-      lock_multiplier: tier?.multiplier || 3000,
-      staked_at: Date.now(),
-      unlock_timestamp: Date.now() + (Number(duration) * 86400000),
-      reward_checkpoint: selectedNode.global_reward_index,
-      claimed: false,
-      unstaked: false
+    startProcessing('COMMIT_STAKE', () => {
+      onStake({
+        validator_id: selectedNode.id,
+        amount: numAmt,
+        lock_multiplier: tier?.multiplier || 3000,
+        staked_at: Date.now(),
+        unlock_timestamp: Date.now() + (Number(duration) * 86400000),
+        reward_checkpoint: selectedNode.global_reward_index,
+        claimed: false,
+        unstaked: false
+      });
+      setAmountInput('');
     });
-    setAmountInput('');
-    setShowReview(false);
+    setShowStakeReview(false);
   };
 
-  const initiateMigration = (stake: any) => {
-    if (!selectedNode) return setFeedback('warning', 'Select a target node in Discovery first.');
-    if (stake.validator_id === selectedNode.id) return setFeedback('warning', 'Already staked in this sector.');
-    setMigrationPending(stake);
+  const initiateMigrate = (stake: any) => {
+    setMigrationStake(stake);
+  };
+
+  const selectMigrationTarget = (target: any) => {
+    setMigrationTarget(target);
+    setShowMigrationReview(true);
   };
 
   const confirmMigration = () => {
-    if (!migrationPending || !selectedNode) return;
-    onMigrate(migrationPending.id, migrationPending.amount, migrationPending.validator_id, selectedNode.id);
-    setMigrationPending(null);
+    if (!migrationStake || !migrationTarget) return;
+    startProcessing('MIGRATE_SECTOR', () => {
+      onMigrate(migrationStake.id, migrationStake.amount, migrationStake.validator_id, migrationTarget.id);
+    });
+    setMigrationStake(null);
+    setMigrationTarget(null);
+    setShowMigrationReview(false);
+  };
+
+  const confirmClaimAll = () => {
+    startProcessing('HARVEST_YIELD', () => onClaim());
+    setShowClaimReview(false);
+  };
+
+  const confirmUnstake = () => {
+    if (!showUnstakeReview) return;
+    const s = userStakes.find((x: any) => x.id === showUnstakeReview);
+    startProcessing('WITHDRAW_PRINCIPAL', () => onUnstake(s.id, s.amount, s.validator_id));
+    setShowUnstakeReview(null);
+  };
+
+  const confirmClaimSingle = () => {
+    if (!showClaimSingleReview) return;
+    startProcessing('HARVEST_YIELD', () => onClaimSingle(showClaimSingleReview.id));
+    setShowClaimSingleReview(null);
   };
 
   const activeUserStakes = userStakes.filter((s: any) => !s.unstaked);
-  const isStakeDisabled = !selectedNode || !amountInput || Number(amountInput.replace(/,/g, '')) <= 0 || !connected;
   const currentTier = STAKING_TIERS.find(t => t.days.toString() === duration);
 
   return (
-    <div className="exn-card p-0 bg-black/80 border-white/10 sticky top-[100px] lg:top-32 overflow-hidden backdrop-blur-3xl transition-all duration-300 z-10 shadow-[0_50px_100px_rgba(0,0,0,0.9)]">
+    <div className="exn-card p-0 bg-black/80 border-white/10 sticky top-32 overflow-hidden backdrop-blur-3xl transition-all duration-300 z-10 shadow-[0_50px_100px_rgba(0,0,0,0.9)]">
       <div className="flex border-b border-white/10">
         <button 
           onClick={() => setActiveTab('stake')}
@@ -128,138 +170,135 @@ export function StakingActionForm({
         </button>
       </div>
 
-      <div className="p-8 space-y-8">
+      <div className="p-6 space-y-6">
         {activeTab === 'stake' && (
-          <div className="space-y-8 animate-in fade-in zoom-in-95 duration-700">
-            <div className="space-y-3">
+          <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+            <div className="space-y-2">
               <div className="flex justify-between items-end">
-                <label className="text-[11px] text-white/30 uppercase font-black tracking-[0.3em]">STAKE_AMOUNT</label>
-                <span className="text-[11px] font-mono font-black text-primary/60 tracking-tight">AVL: {connected ? exnBalance.toLocaleString() : '0.00'}</span>
+                <label className="text-[10px] text-white/30 uppercase font-black tracking-[0.2em]">STAKE_AMOUNT</label>
+                <span className="text-[10px] font-mono font-black text-primary/60">AVL: {connected ? exnBalance.toLocaleString() : '0.00'}</span>
               </div>
               <div className="relative group">
                 <input 
                   type="text" 
                   value={amountInput}
-                  disabled={!connected}
+                  disabled={!connected || !!isProcessing}
                   onChange={handleInputChange}
                   placeholder="0.00"
-                  className={`exn-input h-12 bg-white/5 border-white/10 text-[11px] font-mono font-black tracking-tighter transition-all group-hover:border-primary/40 focus:border-primary ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  className="exn-input h-10 bg-white/5 border-white/10 text-[11px] font-mono font-black tracking-tighter"
                 />
-                {connected && (
-                  <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-4 top-3.5 text-[10px] font-black text-primary hover:text-white transition-colors">MAX_CAP</button>
+                {connected && !isProcessing && (
+                  <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-4 top-2.5 text-[9px] font-black text-primary hover:text-white uppercase transition-colors">MAX</button>
                 )}
               </div>
             </div>
 
-            <div className="space-y-3">
-              <label className="text-[11px] text-white/30 uppercase font-black tracking-[0.3em] block">LOCK_PERIOD_TIER</label>
-              <div className="grid grid-cols-4 gap-3">
+            <div className="space-y-2">
+              <label className="text-[10px] text-white/30 uppercase font-black tracking-[0.2em]">LOCK_TIER</label>
+              <div className="grid grid-cols-4 gap-2">
                 {STAKING_TIERS.map((tier) => (
                   <button
                     key={tier.days}
-                    disabled={!connected}
+                    disabled={!connected || !!isProcessing}
                     onClick={() => setDuration(tier.days.toString())}
-                    className={`h-16 border rounded-xl transition-all flex flex-col items-center justify-center gap-1 ${
+                    className={`h-12 border rounded-lg transition-all flex flex-col items-center justify-center ${
                       duration === tier.days.toString() 
-                        ? 'border-primary bg-primary/20 text-primary shadow-lg shadow-primary/20' 
-                        : 'border-white/10 bg-white/5 text-white/30 hover:border-white/30 hover:bg-white/10'
-                    } ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
+                        ? 'border-primary bg-primary/20 text-primary' 
+                        : 'border-white/5 bg-white/5 text-white/30'
+                    }`}
                   >
-                    <span className="text-[10px] font-black tracking-widest">{tier.label}</span>
-                    <span className="text-[10px] font-mono font-black opacity-60">{(tier.multiplier/1000).toFixed(1)}x</span>
+                    <span className="text-[9px] font-black">{tier.label}</span>
+                    <span className="text-[8px] font-mono opacity-60">{(tier.multiplier/1000).toFixed(1)}x</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="p-6 bg-white/5 rounded-xl border border-white/10 space-y-4 shadow-xl">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[11px] text-white/20 uppercase font-black tracking-[0.3em]">VALIDATOR</span>
-                <span className={`font-black uppercase tracking-tighter text-[11px] ${selectedNode ? 'text-primary' : 'text-white/10'} truncate max-w-[150px]`}>
-                  {selectedNode ? selectedNode.name : 'UNASSIGNED_SECTOR'}
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-white/20 uppercase font-black">VALIDATOR</span>
+                <span className="font-black text-primary uppercase truncate max-w-[120px]">
+                  {selectedNode ? selectedNode.name : 'UNASSIGNED'}
                 </span>
               </div>
-              <div className="h-px w-full bg-white/5" />
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[11px] text-white/20 uppercase font-black tracking-[0.3em]">MULTIPLIER</span>
-                <span className="font-black text-emerald-500 font-mono text-[11px] tracking-tighter">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x_BOOST</span>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-white/20 uppercase font-black">YIELD_BOOST</span>
+                <span className="font-black text-emerald-500 font-mono">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
               </div>
             </div>
 
             <button 
               onClick={initiateStake} 
-              disabled={isStakeDisabled}
-              className={`w-full h-14 uppercase tracking-[0.5em] font-black text-[11px] flex items-center justify-center gap-3 transition-all shadow-2xl ${
-                !isStakeDisabled ? 'exn-button' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed'
+              disabled={!!isProcessing || !selectedNode || !amountInput || Number(amountInput.replace(/,/g, '')) <= 0}
+              className={`w-full h-12 uppercase tracking-[0.3em] font-black text-[10px] flex items-center justify-center gap-2 transition-all ${
+                !isProcessing && selectedNode && amountInput ? 'exn-button' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed'
               }`}
             >
-              COMMIT_STAKE <ChevronRight className="w-4 h-4" />
+              {isProcessing === 'COMMIT_STAKE' ? 'COMMITTING_STAKE...' : 'COMMIT_STAKE'}
             </button>
           </div>
         )}
 
         {activeTab === 'my-stakes' && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
-            <div className="p-6 bg-secondary/10 border border-secondary/40 rounded-xl relative overflow-hidden group/yield">
-              <div className="absolute -top-10 -right-10 w-48 h-48 bg-secondary/20 blur-3xl group-hover/yield:bg-secondary/30 transition-all" />
-              <div className="relative z-10 flex justify-between items-center">
-                <div className="space-y-1">
-                  <p className="text-[11px] text-white/30 uppercase font-black tracking-[0.4em]">ACCRUED_YIELD</p>
-                  <p className="text-[17px] font-black text-white font-mono tracking-tighter">{(totalPendingRewards || 0).toFixed(4)} <span className="text-[11px] text-secondary/60 ml-1">EXN</span></p>
-                </div>
-                <button 
-                  onClick={onClaim}
-                  disabled={totalPendingRewards <= 0 || !connected}
-                  className={`px-6 py-3 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-2xl ${totalPendingRewards > 0 && connected ? 'bg-secondary text-white hover:opacity-90 active:scale-95 shadow-secondary/40' : 'bg-white/5 text-white/10 cursor-not-allowed border border-white/10'}`}
-                >
-                  HARVEST_ALL
-                </button>
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="p-4 bg-secondary/10 border border-secondary/40 rounded-xl flex justify-between items-center">
+              <div className="space-y-0.5">
+                <p className="text-[10px] text-white/30 uppercase font-black">TOTAL_YIELD</p>
+                <p className="text-sm font-black text-white font-mono tracking-tighter">{(totalPendingRewards || 0).toFixed(4)} <span className="text-[9px] text-secondary/60">EXN</span></p>
               </div>
+              <button 
+                onClick={() => setShowClaimReview(true)}
+                disabled={totalPendingRewards <= 0 || !!isProcessing}
+                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.1em] transition-all ${totalPendingRewards > 0 && !isProcessing ? 'bg-secondary text-white' : 'bg-white/5 text-white/10 cursor-not-allowed'}`}
+              >
+                {isProcessing === 'HARVEST_YIELD' ? 'HARVESTING...' : 'HARVEST_ALL'}
+              </button>
             </div>
 
-            <div className="space-y-5 max-h-[450px] overflow-auto pr-3 custom-scrollbar">
+            <div className="space-y-4 max-h-[400px] overflow-auto pr-2 custom-scrollbar">
               {activeUserStakes.length === 0 ? (
-                <div className="text-center py-20 opacity-20 border-2 border-dashed border-white/10 rounded-2xl">
-                  <Clock className="w-12 h-12 mx-auto mb-6 opacity-40" />
-                  <p className="text-[11px] uppercase font-black tracking-[0.4em]">NO_ACTIVE_POSITIONS</p>
+                <div className="text-center py-16 opacity-20">
+                  <Clock className="w-10 h-10 mx-auto mb-4" />
+                  <p className="text-[10px] uppercase font-black">NO_ACTIVE_LOCKS</p>
                 </div>
               ) : (
                 activeUserStakes.map((s: any) => {
                   const isLocked = now < s.unlock_timestamp;
-                  const validator = validators?.find((v: any) => v.id === s.validator_id);
+                  const v = validators?.find((val: any) => val.id === s.validator_id);
                   const multiplier = s.lock_multiplier || 1000;
-                  const pendingReward = validator ? ((validator.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000) : 0;
+                  const reward = v ? ((v.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000) : 0;
                   
                   return (
-                    <div key={s.id} className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-6 hover:border-white/30 transition-all shadow-xl group/stake">
+                    <div key={s.id} className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-4 group/stake">
                       <div className="flex justify-between items-start">
-                        <div className="space-y-3">
-                           <div className="flex items-center gap-3">
-                             <span className="text-[14px] font-black text-white font-mono tracking-tighter">{(s.amount || 0).toLocaleString()}</span>
-                             <span className="text-[11px] text-white/30 uppercase font-black tracking-widest">EXN</span>
+                        <div className="space-y-1">
+                           <div className="flex items-center gap-2">
+                             <span className="text-xs font-black text-white font-mono">{(s.amount || 0).toLocaleString()}</span>
+                             <span className="text-[9px] text-white/30 font-black uppercase">EXN</span>
                            </div>
-                           <p className="text-[11px] font-black text-primary uppercase tracking-[0.2em] truncate max-w-[150px]">{validator?.name || 'NETWORK_VALIDATOR'}</p>
-                           
-                           <div className="flex flex-col gap-2 pt-4 border-t border-white/5 mt-4">
-                             <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-white/40">
-                               <LockIcon className="w-3.5 h-3.5 text-white/20" />
-                               <span className="font-mono">LOCKED: {new Date(s.staked_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                             </div>
-                             <div className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] ${isLocked ? 'text-amber-500' : 'text-emerald-500'}`}>
-                               {isLocked ? <Clock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                               <span className="font-mono">UNLOCK: {new Date(s.unlock_timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                             </div>
-                           </div>
+                           <p className="text-[9px] font-black text-primary uppercase truncate max-w-[140px]">{v?.name || 'VALIDATOR'}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[14px] font-black text-emerald-500 font-mono tracking-tighter">+{pendingReward.toFixed(4)}</p>
-                          <p className="text-[11px] text-white/20 uppercase font-black mt-2 tracking-widest">{(multiplier/1000).toFixed(1)}x_BOOST</p>
+                          <p className="text-xs font-black text-emerald-500 font-mono">+{reward.toFixed(4)}</p>
+                          <p className="text-[8px] text-white/20 uppercase font-black mt-1">{(multiplier/1000).toFixed(1)}x_BOOST</p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 pt-1">
-                        <button onClick={() => onClaimSingle(s.id)} disabled={pendingReward <= 0} className={`h-10 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all ${pendingReward > 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/40 hover:bg-emerald-500/20 shadow-lg' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed'}`}>HARVEST</button>
-                        <button onClick={() => initiateMigration(s)} disabled={!connected} className={`h-10 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all bg-primary/10 text-primary border border-primary/40 hover:bg-primary/20 shadow-lg`}>MIGRATE</button>
-                        <button onClick={() => onUnstake(s.id)} disabled={isLocked} className={`h-10 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all ${!isLocked ? 'bg-white/10 text-white border border-white/20 hover:bg-white/20 shadow-lg' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed'}`}>WITHDRAW</button>
+
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-2 border-t border-white/5">
+                        <div className="flex flex-col">
+                           <span className="text-[8px] text-white/20 uppercase font-black">LOCKED_AT</span>
+                           <span className="text-[9px] font-mono text-white/60">{new Date(s.staked_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                        </div>
+                        <div className="flex flex-col text-right">
+                           <span className="text-[8px] text-white/20 uppercase font-black">UNLOCKS_AT</span>
+                           <span className={`text-[9px] font-mono ${isLocked ? 'text-amber-500' : 'text-emerald-500'}`}>{new Date(s.unlock_timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <button onClick={() => setShowClaimSingleReview({ id: s.id, amount: reward })} disabled={reward <= 0 || !!isProcessing} className="h-8 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 text-[9px] font-black uppercase">HARVEST</button>
+                        <button onClick={() => initiateMigrate(s)} disabled={!!isProcessing} className="h-8 rounded bg-primary/10 text-primary border border-primary/30 text-[9px] font-black uppercase">MIGRATE</button>
+                        <button onClick={() => setShowUnstakeReview(s.id)} disabled={isLocked || !!isProcessing} className="h-8 rounded bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase">WITHDRAW</button>
                       </div>
                     </div>
                   );
@@ -270,87 +309,167 @@ export function StakingActionForm({
         )}
       </div>
 
-      <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md">
-          <div className="p-8 space-y-8">
+      {/* Stake Review */}
+      <AlertDialog open={showStakeReview} onOpenChange={setShowStakeReview}>
+        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-6 space-y-6">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
-                <ShieldCheck className="w-6 h-6" />
-                VERIFY_LOCK
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5" /> VERIFY_LOCK
               </AlertDialogTitle>
-              <div asChild>
-                <div className="space-y-6 pt-6">
-                  <div className="p-6 bg-white/5 rounded-xl border border-white/10 space-y-4 shadow-3xl">
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/30 font-black">OP_CODE</span>
-                      <span className="text-white font-black font-mono">STAKE_PROVISION</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+              <AlertDialogDescription asChild>
+                <div className="space-y-4 pt-4">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                    <div className="flex justify-between items-center text-[10px] uppercase">
                       <span className="text-white/30 font-black">QUANTITY</span>
-                      <span className="text-primary font-mono font-black text-[12px]">{amountInput} EXN</span>
+                      <span className="text-white font-mono font-black">{amountInput} EXN</span>
                     </div>
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/30 font-black">BOOST_TIER</span>
-                      <span className="text-emerald-500 font-black font-mono text-[12px]">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
+                    <div className="flex justify-between items-center text-[10px] uppercase">
+                      <span className="text-white/30 font-black">LOCK_PERIOD</span>
+                      <span className="text-emerald-500 font-black">{duration} DAYS</span>
                     </div>
                   </div>
-                  
-                  <p className="text-[11px] text-white/40 uppercase leading-relaxed font-black tracking-tight">
-                    BY CONFIRMING, YOU AUTHORIZE A PROTOCOL LOCK FOR {duration} DAYS. THIS TRANSACTION IS IMMUTABLE ON THE NETWORK LEDGER.
-                  </p>
+                  <p className="text-[10px] text-white/40 uppercase leading-relaxed font-black">CONFIRMING WILL BROADCAST AN IMMUTABLE STAKING COMMITMENT TO THE NETWORK.</p>
                 </div>
-              </div>
+              </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 text-[11px] h-12 uppercase font-black border-white/20 text-white hover:bg-white/10">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmStake} className="exn-button flex-1 text-[11px] h-12 uppercase font-black">CONFIRM_LOCK</AlertDialogAction>
+            <AlertDialogFooter className="flex flex-row gap-3">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-10 text-[9px] uppercase font-black">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmStake} className="exn-button flex-1 h-10 text-[9px] uppercase font-black">CONFIRM_LOCK</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={migrationPending !== null} onOpenChange={() => setMigrationPending(null)}>
-        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md">
-          <div className="p-8 space-y-8">
+      {/* Claim All Review */}
+      <AlertDialog open={showClaimReview} onOpenChange={setShowClaimReview}>
+        <AlertDialogContent className="exn-card border-secondary/50 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-6 space-y-6">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
-                <ArrowRightLeft className="w-6 h-6" />
-                VERIFY_MIGRATION
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-2">
+                <Zap className="w-5 h-5" /> VERIFY_HARVEST
               </AlertDialogTitle>
-              <div asChild>
-                <div className="space-y-6 pt-6">
-                  <div className="p-6 bg-white/5 rounded-xl border border-white/10 space-y-4 shadow-3xl">
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/30 font-black">OP_CODE</span>
-                      <span className="text-white font-black font-mono">SECTOR_MIGRATION</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/30 font-black">ASSET_VALUE</span>
-                      <span className="text-primary font-mono font-black text-[12px]">{migrationPending?.amount.toLocaleString()} EXN</span>
-                    </div>
-                    <div className="flex flex-col gap-2 pt-2">
-                       <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                          <span className="text-white/30 font-black">FROM</span>
-                          <span className="text-destructive font-black font-mono truncate max-w-[150px]">
-                            {validators.find((v: any) => v.id === migrationPending?.validator_id)?.name || 'ORIGIN_SECTOR'}
-                          </span>
-                       </div>
-                       <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                          <span className="text-white/30 font-black">TO</span>
-                          <span className="text-emerald-500 font-black font-mono truncate max-w-[150px]">{selectedNode?.name}</span>
-                       </div>
+              <AlertDialogDescription asChild>
+                <div className="space-y-4 pt-4">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                    <div className="flex justify-between items-center text-[10px] uppercase">
+                      <span className="text-white/30 font-black">TOTAL_YIELD</span>
+                      <span className="text-secondary font-mono font-black">{totalPendingRewards.toFixed(4)} EXN</span>
                     </div>
                   </div>
-                  
-                  <p className="text-[11px] text-white/40 uppercase leading-relaxed font-black tracking-tight">
-                    MIGRATING ASSETS WILL REROUTE FUTURE REWARD SHARDING TO THE TARGET SECTOR. THIS ACTION IS RECORDED ON THE GLOBAL LEDGER.
-                  </p>
+                  <p className="text-[10px] text-white/40 uppercase leading-relaxed font-black">YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR WALLET BALANCE.</p>
                 </div>
-              </div>
+              </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 text-[11px] h-12 uppercase font-black border-white/20 text-white hover:bg-white/10">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmMigration} className="exn-button flex-1 text-[11px] h-12 uppercase font-black">CONFIRM_MIGRATION</AlertDialogAction>
+            <AlertDialogFooter className="flex flex-row gap-3">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-10 text-[9px] uppercase font-black">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmClaimAll} className="exn-button flex-1 h-10 text-[9px] uppercase font-black bg-secondary">CONFIRM_HARVEST</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Migration Selector Dialog */}
+      <AlertDialog open={!!migrationStake && !showMigrationReview} onOpenChange={() => setMigrationStake(null)}>
+        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 p-0 overflow-hidden max-w-md">
+          <div className="p-6 space-y-6">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                <ArrowRightLeft className="w-5 h-5" /> SELECT_TARGET_SECTOR
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-4 pt-4">
+                  <p className="text-[10px] text-white/40 uppercase font-black">CHOOSE A NEW VALIDATOR FOR THIS STAKE POSITION:</p>
+                  <div className="space-y-2 max-h-[300px] overflow-auto custom-scrollbar pr-2">
+                    {validators.filter((v: any) => v.is_active && v.id !== migrationStake?.validator_id).map((v: any) => (
+                      <button 
+                        key={v.id} 
+                        onClick={() => selectMigrationTarget(v)}
+                        className="w-full p-4 bg-white/5 border border-white/10 rounded-xl hover:border-primary/50 transition-all flex justify-between items-center group"
+                      >
+                        <div className="flex items-center gap-3 text-left">
+                           <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                             <Database className="w-4 h-4 text-primary" />
+                           </div>
+                           <div>
+                             <p className="text-[11px] font-black uppercase text-white tracking-tight">{v.name}</p>
+                             <div className="flex items-center gap-2 text-[8px] text-white/30 font-black uppercase">
+                               <MapPin className="w-3 h-3" /> {v.location}
+                             </div>
+                           </div>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-[10px] font-black text-emerald-500">{(v.commission_rate/100).toFixed(1)}% FEE</p>
+                           <p className="text-[8px] text-white/20 font-black uppercase">NODE_WEIGHT</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="exn-button-outline w-full h-10 text-[9px] uppercase font-black">ABORT_MIGRATION</AlertDialogCancel>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Migration Review */}
+      <AlertDialog open={showMigrationReview} onOpenChange={setShowMigrationReview}>
+        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-6 space-y-6">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5" /> VERIFY_MIGRATION
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-4 pt-4">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                    <div className="flex justify-between items-center text-[10px] uppercase">
+                      <span className="text-white/30 font-black">QUANTITY</span>
+                      <span className="text-white font-mono font-black">{migrationStake?.amount.toLocaleString()} EXN</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase">
+                      <span className="text-white/30 font-black">TARGET</span>
+                      <span className="text-primary font-black uppercase truncate max-w-[150px]">{migrationTarget?.name}</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-white/40 uppercase leading-relaxed font-black">MIGRATING ASSETS WILL REROUTE FUTURE REWARD SHARDING TO THE TARGET SECTOR.</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row gap-3">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-10 text-[9px] uppercase font-black" onClick={() => setShowMigrationReview(false)}>ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmMigration} className="exn-button flex-1 h-10 text-[9px] uppercase font-black">CONFIRM_MIGRATION</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unstake Review */}
+      <AlertDialog open={!!showUnstakeReview} onOpenChange={() => setShowUnstakeReview(null)}>
+        <AlertDialogContent className="exn-card border-destructive/50 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-6 space-y-6">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-destructive flex items-center gap-2">
+                <Unlock className="w-5 h-5" /> VERIFY_WITHDRAWAL
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-4 pt-4">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                    <div className="flex justify-between items-center text-[10px] uppercase">
+                      <span className="text-white/30 font-black">PRINCIPAL</span>
+                      <span className="text-white font-mono font-black">{userStakes.find((x: any) => x.id === showUnstakeReview)?.amount.toLocaleString()} EXN</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-destructive/60 uppercase leading-relaxed font-black">WITHDRAWING PRINCIPAL WILL TERMINATE THIS STAKE POSITION ON THE NETWORK LEDGER.</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row gap-3">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-10 text-[9px] uppercase font-black">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmUnstake} className="bg-destructive text-white flex-1 h-10 text-[9px] uppercase font-black rounded-xl">CONFIRM_WITHDRAW</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
