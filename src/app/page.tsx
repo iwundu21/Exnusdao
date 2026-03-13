@@ -29,6 +29,7 @@ export default function Home() {
     updateUserBalance,
     addStake,
     unstake,
+    migrateStake,
     claimRewards,
     castVote,
     createProposal,
@@ -187,14 +188,19 @@ export default function Home() {
     setFeedback('success', 'Principal unstaked.');
   };
 
+  const handleMigrate = (stakeId: string, amount: number, oldValidatorId: string, newValidatorId: string) => {
+    if (oldValidatorId === newValidatorId) return setFeedback('warning', 'Target sector matches origin.');
+    migrateStake(stakeId, amount, oldValidatorId, newValidatorId);
+  };
+
   if (!isMounted) return null;
 
   return (
     <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
       <div className="flex gap-8 border-b border-border">
-        <button onClick={() => setActiveTab('staking')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Dashboard</button>
-        <button onClick={() => setActiveTab('governance')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>DAO Portal</button>
-        <button onClick={() => setActiveTab('crank')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>Network Crank</button>
+        <button onClick={() => setActiveTab('staking')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>DASHBOARD</button>
+        <button onClick={() => setActiveTab('governance')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>DAO_PORTAL</button>
+        <button onClick={() => setActiveTab('crank')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>NETWORK_CRANK</button>
       </div>
 
       {!isLoaded ? (
@@ -233,6 +239,7 @@ export default function Home() {
                     onClaim={handleClaim}
                     onClaimSingle={handleClaimSingle}
                     onUnstake={handleUnstake}
+                    onMigrate={handleMigrate}
                     setFeedback={setFeedback}
                   />
                 </div>

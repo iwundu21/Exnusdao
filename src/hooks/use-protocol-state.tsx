@@ -3,7 +3,7 @@
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, setDoc, collection, deleteDoc, increment, arrayUnion } from 'firebase/firestore';
+import { doc, setDoc, collection, deleteDoc, increment, arrayUnion, writeBatch } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -68,6 +68,7 @@ interface ProtocolContextType {
   
   addStake: (stake: any) => void;
   unstake: (stakeId: string, amount: number, validatorId: string) => void;
+  migrateStake: (stakeId: string, amount: number, oldValidatorId: string, newValidatorId: string) => void;
   claimRewards: (stakeId: string, amount: number, newCheckpoint: number, wallet: string) => void;
   castVote: (pId: number, support: boolean, weight: number, comment: any) => void;
   createProposal: (proposal: any) => void;
@@ -241,6 +242,23 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
       setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
       setFeedback('success', 'PRINCIPAL RETURNED TO WALLET.', hash);
+    }, SIMULATED_DELAY);
+  }, [db, setFeedback]);
+
+  const migrateStake = useCallback((stakeId: string, amount: number, oldValidatorId: string, newValidatorId: string) => {
+    if (!db) return;
+    setFeedback('warning', 'EXECUTING STAKE MIGRATION...');
+    
+    setTimeout(() => {
+      const sRef = doc(db, 'stakes', stakeId);
+      const oldVRef = doc(db, 'validators', oldValidatorId);
+      const newVRef = doc(db, 'validators', newValidatorId);
+      const hash = generateTxHash();
+      
+      setDoc(sRef, { validator_id: newValidatorId }, { merge: true });
+      setDoc(oldVRef, { total_staked: increment(-amount) }, { merge: true });
+      setDoc(newVRef, { total_staked: increment(amount) }, { merge: true });
+      setFeedback('success', 'STAKE MIGRATED TO NEW SECTOR.', hash);
     }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
@@ -452,6 +470,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       resetProtocol,
       addStake,
       unstake,
+      migrateStake,
       claimRewards,
       castVote,
       createProposal,
