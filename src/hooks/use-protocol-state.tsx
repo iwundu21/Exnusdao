@@ -344,11 +344,18 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const updateValidator = useCallback((vId: string, data: any) => {
     if (!db) return;
-    const vRef = doc(db, 'validators', vId);
-    setDoc(vRef, data, { merge: true }).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
-    });
-  }, [db]);
+    setFeedback('warning', 'Propagating identity updates... (6s simulation)');
+    
+    setTimeout(() => {
+      const vRef = doc(db, 'validators', vId);
+      const hash = generateTxHash();
+      setDoc(vRef, data, { merge: true }).then(() => {
+        setFeedback('success', 'Identity metadata synchronized.', hash);
+      }).catch(err => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
+      });
+    }, 6000);
+  }, [db, setFeedback]);
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
     if (!db) return;
