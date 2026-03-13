@@ -49,7 +49,7 @@ export function Navbar() {
             <Hammer className="w-3.5 h-3.5" /> PROVISION XNODE
           </Link>
           <Link href="/manage-node" className="flex items-center gap-2 text-white hover:text-primary transition-all font-black text-[11px] uppercase tracking-widest">
-            <Settings className="w-3.5 h-3.5" /> COMMAND CENTER
+            <Settings className="w-3.5 h-3.5" /> XNODE MANAGEMENT
           </Link>
         </>
       )}
@@ -68,12 +68,12 @@ export function Navbar() {
             <Hammer className="w-5 h-5" /> PROVISION XNODE
           </Link>
           <Link href="/manage-node" className="flex items-center gap-4 text-[12px] font-black uppercase tracking-widest text-white hover:text-primary transition-all">
-            <Settings className="w-5 h-5" /> COMMAND CENTER
+            <Settings className="w-5 h-5" /> XNODE MANAGEMENT
           </Link>
         </>
       )}
       
-      <div className="h-px w-full bg-white/20 my-2" />
+      <div className="h-px w-full bg-white/40 my-2" />
       
       <Link href="/purchase-license" className="flex items-center gap-4 text-[12px] font-black uppercase tracking-widest text-white hover:text-primary transition-all">
         <Ticket className="w-5 h-5" /> BUY LICENSE
@@ -101,7 +101,7 @@ export function Navbar() {
               </button>
             </SheetTrigger>
             <SheetContent side="left" className="exn-card border-r border-primary/40 bg-black/95 backdrop-blur-3xl p-8">
-              <SheetHeader className="text-left border-b border-white/20 pb-8">
+              <SheetHeader className="text-left border-b border-white/40 pb-8">
                 <SheetTitle className="text-2xl font-black exn-gradient-text tracking-[0.2em] uppercase">NETWORK</SheetTitle>
               </SheetHeader>
               <MobileLinks />
@@ -111,7 +111,7 @@ export function Navbar() {
 
         <Link href="/" className="flex items-center gap-3 group">
           <div className="flex flex-col">
-            <h1 className="text-xl lg:text-2xl font-black exn-gradient-text tracking-[0.2em] leading-none uppercase">EXNUS</h1>
+            <h1 className="text-xl lg:text-2xl font-black exn-gradient-text tracking-[0.2em] leading-none uppercase text-white">EXNUS</h1>
             <span className="text-[10px] text-white font-black uppercase tracking-[0.4em]">PROTOCOL LAYER</span>
           </div>
         </Link>
@@ -139,7 +139,7 @@ export function Navbar() {
           {mounted ? (
             <WalletMultiButton className="exn-wallet-button" />
           ) : (
-            <div className="h-11 w-32 bg-white/10 rounded-xl animate-pulse" />
+            <div className="h-11 w-32 bg-white/20 rounded-xl animate-pulse" />
           )}
         </div>
       </div>
