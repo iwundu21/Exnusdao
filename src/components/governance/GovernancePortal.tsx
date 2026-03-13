@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -20,14 +19,14 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   const [timeLeft, setTimeLeft] = useState<{ label: string; value: string; colorClass: string }>({
     label: 'Syncing...',
     value: '',
-    colorClass: 'text-white/20'
+    colorClass: 'text-white/50'
   });
 
   useEffect(() => {
     const updateCountdown = () => {
       const now = Date.now();
       if (now > deadline) {
-        setTimeLeft({ label: 'CONCLUDED', value: '', colorClass: 'text-white/20' });
+        setTimeLeft({ label: 'CONCLUDED', value: '', colorClass: 'text-white/60' });
         return true;
       }
       if (now > votingEndsAt) {
@@ -40,7 +39,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
         setTimeLeft({ 
           label: 'VOTING_LOCKED | FINAL_RESULTS_IN: ', 
           value: `${days}D ${f(hours)}H ${f(minutes)}M ${f(seconds)}S`,
-          colorClass: 'text-destructive' 
+          colorClass: 'text-destructive font-black' 
         });
         return false;
       }
@@ -53,7 +52,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
       setTimeLeft({ 
         label: 'VOTING_ENDS_IN: ', 
         value: `${days}D ${f(hours)}H ${f(minutes)}M ${f(seconds)}S`,
-        colorClass: 'text-emerald-500' 
+        colorClass: 'text-emerald-500 font-black' 
       });
       return false;
     };
@@ -63,10 +62,10 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   }, [deadline, votingEndsAt]);
 
   return (
-    <div className={`flex items-center gap-2 text-[9px] uppercase font-black tracking-widest ${timeLeft.colorClass}`}>
-      <Clock className="w-3 h-3" />
+    <div className={`flex items-center gap-2 text-[10px] uppercase font-black tracking-widest ${timeLeft.colorClass}`}>
+      <Clock className="w-3.5 h-3.5" />
       <span>{timeLeft.label}</span>
-      <span className="font-mono text-foreground">{timeLeft.value}</span>
+      <span className="font-mono text-white">{timeLeft.value}</span>
     </div>
   );
 }
@@ -76,12 +75,10 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
   
-  // Action/Process States
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [votingOn, setVotingOn] = useState<{ id: number; support: boolean } | null>(null);
   const [voteRationale, setVoteRationale] = useState('');
   
-  // Review Dialog States
   const [showCreateReview, setShowCreateReview] = useState(false);
   const [showVoteReview, setShowVoteReview] = useState(false);
   const [executingProposal, setExecutingProposal] = useState<any | null>(null);
@@ -90,10 +87,10 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
   const startProcessing = (actionId: string, callback: () => void) => {
     setIsProcessing(actionId);
-    callback();
     setTimeout(() => {
+      callback();
       setIsProcessing(null);
-    }, 6500);
+    }, 6000);
   };
 
   const handleCreateRequest = () => {
@@ -111,30 +108,34 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   };
 
   const confirmCreate = () => {
+    setShowCreateReview(false);
     startProcessing('SUBMIT_PROPOSAL', () => {
       onCreate({ ...newProp, amount: Number(newProp.amount) || 0 });
       setShowCreate(false);
       setNewProp({ title: '', description: '', type: 0, amount: '', recipient: '' });
     });
-    setShowCreateReview(false);
   };
 
   const confirmVote = () => {
     if (!votingOn) return;
-    startProcessing(`VOTE_${votingOn.id}`, () => {
-      onVote(votingOn.id, votingOn.support, voteRationale);
-      setVotingOn(null);
+    const vOnId = votingOn.id;
+    const vOnSupport = votingOn.support;
+    const rationale = voteRationale;
+    setShowVoteReview(false);
+    setVotingOn(null);
+    startProcessing(`VOTE_${vOnId}`, () => {
+      onVote(vOnId, vOnSupport, rationale);
       setVoteRationale('');
     });
-    setShowVoteReview(false);
   };
 
   const confirmExecute = () => {
     if (!executingProposal) return;
-    startProcessing(`EXECUTE_${executingProposal.id}`, () => {
-      onExecute(executingProposal.id);
-    });
+    const ePropId = executingProposal.id;
     setExecutingProposal(null);
+    startProcessing(`EXECUTE_${ePropId}`, () => {
+      onExecute(ePropId);
+    });
   };
 
   const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || !connected || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0)) || !!isProcessing;
@@ -144,7 +145,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
       <div className="flex justify-between items-center">
         <div className="space-y-1">
           <h2 className="text-2xl font-black exn-gradient-text tracking-tighter uppercase leading-none">DAO_GOVERNANCE</h2>
-          <p className="text-white/40 text-[9px] font-black uppercase tracking-[0.4em]">STAKE-WEIGHTED CONSENSUS PROTOCOL</p>
+          <p className="text-white font-black uppercase tracking-[0.4em] text-[10px]">STAKE-WEIGHTED CONSENSUS PROTOCOL</p>
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
@@ -156,23 +157,23 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between backdrop-blur-xl">
+        <div className="p-5 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-between backdrop-blur-xl shadow-lg">
            <div className="flex items-center gap-2">
-             <User className="w-3.5 h-3.5 text-primary" />
-             <p className="text-[9px] uppercase font-black tracking-[0.2em] text-white/40">CONSENSUS_WEIGHT</p>
+             <User className="w-4 h-4 text-primary" />
+             <p className="text-[10px] uppercase font-black tracking-[0.2em] text-white">CONSENSUS_WEIGHT</p>
            </div>
            <div className="text-right">
              <p className="text-xs font-black text-primary font-mono">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
              {connected && isNodeOwner && (
-               <div className="flex items-center gap-1 justify-end text-[7px] text-emerald-500 font-black uppercase mt-0.5">
-                 <ShieldCheck className="w-2.5 h-2.5" /> SEED_ACTIVE
+               <div className="flex items-center gap-1 justify-end text-[8px] text-emerald-400 font-black uppercase mt-0.5">
+                 <ShieldCheck className="w-3 h-3" /> SEED_ACTIVE
                </div>
              )}
            </div>
         </div>
-        <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
-           <Info className="w-3.5 h-3.5 text-white/30" />
-           <p className="text-[8px] text-white/40 uppercase font-black leading-tight tracking-tight">
+        <div className="p-5 bg-white/10 border border-white/20 rounded-xl flex items-center gap-4 shadow-lg">
+           <Info className="w-4 h-4 text-white" />
+           <p className="text-[9px] text-white font-black leading-tight tracking-widest uppercase">
              7-DAY CYCLE: 6 DAYS VOTING (EMERALD) <br/>
              FINAL 24H: CONSENSUS FREEZE (RED)
            </p>
@@ -180,42 +181,42 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
       </div>
 
       {showCreate && connected && (
-        <div className="exn-card p-6 border-secondary/40 bg-black/60 backdrop-blur-3xl">
-          <div className="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
-            <Landmark className="w-4 h-4 text-secondary" />
-            <h3 className="text-sm font-black uppercase tracking-[0.2em]">NEW_DAO_PROPOSAL (FEE: 10 EXN)</h3>
+        <div className="exn-card p-8 border-secondary/50 bg-black/90 backdrop-blur-3xl shadow-3xl">
+          <div className="flex items-center gap-2 mb-6 border-b border-white/10 pb-5">
+            <Landmark className="w-5 h-5 text-secondary" />
+            <h3 className="text-sm font-black uppercase tracking-[0.3em] text-secondary">NEW_DAO_PROPOSAL (FEE: 10 EXN)</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-               <div className="space-y-2">
-                 <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.2em]">PROPOSAL_TITLE</label>
-                 <input value={newProp.title} onChange={e => setNewProp({...newProp, title: e.target.value})} className="exn-input text-[10px] font-mono h-10" placeholder="e.g. PIP-004: NETWORK_EXPANSION" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-5">
+               <div className="space-y-2.5">
+                 <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">PROPOSAL_TITLE</label>
+                 <input value={newProp.title} onChange={e => setNewProp({...newProp, title: e.target.value})} className="exn-input text-[11px] font-mono h-11" placeholder="e.g. PIP-004: NETWORK_EXPANSION" />
                </div>
-               <div className="space-y-2">
-                 <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.2em]">CATEGORY</label>
-                 <select value={newProp.type} onChange={e => setNewProp({...newProp, type: Number(e.target.value)})} className="exn-input text-[9px] font-black h-10 uppercase">
+               <div className="space-y-2.5">
+                 <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">CATEGORY</label>
+                 <select value={newProp.type} onChange={e => setNewProp({...newProp, type: Number(e.target.value)})} className="exn-input text-[10px] font-black h-11 uppercase">
                    <option value={0}>PROTOCOL_PARAMETER</option>
                    <option value={1}>TREASURY_DISTRIBUTION</option>
                  </select>
                </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[9px] text-white/30 uppercase font-black tracking-[0.2em]">RATIONALE_DETAILS</label>
-              <textarea value={newProp.description} onChange={e => setNewProp({...newProp, description: e.target.value})} className="exn-input h-[110px] text-[10px] py-3 font-mono font-medium" placeholder="Describe infrastructure adjustments..." />
+            <div className="space-y-2.5">
+              <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">RATIONALE_DETAILS</label>
+              <textarea value={newProp.description} onChange={e => setNewProp({...newProp, description: e.target.value})} className="exn-input h-[120px] text-[11px] py-4 font-mono font-medium leading-relaxed" placeholder="Describe infrastructure adjustments..." />
             </div>
           </div>
 
-          <div className="flex gap-4 mt-6">
-            <button onClick={handleCreateRequest} disabled={isProposalDisabled} className={`px-8 h-10 text-[9px] font-black uppercase tracking-[0.2em] transition-all ${!isProposalDisabled ? 'exn-button' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed'}`}>
+          <div className="flex gap-5 mt-8">
+            <button onClick={handleCreateRequest} disabled={isProposalDisabled} className={`px-10 h-11 text-[10px] font-black uppercase tracking-[0.3em] transition-all shadow-xl ${!isProposalDisabled ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/20 cursor-not-allowed'}`}>
               {isProcessing === 'SUBMIT_PROPOSAL' ? 'SUBMITTING...' : 'REVIEW_&_BROADCAST'}
             </button>
-            <button onClick={() => setShowCreate(false)} className="exn-button-outline px-8 h-10 text-[9px] uppercase font-black tracking-[0.2em] border-white/10 text-white/60">CANCEL</button>
+            <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 h-11 text-[10px] uppercase font-black tracking-[0.3em] border-white/20 text-white hover:bg-white/10">CANCEL</button>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-8">
         {proposals.map((prop: any) => {
           const totalVotes = (prop.yes_votes || 0) + (prop.no_votes || 0);
           const yesPercent = totalVotes > 0 ? (prop.yes_votes / totalVotes) * 100 : 0;
@@ -225,85 +226,85 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           const hasVoted = connected && prop.voters?.includes(walletAddress);
           const isVotingForThis = connected && votingOn?.id === prop.id;
           const showComments = activeCommentId === prop.id;
-          const isActionProcessing = isProcessing === `VOTE_${prop.id}` || isProcessing === `EXECUTE_${prop.id}`;
+          const isActionProcessing = isProcessing?.startsWith(`VOTE_${prop.id}`) || isProcessing === `EXECUTE_${prop.id}`;
 
           return (
-            <div key={prop.id} className="exn-card p-0 border-white/5 bg-black/40 backdrop-blur-3xl">
-              <div className="p-6 flex flex-col md:flex-row justify-between gap-6 border-b border-white/5">
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-[0.1em] border ${prop.type === 1 ? 'bg-secondary/10 text-secondary border-secondary/20' : 'bg-primary/10 text-primary border-primary/20'}`}>
+            <div key={prop.id} className="exn-card p-0 border-white/20 bg-black/60 backdrop-blur-3xl shadow-2xl">
+              <div className="p-8 flex flex-col md:flex-row justify-between gap-8 border-b border-white/10">
+                <div className="flex-1 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest border ${prop.type === 1 ? 'bg-secondary/20 text-secondary border-secondary/40' : 'bg-primary/20 text-primary border-primary/40'}`}>
                       {prop.type === 1 ? 'TREASURY' : 'PARAMETER'}
                     </span>
-                    <h3 className="text-lg font-black text-white tracking-tighter uppercase">{prop.title}</h3>
+                    <h3 className="text-xl font-black text-white tracking-tighter uppercase leading-none">{prop.title}</h3>
                   </div>
-                  <p className="text-white/60 text-[11px] leading-relaxed font-medium italic border-l border-primary/20 pl-4">{prop.description}</p>
-                  <div className="flex items-center gap-6 pt-2">
+                  <p className="text-white/90 text-[12px] leading-relaxed font-medium italic border-l-2 border-primary/30 pl-5 tracking-tight">{prop.description}</p>
+                  <div className="flex items-center gap-8 pt-2">
                     <ProposalCountdown deadline={prop.deadline} votingEndsAt={prop.voting_ends_at} />
-                    {isVotingLocked && <span className="text-[8px] text-destructive uppercase font-black bg-destructive/10 px-2 py-0.5 rounded border border-destructive/20 animate-pulse">FREEZE</span>}
+                    {isVotingLocked && <span className="text-[9px] text-destructive uppercase font-black bg-destructive/20 px-3 py-1 rounded border border-destructive/40 animate-pulse tracking-widest">FREEZE</span>}
                   </div>
                 </div>
 
-                <div className="w-full md:w-72 space-y-5 bg-white/5 p-5 rounded-xl border border-white/10">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-end text-[8px] font-black uppercase">
-                        <span className="text-emerald-500">YES: {yesPercent.toFixed(1)}%</span>
+                <div className="w-full md:w-80 space-y-6 bg-white/5 p-6 rounded-2xl border border-white/15 shadow-xl">
+                  <div className="space-y-3.5">
+                    <div className="flex justify-between items-end text-[9px] font-black uppercase tracking-widest">
+                        <span className="text-emerald-400">YES: {yesPercent.toFixed(1)}%</span>
                         <span className="text-destructive">NO: {(100 - yesPercent).toFixed(1)}%</span>
                     </div>
-                    <Progress value={yesPercent} className="h-1.5 bg-destructive/10" />
-                    <p className="text-[7px] text-white/20 uppercase font-black text-center tracking-widest">WEIGHT: {totalVotes.toLocaleString()} EXN</p>
+                    <Progress value={yesPercent} className="h-2 bg-destructive/20" />
+                    <p className="text-[8px] text-white/60 uppercase font-black text-center tracking-[0.3em]">CONSENSUS_WEIGHT: {totalVotes.toLocaleString()} EXN</p>
                   </div>
 
                   {!isExpired && !isVotingLocked && !hasVoted && !isVotingForThis && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-black py-2 rounded text-[8px] uppercase border border-emerald-500/20">VOTE_YES</button>
-                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/10 hover:bg-destructive/20 text-destructive font-black py-2 rounded text-[8px] uppercase border border-destructive/20">VOTE_NO</button>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 font-black py-2.5 rounded-lg text-[10px] uppercase border border-emerald-500/30 transition-all shadow-md">VOTE_YES</button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/15 hover:bg-destructive/25 text-destructive font-black py-2.5 rounded-lg text-[10px] uppercase border border-destructive/30 transition-all shadow-md">VOTE_NO</button>
                     </div>
                   )}
 
                   {isVotingForThis && (
-                    <div className="space-y-3 animate-in zoom-in-95 duration-500">
-                      <textarea value={voteRationale} onChange={e => setVoteRationale(e.target.value)} placeholder="Rationale (3 EXN Fee)" className="exn-input h-20 text-[10px] bg-background font-mono py-2" />
-                      <div className="grid grid-cols-2 gap-2">
-                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim() || !!isProcessing} className={`h-8 text-[8px] font-black uppercase transition-all ${voteRationale.trim() && !isProcessing ? 'exn-button' : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'}`}>
+                    <div className="space-y-4 animate-in zoom-in-95 duration-500">
+                      <textarea value={voteRationale} onChange={e => setVoteRationale(e.target.value)} placeholder="Rationale (3 EXN Fee)" className="exn-input h-24 text-[11px] bg-background font-mono py-3" />
+                      <div className="grid grid-cols-2 gap-3">
+                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim() || !!isProcessing} className={`h-10 text-[10px] font-black uppercase transition-all shadow-lg ${voteRationale.trim() && !isProcessing ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/20 cursor-not-allowed'}`}>
                           {isActionProcessing ? 'VOTING...' : 'REVIEW'}
                         </button>
-                        <button onClick={() => setVotingOn(null)} className="exn-button-outline h-8 text-[8px] font-black border-white/10">ABORT</button>
+                        <button onClick={() => setVotingOn(null)} className="exn-button-outline h-10 text-[10px] font-black border-white/20 text-white">ABORT</button>
                       </div>
                     </div>
                   )}
 
                   {isExpired && (
-                    <button onClick={() => setExecutingProposal(prop)} disabled={prop.executed || !!isProcessing} className={`w-full h-10 uppercase text-[9px] font-black tracking-[0.2em] flex items-center justify-center gap-2 transition-all ${prop.executed || isProcessing ? 'bg-white/5 text-white/10 border border-white/10' : 'exn-button'}`}>
-                      {isActionProcessing ? 'EXECUTING...' : (prop.executed ? 'FINALIZED' : 'EXECUTE_ACTION')}
+                    <button onClick={() => setExecutingProposal(prop)} disabled={prop.executed || !!isProcessing} className={`w-full h-12 uppercase text-[10px] font-black tracking-[0.3em] flex items-center justify-center gap-3 transition-all shadow-xl ${prop.executed || isProcessing ? 'bg-white/10 text-white/30 border border-white/20' : 'exn-button'}`}>
+                      {isActionProcessing ? 'EXECUTING...' : (prop.executed ? 'FINALIZED_IN_LEDGER' : 'EXECUTE_CONSENSUS')}
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="bg-black/20">
-                <button onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)} className="w-full flex items-center justify-between px-6 py-3 text-[8px] font-black uppercase text-white/20 hover:text-white transition-all border-b border-white/5">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-3 h-3" />
-                    VOTER_RATIONALES ({prop.comments?.length || 0})
+              <div className="bg-black/30">
+                <button onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)} className="w-full flex items-center justify-between px-8 py-4 text-[9px] font-black uppercase text-white/60 hover:text-white transition-all border-b border-white/10">
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-4 h-4" />
+                    NETWORK_RATIONALES ({prop.comments?.length || 0})
                   </div>
-                  {showComments ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showComments ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {showComments && (
-                  <div className="p-6 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+                  <div className="p-8 space-y-5 max-h-[350px] overflow-y-auto custom-scrollbar">
                     {(!prop.comments || prop.comments.length === 0) ? (
-                      <p className="text-[8px] text-white/10 uppercase font-black text-center py-6 tracking-widest">NO_RATIONALES_LOGGED</p>
+                      <p className="text-[10px] text-white/30 uppercase font-black text-center py-10 tracking-[0.4em]">NO_RATIONALES_LOGGED</p>
                     ) : (
                       prop.comments.map((comment: any, idx: number) => (
-                        <div key={idx} className="p-4 bg-white/5 rounded-lg border border-white/5 space-y-2">
-                          <div className="flex justify-between items-center text-[8px]">
-                            <div className="flex items-center gap-2">
-                              <span className={`w-1 h-1 rounded-full ${comment.vote_stance === 'YES' ? 'bg-emerald-500' : 'bg-destructive'}`} />
-                              <p className="font-mono text-primary font-black">{shortenAddress(comment.author)}</p>
+                        <div key={idx} className="p-5 bg-white/5 rounded-xl border border-white/10 space-y-3 shadow-lg hover:border-primary/40 transition-all">
+                          <div className="flex justify-between items-center text-[9px] uppercase font-black">
+                            <div className="flex items-center gap-2.5">
+                              <span className={`w-2 h-2 rounded-full ${comment.vote_stance === 'YES' ? 'bg-emerald-500' : 'bg-destructive'} shadow-lg`} />
+                              <p className="font-mono text-primary">{shortenAddress(comment.author)}</p>
                             </div>
-                            <p className="text-white/20 font-black">{new Date(comment.timestamp).toLocaleDateString()}</p>
+                            <p className="text-white/40 tracking-widest">{new Date(comment.timestamp).toLocaleDateString()}</p>
                           </div>
-                          <p className="text-[10px] text-white/70 leading-relaxed font-medium pl-3 border-l border-white/5">{comment.text}</p>
+                          <p className="text-[11px] text-white font-medium leading-relaxed pl-5 border-l-2 border-white/10 tracking-tight">{comment.text}</p>
                         </div>
                       ))
                     )}
@@ -317,31 +318,31 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
       {/* Create Proposal Review */}
       <AlertDialog open={showCreateReview} onOpenChange={setShowCreateReview}>
-        <AlertDialogContent className="exn-card border-secondary/50 bg-black/95 p-0 overflow-hidden max-w-sm">
-          <div className="p-6 space-y-6">
+        <AlertDialogContent className="exn-card border-secondary/60 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-8 space-y-8">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5" /> VERIFY_PROPOSAL
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-3">
+                <ShieldCheck className="w-6 h-6" /> VERIFY_PROPOSAL
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
-                <div className="space-y-4 pt-4">
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
-                    <div className="flex justify-between items-center text-[10px] uppercase">
-                      <span className="text-white/30 font-black">TITLE</span>
-                      <span className="text-white font-black truncate max-w-[150px]">{newProp.title}</span>
+                <div className="space-y-6 pt-4">
+                  <div className="p-5 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-xl">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white/70">TITLE</span>
+                      <span className="text-white truncate max-w-[150px]">{newProp.title}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase">
-                      <span className="text-white/30 font-black">NETWORK_FEE</span>
-                      <span className="text-primary font-mono font-black">10 EXN</span>
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white/70">NETWORK_FEE</span>
+                      <span className="text-primary font-mono">10 EXN</span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-white/40 uppercase leading-relaxed font-black">PROPOSAL WILL BE BROADCAST TO THE NETWORK DAO FOR CONSENSUS.</p>
+                  <p className="text-[10px] text-white/70 uppercase leading-relaxed font-black tracking-tight">PROPOSAL WILL BE BROADCAST TO THE NETWORK DAO FOR GLOBAL CONSENSUS.</p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-3">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-10 text-[9px] uppercase font-black">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmCreate} className="exn-button flex-1 h-10 text-[9px] uppercase font-black bg-secondary">CONFIRM_BROADCAST</AlertDialogAction>
+            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmCreate} className="exn-button flex-1 h-11 text-[10px] uppercase font-black bg-secondary">CONFIRM_BROADCAST</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
@@ -349,33 +350,33 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
       {/* Vote Review */}
       <AlertDialog open={showVoteReview} onOpenChange={setShowVoteReview}>
-        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 p-0 overflow-hidden max-w-sm">
-          <div className="p-6 space-y-6">
+        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-8 space-y-8">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> VERIFY_VOTE
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-primary flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6" /> VERIFY_VOTE
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
-                <div className="space-y-4 pt-4">
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
-                    <div className="flex justify-between items-center text-[10px] uppercase">
-                      <span className="text-white/30 font-black">STANCE</span>
-                      <span className={votingOn?.support ? "text-emerald-500 font-black" : "text-destructive font-black"}>
+                <div className="space-y-6 pt-4">
+                  <div className="p-5 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-xl">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white/70">STANCE</span>
+                      <span className={votingOn?.support ? "text-emerald-500" : "text-destructive"}>
                         {votingOn?.support ? 'YES_SUPPORT' : 'NO_REJECT'}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase">
-                      <span className="text-white/30 font-black">WEIGHT</span>
-                      <span className="text-primary font-mono font-black">{userStakeWeight.toLocaleString()}</span>
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white/70">WEIGHT</span>
+                      <span className="text-primary font-mono">{userStakeWeight.toLocaleString()}</span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-white/40 uppercase leading-relaxed font-black">YOUR CONSENSUS WEIGHT WILL BE RECORDED ON THE NETWORK LEDGER.</p>
+                  <p className="text-[10px] text-white/70 uppercase leading-relaxed font-black tracking-tight">YOUR CONSENSUS WEIGHT WILL BE PERMANENTLY RECORDED ON THE NETWORK LEDGER.</p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-3">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-10 text-[9px] uppercase font-black">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmVote} className="exn-button flex-1 h-10 text-[9px] uppercase font-black">CONFIRM_VOTE</AlertDialogAction>
+            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmVote} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_VOTE</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
@@ -383,31 +384,31 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
       {/* Execute Review */}
       <AlertDialog open={!!executingProposal} onOpenChange={() => setExecutingProposal(null)}>
-        <AlertDialogContent className="exn-card border-emerald-500/50 bg-black/95 p-0 overflow-hidden max-w-sm">
-          <div className="p-6 space-y-6">
+        <AlertDialogContent className="exn-card border-emerald-500/60 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-8 space-y-8">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-emerald-500 flex items-center gap-2">
-                <Zap className="w-5 h-5" /> VERIFY_EXECUTION
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-emerald-500 flex items-center gap-3">
+                <Zap className="w-6 h-6" /> VERIFY_EXECUTION
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
-                <div className="space-y-4 pt-4">
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
-                    <div className="flex justify-between items-center text-[10px] uppercase">
-                      <span className="text-white/30 font-black">PROPOSAL_ID</span>
-                      <span className="text-white font-mono font-black">#{executingProposal?.id}</span>
+                <div className="space-y-6 pt-4">
+                  <div className="p-5 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-xl">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white/70">PROPOSAL_ID</span>
+                      <span className="text-white font-mono">#{executingProposal?.id}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase">
-                      <span className="text-white/30 font-black">CONSENSUS</span>
-                      <span className="text-emerald-500 font-black">PASSED_ENACTING</span>
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white/70">CONSENSUS</span>
+                      <span className="text-emerald-500">PASSED_ENACTING</span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-white/40 uppercase leading-relaxed font-black">ENACTING THIS PROPOSAL WILL PERMANENTLY TRIGGER THE ASSOCIATED ON-CHAIN ACTIONS.</p>
+                  <p className="text-[10px] text-white/70 uppercase leading-relaxed font-black tracking-tight">ENACTING THIS PROPOSAL WILL PERMANENTLY TRIGGER THE ASSOCIATED ON-CHAIN ACTIONS.</p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-3">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-10 text-[9px] uppercase font-black">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmExecute} className="bg-emerald-500 text-black flex-1 h-10 text-[9px] uppercase font-black rounded-xl">CONFIRM_ENACT</AlertDialogAction>
+            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmExecute} className="bg-emerald-500 text-black flex-1 h-11 text-[10px] uppercase font-black rounded-xl hover:opacity-90 shadow-lg">CONFIRM_ENACT</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
