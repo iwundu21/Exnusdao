@@ -34,95 +34,94 @@ export function Navbar() {
 
   const NavLinks = () => (
     <>
-      <Link href="/" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-        <LayoutDashboard className="w-4 h-4" /> Dashboard
+      <Link href="/" className="flex items-center gap-2.5 text-white/60 hover:text-primary transition-all font-black">
+        <LayoutDashboard className="w-4 h-4" /> DASHBOARD
       </Link>
-      <Link href="/register-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-        <Hammer className="w-4 h-4" /> Register XNode
+      <Link href="/register-node" className="flex items-center gap-2.5 text-white/60 hover:text-primary transition-all font-black">
+        <Hammer className="w-4 h-4" /> PROVISION XNODE
       </Link>
-      <Link href="/manage-node" className="flex items-center gap-2 text-foreground/60 hover:text-primary transition-colors">
-        <Settings className="w-4 h-4" /> Manage XNode
+      <Link href="/manage-node" className="flex items-center gap-2.5 text-white/60 hover:text-primary transition-all font-black">
+        <Settings className="w-4 h-4" /> COMMAND CENTER
       </Link>
     </>
   );
 
   const MobileLinks = () => (
-    <div className="flex flex-col gap-6 mt-10">
-      <Link href="/" className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-foreground/60 hover:text-primary transition-all">
-        <LayoutDashboard className="w-5 h-5" /> Dashboard
+    <div className="flex flex-col gap-8 mt-12">
+      <Link href="/" className="flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+        <LayoutDashboard className="w-6 h-6" /> DASHBOARD
       </Link>
-      <Link href="/register-node" className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-foreground/60 hover:text-primary transition-all">
-        <Hammer className="w-5 h-5" /> Register XNode
+      <Link href="/register-node" className="flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+        <Hammer className="w-6 h-6" /> PROVISION XNODE
       </Link>
-      <Link href="/manage-node" className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-foreground/60 hover:text-primary transition-all">
-        <Settings className="w-5 h-5" /> Manage XNode
+      <Link href="/manage-node" className="flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+        <Settings className="w-6 h-6" /> COMMAND CENTER
       </Link>
-      <div className="h-px w-full bg-white/5 my-2" />
-      <Link href="/purchase-license" className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-foreground/60 hover:text-primary transition-all">
-        <Ticket className="w-5 h-5" /> Buy XNode License
+      <div className="h-px w-full bg-white/10 my-4" />
+      <Link href="/purchase-license" className="flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+        <Ticket className="w-6 h-6" /> BUY LICENSE
       </Link>
-      <Link href="/faucet" className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-foreground/60 hover:text-primary transition-all">
-        <Droplets className="w-5 h-5" /> Faucet
+      <Link href="/faucet" className="flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+        <Droplets className="w-6 h-6" /> FAUCET
       </Link>
       {isAdmin && (
-        <Link href="/admin" className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-primary hover:opacity-80 transition-all">
-          <ShieldCheck className="w-5 h-5" /> Admin Terminal
+        <Link href="/admin" className="flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-80 transition-all">
+          <ShieldCheck className="w-6 h-6" /> ADMIN TERMINAL
         </Link>
       )}
     </div>
   );
 
   return (
-    <nav className="flex items-center justify-between px-6 lg:px-10 py-6 border-b border-border backdrop-blur-md fixed top-0 left-0 w-full z-50 bg-background/80">
-      <div className="flex items-center gap-4">
-        {/* Mobile Menu Trigger */}
+    <nav className="flex items-center justify-between px-8 lg:px-12 py-7 border-b border-white/10 backdrop-blur-2xl fixed top-0 left-0 w-full z-50 bg-black/80">
+      <div className="flex items-center gap-6">
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="p-2 bg-foreground/5 rounded-lg border border-border hover:bg-foreground/10 transition-all">
-                <Menu className="w-5 h-5 text-primary" />
+              <button className="p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all shadow-lg">
+                <Menu className="w-6 h-6 text-primary" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="exn-card border-r border-primary/20 bg-black/95 backdrop-blur-2xl">
-              <SheetHeader className="text-left border-b border-white/5 pb-6">
-                <SheetTitle className="text-2xl font-bold exn-gradient-text tracking-wider uppercase">Protocol Menu</SheetTitle>
+            <SheetContent side="left" className="exn-card border-r border-primary/30 bg-black/95 backdrop-blur-3xl">
+              <SheetHeader className="text-left border-b border-white/10 pb-8">
+                <SheetTitle className="text-3xl font-black exn-gradient-text tracking-[0.2em] uppercase">NETWORK</SheetTitle>
               </SheetHeader>
               <MobileLinks />
             </SheetContent>
           </Sheet>
         </div>
 
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-3 group">
           <div className="flex flex-col">
-            <h1 className="text-xl lg:text-2xl font-bold exn-gradient-text tracking-wider leading-none">EXNUS</h1>
-            <span className="text-[8px] lg:text-[10px] text-foreground/40 tracking-[0.3em] font-bold uppercase">Protocol | Network</span>
+            <h1 className="text-2xl lg:text-3xl font-black exn-gradient-text tracking-[0.2em] leading-none uppercase">EXNUS</h1>
+            <span className="text-[10px] lg:text-[11px] text-white/40 tracking-[0.4em] font-black uppercase">PROTOCOL LAYER</span>
           </div>
         </Link>
       </div>
 
-      <div className="flex items-center gap-4 lg:gap-6">
-        <div className="hidden lg:flex items-center gap-6 text-xs uppercase font-bold tracking-widest">
+      <div className="flex items-center gap-6 lg:gap-10">
+        <div className="hidden lg:flex items-center gap-10 text-[11px] uppercase font-black tracking-[0.2em]">
           <NavLinks />
         </div>
 
         {mounted && connected && isLoaded && (
-          <div className="flex items-center gap-2 lg:gap-4 animate-in fade-in duration-300">
-            <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 lg:py-1.5 bg-foreground/5 rounded-full border border-border">
-              <Coins className="w-3.5 h-3.5 text-primary" />
-              <span className="text-[10px] lg:text-xs font-bold text-primary">{exnBalance.toLocaleString()}</span>
+          <div className="flex items-center gap-3 lg:gap-6 animate-in fade-in duration-500">
+            <div className="flex items-center gap-2.5 px-4 py-2 bg-white/5 rounded-xl border border-white/10 shadow-lg">
+              <Coins className="w-4 h-4 text-primary" />
+              <span className="text-xs lg:text-sm font-black text-primary font-mono">{exnBalance.toLocaleString()}</span>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 lg:py-1.5 bg-foreground/5 rounded-full border border-border">
-              <CircleDollarSign className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-[10px] lg:text-xs font-bold text-emerald-500">{usdcBalance.toLocaleString()}</span>
+            <div className="hidden sm:flex items-center gap-2.5 px-4 py-2 bg-white/5 rounded-xl border border-white/10 shadow-lg">
+              <CircleDollarSign className="w-4 h-4 text-emerald-500" />
+              <span className="text-xs lg:text-sm font-black text-emerald-500 font-mono">{usdcBalance.toLocaleString()}</span>
             </div>
           </div>
         )}
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {mounted ? (
             <WalletMultiButton className="exn-wallet-button" />
           ) : (
-            <div className="h-10 w-24 lg:w-32 bg-foreground/5 rounded-lg animate-pulse" />
+            <div className="h-11 w-32 lg:w-40 bg-white/5 rounded-xl animate-pulse" />
           )}
         </div>
       </div>
@@ -131,27 +130,30 @@ export function Navbar() {
         .exn-wallet-button {
           background: linear-gradient(to right, #00f5ff, #a855f7) !important;
           color: black !important;
-          font-weight: 800 !important;
+          font-weight: 900 !important;
           text-transform: uppercase !important;
-          font-size: 8px !important;
-          letter-spacing: 0.1em !important;
-          height: 36px !important;
-          line-height: 36px !important;
-          border-radius: 8px !important;
-          padding: 0 12px !important;
-          transition: all 0.3s ease !important;
+          font-size: 10px !important;
+          letter-spacing: 0.2em !important;
+          height: 44px !important;
+          line-height: 44px !important;
+          border-radius: 12px !important;
+          padding: 0 24px !important;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          border: none !important;
+          box-shadow: 0 0 20px rgba(0, 245, 255, 0.3) !important;
         }
         @media (min-width: 1024px) {
           .exn-wallet-button {
-            font-size: 10px !important;
-            height: 40px !important;
-            line-height: 40px !important;
-            padding: 0 20px !important;
+            font-size: 11px !important;
+            height: 48px !important;
+            line-height: 48px !important;
+            padding: 0 32px !important;
           }
         }
         .exn-wallet-button:hover {
           opacity: 0.9 !important;
-          transform: scale(0.98) !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 0 30px rgba(0, 245, 255, 0.5) !important;
         }
       `}</style>
     </nav>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -30,7 +29,7 @@ export function TransactionStatus() {
     if (tx && tx.status !== 'warning') {
       const timer = setTimeout(() => {
         setTx(null);
-      }, 6000);
+      }, 7000);
       return () => clearTimeout(timer);
     }
   }, [tx]);
@@ -39,28 +38,28 @@ export function TransactionStatus() {
 
   const styles = {
     success: {
-      bg: 'bg-emerald-500/10',
-      border: 'border-emerald-500/40',
+      bg: 'bg-emerald-500/15',
+      border: 'border-emerald-500/50',
       text: 'text-emerald-500',
       icon: CheckCircle2,
-      glow: 'shadow-[0_0_40px_rgba(16,185,129,0.3)]',
+      glow: 'shadow-[0_0_50px_rgba(16,185,129,0.4)]',
       label: 'NETWORK_CONFIRMED'
     },
     error: {
-      bg: 'bg-destructive/10',
-      border: 'border-destructive/40',
+      bg: 'bg-destructive/15',
+      border: 'border-destructive/50',
       text: 'text-destructive',
       icon: AlertCircle,
-      glow: 'shadow-[0_0_40px_rgba(239,68,68,0.2)]',
-      label: 'TRANSACTION_REJECTED'
+      glow: 'shadow-[0_0_50px_rgba(239,68,68,0.3)]',
+      label: 'CONSENSUS_REJECTED'
     },
     warning: {
-      bg: 'bg-primary/10',
-      border: 'border-primary/40',
+      bg: 'bg-primary/15',
+      border: 'border-primary/50',
       text: 'text-primary',
       icon: Cpu,
-      glow: 'shadow-[0_0_40px_rgba(0,245,255,0.25)]',
-      label: 'BROADCASTING_TO_NETWORK'
+      glow: 'shadow-[0_0_50px_rgba(0,245,255,0.4)]',
+      label: 'BROADCASTING_BLOCK'
     }
   };
 
@@ -68,61 +67,58 @@ export function TransactionStatus() {
   const Icon = current.icon;
 
   return (
-    <div className={`fixed bottom-28 right-6 lg:right-10 z-[100] w-full max-w-sm animate-in slide-in-from-right-10 fade-in duration-500`}>
-      <div className={`exn-card p-6 border ${current.bg} ${current.border} ${current.glow} backdrop-blur-3xl relative overflow-hidden group`}>
+    <div className={`fixed bottom-24 right-8 lg:right-12 z-[100] w-full max-w-sm animate-in slide-in-from-right-10 fade-in duration-500`}>
+      <div className={`exn-card p-8 border ${current.bg} ${current.border} ${current.glow} backdrop-blur-3xl relative overflow-hidden group`}>
         {/* Dynamic scan line for "Processing" state */}
         {tx.status === 'warning' && (
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/0 via-primary/5 to-primary/0 h-10 w-full animate-scan pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/0 via-primary/10 to-primary/0 h-12 w-full animate-scan pointer-events-none" />
         )}
         
-        <div className={`absolute top-0 left-0 w-1 h-full ${tx.status === 'success' ? 'bg-emerald-500' : tx.status === 'warning' ? 'bg-primary' : 'bg-destructive'}`} />
+        <div className={`absolute top-0 left-0 w-1.5 h-full ${tx.status === 'success' ? 'bg-emerald-500' : tx.status === 'warning' ? 'bg-primary' : 'bg-destructive'}`} />
         
-        <div className="flex justify-between items-start gap-4 relative z-10">
-          <div className="flex gap-4">
-            <div className={`p-3 rounded-xl bg-background/80 border ${current.border} relative overflow-hidden`}>
+        <div className="flex justify-between items-start gap-6 relative z-10">
+          <div className="flex gap-5">
+            <div className={`p-4 rounded-2xl bg-black/80 border ${current.border} relative overflow-hidden shadow-2xl`}>
               {tx.status === 'warning' ? (
-                <Loader2 className={`w-5 h-5 ${current.text} animate-spin`} />
+                <Loader2 className={`w-6 h-6 ${current.text} animate-spin`} />
               ) : (
-                <Icon className={`w-5 h-5 ${current.text}`} />
-              )}
-              {tx.status === 'warning' && (
-                <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+                <Icon className={`w-6 h-6 ${current.text}`} />
               )}
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <h4 className={`text-[9px] font-black uppercase tracking-[0.3em] ${current.text} font-mono`}>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <h4 className={`text-[10px] font-black uppercase tracking-[0.4em] ${current.text} font-mono`}>
                   {current.label}
                 </h4>
                 {tx.status === 'warning' && (
-                  <span className="flex gap-0.5">
-                    <span className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-1 h-1 bg-primary rounded-full animate-bounce" />
+                  <span className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" />
                   </span>
                 )}
               </div>
-              <p className="text-xs text-foreground/90 font-bold leading-relaxed uppercase tracking-tight">
+              <p className="text-sm text-white font-black leading-tight uppercase tracking-tight">
                 {tx.message}
               </p>
               
               {tx.status === 'success' && tx.txHash && (
-                <div className="pt-2 flex items-center gap-4">
+                <div className="pt-3">
                   <a 
                     href={getExplorerLink(tx.txHash)} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-[9px] font-black uppercase tracking-[0.2em] text-primary hover:text-white transition-all flex items-center gap-1.5 px-3 py-1 bg-primary/5 border border-primary/20 rounded-md"
+                    className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:text-white transition-all flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-lg shadow-lg"
                   >
-                    View on Solana Explorer <ExternalLink className="w-3 h-3" />
+                    EXPLORER VERIFICATION <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
               )}
 
               {tx.status === 'warning' && (
-                <div className="flex items-center gap-2 text-[8px] text-primary/40 uppercase font-black tracking-widest">
-                   <ShieldCheck className="w-3 h-3" />
-                   <span>Verifying Block State...</span>
+                <div className="flex items-center gap-2.5 text-[9px] text-primary/60 uppercase font-black tracking-widest">
+                   <ShieldCheck className="w-4 h-4" />
+                   <span>VERIFYING BLOCK STATE...</span>
                 </div>
               )}
             </div>
@@ -130,14 +126,14 @@ export function TransactionStatus() {
           
           <button 
             onClick={() => setTx(null)}
-            className="text-foreground/20 hover:text-foreground transition-colors p-1"
+            className="text-white/30 hover:text-white transition-colors p-1.5"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Technical progress bar */}
-        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-white/5">
+        <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/5">
            <div className={`h-full ${tx.status === 'success' ? 'bg-emerald-500' : tx.status === 'warning' ? 'bg-primary' : 'bg-destructive'} ${tx.status === 'warning' ? 'animate-progress-6s' : 'animate-progress-fast'}`} />
         </div>
       </div>
@@ -159,7 +155,7 @@ export function TransactionStatus() {
           animation: progress-6s 6000ms linear forwards;
         }
         .animate-progress-fast {
-          animation: progress-fast 6000ms linear forwards;
+          animation: progress-fast 7000ms linear forwards;
         }
         .animate-scan {
           animation: scan 2s linear infinite;
