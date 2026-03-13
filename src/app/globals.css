@@ -38,12 +38,12 @@
     --secondary: 270 91% 65%;
     --secondary-foreground: 0 0% 100%;
     --muted: 222 47% 12%;
-    --muted-foreground: 215 20.2% 75%;
+    --muted-foreground: 215 20.2% 90%;
     --accent: 182 100% 50%;
     --accent-foreground: 222 47% 6%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 182 100% 50% / 0.15;
+    --border: 182 100% 50% / 0.25;
     --input: 222 47% 10%;
     --ring: 182 100% 50%;
   }
@@ -54,7 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground min-h-screen font-body pt-24;
+    @apply bg-background text-foreground min-h-screen font-body pt-24 text-[13px] leading-relaxed;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   
@@ -73,23 +73,23 @@
   }
 
   .exn-card {
-    @apply bg-card border border-border/40 rounded-2xl overflow-hidden shadow-2xl transition-all duration-500;
+    @apply bg-card border border-border/60 rounded-2xl overflow-hidden shadow-2xl transition-all duration-500;
   }
   
   .dark .exn-card {
-    @apply bg-black/40 border-white/10 backdrop-blur-3xl;
+    @apply bg-black/60 border-white/20 backdrop-blur-3xl;
   }
 
   .exn-input {
-    @apply bg-background/50 border border-white/10 text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 outline-none rounded-xl px-5 py-3 w-full transition-all font-medium;
+    @apply bg-background/50 border border-white/20 text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 outline-none rounded-xl px-5 py-3 w-full transition-all font-medium;
   }
 
   .exn-button {
-    @apply exn-gradient-bg text-black font-black py-3 px-8 rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,245,255,0.2)] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply exn-gradient-bg text-black font-black py-3 px-8 rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,245,255,0.3)] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .exn-button-outline {
-    @apply border border-primary/40 text-primary hover:bg-primary/10 font-black py-3 px-8 rounded-xl transition-all disabled:opacity-30;
+    @apply border border-primary/60 text-primary hover:bg-primary/10 font-black py-3 px-8 rounded-xl transition-all disabled:opacity-30;
   }
   
   .custom-scrollbar::-webkit-scrollbar {
@@ -99,6 +99,6 @@
     @apply bg-transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+    @apply bg-white/20 rounded-full hover:bg-white/30 transition-colors;
   }
 }

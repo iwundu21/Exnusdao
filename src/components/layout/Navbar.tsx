@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -35,13 +34,13 @@ export function Navbar() {
 
   const NavLinks = () => (
     <>
-      <Link href="/" className="flex items-center gap-2 text-white/60 hover:text-primary transition-all font-black">
+      <Link href="/" className="flex items-center gap-2 text-white/80 hover:text-primary transition-all font-bold">
         <LayoutDashboard className="w-3.5 h-3.5" /> DASHBOARD
       </Link>
-      <Link href="/register-node" className="flex items-center gap-2 text-white/60 hover:text-primary transition-all font-black">
+      <Link href="/register-node" className="flex items-center gap-2 text-white/80 hover:text-primary transition-all font-bold">
         <Hammer className="w-3.5 h-3.5" /> PROVISION XNODE
       </Link>
-      <Link href="/manage-node" className="flex items-center gap-2 text-white/60 hover:text-primary transition-all font-black">
+      <Link href="/manage-node" className="flex items-center gap-2 text-white/80 hover:text-primary transition-all font-bold">
         <Settings className="w-3.5 h-3.5" /> COMMAND CENTER
       </Link>
     </>
@@ -49,20 +48,20 @@ export function Navbar() {
 
   const MobileLinks = () => (
     <div className="flex flex-col gap-6 mt-8">
-      <Link href="/" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+      <Link href="/" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/90 hover:text-primary transition-all">
         <LayoutDashboard className="w-5 h-5" /> DASHBOARD
       </Link>
-      <Link href="/register-node" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+      <Link href="/register-node" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/90 hover:text-primary transition-all">
         <Hammer className="w-5 h-5" /> PROVISION XNODE
       </Link>
-      <Link href="/manage-node" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+      <Link href="/manage-node" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/90 hover:text-primary transition-all">
         <Settings className="w-5 h-5" /> COMMAND CENTER
       </Link>
-      <div className="h-px w-full bg-white/10 my-2" />
-      <Link href="/purchase-license" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+      <div className="h-px w-full bg-white/20 my-2" />
+      <Link href="/purchase-license" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/90 hover:text-primary transition-all">
         <Ticket className="w-5 h-5" /> BUY LICENSE
       </Link>
-      <Link href="/faucet" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/70 hover:text-primary transition-all">
+      <Link href="/faucet" className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white/90 hover:text-primary transition-all">
         <Droplets className="w-5 h-5" /> FAUCET
       </Link>
       {isAdmin && (
@@ -74,17 +73,17 @@ export function Navbar() {
   );
 
   return (
-    <nav className="flex items-center justify-between px-6 lg:px-10 py-5 border-b border-white/10 backdrop-blur-2xl fixed top-0 left-0 w-full z-50 bg-black/80">
+    <nav className="flex items-center justify-between px-6 lg:px-10 py-5 border-b border-white/20 backdrop-blur-2xl fixed top-0 left-0 w-full z-50 bg-black/90">
       <div className="flex items-center gap-4">
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all shadow-lg">
+              <button className="p-2 bg-white/10 rounded-lg border border-white/20 hover:bg-white/20 transition-all shadow-lg">
                 <Menu className="w-5 h-5 text-primary" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="exn-card border-r border-primary/30 bg-black/95 backdrop-blur-3xl">
-              <SheetHeader className="text-left border-b border-white/10 pb-6">
+            <SheetContent side="left" className="exn-card border-r border-primary/40 bg-black/95 backdrop-blur-3xl">
+              <SheetHeader className="text-left border-b border-white/20 pb-6">
                 <SheetTitle className="text-2xl font-black exn-gradient-text tracking-[0.2em] uppercase">NETWORK</SheetTitle>
               </SheetHeader>
               <MobileLinks />
@@ -95,23 +94,23 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="flex flex-col">
             <h1 className="text-xl lg:text-2xl font-black exn-gradient-text tracking-[0.2em] leading-none uppercase">EXNUS</h1>
-            <span className="text-[8px] lg:text-[9px] text-white/40 tracking-[0.4em] font-black uppercase">PROTOCOL LAYER</span>
+            <span className="text-[10px] text-white/60 tracking-[0.4em] font-black uppercase">PROTOCOL LAYER</span>
           </div>
         </Link>
       </div>
 
       <div className="flex items-center gap-6 lg:gap-8">
-        <div className="hidden lg:flex items-center gap-8 text-[10px] uppercase font-black tracking-[0.2em]">
+        <div className="hidden lg:flex items-center gap-8 text-[11px] uppercase font-black tracking-[0.2em]">
           <NavLinks />
         </div>
 
         {mounted && connected && isLoaded && (
           <div className="flex items-center gap-3 lg:gap-5 animate-in fade-in duration-500">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10 shadow-lg">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg border border-white/20 shadow-lg">
               <Coins className="w-3.5 h-3.5 text-primary" />
               <span className="text-xs font-black text-primary font-mono">{exnBalance.toLocaleString()}</span>
             </div>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10 shadow-lg">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg border border-white/20 shadow-lg">
               <CircleDollarSign className="w-3.5 h-3.5 text-emerald-500" />
               <span className="text-xs font-black text-emerald-500 font-mono">{usdcBalance.toLocaleString()}</span>
             </div>
@@ -122,7 +121,7 @@ export function Navbar() {
           {mounted ? (
             <WalletMultiButton className="exn-wallet-button" />
           ) : (
-            <div className="h-10 w-28 lg:w-32 bg-white/5 rounded-lg animate-pulse" />
+            <div className="h-10 w-28 lg:w-32 bg-white/10 rounded-lg animate-pulse" />
           )}
         </div>
       </div>
@@ -133,7 +132,7 @@ export function Navbar() {
           color: black !important;
           font-weight: 900 !important;
           text-transform: uppercase !important;
-          font-size: 9px !important;
+          font-size: 10px !important;
           letter-spacing: 0.2em !important;
           height: 38px !important;
           line-height: 38px !important;
@@ -141,11 +140,11 @@ export function Navbar() {
           padding: 0 16px !important;
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
           border: none !important;
-          box-shadow: 0 0 20px rgba(0, 245, 255, 0.3) !important;
+          box-shadow: 0 0 20px rgba(0, 245, 255, 0.4) !important;
         }
         @media (min-width: 1024px) {
           .exn-wallet-button {
-            font-size: 10px !important;
+            font-size: 11px !important;
             height: 42px !important;
             line-height: 42px !important;
             padding: 0 24px !important;
@@ -154,7 +153,7 @@ export function Navbar() {
         .exn-wallet-button:hover {
           opacity: 0.9 !important;
           transform: translateY(-2px) !important;
-          box-shadow: 0 0 30px rgba(0, 245, 255, 0.5) !important;
+          box-shadow: 0 0 30px rgba(0, 245, 255, 0.6) !important;
         }
       `}</style>
     </nav>
