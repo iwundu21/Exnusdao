@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Image from 'next/image';
-import { TrendingUp, MapPin, Globe, ShieldCheck } from 'lucide-react';
+import { MapPin, Globe, ShieldCheck } from 'lucide-react';
 
 export function ValidatorDiscovery({ validators, onSelect, userStakes = [], walletAddress, selectedId }: any) {
   const totalNetworkWeight = useMemo(() => {
@@ -40,8 +40,8 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                 isSelected 
                   ? 'border-primary ring-8 ring-primary/20 shadow-[0_0_80px_rgba(0,245,255,0.4)] scale-[1.02]' 
                   : !validator.is_active 
-                    ? 'border-destructive/60 opacity-80' 
-                    : 'border-white/60 hover:border-primary shadow-3xl'
+                    ? 'border-destructive opacity-80' 
+                    : 'border-white hover:border-primary shadow-3xl'
               }`}
             >
               <div className="relative h-56 w-full overflow-hidden">
@@ -56,7 +56,6 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                 
                 <div className="absolute top-8 right-8 flex items-center gap-4">
                    <div className="flex items-center gap-2.5 bg-black text-primary text-[11px] px-5 py-2.5 rounded-xl font-black uppercase border-2 border-primary shadow-2xl">
-                      <TrendingUp className="w-4 h-4" />
                       {weightShare.toFixed(2)}%_WEIGHT
                    </div>
                    {isUserStaked && (
@@ -115,7 +114,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                   className={`w-full text-[14px] h-16 uppercase font-black tracking-[0.5em] rounded-2xl transition-all duration-500 shadow-3xl ${
                     validator.is_active 
                       ? (isSelected ? 'bg-primary/40 text-primary border-4 border-primary shadow-[0_0_40px_rgba(0,245,255,0.3)]' : 'exn-button') 
-                      : 'bg-white/15 text-white/60 border-2 border-white/30 cursor-not-allowed'
+                      : 'bg-white/15 text-white border-2 border-white cursor-not-allowed'
                   }`}
                 >
                   {isSelected ? 'IDENTITY_SELECTED' : (validator.is_active ? 'INITIALIZE_STAKE' : 'OFFLINE_STATUS')}

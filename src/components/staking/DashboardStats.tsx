@@ -10,7 +10,7 @@ import {
   XAxis, 
   YAxis 
 } from 'recharts';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Cpu, Calendar } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Cpu, Calendar } from 'lucide-react';
 
 interface DashboardStatsProps {
   totalStaked?: number;
@@ -90,7 +90,7 @@ export function DashboardStats({
     <div className="space-y-8 mb-12 animate-in fade-in duration-1000">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <div className="lg:col-span-3 relative h-[340px] exn-card bg-black border-white/40 shadow-[0_40px_100px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden backdrop-blur-3xl">
+        <div className="lg:col-span-3 relative h-[340px] exn-card bg-black border-white shadow-[0_40px_100px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden backdrop-blur-3xl">
           <div className="p-10 pb-0 flex justify-between items-start relative z-10">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -107,7 +107,7 @@ export function DashboardStats({
                 <p className="text-[18px] font-black text-emerald-400 font-mono tracking-tighter">
                   ${stakedUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border-2 ${isTvlPositive ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-lg' : 'bg-destructive/20 text-destructive border-destructive/50 shadow-lg'}`}>
+                <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border-2 ${isTvlPositive ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500 shadow-lg' : 'bg-destructive/20 text-destructive border-destructive shadow-lg'}`}>
                   {isTvlPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                   {tvlTrend}%
                 </div>
@@ -134,7 +134,7 @@ export function DashboardStats({
                       return (
                         <div className="bg-black border-2 border-primary p-6 rounded-2xl shadow-[0_0_50px_rgba(0,245,255,0.3)] space-y-3 backdrop-blur-3xl">
                           <p className="text-[12px] font-black text-white uppercase tracking-[0.3em]">{payload[0].payload.date}</p>
-                          <div className="h-px w-full bg-white/30" />
+                          <div className="h-px w-full bg-white" />
                           <p className="text-[15px] font-black text-primary font-mono tracking-tighter">
                             {Number(payload[0].value).toLocaleString()} <span className="text-[11px]">EXN</span>
                           </p>
@@ -159,7 +159,7 @@ export function DashboardStats({
         </div>
 
         <div className="flex flex-col gap-8 lg:col-span-1">
-          <div className="flex-1 exn-card p-10 bg-black border-white/40 flex flex-col justify-center space-y-8 group hover:border-secondary transition-all duration-700 backdrop-blur-3xl overflow-hidden relative shadow-[0_40px_80px_rgba(0,0,0,0.8)]">
+          <div className="flex-1 exn-card p-10 bg-black border-white flex flex-col justify-center space-y-8 group hover:border-secondary transition-all duration-700 backdrop-blur-3xl overflow-hidden relative shadow-[0_40px_80px_rgba(0,0,0,0.8)]">
             <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/20 blur-3xl rounded-full" />
             <div className="space-y-4 relative z-10">
               <p className="text-white text-[12px] font-black uppercase tracking-[0.6em]">DAO Treasury</p>
@@ -173,8 +173,8 @@ export function DashboardStats({
                 </p>
               </div>
               <div className="text-right space-y-4">
-                <div className={`flex items-center gap-1.5 ml-auto w-fit px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border-2 ${isTreasuryPositive ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-lg' : 'bg-destructive/20 text-destructive border-destructive/50 shadow-lg'}`}>
-                  {isTreasuryPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                <div className={`flex items-center gap-1.5 ml-auto w-fit px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border-2 ${isTreasuryPositive ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500 shadow-lg' : 'bg-destructive/20 text-destructive border-destructive shadow-lg'}`}>
+                  <ArrowUpRight className="w-4 h-4" />
                   {treasuryTrend}%
                 </div>
                 <p className="text-[15px] font-black text-secondary font-mono uppercase tracking-tight">
@@ -187,7 +187,7 @@ export function DashboardStats({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div className="exn-card p-8 bg-black border-white/40 flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
+        <div className="exn-card p-8 bg-black border-white flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
            <div className="flex items-center gap-5">
               <Calendar className="w-8 h-8 text-primary shadow-[0_0_20px_rgba(0,245,255,0.4)]" />
               <div className="space-y-1.5">
@@ -201,7 +201,7 @@ export function DashboardStats({
            </div>
         </div>
 
-        <div className="exn-card p-8 bg-black border-white/40 flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
+        <div className="exn-card p-8 bg-black border-white flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
            <div className="flex items-center gap-5">
               <div className="space-y-1.5">
                  <p className="text-[11px] text-white uppercase font-black tracking-widest">Last Settled</p>
@@ -210,7 +210,7 @@ export function DashboardStats({
            </div>
         </div>
 
-        <div className="exn-card p-8 bg-black border-white/40 flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
+        <div className="exn-card p-8 bg-black border-white flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
            <div className="flex items-center gap-5">
               <Cpu className="w-8 h-8 text-primary" />
               <div className="space-y-1.5">
@@ -218,12 +218,11 @@ export function DashboardStats({
                  <p className="text-[18px] font-black text-white font-mono">{state.validators.filter(v => v.is_active).length}</p>
               </div>
            </div>
-           <span className="text-[11px] text-primary font-black uppercase border-2 border-primary/50 px-3 py-1.5 rounded-xl shadow-lg">Online</span>
+           <span className="text-[11px] text-primary font-black uppercase border-2 border-primary px-3 py-1.5 rounded-xl shadow-lg">Online</span>
         </div>
 
-        <div className="exn-card p-8 bg-black border-white/40 flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
+        <div className="exn-card p-8 bg-black border-white flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
            <div className="flex items-center gap-5">
-              <TrendingUp className="w-8 h-8 text-emerald-400" />
               <div className="space-y-1.5">
                  <p className="text-[11px] text-white uppercase font-black tracking-widest">Network Health</p>
                  <p className="text-[18px] font-black text-emerald-400 font-mono tracking-widest">STABLE</p>
