@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -89,14 +90,14 @@ export function DashboardStats({
                 <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(0,245,255,0.6)]" />
                 <p className="text-white/40 text-[11px] font-black uppercase tracking-[0.4em]">Protocol TVL</p>
               </div>
-              <h3 className="text-3xl font-black font-mono tracking-tighter text-white">
-                {totalStaked.toLocaleString()} <span className="text-xs text-primary/60 uppercase font-black ml-2">EXN</span>
+              <h3 className="text-[28px] font-black font-mono tracking-tighter text-white">
+                {totalStaked.toLocaleString()} <span className="text-[11px] text-primary/60 uppercase font-black ml-2">EXN</span>
               </h3>
             </div>
             
             <div className="text-right space-y-3">
               <div className="flex items-center justify-end gap-4">
-                <p className="text-lg font-bold text-emerald-500 font-mono tracking-tighter">
+                <p className="text-[16px] font-bold text-emerald-500 font-mono tracking-tighter">
                   ${stakedUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${isTvlPositive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
@@ -104,7 +105,7 @@ export function DashboardStats({
                   {tvlTrend}%
                 </div>
               </div>
-              <p className="text-[10px] font-black uppercase text-white/20 tracking-[0.2em]">24H Network Velocity</p>
+              <p className="text-[11px] font-black uppercase text-white/20 tracking-[0.2em]">24H Network Velocity</p>
             </div>
           </div>
 
@@ -125,10 +126,10 @@ export function DashboardStats({
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-black/95 backdrop-blur-3xl border border-white/20 p-6 rounded-2xl shadow-3xl space-y-3">
-                          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{payload[0].payload.date}</p>
+                          <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">{payload[0].payload.date}</p>
                           <div className="h-px w-full bg-white/10" />
-                          <p className="text-base font-bold text-primary font-mono tracking-tighter">
-                            {Number(payload[0].value).toLocaleString()} <span className="text-xs">EXN</span>
+                          <p className="text-[14px] font-bold text-primary font-mono tracking-tighter">
+                            {Number(payload[0].value).toLocaleString()} <span className="text-[11px]">EXN</span>
                           </p>
                         </div>
                       );
@@ -160,16 +161,16 @@ export function DashboardStats({
             
             <div className="flex justify-between items-end relative z-10">
               <div className="space-y-3">
-                <p className="text-xl font-mono font-bold text-white tracking-tighter">
+                <p className="text-[18px] font-mono font-bold text-white tracking-tighter">
                   {treasuryBalance.toLocaleString()} <span className="text-[11px] text-white/30 ml-2">EXN</span>
                 </p>
               </div>
               <div className="text-right space-y-4">
-                <div className={`flex items-center gap-1.5 ml-auto w-fit px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${isTreasuryPositive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
+                <div className={`flex items-center gap-1.5 ml-auto w-fit px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${isTreasuryPositive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
                   {isTreasuryPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                   {treasuryTrend}%
                 </div>
-                <p className="text-sm font-bold text-secondary/90 font-mono uppercase tracking-tight">
+                <p className="text-[14px] font-bold text-secondary/90 font-mono uppercase tracking-tight">
                   ${treasuryUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>

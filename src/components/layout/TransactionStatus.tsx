@@ -1,7 +1,8 @@
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { ExternalLink, X, CheckCircle2, AlertCircle, HelpCircle, Cpu, Zap, Activity, Loader2, ShieldCheck } from 'lucide-react';
+import { ExternalLink, X, CheckCircle2, AlertCircle, Cpu, Loader2, ShieldCheck } from 'lucide-react';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { getExplorerLink } from '@/lib/utils';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -24,7 +25,6 @@ export function TransactionStatus() {
     };
   }, []);
 
-  // Auto-dismiss after 8 seconds (covers the 6s delay + 2s success view)
   useEffect(() => {
     if (tx && tx.status !== 'warning') {
       const timer = setTimeout(() => {
@@ -69,7 +69,6 @@ export function TransactionStatus() {
   return (
     <div className={`fixed bottom-24 right-8 lg:right-12 z-[100] w-full max-w-sm animate-in slide-in-from-right-10 fade-in duration-500`}>
       <div className={`exn-card p-8 border ${current.bg} ${current.border} ${current.glow} backdrop-blur-3xl relative overflow-hidden group`}>
-        {/* Dynamic scan line for "Processing" state */}
         {tx.status === 'warning' && (
           <div className="absolute inset-0 bg-gradient-to-b from-primary/0 via-primary/10 to-primary/0 h-12 w-full animate-scan pointer-events-none" />
         )}
@@ -87,7 +86,7 @@ export function TransactionStatus() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <h4 className={`text-[10px] font-black uppercase tracking-[0.4em] ${current.text} font-mono`}>
+                <h4 className={`text-[11px] font-black uppercase tracking-[0.4em] ${current.text} font-mono`}>
                   {current.label}
                 </h4>
                 {tx.status === 'warning' && (
@@ -98,7 +97,7 @@ export function TransactionStatus() {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-white font-black leading-tight uppercase tracking-tight">
+              <p className="text-[13px] text-white font-black leading-tight uppercase tracking-tight">
                 {tx.message}
               </p>
               
@@ -108,7 +107,7 @@ export function TransactionStatus() {
                     href={getExplorerLink(tx.txHash)} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:text-white transition-all flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-lg shadow-lg"
+                    className="text-[11px] font-black uppercase tracking-[0.2em] text-primary hover:text-white transition-all flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-lg shadow-lg"
                   >
                     EXPLORER VERIFICATION <ExternalLink className="w-3.5 h-3.5" />
                   </a>
@@ -116,7 +115,7 @@ export function TransactionStatus() {
               )}
 
               {tx.status === 'warning' && (
-                <div className="flex items-center gap-2.5 text-[9px] text-primary/60 uppercase font-black tracking-widest">
+                <div className="flex items-center gap-2.5 text-[10px] text-primary/60 uppercase font-black tracking-widest">
                    <ShieldCheck className="w-4 h-4" />
                    <span>VERIFYING BLOCK STATE...</span>
                 </div>
@@ -132,7 +131,6 @@ export function TransactionStatus() {
           </button>
         </div>
 
-        {/* Technical progress bar */}
         <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/5">
            <div className={`h-full ${tx.status === 'success' ? 'bg-emerald-500' : tx.status === 'warning' ? 'bg-primary' : 'bg-destructive'} ${tx.status === 'warning' ? 'animate-progress-6s' : 'animate-progress-fast'}`} />
         </div>

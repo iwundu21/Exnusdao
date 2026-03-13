@@ -200,7 +200,7 @@ export default function Home() {
       {!isLoaded ? (
         <div className="py-40 flex flex-col items-center justify-center space-y-4">
            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-           <p className="text-[10px] uppercase font-black tracking-widest text-primary animate-pulse">Syncing Cloud Ledger</p>
+           <p className="text-[11px] uppercase font-black tracking-widest text-primary animate-pulse">Syncing Cloud Ledger</p>
         </div>
       ) : (
         <>

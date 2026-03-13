@@ -82,6 +82,7 @@ interface ProtocolContextType {
 const ProtocolContext = createContext<ProtocolContextType | null>(null);
 
 const ADMIN_WALLET_ADDRESS = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
+const SIMULATED_DELAY = 6000;
 
 export function ProtocolProvider({ children }: { children: ReactNode }) {
   const { publicKey } = useWallet();
@@ -143,7 +144,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const claimFaucetAssets = useCallback((address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
-    setFeedback('warning', `GENERATING ${type.toUpperCase()} ASSET DROP...`);
+    setFeedback('warning', `ESTABLISHING ${type.toUpperCase()} ASSET DROP...`);
     
     setTimeout(() => {
       const ref = doc(db, 'users', address);
@@ -163,7 +164,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
           operation: 'write'
         }));
       });
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const adminFundVault = useCallback((address: string, amount: number, vault: string) => {
@@ -206,7 +207,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(uRef, { usdcBalance: increment(-price) }, { merge: true });
       setDoc(gRef, { usdcVaultBalance: increment(price) }, { merge: true });
       setFeedback('success', `LICENSE ${license.id} MINTED.`, hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const addStake = useCallback((stake: any) => {
@@ -223,7 +224,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(gRef, { stakedVaultBalance: increment(stake.amount) }, { merge: true });
       setDoc(vRef, { total_staked: increment(stake.amount) }, { merge: true });
       setFeedback('success', `${stake.amount.toLocaleString()} EXN COMMITTED.`, hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
@@ -240,7 +241,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
       setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
       setFeedback('success', 'PRINCIPAL RETURNED TO WALLET.', hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, newCheckpoint: number, wallet: string) => {
@@ -253,7 +254,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(sRef, { reward_checkpoint: newCheckpoint }, { merge: true });
       updateUserBalance(wallet, amount, 0);
       setFeedback('success', 'REWARDS DEPOSITED.', hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, updateUserBalance, setFeedback]);
 
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
@@ -273,7 +274,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       }, { merge: true });
       setDoc(gRef, { treasuryBalance: increment(3) }, { merge: true });
       setFeedback('success', 'CONSENSUS VOTE RECORDED.', hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, walletAddress, setFeedback]);
 
   const createProposal = useCallback((proposal: any) => {
@@ -288,7 +289,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(pRef, proposal);
       setDoc(gRef, { treasuryBalance: increment(10) }, { merge: true });
       setFeedback('success', 'PROPOSAL BROADCAST SUCCESSFUL.', hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
@@ -306,7 +307,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         if (recipient === wallet) updateUserBalance(wallet, amount, 0);
       }
       setFeedback('success', 'PROPOSAL ENACTED.', hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, updateUserBalance, setFeedback]);
 
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
@@ -321,7 +322,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         rewardVaultBalance: increment(-totalPool)
       }, { merge: true });
       setFeedback('success', `EPOCH ${targetEpoch} SETTLED.`, hash);
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const registerValidator = useCallback((validator: any, licenseId: string) => {
@@ -339,7 +340,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       }).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'create' }));
       });
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const updateValidator = useCallback((vId: string, data: any) => {
@@ -354,7 +355,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       }).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
       });
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, setFeedback]);
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
@@ -373,7 +374,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       }).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'delete' }));
       });
-    }, 6000);
+    }, SIMULATED_DELAY);
   }, [db, updateUserBalance, setFeedback]);
 
   const toggleValidator = useCallback((vId: string, status: boolean) => {

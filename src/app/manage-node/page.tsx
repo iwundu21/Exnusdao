@@ -38,7 +38,7 @@ export default function ManageNodePage() {
   if (!mounted || !isLoaded) return (
     <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">SYNCING_CLOUD_TERMINAL</p>
+      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[11px]">SYNCING_CLOUD_TERMINAL</p>
     </div>
   );
 
@@ -49,7 +49,7 @@ export default function ManageNodePage() {
        </div>
        <div className="space-y-4">
          <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground">AUTHENTICATION_REQUIRED</h1>
-         <p className="text-muted-foreground text-[10px] uppercase font-black tracking-[0.3em]">Establish wallet link to access management protocols.</p>
+         <p className="text-muted-foreground text-[11px] uppercase font-black tracking-[0.3em]">Establish wallet link to access management protocols.</p>
        </div>
     </div>
   );
@@ -110,29 +110,29 @@ export default function ManageNodePage() {
        </div>
        <div className="space-y-4">
          <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground">NO_REGISTERED_NODES</h1>
-         <p className="text-muted-foreground text-[10px] uppercase font-black tracking-[0.3em]">Wallet address has no bound XNode registrations.</p>
+         <p className="text-muted-foreground text-[11px] uppercase font-black tracking-[0.3em]">Wallet address has no bound XNode registrations.</p>
        </div>
-       <Link href="/register-node" className="exn-button inline-block text-[11px] h-12 flex items-center justify-center">INITIALIZE_REGISTRATION</Link>
+       <Link href="/register-node" className="exn-button inline-block text-[12px] h-12 flex items-center justify-center">INITIALIZE_REGISTRATION</Link>
     </div>
   );
 
   return (
     <div className="max-w-7xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500 pb-40">
-      <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground uppercase text-[10px] font-black tracking-[0.2em] transition-all"><ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL</Link>
+      <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground uppercase text-[11px] font-black tracking-[0.2em] transition-all"><ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL</Link>
       
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
              <Terminal className="w-5 h-5 text-primary" />
-             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">MGMT_CONSOLE_V2.0.1</p>
+             <p className="text-[11px] font-black uppercase tracking-[0.4em] text-primary">MGMT_CONSOLE_V2.0.1</p>
           </div>
           <h1 className="text-5xl font-black exn-gradient-text uppercase tracking-tighter">XNODE_COMMAND</h1>
         </div>
         
         <div className="flex items-center gap-6 bg-primary/5 border border-primary/20 px-8 py-4 rounded-2xl backdrop-blur-3xl shadow-2xl">
            <div className="space-y-1">
-              <p className="text-[9px] text-muted-foreground uppercase font-black tracking-[0.3em]">ACTIVE_IDENTITY</p>
-              <p className="text-xs font-mono font-black text-foreground">{shortenAddress(walletAddress)}</p>
+              <p className="text-[11px] text-muted-foreground uppercase font-black tracking-[0.3em]">ACTIVE_IDENTITY</p>
+              <p className="text-[12px] font-mono font-black text-foreground">{shortenAddress(walletAddress)}</p>
            </div>
         </div>
       </div>
@@ -146,14 +146,13 @@ export default function ManageNodePage() {
           return (
             <div key={node.id} className="exn-card p-0 border-primary/30 relative overflow-hidden group bg-black/60 backdrop-blur-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
               <div className="absolute top-0 right-0 p-10 z-10">
-                 <div className={`flex items-center gap-3 text-[10px] font-black uppercase px-6 py-2.5 rounded-xl border backdrop-blur-xl ${node.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
+                 <div className={`flex items-center gap-3 text-[11px] font-black uppercase px-6 py-2.5 rounded-xl border backdrop-blur-xl ${node.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
                     <div className={`w-2 h-2 rounded-full ${node.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-destructive'}`} />
                     {node.is_active ? 'STATUS_ONLINE' : 'STATUS_OFFLINE'}
                  </div>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-12">
-                {/* Status Column */}
                 <div className="xl:col-span-4 p-12 border-r border-white/10 space-y-12">
                   <div className="flex items-center gap-8">
                     <div className="relative w-28 h-28 rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
@@ -161,7 +160,7 @@ export default function ManageNodePage() {
                     </div>
                     <div className="space-y-3">
                       <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground leading-none">{node.name}</h2>
-                      <p className="text-[11px] font-mono text-primary/60 font-black">{shortenAddress(node.id)}</p>
+                      <p className="text-[12px] font-mono text-primary/60 font-black">{shortenAddress(node.id)}</p>
                     </div>
                   </div>
 
@@ -169,16 +168,16 @@ export default function ManageNodePage() {
                     <div className="p-8 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between group/metric hover:border-primary/40 transition-all">
                        <div className="flex items-center gap-4">
                          <Activity className="w-5 h-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-                         <span className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em]">NETWORK_WEIGHT</span>
+                         <span className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.2em]">NETWORK_WEIGHT</span>
                        </div>
-                       <span className="text-sm font-black font-mono text-primary">{(node.total_staked || 0).toLocaleString()}</span>
+                       <span className="text-[13px] font-black font-mono text-primary">{(node.total_staked || 0).toLocaleString()}</span>
                     </div>
                     <div className="p-8 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between group/metric hover:border-primary/40 transition-all">
                        <div className="flex items-center gap-4">
                          <Database className="w-5 h-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-                         <span className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em]">ACTIVE_STAKERS</span>
+                         <span className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.2em]">ACTIVE_STAKERS</span>
                        </div>
-                       <span className="text-sm font-black font-mono text-foreground">{stakerCount}</span>
+                       <span className="text-[13px] font-black font-mono text-foreground">{stakerCount}</span>
                     </div>
                   </div>
 
@@ -186,8 +185,8 @@ export default function ManageNodePage() {
                     <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full group-hover/yield:bg-emerald-500/20 transition-all" />
                     <div className="flex justify-between items-end relative z-10">
                       <div className="space-y-2">
-                        <p className="text-[10px] uppercase font-black text-emerald-500/60 tracking-[0.3em]">ACCRUED_COMMISSION</p>
-                        <p className="text-xl font-black text-foreground font-mono tracking-tighter">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-xs text-emerald-500 font-bold">EXN</span></p>
+                        <p className="text-[11px] uppercase font-black text-emerald-500/60 tracking-[0.3em]">ACCRUED_COMMISSION</p>
+                        <p className="text-xl font-black text-foreground font-mono tracking-tighter">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-[11px] text-emerald-500 font-bold">EXN</span></p>
                       </div>
                       <Zap className="w-6 h-6 text-emerald-500/40" />
                     </div>
@@ -205,7 +204,6 @@ export default function ManageNodePage() {
                   </div>
                 </div>
 
-                {/* Configuration Column */}
                 <div className="xl:col-span-8 p-12 space-y-12 bg-black/20">
                   {isEditing ? (
                     <div className="space-y-12 animate-in fade-in zoom-in-95 duration-700">
@@ -216,29 +214,29 @@ export default function ManageNodePage() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.3em]">XNODE_IDENTIFIER</label>
-                           <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-14 bg-white/5 text-xs font-mono font-bold tracking-tight" placeholder="ID_STRING" />
+                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">XNODE_IDENTIFIER</label>
+                           <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-14 bg-white/5 text-[12px] font-mono font-bold tracking-tight" placeholder="ID_STRING" />
                         </div>
                         <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.3em]">GLOBAL_SECTOR</label>
-                           <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-14 bg-white/5 text-xs font-mono font-bold tracking-tight" placeholder="e.g. FRANKFURT_DE" />
+                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">GLOBAL_SECTOR</label>
+                           <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-14 bg-white/5 text-[12px] font-mono font-bold tracking-tight" placeholder="e.g. FRANKFURT_DE" />
                         </div>
                         <div className="space-y-4 md:col-span-2">
-                           <label className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.3em]">PROTOCOL_BIO</label>
-                           <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[140px] bg-white/5 text-xs font-mono py-6 font-medium leading-relaxed" placeholder="Hardware and reliability commitment metrics..." />
+                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">PROTOCOL_BIO</label>
+                           <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[140px] bg-white/5 text-[12px] font-mono py-6 font-medium leading-relaxed" placeholder="Hardware and reliability commitment metrics..." />
                         </div>
                         <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.3em]">COMMISSION_RATE (0-30%)</label>
+                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">COMMISSION_RATE (0-30%)</label>
                            <div className="relative">
-                              <input type="number" step="0.1" value={formData.commission_rate} onChange={e => setFormData({...formData, commission_rate: Math.min(30, Math.max(0, Number(e.target.value)))})} className="exn-input h-14 bg-white/5 text-xs font-mono font-bold" />
-                              <span className="absolute right-6 top-4.5 text-[11px] font-black text-muted-foreground">%</span>
+                              <input type="number" step="0.1" value={formData.commission_rate} onChange={e => setFormData({...formData, commission_rate: Math.min(30, Math.max(0, Number(e.target.value)))})} className="exn-input h-14 bg-white/5 text-[13px] font-mono font-bold" />
+                              <span className="absolute right-6 top-4.5 text-[11px] font-black text-white/30">%</span>
                            </div>
                         </div>
                       </div>
 
                       <div className="flex gap-6 pt-6">
-                        <button onClick={() => setReviewAction('update')} className="exn-button flex-1 h-14 uppercase font-black tracking-[0.4em] text-[11px]">SYNCHRONIZE_METADATA</button>
-                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-14 uppercase font-black tracking-[0.4em] text-[11px] border-white/20 text-white/60 hover:bg-white/10">ABORT_PATCH</button>
+                        <button onClick={() => setReviewAction('update')} className="exn-button flex-1 h-14 uppercase font-black tracking-[0.4em] text-[12px]">SYNCHRONIZE_METADATA</button>
+                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-14 uppercase font-black tracking-[0.4em] text-[12px] border-white/20 text-white/60 hover:bg-white/10">ABORT_PATCH</button>
                       </div>
                     </div>
                   ) : (
@@ -273,11 +271,11 @@ export default function ManageNodePage() {
                                <h3 className="text-[11px] uppercase font-black tracking-[0.4em] text-white/40">SYSTEM_CONTROLLER</h3>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
-                               <button onClick={() => startEditing(node)} className="h-14 exn-button-outline border-white/20 hover:bg-primary/10 hover:border-primary/40 uppercase text-[10px] font-black tracking-[0.3em] rounded-xl transition-all shadow-xl">PATCH_IDENTITY</button>
+                               <button onClick={() => startEditing(node)} className="h-14 exn-button-outline border-white/20 hover:bg-primary/10 hover:border-primary/40 uppercase text-[11px] font-black tracking-[0.3em] rounded-xl transition-all shadow-xl">PATCH_IDENTITY</button>
                                {!node.seed_deposited ? (
-                                 <button onClick={() => handleDepositSeed(node.id)} className="h-14 exn-button uppercase text-[10px] font-black tracking-[0.3em]">INJECT_SEED_CAPITAL</button>
+                                 <button onClick={() => handleDepositSeed(node.id)} className="h-14 exn-button uppercase text-[11px] font-black tracking-[0.3em]">INJECT_SEED_CAPITAL</button>
                                ) : (
-                                 <button onClick={() => handleWithdrawSeed(node.id)} className="h-14 bg-primary/10 text-primary border border-primary/30 uppercase text-[10px] font-black tracking-[0.3em] rounded-xl hover:bg-primary/20 transition-all">WITHDRAW_SEED</button>
+                                 <button onClick={() => handleWithdrawSeed(node.id)} className="h-14 bg-primary/10 text-primary border border-primary/30 uppercase text-[11px] font-black tracking-[0.3em] rounded-xl hover:bg-primary/20 transition-all">WITHDRAW_SEED</button>
                                )}
                             </div>
                          </div>
@@ -306,7 +304,6 @@ export default function ManageNodePage() {
         })}
       </div>
 
-      {/* Action Review Dialog */}
       <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
         <AlertDialogContent className="exn-card border-primary/50 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-lg">
           <div className="p-10 space-y-10">

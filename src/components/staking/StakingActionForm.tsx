@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, Info, Sparkles, Lock, Unlock, Clock, CalendarDays, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Wallet, Unlock, Clock, ShieldCheck, ChevronRight, LockIcon } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -129,7 +129,7 @@ export function StakingActionForm({
                   disabled={!connected}
                   onChange={handleInputChange}
                   placeholder="0.00"
-                  className={`exn-input h-14 bg-white/5 border-white/10 text-sm font-mono font-black tracking-tighter transition-all group-hover:border-primary/40 focus:border-primary ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  className={`exn-input h-14 bg-white/5 border-white/10 text-[13px] font-mono font-black tracking-tighter transition-all group-hover:border-primary/40 focus:border-primary ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
                 />
                 {connected && (
                   <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-6 top-4.5 text-[11px] font-black text-primary hover:text-white transition-colors">MAX_CAP</button>
@@ -152,7 +152,7 @@ export function StakingActionForm({
                     } ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
                   >
                     <span className="text-[11px] font-black tracking-widest">{tier.label}</span>
-                    <span className="text-[10px] font-mono font-black opacity-60">{(tier.multiplier/1000).toFixed(1)}x</span>
+                    <span className="text-[11px] font-mono font-black opacity-60">{(tier.multiplier/1000).toFixed(1)}x</span>
                   </button>
                 ))}
               </div>
@@ -161,14 +161,14 @@ export function StakingActionForm({
             <div className="p-8 bg-white/5 rounded-2xl border border-white/10 space-y-5 shadow-2xl">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-[11px] text-white/20 uppercase font-black tracking-[0.3em]">VALIDATOR</span>
-                <span className={`font-black uppercase tracking-tighter text-sm ${selectedNode ? 'text-primary' : 'text-white/10'} truncate max-w-[180px]`}>
+                <span className={`font-black uppercase tracking-tighter text-[13px] ${selectedNode ? 'text-primary' : 'text-white/10'} truncate max-w-[180px]`}>
                   {selectedNode ? selectedNode.name : 'UNASSIGNED_SECTOR'}
                 </span>
               </div>
               <div className="h-px w-full bg-white/5" />
               <div className="flex justify-between items-center text-xs">
                 <span className="text-[11px] text-white/20 uppercase font-black tracking-[0.3em]">MULTIPLIER</span>
-                <span className="font-black text-emerald-500 font-mono text-sm tracking-tighter">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x_BOOST</span>
+                <span className="font-black text-emerald-500 font-mono text-[13px] tracking-tighter">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x_BOOST</span>
               </div>
             </div>
 
@@ -191,7 +191,7 @@ export function StakingActionForm({
               <div className="relative z-10 flex justify-between items-center">
                 <div className="space-y-2">
                   <p className="text-[11px] text-white/30 uppercase font-black tracking-[0.4em]">ACCRUED_YIELD</p>
-                  <p className="text-2xl font-black text-white font-mono tracking-tighter">{(totalPendingRewards || 0).toFixed(4)} <span className="text-xs text-secondary/60 ml-2">EXN</span></p>
+                  <p className="text-[20px] font-black text-white font-mono tracking-tighter">{(totalPendingRewards || 0).toFixed(4)} <span className="text-[11px] text-secondary/60 ml-2">EXN</span></p>
                 </div>
                 <button 
                   onClick={onClaim}
@@ -206,7 +206,7 @@ export function StakingActionForm({
             <div className="space-y-6 max-h-[550px] overflow-auto pr-4 custom-scrollbar">
               {activeUserStakes.length === 0 ? (
                 <div className="text-center py-32 opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
-                  <CalendarDays className="w-16 h-16 mx-auto mb-8 opacity-40" />
+                  <Clock className="w-16 h-16 mx-auto mb-8 opacity-40" />
                   <p className="text-[12px] uppercase font-black tracking-[0.4em]">NO_ACTIVE_POSITIONS</p>
                 </div>
               ) : (
@@ -221,15 +221,15 @@ export function StakingActionForm({
                       <div className="flex justify-between items-start">
                         <div className="space-y-4">
                            <div className="flex items-center gap-4">
-                             <span className="text-lg font-black text-white font-mono tracking-tighter">{(s.amount || 0).toLocaleString()}</span>
+                             <span className="text-[16px] font-black text-white font-mono tracking-tighter">{(s.amount || 0).toLocaleString()}</span>
                              <span className="text-[11px] text-white/30 uppercase font-black tracking-widest">EXN</span>
                            </div>
                            <p className="text-[12px] font-black text-primary uppercase tracking-[0.2em] truncate max-w-[180px]">{validator?.name || 'NETWORK_VALIDATOR'}</p>
                            
                            <div className="flex flex-col gap-3 pt-6 border-t border-white/5 mt-6">
                              <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-white/40">
-                               <Lock className="w-4 h-4 text-white/20" />
-                               <span className="font-mono">LOCK: {new Date(s.staked_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                               <LockIcon className="w-4 h-4 text-white/20" />
+                               <span className="font-mono">LOCKED: {new Date(s.staked_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
                              </div>
                              <div className={`flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] ${isLocked ? 'text-amber-500' : 'text-emerald-500'}`}>
                                {isLocked ? <Clock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
@@ -238,7 +238,7 @@ export function StakingActionForm({
                            </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-black text-emerald-500 font-mono tracking-tighter">+{pendingReward.toFixed(4)}</p>
+                          <p className="text-[16px] font-black text-emerald-500 font-mono tracking-tighter">+{pendingReward.toFixed(4)}</p>
                           <p className="text-[11px] text-white/20 uppercase font-black mt-3 tracking-widest">{(multiplier/1000).toFixed(1)}x_BOOST</p>
                         </div>
                       </div>
@@ -272,15 +272,15 @@ export function StakingActionForm({
                     </div>
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
                       <span className="text-white/30 font-black">QUANTITY</span>
-                      <span className="text-primary font-mono font-black text-sm">{amountInput} EXN</span>
+                      <span className="text-primary font-mono font-black text-[13px]">{amountInput} EXN</span>
                     </div>
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
                       <span className="text-white/30 font-black">BOOST_TIER</span>
-                      <span className="text-emerald-500 font-black font-mono text-sm">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
+                      <span className="text-emerald-500 font-black font-mono text-[13px]">{(Number(currentTier?.multiplier || 3000)/1000).toFixed(1)}x</span>
                     </div>
                   </div>
                   
-                  <p className="text-[11px] text-white/40 uppercase leading-relaxed font-black tracking-tight">
+                  <p className="text-[12px] text-white/40 uppercase leading-relaxed font-black tracking-tight">
                     BY CONFIRMING, YOU AUTHORIZE A PROTOCOL LOCK FOR {duration} DAYS. THIS TRANSACTION IS IMMUTABLE ON THE NETWORK LEDGER.
                   </p>
                 </div>
