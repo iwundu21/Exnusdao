@@ -10,7 +10,7 @@ import {
   XAxis, 
   YAxis 
 } from 'recharts';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Zap, Cpu, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Cpu, Calendar } from 'lucide-react';
 
 interface DashboardStatsProps {
   totalStaked?: number;
@@ -208,7 +208,6 @@ export function DashboardStats({
                  <p className="text-[18px] font-black text-white font-mono">{state.lastCrankedEpoch || 0}</p>
               </div>
            </div>
-           <Zap className="w-7 h-7 text-secondary group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all" />
         </div>
 
         <div className="exn-card p-8 bg-black border-white/40 flex items-center justify-between group hover:border-primary transition-all shadow-2xl">
