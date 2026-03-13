@@ -33,20 +33,20 @@ export default function PurchaseLicensePage() {
 
   if (!mounted || !isLoaded) return (
     <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
-      <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="exn-gradient-text font-bold uppercase tracking-widest animate-pulse">Syncing Network State</p>
+      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">SYNCING_NETWORK_STATE</p>
     </div>
   );
 
   if (!connected) {
     return (
       <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
-         <div className="p-6 bg-primary/10 rounded-full border border-primary/20">
+         <div className="p-6 bg-primary/10 rounded-2xl border border-primary/20 shadow-2xl">
            <Wallet className="w-12 h-12 text-primary" />
          </div>
          <div className="space-y-4">
-           <h1 className="text-4xl font-bold uppercase tracking-tight text-foreground">Wallet Required</h1>
-           <p className="text-muted-foreground max-w-md mx-auto">Connect your wallet to mint your XNode License NFT.</p>
+           <h1 className="text-4xl font-black uppercase tracking-tighter text-foreground">AUTHENTICATION_REQUIRED</h1>
+           <p className="text-muted-foreground text-[11px] uppercase font-black tracking-[0.3em]">Connect your wallet to provision your XNode License NFT.</p>
          </div>
       </div>
     );
@@ -85,56 +85,55 @@ export default function PurchaseLicensePage() {
 
     mintLicense(walletAddress, licensePrice, newLicense);
     
-    // Reset minting state after standard 6s delay (handled in state hook)
     setTimeout(() => {
       setIsMinting(false);
     }, 6500);
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
-      <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors uppercase text-xs font-bold tracking-widest">
-        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+    <div className="max-w-6xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500">
+      <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors uppercase text-[10px] font-black tracking-[0.2em]">
+        <ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-        <div className="lg:col-span-3 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-7 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-5xl font-bold exn-gradient-text tracking-tighter uppercase text-foreground">XNode Minting</h1>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Mint your unique XNode License NFT to gain validator registration rights. Each wallet is restricted to one license.
+            <h1 className="text-6xl font-black exn-gradient-text tracking-tighter uppercase text-foreground leading-none">XNODE_MINTING</h1>
+            <p className="text-white/40 text-[11px] font-black uppercase tracking-[0.4em] max-w-xl">
+              Provision unique XNode License NFTs to gain infrastructure registration rights. Each wallet is restricted to a single authorization sector.
             </p>
           </div>
 
-          <div className="exn-card p-10 space-y-10 border-primary/20 bg-primary/5">
-            <div className="flex justify-between items-center border-b border-white/5 pb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
-                  <Ticket className="w-6 h-6 text-primary" />
+          <div className="exn-card p-12 space-y-12 border-white/10 bg-black/40 backdrop-blur-3xl shadow-3xl">
+            <div className="flex justify-between items-center border-b border-white/5 pb-10">
+              <div className="flex items-center gap-5">
+                <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20 shadow-xl">
+                  <Ticket className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">XNode Authorization</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black">NFT Standard Mint</p>
+                  <p className="text-base font-black text-foreground uppercase tracking-widest">XNODE_AUTHORIZATION</p>
+                  <p className="text-[11px] text-white/30 uppercase font-black tracking-[0.2em]">NFT_METAPLEX_STANDARD</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold text-emerald-500 font-mono">{licensePrice.toLocaleString()} USDC</p>
+                <p className="text-xl font-black text-emerald-500 font-mono tracking-tighter">{licensePrice.toLocaleString()} <span className="text-xs">USDC</span></p>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
-                   <span className="text-muted-foreground">Minted / Total Supply Cap</span>
-                   <div className="flex items-center gap-1.5 font-black">
+            <div className="space-y-8">
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-[0.3em]">
+                   <span className="text-white/20">MINTED / TOTAL_SUPPLY_CAP</span>
+                   <div className="flex items-center gap-2 font-black">
                      <span className={remainingSlots > 0 ? "text-primary" : "text-destructive"}>{currentMintedCount}</span>
-                     <span className="text-muted-foreground/40">/</span>
-                     <span className="text-muted-foreground">{totalLimit || '∞'}</span>
+                     <span className="text-white/10">/</span>
+                     <span className="text-white/40">{totalLimit || '∞'}</span>
                    </div>
                 </div>
                 {totalLimit > 0 && (
-                  <div className="w-full h-1.5 bg-foreground/5 rounded-full overflow-hidden">
-                    <div className="h-full exn-gradient-bg transition-all duration-500" style={{ width: `${Math.min(100, (currentMintedCount / totalLimit) * 100)}%` }} />
+                  <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden shadow-inner border border-white/5">
+                    <div className="h-full exn-gradient-bg transition-all duration-1000 shadow-[0_0_15px_rgba(0,245,255,0.4)]" style={{ width: `${Math.min(100, (currentMintedCount / totalLimit) * 100)}%` }} />
                   </div>
                 )}
               </div>
@@ -143,19 +142,19 @@ export default function PurchaseLicensePage() {
                 <button 
                   onClick={handleMintInitiate} 
                   disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || isMinting || hasLicense} 
-                  className={`w-full h-16 text-sm tracking-[0.2em] font-black uppercase flex items-center justify-center gap-3 transition-all ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+                  className={`w-full h-16 text-[12px] tracking-[0.5em] font-black uppercase flex items-center justify-center gap-4 transition-all shadow-3xl ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed'}`}
                 >
                   {isMinting ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                      Provisioning NFT Sector...
+                      <div className="w-5 h-5 border-3 border-black border-t-transparent rounded-full animate-spin" />
+                      PROVISIONING_SECTOR...
                     </>
                   ) : hasLicense ? (
-                    'License Already Owned'
+                    'AUTHORIZATION_ALREADY_OWNED'
                   ) : (
                     <>
-                      <Sparkles className="w-5 h-5" />
-                      Mint XNode License NFT
+                      <Sparkles className="w-6 h-6" />
+                      MINT_XNODE_LICENSE
                     </>
                   )}
                 </button>
@@ -164,33 +163,33 @@ export default function PurchaseLicensePage() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-6">
-           <div className="exn-card p-6 border-border/10">
-              <h3 className="text-xs font-black text-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-primary" /> Your Inventory
+        <div className="lg:col-span-5 space-y-8">
+           <div className="exn-card p-8 border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl">
+              <h3 className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] mb-8 flex items-center gap-3">
+                <ShieldCheck className="w-5 h-5 text-primary" /> INVENTORY_SCAN
               </h3>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {myLicenses.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 opacity-20 border border-dashed border-border rounded-xl">
-                     <Ticket className="w-8 h-8 mb-2" />
-                     <p className="text-[10px] uppercase font-black text-center">No XNode NFTs Found</p>
+                  <div className="flex flex-col items-center justify-center py-20 opacity-10 border-2 border-dashed border-white/10 rounded-2xl">
+                     <Ticket className="w-12 h-12 mb-4" />
+                     <p className="text-[11px] uppercase font-black text-center tracking-[0.3em]">NO_XNODE_NFT_DETECTED</p>
                   </div>
                 ) : (
                   myLicenses.map((lic) => (
-                    <div key={lic.id} className="p-4 bg-foreground/5 rounded-xl border border-border/40 space-y-4 group hover:border-primary/30 transition-all">
-                       <div className="flex gap-4">
-                          <div className="w-12 h-12 relative rounded-lg overflow-hidden border border-white/5">
+                    <div key={lic.id} className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-6 group hover:border-primary/40 transition-all shadow-xl">
+                       <div className="flex gap-6">
+                          <div className="w-16 h-16 relative rounded-xl overflow-hidden border border-white/20 shadow-2xl">
                              <Image src={lic.image_url || `https://picsum.photos/seed/${lic.id}/100/100`} alt="License" fill className="object-cover" />
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 space-y-2">
                              <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="text-[9px] text-muted-foreground uppercase font-black mb-1">Mint Address</p>
-                                  <p className="font-mono text-[11px] text-primary">{shortenAddress(lic.id)}</p>
+                                  <p className="text-[10px] text-white/20 uppercase font-black mb-1 tracking-widest">MINT_ID</p>
+                                  <p className="font-mono text-[12px] text-primary font-black tracking-tighter">{shortenAddress(lic.id)}</p>
                                 </div>
                                 <a href={getExplorerLink(lic.id)} target="_blank" rel="noopener noreferrer">
-                                   <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
+                                   <ExternalLink className="w-4 h-4 text-white/20 hover:text-primary transition-all" />
                                 </a>
                              </div>
                           </div>
@@ -205,39 +204,41 @@ export default function PurchaseLicensePage() {
 
       {/* Mint Review Dialog */}
       <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary/40 bg-black/90 backdrop-blur-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6" />
-              Review NFT Minting
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-6 pt-4">
-                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Action</span>
-                    <span className="text-foreground font-black">Mint XNode License NFT</span>
+        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-lg">
+          <div className="p-10 space-y-10">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-4">
+                <ShieldCheck className="w-8 h-8" />
+                VERIFY_PROVISIONING
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-8 pt-8">
+                  <div className="p-8 bg-white/5 rounded-2xl border border-white/10 space-y-6 shadow-3xl">
+                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                      <span className="text-white/30 font-black">OP_CODE</span>
+                      <span className="text-white font-black font-mono">XNODE_NFT_MINT</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                      <span className="text-white/30 font-black">METAPLEX_VER</span>
+                      <span className="text-white font-black font-mono">MASTER_EDITION_V2</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                      <span className="text-white/30 font-black">MINT_COST</span>
+                      <span className="text-emerald-500 font-mono font-black text-sm">{licensePrice.toLocaleString()} USDC</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Standard</span>
-                    <span className="text-foreground font-bold">Metaplex Master Edition</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Mint Cost</span>
-                    <span className="text-emerald-500 font-mono font-bold">{licensePrice.toLocaleString()} USDC</span>
-                  </div>
+                  
+                  <p className="text-[11px] text-white/40 uppercase leading-relaxed font-black tracking-tight">
+                    BY CONFIRMING, THE MINT COST WILL BE DEDUCTED FROM YOUR USDC BALANCE. THE XNODE LICENSE IS REQUIRED TO REGISTER A VALIDATOR ON THE NETWORK. THIS TRANSACTION IS FINAL.
+                  </p>
                 </div>
-                
-                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                  By confirming, the mint cost will be deducted from your USDC balance. The XNode License is required to register a validator on the network. This transaction is final.
-                </p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="pt-6">
-            <AlertDialogCancel className="exn-button-outline text-[10px] h-12 uppercase font-black">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmMint} className="exn-button text-[10px] h-12 uppercase font-black">Confirm & Mint</AlertDialogAction>
-          </AlertDialogFooter>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row gap-6 pt-4">
+              <AlertDialogCancel className="exn-button-outline flex-1 text-[11px] h-14 uppercase font-black border-white/20 text-white hover:bg-white/10">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmMint} className="exn-button flex-1 text-[11px] h-14 uppercase font-black">CONFIRM_MINT</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

@@ -41,7 +41,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
         
         const f = (n: number) => n.toString().padStart(2, '0');
         setTimeLeft({ 
-          label: 'Voting Locked | Final Results In: ', 
+          label: 'VOTING_LOCKED | FINAL_RESULTS_IN: ', 
           value: `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`,
           colorClass: 'text-destructive' 
         });
@@ -56,7 +56,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
 
       const f = (n: number) => n.toString().padStart(2, '0');
       setTimeLeft({ 
-        label: 'Voting Ends In: ', 
+        label: 'VOTING_ENDS_IN: ', 
         value: `${days}d ${f(hours)}h ${f(minutes)}m ${f(seconds)}s`,
         colorClass: 'text-emerald-500' 
       });
@@ -132,106 +132,106 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || !connected || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0));
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-500">
+    <div className="space-y-12 animate-in fade-in duration-700">
       <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <h2 className="text-4xl font-bold exn-gradient-text tracking-tighter uppercase">DAO Governance</h2>
-          <p className="text-muted-foreground text-sm">Direct stake-weighted voting. Outcomes determined by majority consensus over a 7-day window.</p>
+        <div className="space-y-3">
+          <h2 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase leading-none">DAO_GOVERNANCE</h2>
+          <p className="text-white/40 text-[11px] font-black uppercase tracking-[0.4em]">Direct stake-weighted consensus protocol v3.0</p>
         </div>
         <button 
           onClick={() => {
             if (!connected) return setFeedback('warning', 'Connect wallet to create a new proposal.');
             setShowCreate(!showCreate);
           }}
-          className={`exn-button uppercase tracking-widest text-xs font-black ${!connected ? 'opacity-50' : ''}`}
+          className={`exn-button uppercase tracking-[0.3em] text-[11px] font-black h-12 flex items-center justify-center px-10 ${!connected ? 'opacity-50' : ''}`}
         >
-          {showCreate ? 'Close Form' : 'New Proposal'}
+          {showCreate ? 'CLOSE_FORM' : 'SUBMIT_PROPOSAL'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between">
-           <div className="flex items-center gap-3">
-             <User className="w-4 h-4 text-primary" />
-             <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Combined Consensus Weight</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl flex items-center justify-between shadow-xl backdrop-blur-xl">
+           <div className="flex items-center gap-4">
+             <User className="w-5 h-5 text-primary" />
+             <p className="text-[10px] uppercase font-black tracking-[0.3em] text-white/40">CONSENSUS_WEIGHT</p>
            </div>
            <div className="text-right">
-             <p className="text-sm font-bold text-primary font-mono">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
+             <p className="text-sm font-black text-primary font-mono tracking-tighter">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
              {connected && isNodeOwner && (
-               <div className="flex items-center gap-1.5 justify-end text-[8px] text-emerald-500 font-black uppercase">
-                 <ShieldCheck className="w-2.5 h-2.5" /> Includes 15M Seed Power
+               <div className="flex items-center gap-2 justify-end text-[9px] text-emerald-500 font-black uppercase mt-1">
+                 <ShieldCheck className="w-3 h-3" /> SEED_POWER_ACTIVE
                </div>
              )}
            </div>
         </div>
-        <div className="p-4 bg-foreground/5 border border-border rounded-xl flex items-center gap-4">
-           <Info className="w-4 h-4 text-muted-foreground" />
-           <p className="text-[10px] text-muted-foreground uppercase font-black leading-tight tracking-tight">
-             7-DAY LIFECYCLE: 6 DAYS VOTING (EMERALD) <br/>
-             FINAL 24H: VOTING LOCK & CONSENSUS FREEZE (RED)
+        <div className="p-6 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-5 shadow-xl backdrop-blur-xl">
+           <Info className="w-5 h-5 text-white/30" />
+           <p className="text-[10px] text-white/40 uppercase font-black leading-relaxed tracking-tight">
+             7-DAY CYCLE: 6 DAYS VOTING (EMERALD) <br/>
+             FINAL 24H: CONSENSUS FREEZE (RED)
            </p>
         </div>
       </div>
 
       {showCreate && connected && (
-        <div className="exn-card p-8 border-secondary/40 animate-in fade-in slide-in-from-top-4">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-secondary/20 rounded-lg">
-              <Landmark className="w-5 h-5 text-secondary" />
+        <div className="exn-card p-10 border-secondary/40 animate-in fade-in slide-in-from-top-6 duration-700 bg-black/60 backdrop-blur-3xl shadow-3xl">
+          <div className="flex items-center gap-4 mb-10 border-b border-white/5 pb-6">
+            <div className="p-3 bg-secondary/20 rounded-xl">
+              <Landmark className="w-6 h-6 text-secondary" />
             </div>
-            <h3 className="text-xl font-bold uppercase tracking-widest">Submit Proposal (Fee: 10 EXN)</h3>
+            <h3 className="text-2xl font-black uppercase tracking-[0.3em]">NEW_DAO_PROPOSAL (FEE_10_EXN)</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-               <div className="space-y-2">
-                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Proposal Title</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-8">
+               <div className="space-y-4">
+                 <label className="text-[11px] text-white/30 uppercase font-black tracking-[0.3em]">PROPOSAL_TITLE</label>
                  <input 
                    value={newProp.title}
                    onChange={e => setNewProp({...newProp, title: e.target.value})}
-                   className="exn-input text-xs" 
-                   placeholder="e.g. PIP-004: Network Expansion" 
+                   className="exn-input text-xs font-mono font-bold h-14" 
+                   placeholder="e.g. PIP-004: NETWORK_EXPANSION" 
                  />
                </div>
 
-               <div className="space-y-2">
-                 <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Proposal Category</label>
+               <div className="space-y-4">
+                 <label className="text-[11px] text-white/30 uppercase font-black tracking-[0.3em]">PROPOSAL_CATEGORY</label>
                  <select 
                    value={newProp.type}
                    onChange={e => setNewProp({...newProp, type: Number(e.target.value)})}
-                   className="exn-input text-xs"
+                   className="exn-input text-[11px] font-black h-14 uppercase tracking-widest"
                  >
-                   <option value={0}>Protocol Parameter Change</option>
-                   <option value={1}>Treasury Distribution</option>
+                   <option value={0}>PROTOCOL_PARAMETER_CHANGE</option>
+                   <option value={1}>TREASURY_DISTRIBUTION</option>
                  </select>
                </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Rationale & Details</label>
+            <div className="space-y-4">
+              <label className="text-[11px] text-white/30 uppercase font-black tracking-[0.3em]">RATIONALE_DETAILS</label>
               <textarea 
                 value={newProp.description}
                 onChange={e => setNewProp({...newProp, description: e.target.value})}
-                className="exn-input h-[210px] text-xs py-4" 
-                placeholder="Describe the change. Required combined weight: 1M EXN." 
+                className="exn-input h-[230px] text-xs py-6 font-mono font-medium leading-relaxed" 
+                placeholder="Describe infrastructure adjustments. Required weight: 1M EXN." 
               />
             </div>
           </div>
 
-          <div className="flex gap-4 mt-10">
+          <div className="flex gap-6 mt-12">
             <button 
               onClick={handleCreateRequest} 
               disabled={isProposalDisabled}
-              className={`px-10 text-[10px] transition-all h-12 flex items-center justify-center font-black uppercase ${!isProposalDisabled ? 'exn-button' : 'bg-foreground/5 text-muted-foreground border border-border cursor-not-allowed'}`}
+              className={`px-12 text-[11px] transition-all h-14 flex items-center justify-center font-black uppercase tracking-[0.3em] shadow-2xl ${!isProposalDisabled ? 'exn-button' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed'}`}
             >
-              Review & Broadcast
+              REVIEW_&_BROADCAST
             </button>
-            <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 text-[10px]">Cancel</button>
+            <button onClick={() => setShowCreate(false)} className="exn-button-outline px-12 text-[11px] h-14 uppercase font-black tracking-[0.3em] border-white/20 text-white hover:bg-white/10">CANCEL</button>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-10">
         {proposals.map((prop: any) => {
           const totalVotes = (prop.yes_votes || 0) + (prop.no_votes || 0);
           const yesPercent = totalVotes > 0 ? (prop.yes_votes / totalVotes) * 100 : 0;
@@ -244,110 +244,110 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           const showComments = activeCommentId === prop.id;
 
           return (
-            <div key={prop.id} className="exn-card p-0 border-border overflow-hidden">
-              <div className="p-8 flex flex-col md:flex-row justify-between gap-8 border-b border-border">
-                <div className="flex-1 space-y-6">
-                  <div className="flex items-center gap-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${prop.type === 1 ? 'bg-secondary/20 text-secondary' : 'bg-primary/20 text-primary'}`}>
-                      {prop.type === 1 ? 'Treasury' : 'Parameter'}
+            <div key={prop.id} className="exn-card p-0 border-white/10 overflow-hidden shadow-2xl bg-black/40 backdrop-blur-3xl">
+              <div className="p-10 flex flex-col md:flex-row justify-between gap-10 border-b border-white/5">
+                <div className="flex-1 space-y-8">
+                  <div className="flex items-center gap-4">
+                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border ${prop.type === 1 ? 'bg-secondary/10 text-secondary border-secondary/30' : 'bg-primary/10 text-primary border-primary/30'}`}>
+                      {prop.type === 1 ? 'TREASURY' : 'PARAMETER'}
                     </span>
-                    <h3 className="text-2xl font-bold text-foreground tracking-tight uppercase">{prop.title}</h3>
+                    <h3 className="text-3xl font-black text-foreground tracking-tighter uppercase leading-tight">{prop.title}</h3>
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{prop.description}</p>
+                  <p className="text-white/60 text-sm leading-relaxed font-medium tracking-tight italic border-l-2 border-primary/20 pl-6">{prop.description}</p>
                   
-                  <div className="flex items-center gap-6 pt-2">
+                  <div className="flex items-center gap-8 pt-4">
                     <ProposalCountdown deadline={prop.deadline} votingEndsAt={prop.voting_ends_at} />
                     {isVotingLocked && (
-                      <div className="flex items-center gap-2 text-[10px] text-destructive uppercase font-black bg-destructive/10 px-3 py-1 rounded-full border border-destructive/20 animate-pulse">
-                        <ShieldAlert className="w-3 h-3" />
-                        Voting Locked
+                      <div className="flex items-center gap-2.5 text-[10px] text-destructive uppercase font-black bg-destructive/10 px-4 py-1.5 rounded-full border border-destructive/30 animate-pulse">
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        CONSENSUS_FREEZE
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="w-full md:w-80 space-y-6 bg-foreground/5 p-6 rounded-2xl">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest">
-                        <div className="flex flex-col">
+                <div className="w-full md:w-96 space-y-8 bg-white/5 p-8 rounded-3xl border border-white/10 shadow-3xl">
+                  <div className="space-y-5">
+                    <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-[0.3em]">
+                        <div className="flex flex-col gap-1">
                           <span className="text-emerald-500">YES: {(prop.yes_votes || 0).toLocaleString()}</span>
-                          <span className="text-[8px] text-emerald-500/50">{yesPercent.toFixed(1)}%</span>
+                          <span className="text-[9px] text-emerald-500/40 font-mono">{yesPercent.toFixed(1)}%</span>
                         </div>
-                        <div className="flex flex-col text-right">
+                        <div className="flex flex-col text-right gap-1">
                           <span className="text-destructive">NO: {(prop.no_votes || 0).toLocaleString()}</span>
-                          <span className="text-[8px] text-destructive/50">{(100 - yesPercent).toFixed(1)}%</span>
+                          <span className="text-[9px] text-destructive/40 font-mono">{(100 - yesPercent).toFixed(1)}%</span>
                         </div>
                     </div>
-                    <Progress value={yesPercent} className="h-2 bg-destructive/20" />
-                    <p className="text-[8px] text-muted-foreground uppercase font-bold text-center">Total Consensus Weight: {totalVotes.toLocaleString()} EXN</p>
+                    <Progress value={yesPercent} className="h-2.5 bg-destructive/20 border border-white/5" />
+                    <p className="text-[9px] text-white/20 uppercase font-black text-center tracking-[0.2em]">TOTAL_CONSOLIDATED_WEIGHT: {totalVotes.toLocaleString()} EXN</p>
                   </div>
 
                   {!isExpired && !isVotingLocked && !hasVoted && !isVotingForThis && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-bold py-3 rounded-lg border border-emerald-500/20 text-[10px] uppercase">Vote Yes</button>
-                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg border border-destructive/20 text-[10px] uppercase">Vote No</button>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-black py-4 rounded-xl border border-emerald-500/30 text-[10px] uppercase tracking-[0.3em] transition-all active:scale-95 shadow-lg">VOTE_YES</button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/10 hover:bg-destructive/20 text-destructive font-black py-4 rounded-xl border border-destructive/30 text-[10px] uppercase tracking-[0.3em] transition-all active:scale-95 shadow-lg">VOTE_NO</button>
                     </div>
                   )}
 
                   {isVotingForThis && (
-                    <div className="space-y-4 animate-in zoom-in-95">
+                    <div className="space-y-5 animate-in zoom-in-95 duration-500">
                       <textarea 
                         value={voteRationale}
                         onChange={e => setVoteRationale(e.target.value)}
                         placeholder="State your rationale... (3 EXN Fee)"
-                        className="exn-input h-24 text-xs bg-background"
+                        className="exn-input h-28 text-xs bg-background font-mono font-medium py-4"
                       />
-                      <div className="grid grid-cols-2 gap-2">
-                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim()} className={`py-2 text-[10px] font-black uppercase ${voteRationale.trim() ? 'exn-button' : 'bg-foreground/5 text-muted-foreground cursor-not-allowed'}`}>Review</button>
-                        <button onClick={() => setVotingOn(null)} className="exn-button-outline py-2 text-[10px]">Cancel</button>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim()} className={`py-3 text-[10px] font-black uppercase tracking-widest ${voteRationale.trim() ? 'exn-button h-12 flex items-center justify-center' : 'bg-white/5 text-white/10 border border-white/10 cursor-not-allowed h-12'}`}>REVIEW</button>
+                        <button onClick={() => setVotingOn(null)} className="exn-button-outline py-3 text-[10px] h-12 flex items-center justify-center border-white/20 text-white/60">ABORT</button>
                       </div>
                     </div>
                   )}
 
                   {isVotingLocked && !isExpired && (
-                    <div className="py-3 bg-destructive/5 border border-destructive/20 rounded-lg text-center text-[10px] text-destructive uppercase font-black">
-                      Consensus Freeze
+                    <div className="py-4 bg-destructive/10 border border-destructive/30 rounded-xl text-center text-[10px] text-destructive uppercase font-black tracking-[0.4em] shadow-lg">
+                      CONSENSUS_FREEZE
                     </div>
                   )}
 
                   {isExpired && (
-                    <button onClick={() => onExecute(prop.id)} disabled={prop.executed} className={`w-full h-12 uppercase text-[10px] font-black tracking-widest flex items-center justify-center gap-2 ${prop.executed ? 'bg-foreground/5 text-muted-foreground border border-border' : 'exn-button'}`}>
-                      <Zap className="w-4 h-4 fill-current" /> {prop.executed ? 'Finalized' : 'Execute Action'}
+                    <button onClick={() => onExecute(prop.id)} disabled={prop.executed} className={`w-full h-14 uppercase text-[11px] font-black tracking-[0.4em] flex items-center justify-center gap-3 transition-all ${prop.executed ? 'bg-white/5 text-white/20 border border-white/10' : 'exn-button shadow-2xl'}`}>
+                      <Zap className="w-4 h-4 fill-current" /> {prop.executed ? 'FINALIZED' : 'EXECUTE_ACTION'}
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="bg-background/40">
+              <div className="bg-black/20">
                 <button 
                   onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)}
-                  className="w-full flex items-center justify-between px-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all border-b border-border/10"
+                  className="w-full flex items-center justify-between px-10 py-5 text-[10px] font-black uppercase tracking-[0.4em] text-white/30 hover:text-white transition-all border-b border-white/5 backdrop-blur-3xl"
                 >
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    Voter Rationales ({prop.comments?.length || 0})
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-4 h-4" />
+                    VOTER_RATIONALES ({prop.comments?.length || 0})
                   </div>
-                  {showComments ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {showComments ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                 </button>
 
                 {showComments && (
-                  <div className="p-8 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 max-h-80 overflow-y-auto custom-scrollbar">
+                  <div className="p-10 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 max-h-[450px] overflow-y-auto custom-scrollbar bg-black/40">
                     {(!prop.comments || prop.comments.length === 0) ? (
-                      <p className="text-[10px] text-muted-foreground uppercase font-black text-center py-6 italic">No rationales provided yet.</p>
+                      <p className="text-[10px] text-white/10 uppercase font-black text-center py-12 tracking-[0.3em] italic">NO_RATIONALES_LOGGED_FOR_THIS_SECTOR</p>
                     ) : (
                       prop.comments.map((comment: any, idx: number) => (
-                        <div key={idx} className="p-4 bg-foreground/5 rounded-xl border border-border/10 space-y-2">
+                        <div key={idx} className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-4 shadow-xl hover:border-white/20 transition-all">
                           <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                              <span className={`w-1.5 h-1.5 rounded-full ${comment.vote_stance === 'YES' ? 'bg-emerald-500' : 'bg-destructive'}`} />
-                              <p className="text-[9px] font-mono text-primary font-bold">{shortenAddress(comment.author)}</p>
-                              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${comment.vote_stance === 'YES' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
+                            <div className="flex items-center gap-4">
+                              <span className={`w-2 h-2 rounded-full ${comment.vote_stance === 'YES' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-destructive shadow-[0_0_10px_#ef4444]'}`} />
+                              <p className="text-[11px] font-mono text-primary font-black tracking-tighter">{shortenAddress(comment.author)}</p>
+                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${comment.vote_stance === 'YES' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
                                 {comment.vote_stance}
                               </span>
                             </div>
-                            <p className="text-[8px] text-muted-foreground uppercase">{new Date(comment.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>
+                            <p className="text-[9px] text-white/20 uppercase font-black tracking-widest">{new Date(comment.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>
                           </div>
-                          <p className="text-xs text-foreground/80 leading-relaxed">{comment.text}</p>
+                          <p className="text-xs text-white/70 leading-relaxed font-medium tracking-tight border-l border-white/10 pl-4">{comment.text}</p>
                         </div>
                       ))
                     )}
@@ -361,60 +361,62 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
       {/* Governance Review Dialog */}
       <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
-        <AlertDialogContent className="exn-card border-primary/40 bg-black/90 backdrop-blur-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold uppercase tracking-widest text-primary flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6" />
-              Review Governance Action
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-6 pt-4">
-                <div className="p-6 bg-foreground/5 rounded-2xl border border-white/5 space-y-4">
-                  <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                    <span className="text-muted-foreground">Action</span>
-                    <span className="text-foreground font-black">{reviewAction === 'create' ? 'Broadcast Proposal' : 'Cast Consensus Vote'}</span>
+        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-lg">
+          <div className="p-10 space-y-10">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-4">
+                <ShieldCheck className="w-8 h-8" />
+                VERIFY_DAO_ACTION
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-8 pt-8">
+                  <div className="p-8 bg-white/5 rounded-2xl border border-white/10 space-y-6 shadow-3xl">
+                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                      <span className="text-white/30 font-black">OP_CODE</span>
+                      <span className="text-white font-black font-mono">{reviewAction === 'create' ? 'PROPOSAL_BROADCAST' : 'CONSENSUS_VOTE'}</span>
+                    </div>
+                    {reviewAction === 'create' ? (
+                      <>
+                        <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                          <span className="text-white/30 font-black">ID_STRING</span>
+                          <span className="text-white font-black font-mono truncate max-w-[180px]">{newProp.title}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                          <span className="text-white/30 font-black">NETWORK_FEE</span>
+                          <span className="text-primary font-mono font-black text-sm">10 EXN</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                          <span className="text-white/30 font-black">STANCE</span>
+                          <span className={votingOn?.support ? "text-emerald-500 font-black" : "text-destructive font-black"}>
+                            {votingOn?.support ? 'YES_SUPPORT' : 'NO_REJECT'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                          <span className="text-white/30 font-black">WEIGHT</span>
+                          <span className="text-primary font-mono font-black text-sm">{userStakeWeight.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                          <span className="text-white/30 font-black">NETWORK_FEE</span>
+                          <span className="text-primary font-mono font-black text-sm">3 EXN</span>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  {reviewAction === 'create' ? (
-                    <>
-                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                        <span className="text-muted-foreground">Title</span>
-                        <span className="text-foreground font-bold truncate max-w-[200px]">{newProp.title}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                        <span className="text-muted-foreground">Network Fee</span>
-                        <span className="text-primary font-mono font-bold">10 EXN</span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                        <span className="text-muted-foreground">Vote Stance</span>
-                        <span className={votingOn?.support ? "text-emerald-500 font-bold" : "text-destructive font-bold"}>
-                          {votingOn?.support ? 'YES / SUPPORT' : 'NO / REJECT'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                        <span className="text-muted-foreground">Consensus Weight</span>
-                        <span className="text-primary font-mono font-bold">{userStakeWeight.toLocaleString()} EXN</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                        <span className="text-muted-foreground">Network Fee</span>
-                        <span className="text-primary font-mono font-bold">3 EXN</span>
-                      </div>
-                    </>
-                  )}
+                  
+                  <p className="text-[11px] text-white/40 uppercase leading-relaxed font-black tracking-tight">
+                    BY CONFIRMING, YOUR DECISION WILL BE RECORDED ON THE GLOBAL PROTOCOL LEDGER. GOVERNANCE ACTIONS REQUIRE NETWORK FEES TO PREVENT CONSENSUS SPAM.
+                  </p>
                 </div>
-                
-                <p className="text-[10px] text-muted-foreground uppercase leading-relaxed font-bold">
-                  By confirming, your decision will be recorded on the global protocol ledger. Governance actions require network fees to prevent consensus spam.
-                </p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="pt-6">
-            <AlertDialogCancel className="exn-button-outline text-[10px] h-12 uppercase font-black">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={reviewAction === 'create' ? confirmCreate : confirmVote} className="exn-button text-[10px] h-12 uppercase font-black">Confirm & Broadcast</AlertDialogAction>
-          </AlertDialogFooter>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row gap-6 pt-4">
+              <AlertDialogCancel className="exn-button-outline flex-1 text-[11px] h-14 uppercase font-black border-white/20 text-white hover:bg-white/10">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={reviewAction === 'create' ? confirmCreate : confirmVote} className="exn-button flex-1 text-[11px] h-14 uppercase font-black">CONFIRM_BROADCAST</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
