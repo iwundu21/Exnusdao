@@ -14,11 +14,11 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <h2 className="text-2xl font-black exn-gradient-text uppercase tracking-tighter">NETWORK_DISCOVERY</h2>
-          <p className="text-[11px] text-white/80 uppercase font-black tracking-[0.4em]">Global Node Indexing v2.4</p>
+          <p className="text-[11px] text-white uppercase font-black tracking-[0.4em]">Global Node Indexing v2.4</p>
         </div>
         <div className="flex gap-3">
-          <span className="bg-white/10 text-white text-[10px] px-4 py-2 rounded-lg border border-white/20 font-black uppercase tracking-widest backdrop-blur-md">{validators.length} UNITS</span>
-          <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-4 py-2 rounded-lg border border-emerald-500/40 font-black uppercase tracking-widest backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.3)]">{validators.filter((v: any) => v.is_active).length} ONLINE</span>
+          <span className="bg-white/10 text-white text-[10px] px-4 py-2 rounded-lg border border-white font-black uppercase tracking-widest backdrop-blur-md">{validators.length} UNITS</span>
+          <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-4 py-2 rounded-lg border border-emerald-500 font-black uppercase tracking-widest backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.3)]">{validators.filter((v: any) => v.is_active).length} ONLINE</span>
         </div>
       </div>
 
@@ -41,7 +41,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                   ? 'border-primary ring-4 ring-primary/20 shadow-[0_0_60px_rgba(0,245,255,0.3)]' 
                   : !validator.is_active 
                     ? 'border-destructive/40 opacity-70' 
-                    : 'border-white/20 hover:border-primary/40 shadow-2xl'
+                    : 'border-white hover:border-primary shadow-2xl'
               }`}
             >
               <div className="relative h-48 w-full overflow-hidden">
@@ -55,7 +55,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                 <div className="absolute inset-0 bg-gradient-to-t from-[#02060f] via-transparent to-transparent" />
                 
                 <div className="absolute top-6 right-6 flex items-center gap-3">
-                   <div className="flex items-center gap-2 bg-black/90 backdrop-blur-2xl text-primary text-[10px] px-4 py-2 rounded-lg font-black uppercase border border-primary/50 shadow-2xl">
+                   <div className="flex items-center gap-2 bg-black/90 backdrop-blur-2xl text-primary text-[10px] px-4 py-2 rounded-lg font-black uppercase border border-primary shadow-2xl">
                       <TrendingUp className="w-3.5 h-3.5" />
                       {weightShare.toFixed(2)}%_WEIGHT
                    </div>
@@ -85,23 +85,23 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="p-6 bg-white/10 rounded-xl border border-white/20 space-y-2 group-hover:border-primary/60 transition-all duration-500 shadow-xl">
-                    <p className="text-[10px] uppercase font-black text-white/60 tracking-[0.2em]">STAKED_WEIGHT</p>
-                    <p className="text-primary font-black text-[14px] font-mono tracking-tighter">{(validator.total_staked || 0).toLocaleString()} <span className="text-[10px] text-white/60">EXN</span></p>
+                  <div className="p-6 bg-white/10 rounded-xl border border-white space-y-2 group-hover:border-primary transition-all duration-500 shadow-xl">
+                    <p className="text-[10px] uppercase font-black text-white tracking-[0.2em]">STAKED_WEIGHT</p>
+                    <p className="text-primary font-black text-[14px] font-mono tracking-tighter">{(validator.total_staked || 0).toLocaleString()} <span className="text-[10px] text-white">EXN</span></p>
                   </div>
-                  <div className="p-6 bg-white/10 rounded-xl border border-white/20 space-y-2 group-hover:border-primary/60 transition-all duration-500 shadow-xl">
-                    <p className="text-[10px] uppercase font-black text-white/60 tracking-[0.2em]">ACTIVE_STAKERS</p>
+                  <div className="p-6 bg-white/10 rounded-xl border border-white space-y-2 group-hover:border-primary transition-all duration-500 shadow-xl">
+                    <p className="text-[10px] uppercase font-black text-white tracking-[0.2em]">ACTIVE_STAKERS</p>
                     <p className="text-white font-black text-[14px] font-mono tracking-tighter">{stakerCount}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="px-5 py-4 bg-white/10 rounded-xl border border-white/20 flex flex-col items-center gap-2">
-                    <span className="text-white/60 text-[10px] uppercase font-black tracking-widest">NETWORK_FEE</span>
+                  <div className="px-5 py-4 bg-white/10 rounded-xl border border-white flex flex-col items-center gap-2">
+                    <span className="text-white text-[10px] uppercase font-black tracking-widest">NETWORK_FEE</span>
                     <span className="text-white font-black text-[13px] font-mono">{(validator.commission_rate / 100).toFixed(1)}%</span>
                   </div>
-                  <div className="px-5 py-4 bg-white/10 rounded-xl border border-white/20 flex flex-col items-center gap-2 overflow-hidden">
-                    <span className="text-white/60 text-[10px] uppercase font-black tracking-widest">REGION</span>
+                  <div className="px-5 py-4 bg-white/10 rounded-xl border border-white flex flex-col items-center gap-2 overflow-hidden">
+                    <span className="text-white text-[10px] uppercase font-black tracking-widest">REGION</span>
                     <div className="flex items-center gap-2 text-primary">
                        <MapPin className="w-3.5 h-3.5" />
                        <span className="font-black text-[10px] uppercase truncate max-w-[120px] font-mono tracking-tight">{validator.location}</span>
@@ -114,8 +114,8 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                   onClick={() => onSelect(validator)}
                   className={`w-full text-[12px] h-14 uppercase font-black tracking-[0.4em] rounded-xl transition-all duration-500 shadow-2xl ${
                     validator.is_active 
-                      ? (isSelected ? 'bg-primary/30 text-primary border border-primary/60' : 'exn-button') 
-                      : 'bg-white/10 text-white/40 border border-white/20 cursor-not-allowed'
+                      ? (isSelected ? 'bg-primary/30 text-primary border border-primary' : 'exn-button') 
+                      : 'bg-white/10 text-white border border-white cursor-not-allowed'
                   }`}
                 >
                   {isSelected ? 'IDENTITY_SELECTED' : (validator.is_active ? 'INITIALIZE_STAKE' : 'OFFLINE_STATUS')}

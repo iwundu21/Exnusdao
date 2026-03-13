@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Wallet, ShieldAlert, AlertTriangle, Terminal, Activity, Database, Cpu, Globe, Settings2, ShieldCheck, Zap, Ticket } from 'lucide-react';
+import { ArrowLeft, Wallet, ShieldAlert, AlertTriangle, Terminal, Database, Cpu, Globe, Settings2, ShieldCheck, Zap, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
@@ -201,7 +201,6 @@ export default function ManageNodePage() {
                   <div className="grid grid-cols-1 gap-6">
                     <div className="p-6 bg-white/10 rounded-2xl border border-white/30 flex items-center justify-between group/metric hover:border-primary transition-all shadow-xl">
                        <div className="flex items-center gap-4">
-                         <Activity className="w-5 h-5 text-white group-hover:text-primary transition-colors" />
                          <span className="text-[11px] uppercase font-black text-white tracking-[0.3em]">NETWORK_WEIGHT</span>
                        </div>
                        <span className="text-[13px] font-black font-mono text-primary">{(node.total_staked || 0).toLocaleString()}</span>
@@ -347,7 +346,7 @@ export default function ManageNodePage() {
       </div>
 
       <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
-        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md">
+        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md" asChild>
           <div className="p-10 space-y-10">
             <AlertDialogHeader>
               <AlertDialogTitle asChild>

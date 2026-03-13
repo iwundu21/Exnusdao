@@ -11,14 +11,10 @@ import {
   Coins,
   ShieldAlert,
   RotateCcw,
-  AlertTriangle,
   ArrowUpRight,
-  ArrowDownLeft,
   Banknote,
   Ticket,
   Zap,
-  Layers,
-  Activity,
   Play
 } from 'lucide-react';
 
@@ -199,7 +195,6 @@ export default function AdminPage() {
            <div className="lg:col-span-2 space-y-6">
               <div className="exn-card p-6 space-y-6 border-primary/40 bg-primary/10">
                  <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-primary" />
                     <h3 className="text-base font-bold uppercase tracking-widest text-white">Epoch Protocol Control</h3>
                  </div>
                  
@@ -232,15 +227,15 @@ export default function AdminPage() {
                     <div className="space-y-3">
                        <p className="text-[10px] text-white uppercase font-black">License Price (USDC)</p>
                        <div className="relative">
-                          <Ticket className="absolute left-4 top-3 w-3.5 h-3.5 text-white/60" />
-                          <input value={formatInput(newLicensePrice)} onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white/40 bg-white/10" />
+                          <Ticket className="absolute left-4 top-3 w-3.5 h-3.5 text-white" />
+                          <input value={formatInput(newLicensePrice)} onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white bg-white/10" />
                        </div>
                     </div>
                     <div className="space-y-3">
                        <p className="text-[10px] text-white uppercase font-black">Reward Cap (EXN)</p>
                        <div className="relative">
-                          <Zap className="absolute left-4 top-3 w-3.5 h-3.5 text-white/60" />
-                          <input value={formatInput(newRewardCap)} onChange={e => handleTextChange(e.target.value, setNewRewardCap)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white/40 bg-white/10" />
+                          <Zap className="absolute left-4 top-3 w-3.5 h-3.5 text-white" />
+                          <input value={formatInput(newRewardCap)} onChange={e => handleTextChange(e.target.value, setNewRewardCap)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white bg-white/10" />
                        </div>
                     </div>
                  </div>
@@ -263,7 +258,7 @@ export default function AdminPage() {
                         <p className="text-[11px] text-emerald-400 font-bold uppercase">Vault: {state.usdcVaultBalance.toLocaleString()} USDC</p>
                       </div>
                       <div className="flex gap-2">
-                         <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-11 font-mono text-[12px] text-white border-white/40 bg-white/10" />
+                         <input value={formatInput(withdrawUsdcAmt)} onChange={e => handleTextChange(e.target.value, setWithdrawUsdcAmt)} className="exn-input h-11 font-mono text-[12px] text-white border-white bg-white/10" />
                          <button onClick={handleWithdrawUsdc} disabled={!withdrawUsdcAmt.trim() || Number(withdrawUsdcAmt.replace(/,/g, '')) > state.usdcVaultBalance} className={`px-4 h-11 text-[10px] uppercase font-black transition-all flex items-center gap-2 ${withdrawUsdcAmt.trim() ? 'exn-button' : 'bg-white/10 text-white border border-white/30 cursor-not-allowed'}`}>
                            Withdraw
                          </button>
@@ -276,7 +271,7 @@ export default function AdminPage() {
                           <p className="text-[10px] text-white uppercase font-black">Fund Reward Pool (EXN)</p>
                           <p className="text-[11px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                         </div>
-                        <input value={formatInput(fundRewardsAmt)} onChange={e => handleTextChange(e.target.value, setFundRewardsAmt)} className="exn-input h-11 font-mono text-[12px] text-white border-white/40 bg-white/10" />
+                        <input value={formatInput(fundRewardsAmt)} onChange={e => handleTextChange(e.target.value, setFundRewardsAmt)} className="exn-input h-11 font-mono text-[12px] text-white border-white bg-white/10" />
                         <button onClick={handleFundRewards} disabled={!fundRewardsAmt.trim() || Number(fundRewardsAmt.replace(/,/g, '')) > exnBalance} className={`w-full h-11 text-[10px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundRewardsAmt.trim() ? 'exn-button' : 'bg-white/10 text-white border border-white/30 cursor-not-allowed'}`}>
                           Fund Rewards
                         </button>
@@ -287,7 +282,7 @@ export default function AdminPage() {
                           <p className="text-[10px] text-white uppercase font-black">Fund DAO Treasury (EXN)</p>
                           <p className="text-[11px] text-primary font-bold uppercase">Bal: {exnBalance.toLocaleString()}</p>
                         </div>
-                        <input value={formatInput(fundTreasuryAmt)} onChange={e => handleTextChange(e.target.value, setFundTreasuryAmt)} className="exn-input h-11 font-mono text-[12px] text-white border-white/40 bg-white/10" />
+                        <input value={formatInput(fundTreasuryAmt)} onChange={e => handleTextChange(e.target.value, setFundTreasuryAmt)} className="exn-input h-11 font-mono text-[12px] text-white border-white bg-white/10" />
                         <button onClick={handleFundTreasury} disabled={!fundTreasuryAmt.trim() || Number(fundTreasuryAmt.replace(/,/g, '')) > exnBalance} className={`w-full h-11 text-[10px] uppercase font-black transition-all flex items-center justify-center gap-2 ${fundTreasuryAmt.trim() ? 'exn-button' : 'bg-white/10 text-white border border-white/30 cursor-not-allowed'}`}>
                           Fund Treasury
                         </button>
