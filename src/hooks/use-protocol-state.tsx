@@ -143,7 +143,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const claimFaucetAssets = useCallback((address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
-    setFeedback('warning', 'Processing claim request... (6s simulation)');
+    setFeedback('warning', `GENERATING ${type.toUpperCase()} ASSET DROP...`);
     
     setTimeout(() => {
       const ref = doc(db, 'users', address);
@@ -156,7 +156,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         [timestampField]: Date.now(),
         lastActive: Date.now()
       }, { merge: true }).then(() => {
-        setFeedback('success', `${type.toUpperCase()} assets deposited successfully.`, hash);
+        setFeedback('success', `${type.toUpperCase()} ASSETS DEPOSITED.`, hash);
       }).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ 
           path: ref.path, 
@@ -186,15 +186,15 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     if (!db) return;
     const gRef = doc(db, 'protocol', 'global');
     setDoc(gRef, settings, { merge: true }).then(() => {
-      setFeedback('success', 'Global network parameters updated in cloud ledger.');
+      setFeedback('success', 'PROTOCOL SETTINGS SYNCHRONIZED.');
     }).catch(err => {
-      setFeedback('error', 'Failed to update global protocol settings.');
+      setFeedback('error', 'FAILED TO UPDATE PROTOCOL SETTINGS.');
     });
   }, [db, setFeedback]);
 
   const mintLicense = useCallback((address: string, price: number, license: any) => {
     if (!address || !db) return;
-    setFeedback('warning', 'Minting XNode License NFT... (6s simulation)');
+    setFeedback('warning', 'PROVISIONING XNODE LICENSE NFT...');
     
     setTimeout(() => {
       const lRef = doc(db, 'licenses', license.id);
@@ -205,13 +205,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(lRef, license);
       setDoc(uRef, { usdcBalance: increment(-price) }, { merge: true });
       setDoc(gRef, { usdcVaultBalance: increment(price) }, { merge: true });
-      setFeedback('success', `XNode License ${license.id} minted successfully.`, hash);
+      setFeedback('success', `LICENSE ${license.id} MINTED.`, hash);
     }, 6000);
   }, [db, setFeedback]);
 
   const addStake = useCallback((stake: any) => {
     if (!db) return;
-    setFeedback('warning', 'Executing on-chain stake... (6s simulation)');
+    setFeedback('warning', 'ESTABLISHING STAKING LOCK...');
     
     setTimeout(() => {
       const sRef = doc(collection(db, 'stakes'));
@@ -222,13 +222,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(sRef, { ...stake, id: sRef.id });
       setDoc(gRef, { stakedVaultBalance: increment(stake.amount) }, { merge: true });
       setDoc(vRef, { total_staked: increment(stake.amount) }, { merge: true });
-      setFeedback('success', `${stake.amount.toLocaleString()} EXN successfully locked.`, hash);
+      setFeedback('success', `${stake.amount.toLocaleString()} EXN COMMITTED.`, hash);
     }, 6000);
   }, [db, setFeedback]);
 
   const unstake = useCallback((stakeId: string, amount: number, validatorId: string) => {
     if (!db) return;
-    setFeedback('warning', 'Processing unstake request... (6s simulation)');
+    setFeedback('warning', 'EXECUTING PRINCIPAL WITHDRAWAL...');
     
     setTimeout(() => {
       const sRef = doc(db, 'stakes', stakeId);
@@ -239,26 +239,26 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       setDoc(sRef, { unstaked: true }, { merge: true });
       setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
       setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
-      setFeedback('success', 'Principal returned to wallet.', hash);
+      setFeedback('success', 'PRINCIPAL RETURNED TO WALLET.', hash);
     }, 6000);
   }, [db, setFeedback]);
 
   const claimRewards = useCallback((stakeId: string, amount: number, newCheckpoint: number, wallet: string) => {
     if (!db) return;
-    setFeedback('warning', 'Harvesting yield... (6s simulation)');
+    setFeedback('warning', 'HARVESTING ACCRUED YIELD...');
     
     setTimeout(() => {
       const sRef = doc(db, 'stakes', stakeId);
       const hash = generateTxHash();
       setDoc(sRef, { reward_checkpoint: newCheckpoint }, { merge: true });
       updateUserBalance(wallet, amount, 0);
-      setFeedback('success', 'Rewards successfully harvested.', hash);
+      setFeedback('success', 'REWARDS DEPOSITED.', hash);
     }, 6000);
   }, [db, updateUserBalance, setFeedback]);
 
   const castVote = useCallback((pId: number, support: boolean, weight: number, comment: any) => {
     if (!db || !walletAddress) return;
-    setFeedback('warning', 'Recording consensus decision... (6s simulation)');
+    setFeedback('warning', 'ESTABLISHING CONSENSUS DECISION...');
     
     setTimeout(() => {
       const pRef = doc(db, 'proposals', pId.toString());
@@ -272,13 +272,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         voters: arrayUnion(walletAddress)
       }, { merge: true });
       setDoc(gRef, { treasuryBalance: increment(3) }, { merge: true });
-      setFeedback('success', 'Vote recorded on-chain.', hash);
+      setFeedback('success', 'CONSENSUS VOTE RECORDED.', hash);
     }, 6000);
   }, [db, walletAddress, setFeedback]);
 
   const createProposal = useCallback((proposal: any) => {
     if (!db) return;
-    setFeedback('warning', 'Broadcasting proposal to network... (6s simulation)');
+    setFeedback('warning', 'BROADCASTING PROPOSAL TO NETWORK...');
     
     setTimeout(() => {
       const pRef = doc(db, 'proposals', proposal.id.toString());
@@ -287,13 +287,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       
       setDoc(pRef, proposal);
       setDoc(gRef, { treasuryBalance: increment(10) }, { merge: true });
-      setFeedback('success', 'Proposal broadcast successfully.', hash);
+      setFeedback('success', 'PROPOSAL BROADCAST SUCCESSFUL.', hash);
     }, 6000);
   }, [db, setFeedback]);
 
   const executeProposal = useCallback((pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => {
     if (!db) return;
-    setFeedback('warning', 'Enacting DAO consensus... (6s simulation)');
+    setFeedback('warning', 'ENACTING DAO CONSENSUS...');
     
     setTimeout(() => {
       const pRef = doc(db, 'proposals', pId.toString());
@@ -305,13 +305,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         setDoc(gRef, { treasuryBalance: increment(-amount) }, { merge: true });
         if (recipient === wallet) updateUserBalance(wallet, amount, 0);
       }
-      setFeedback('success', 'Proposal execution complete.', hash);
+      setFeedback('success', 'PROPOSAL ENACTED.', hash);
     }, 6000);
   }, [db, updateUserBalance, setFeedback]);
 
   const crankEpoch = useCallback((targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => {
     if (!db) return;
-    setFeedback('warning', 'Settling epoch rewards... (6s simulation)');
+    setFeedback('warning', 'SETTLING EPOCH REWARDS...');
     
     setTimeout(() => {
       const gRef = doc(db, 'protocol', 'global');
@@ -320,13 +320,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         lastCrankedEpoch: targetEpoch,
         rewardVaultBalance: increment(-totalPool)
       }, { merge: true });
-      setFeedback('success', `Epoch ${targetEpoch} successfully settled.`, hash);
+      setFeedback('success', `EPOCH ${targetEpoch} SETTLED.`, hash);
     }, 6000);
   }, [db, setFeedback]);
 
   const registerValidator = useCallback((validator: any, licenseId: string) => {
     if (!db) return;
-    setFeedback('warning', 'Provisioning XNode sector... (6s simulation)');
+    setFeedback('warning', 'PROVISIONING XNODE SECTOR...');
     
     setTimeout(() => {
       const vRef = doc(db, 'validators', validator.id);
@@ -335,7 +335,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       
       setDoc(vRef, validator).then(() => {
         setDoc(lRef, { is_claimed: true }, { merge: true });
-        setFeedback('success', 'XNode identity registered.', hash);
+        setFeedback('success', 'XNODE IDENTITY REGISTERED.', hash);
       }).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'create' }));
       });
@@ -344,13 +344,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const updateValidator = useCallback((vId: string, data: any) => {
     if (!db) return;
-    setFeedback('warning', 'Propagating identity updates... (6s simulation)');
+    setFeedback('warning', 'PROPAGATING IDENTITY UPDATES...');
     
     setTimeout(() => {
       const vRef = doc(db, 'validators', vId);
       const hash = generateTxHash();
       setDoc(vRef, data, { merge: true }).then(() => {
-        setFeedback('success', 'Identity metadata synchronized.', hash);
+        setFeedback('success', 'IDENTITY SYNCHRONIZED.', hash);
       }).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'update' }));
       });
@@ -359,7 +359,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const terminateValidator = useCallback((vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
     if (!db) return;
-    setFeedback('warning', 'Decommissioning XNode identity... (6s simulation)');
+    setFeedback('warning', 'DECOMMISSIONING XNODE IDENTITY...');
     
     setTimeout(() => {
       const vRef = doc(db, 'validators', vId);
@@ -369,7 +369,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       deleteDoc(vRef).then(() => {
         setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true });
         updateUserBalance(wallet, seedRefund + rewards, 0);
-        setFeedback('success', 'Registration terminated and license burned.', hash);
+        setFeedback('success', 'REGISTRATION TERMINATED.', hash);
       }).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: vRef.path, operation: 'delete' }));
       });
