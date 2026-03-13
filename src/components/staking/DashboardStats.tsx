@@ -25,6 +25,7 @@ export function DashboardStats({
 }: DashboardStatsProps) {
   const { state } = useProtocolState();
   const [now, setNow] = useState(Date.now());
+  const [healthIndex, setHealthIndex] = useState(0); // 0: stable, 1: latency, 2: degraded
   const exnPrice = state.exnPrice || 0.23;
   
   const stakedUsdValue = totalStaked * exnPrice;
@@ -32,7 +33,11 @@ export function DashboardStats({
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
+    const healthTimer = setInterval(() => setHealthIndex((prev) => (prev + 1) % 3), 4000);
+    return () => {
+      clearInterval(timer);
+      clearInterval(healthTimer);
+    };
   }, []);
 
   const currentEpoch = useMemo(() => {
@@ -86,6 +91,14 @@ export function DashboardStats({
     return data;
   }, [totalStaked, state.networkStartDate]);
 
+  const healthStates = [
+    { name: 'STABLE', color: 'text-emerald-400', bg: 'bg-emerald-500', shadow: 'shadow-[0_0_20px_#10b981]' },
+    { name: 'LATENCY', color: 'text-amber-400', bg: 'bg-amber-500', shadow: 'shadow-[0_0_20px_#f59e0b]' },
+    { name: 'DEGRADED', color: 'text-rose-400', bg: 'bg-rose-500', shadow: 'shadow-[0_0_20px_#f43f5e]' }
+  ];
+
+  const currentHealth = healthStates[healthIndex];
+
   return (
     <div className="space-y-8 mb-12 animate-in fade-in duration-1000">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -120,7 +133,7 @@ export function DashboardStats({
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="chartGradient" x1="0" x1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                   </linearGradient>
@@ -225,13 +238,13 @@ export function DashboardStats({
            <div className="flex items-center gap-5">
               <div className="space-y-1.5">
                  <p className="text-[11px] text-white uppercase font-black tracking-widest">Network Health</p>
-                 <p className="text-[18px] font-black text-emerald-400 font-mono tracking-widest">STABLE</p>
+                 <p className={`text-[18px] font-black ${currentHealth.color} font-mono tracking-widest transition-colors duration-1000`}>{currentHealth.name}</p>
               </div>
            </div>
            <div className="flex gap-2">
-              <div className="w-2 h-5 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]" />
-              <div className="w-2 h-5 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]" />
-              <div className="w-2 h-5 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]" />
+              <div className={`w-2 h-5 ${currentHealth.bg} rounded-full ${currentHealth.shadow} transition-all duration-1000`} />
+              <div className={`w-2 h-5 ${currentHealth.bg} rounded-full ${currentHealth.shadow} transition-all duration-1000 delay-75`} />
+              <div className={`w-2 h-5 ${currentHealth.bg} rounded-full ${currentHealth.shadow} transition-all duration-1000 delay-150`} />
            </div>
         </div>
       </div>
