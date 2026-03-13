@@ -98,7 +98,7 @@ export function StakingActionForm({
   const currentTier = STAKING_TIERS.find(t => t.days.toString() === duration);
 
   return (
-    <div className="exn-card p-0 bg-black/40 border-white/5 sticky top-28 overflow-hidden backdrop-blur-xl">
+    <div className="exn-card p-0 bg-black/40 border-white/5 sticky top-28 overflow-hidden backdrop-blur-xl transition-all duration-300">
       <div className="flex border-b border-white/5">
         <button 
           onClick={() => setActiveTab('stake')}
@@ -129,7 +129,7 @@ export function StakingActionForm({
                   disabled={!connected}
                   onChange={handleInputChange}
                   placeholder="0.00"
-                  className={`exn-input h-14 bg-white/5 border-white/10 text-xs font-mono tracking-tighter transition-all group-hover:border-primary/40 focus:border-primary ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  className={`exn-input h-14 bg-white/5 border-white/10 text-[11px] font-mono tracking-tighter transition-all group-hover:border-primary/40 focus:border-primary ${!connected ? 'opacity-30 cursor-not-allowed' : ''}`}
                 />
                 {connected && (
                   <button onClick={() => setAmountInput(formatForDisplay(exnBalance.toString()))} className="absolute right-4 top-4.5 text-[8px] font-black text-primary hover:text-white transition-colors">MAX</button>
@@ -191,7 +191,7 @@ export function StakingActionForm({
               <div className="relative z-10 flex justify-between items-center">
                 <div className="space-y-1">
                   <p className="text-[8px] text-white/30 uppercase font-black tracking-[0.3em]">Aggregate Yield</p>
-                  <p className="text-sm font-bold text-white font-mono tracking-tighter">{totalPendingRewards.toFixed(4)} <span className="text-[10px] text-secondary">EXN</span></p>
+                  <p className="text-[11px] font-bold text-white font-mono tracking-tighter">{totalPendingRewards.toFixed(4)} <span className="text-[10px] text-secondary">EXN</span></p>
                 </div>
                 <button 
                   onClick={onClaim}
@@ -221,7 +221,7 @@ export function StakingActionForm({
                       <div className="flex justify-between items-start">
                         <div className="space-y-2">
                            <div className="flex items-center gap-2">
-                             <span className="text-xs font-bold text-white font-mono tracking-tighter">{s.amount.toLocaleString()}</span>
+                             <span className="text-[11px] font-bold text-white font-mono tracking-tighter">{s.amount.toLocaleString()}</span>
                              <span className="text-[8px] text-white/30 uppercase font-black">EXN</span>
                            </div>
                            <p className="text-[9px] font-black text-primary/70 uppercase tracking-widest">{validator?.name || 'Unknown Cluster'}</p>
@@ -238,7 +238,7 @@ export function StakingActionForm({
                            </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-bold text-emerald-500 font-mono tracking-tighter">+{pendingReward.toFixed(4)}</p>
+                          <p className="text-[11px] font-bold text-emerald-500 font-mono tracking-tighter">+{pendingReward.toFixed(4)}</p>
                           <p className="text-[7px] text-white/20 uppercase font-black mt-1">Multiplier: {(multiplier/1000).toFixed(1)}x</p>
                         </div>
                       </div>
@@ -272,7 +272,7 @@ export function StakingActionForm({
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
                       <span className="text-white/30">Amount</span>
-                      <span className="text-primary font-mono font-bold">{amountInput} EXN</span>
+                      <span className="text-primary font-mono font-bold text-[11px]">{amountInput} EXN</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
                       <span className="text-white/30">Target Cluster</span>

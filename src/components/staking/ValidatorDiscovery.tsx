@@ -88,11 +88,11 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-2 group-hover:border-primary/20 transition-all duration-500">
                     <p className="text-[8px] uppercase font-black text-white/20 tracking-widest">Weight</p>
-                    <p className="text-primary font-bold text-xs font-mono tracking-tighter">{validator.total_staked.toLocaleString()} <span className="text-[9px] text-white/30">EXN</span></p>
+                    <p className="text-primary font-bold text-[11px] font-mono tracking-tighter">{validator.total_staked.toLocaleString()} <span className="text-[9px] text-white/30">EXN</span></p>
                   </div>
                   <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-2 group-hover:border-primary/20 transition-all duration-500">
                     <p className="text-[8px] uppercase font-black text-white/20 tracking-widest">Stakers</p>
-                    <p className="text-white font-bold text-xs font-mono tracking-tighter">{stakerCount}</p>
+                    <p className="text-white font-bold text-[11px] font-mono tracking-tighter">{stakerCount}</p>
                   </div>
                 </div>
 

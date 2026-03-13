@@ -122,8 +122,8 @@ export default function Home() {
       id: state.proposals.length + 1,
       proposer: walletAddress,
       created_at: nowTime,
-      deadline: nowTime + (7 * 24 * 60 * 60 * 1000), // 7 Full Days
-      voting_ends_at: nowTime + (6 * 24 * 60 * 60 * 1000), // 6 Days Active, 1 Day Locked
+      deadline: nowTime + (7 * 24 * 60 * 60 * 1000), 
+      voting_ends_at: nowTime + (6 * 24 * 60 * 60 * 1000), 
       yes_votes: 0,
       no_votes: 0,
       executed: false,
@@ -210,7 +210,7 @@ export default function Home() {
                 totalStaked={totalStakedReal} 
                 treasuryBalance={state.treasuryBalance || 0} 
               />
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
                 <div className="lg:col-span-2">
                   <ValidatorDiscovery 
                     validators={state.validators} 
@@ -221,19 +221,21 @@ export default function Home() {
                     setFeedback={setFeedback}
                   />
                 </div>
-                <StakingActionForm 
-                  selectedNode={selectedValidator} 
-                  exnBalance={exnBalance} 
-                  onStake={handleStake} 
-                  userStakes={state.userStakes.filter(s => s.owner === walletAddress)} 
-                  validators={state.validators} 
-                  totalPendingRewards={pendingRewardsTotal} 
-                  connected={connected}
-                  onClaim={handleClaim}
-                  onClaimSingle={handleClaimSingle}
-                  onUnstake={handleUnstake}
-                  setFeedback={setFeedback}
-                />
+                <div className="relative">
+                  <StakingActionForm 
+                    selectedNode={selectedValidator} 
+                    exnBalance={exnBalance} 
+                    onStake={handleStake} 
+                    userStakes={state.userStakes.filter(s => s.owner === walletAddress)} 
+                    validators={state.validators} 
+                    totalPendingRewards={pendingRewardsTotal} 
+                    connected={connected}
+                    onClaim={handleClaim}
+                    onClaimSingle={handleClaimSingle}
+                    onUnstake={handleUnstake}
+                    setFeedback={setFeedback}
+                  />
+                </div>
               </div>
             </>
           )}
