@@ -37,19 +37,19 @@ export default function ManageNodePage() {
 
   if (!mounted || !isLoaded) return (
     <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
-      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[11px]">SYNCING_CLOUD_TERMINAL</p>
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">SYNCING_CLOUD_TERMINAL</p>
     </div>
   );
 
   if (!connected) return (
-    <div className="flex flex-col items-center justify-center text-center px-10 py-40 space-y-8 animate-in fade-in duration-500">
-       <div className="p-6 bg-primary/10 rounded-2xl border border-primary/20">
-         <Wallet className="w-12 h-12 text-primary" />
+    <div className="flex flex-col items-center justify-center text-center px-10 py-32 space-y-6 animate-in fade-in duration-500">
+       <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20">
+         <Wallet className="w-10 h-10 text-primary" />
        </div>
-       <div className="space-y-4">
-         <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground">AUTHENTICATION_REQUIRED</h1>
-         <p className="text-muted-foreground text-[11px] uppercase font-black tracking-[0.3em]">Establish wallet link to access management protocols.</p>
+       <div className="space-y-3">
+         <h1 className="text-2xl font-black uppercase tracking-tighter text-foreground">AUTHENTICATION_REQUIRED</h1>
+         <p className="text-muted-foreground text-[10px] uppercase font-black tracking-[0.3em]">Establish wallet link to access management protocols.</p>
        </div>
     </div>
   );
@@ -104,40 +104,40 @@ export default function ManageNodePage() {
   };
 
   if (myNodes.length === 0) return (
-    <div className="max-w-4xl mx-auto px-10 py-40 text-center space-y-8 animate-in fade-in duration-500">
-       <div className="p-6 bg-primary/10 rounded-2xl border border-primary/20 w-fit mx-auto">
-         <ShieldAlert className="w-12 h-12 text-primary" />
+    <div className="max-w-3xl mx-auto px-10 py-32 text-center space-y-6 animate-in fade-in duration-500">
+       <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20 w-fit mx-auto">
+         <ShieldAlert className="w-10 h-10 text-primary" />
        </div>
-       <div className="space-y-4">
-         <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground">NO_REGISTERED_NODES</h1>
-         <p className="text-muted-foreground text-[11px] uppercase font-black tracking-[0.3em]">Wallet address has no bound XNode registrations.</p>
+       <div className="space-y-3">
+         <h1 className="text-2xl font-black uppercase tracking-tighter text-foreground">NO_REGISTERED_NODES</h1>
+         <p className="text-muted-foreground text-[10px] uppercase font-black tracking-[0.3em]">Wallet address has no bound XNode registrations.</p>
        </div>
-       <Link href="/register-node" className="exn-button inline-block text-[12px] h-12 flex items-center justify-center">INITIALIZE_REGISTRATION</Link>
+       <Link href="/register-node" className="exn-button inline-block text-[11px] h-11 flex items-center justify-center">INITIALIZE_REGISTRATION</Link>
     </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-10 py-20 space-y-12 animate-in fade-in duration-500 pb-40">
-      <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground uppercase text-[11px] font-black tracking-[0.2em] transition-all"><ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL</Link>
+    <div className="max-w-6xl mx-auto px-10 py-16 space-y-10 animate-in fade-in duration-500 pb-32">
+      <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground uppercase text-[10px] font-black tracking-[0.2em] transition-all"><ArrowLeft className="w-3.5 h-3.5" /> EXIT_TERMINAL</Link>
       
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-             <Terminal className="w-5 h-5 text-primary" />
-             <p className="text-[11px] font-black uppercase tracking-[0.4em] text-primary">MGMT_CONSOLE_V2.0.1</p>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-5">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+             <Terminal className="w-4 h-4 text-primary" />
+             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">MGMT_CONSOLE_V2.0.1</p>
           </div>
-          <h1 className="text-5xl font-black exn-gradient-text uppercase tracking-tighter">XNODE_COMMAND</h1>
+          <h1 className="text-4xl font-black exn-gradient-text uppercase tracking-tighter">XNODE_COMMAND</h1>
         </div>
         
-        <div className="flex items-center gap-6 bg-primary/5 border border-primary/20 px-8 py-4 rounded-2xl backdrop-blur-3xl shadow-2xl">
-           <div className="space-y-1">
-              <p className="text-[11px] text-muted-foreground uppercase font-black tracking-[0.3em]">ACTIVE_IDENTITY</p>
-              <p className="text-[12px] font-mono font-black text-foreground">{shortenAddress(walletAddress)}</p>
+        <div className="flex items-center gap-5 bg-primary/5 border border-primary/20 px-6 py-3 rounded-xl backdrop-blur-3xl shadow-2xl">
+           <div className="space-y-0.5">
+              <p className="text-[9px] text-muted-foreground uppercase font-black tracking-[0.3em]">ACTIVE_IDENTITY</p>
+              <p className="text-[11px] font-mono font-black text-foreground">{shortenAddress(walletAddress)}</p>
            </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-12">
+      <div className="grid grid-cols-1 gap-8">
         {myNodes.map((node) => {
           const isEditing = editingNodeId === node.id;
           const logoUrl = node.logo_uri.startsWith('http') || node.logo_uri.startsWith('data:') ? node.logo_uri : `https://picsum.photos/seed/${node.logo_uri}/400/400`;
@@ -145,50 +145,50 @@ export default function ManageNodePage() {
 
           return (
             <div key={node.id} className="exn-card p-0 border-primary/30 relative overflow-hidden group bg-black/60 backdrop-blur-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
-              <div className="absolute top-0 right-0 p-10 z-10">
-                 <div className={`flex items-center gap-3 text-[11px] font-black uppercase px-6 py-2.5 rounded-xl border backdrop-blur-xl ${node.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
-                    <div className={`w-2 h-2 rounded-full ${node.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-destructive'}`} />
+              <div className="absolute top-0 right-0 p-8 z-10">
+                 <div className={`flex items-center gap-2 text-[10px] font-black uppercase px-5 py-2 rounded-lg border backdrop-blur-xl ${node.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${node.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-destructive'}`} />
                     {node.is_active ? 'STATUS_ONLINE' : 'STATUS_OFFLINE'}
                  </div>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-12">
-                <div className="xl:col-span-4 p-12 border-r border-white/10 space-y-12">
-                  <div className="flex items-center gap-8">
-                    <div className="relative w-28 h-28 rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
+                <div className="xl:col-span-4 p-10 border-r border-white/10 space-y-10">
+                  <div className="flex items-center gap-6">
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
                       <Image src={logoUrl} alt="logo" fill className="object-cover" />
                     </div>
-                    <div className="space-y-3">
-                      <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground leading-none">{node.name}</h2>
-                      <p className="text-[12px] font-mono text-primary/60 font-black">{shortenAddress(node.id)}</p>
+                    <div className="space-y-2">
+                      <h2 className="text-2xl font-black uppercase tracking-tighter text-foreground leading-none">{node.name}</h2>
+                      <p className="text-[11px] font-mono text-primary/60 font-black">{shortenAddress(node.id)}</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6">
-                    <div className="p-8 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between group/metric hover:border-primary/40 transition-all">
-                       <div className="flex items-center gap-4">
-                         <Activity className="w-5 h-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-                         <span className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.2em]">NETWORK_WEIGHT</span>
+                  <div className="grid grid-cols-1 gap-5">
+                    <div className="p-6 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between group/metric hover:border-primary/40 transition-all">
+                       <div className="flex items-center gap-3">
+                         <Activity className="w-4 h-4 text-muted-foreground group-hover/metric:text-primary transition-colors" />
+                         <span className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em]">NETWORK_WEIGHT</span>
                        </div>
-                       <span className="text-[13px] font-black font-mono text-primary">{(node.total_staked || 0).toLocaleString()}</span>
+                       <span className="text-[12px] font-black font-mono text-primary">{(node.total_staked || 0).toLocaleString()}</span>
                     </div>
-                    <div className="p-8 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between group/metric hover:border-primary/40 transition-all">
-                       <div className="flex items-center gap-4">
-                         <Database className="w-5 h-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-                         <span className="text-[11px] uppercase font-black text-muted-foreground tracking-[0.2em]">ACTIVE_STAKERS</span>
+                    <div className="p-6 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between group/metric hover:border-primary/40 transition-all">
+                       <div className="flex items-center gap-3">
+                         <Database className="w-4 h-4 text-muted-foreground group-hover/metric:text-primary transition-colors" />
+                         <span className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em]">ACTIVE_STAKERS</span>
                        </div>
-                       <span className="text-[13px] font-black font-mono text-foreground">{stakerCount}</span>
+                       <span className="text-[12px] font-black font-mono text-foreground">{stakerCount}</span>
                     </div>
                   </div>
 
-                  <div className="p-10 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl space-y-8 relative overflow-hidden group/yield">
-                    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full group-hover/yield:bg-emerald-500/20 transition-all" />
+                  <div className="p-8 bg-emerald-500/10 border border-emerald-500/30 rounded-xl space-y-6 relative overflow-hidden group/yield">
+                    <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-emerald-500/10 blur-3xl rounded-full group-hover/yield:bg-emerald-500/20 transition-all" />
                     <div className="flex justify-between items-end relative z-10">
-                      <div className="space-y-2">
-                        <p className="text-[11px] uppercase font-black text-emerald-500/60 tracking-[0.3em]">ACCRUED_COMMISSION</p>
-                        <p className="text-xl font-black text-foreground font-mono tracking-tighter">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-[11px] text-emerald-500 font-bold">EXN</span></p>
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] uppercase font-black text-emerald-500/60 tracking-[0.3em]">ACCRUED_COMMISSION</p>
+                        <p className="text-lg font-black text-foreground font-mono tracking-tighter">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-[10px] text-emerald-500 font-bold">EXN</span></p>
                       </div>
-                      <Zap className="w-6 h-6 text-emerald-500/40" />
+                      <Zap className="w-5 h-5 text-emerald-500/40" />
                     </div>
                     <button 
                       onClick={() => {
@@ -197,100 +197,100 @@ export default function ManageNodePage() {
                         setFeedback('success', 'Economic commission harvested.');
                       }} 
                       disabled={(node.accrued_node_rewards || 0) <= 0} 
-                      className={`w-full py-5 rounded-xl text-[11px] font-black uppercase tracking-[0.3em] transition-all relative z-10 ${ (node.accrued_node_rewards || 0) > 0 ? 'bg-emerald-500 text-black shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-white/10 cursor-not-allowed border border-white/10'}`}
+                      className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] transition-all relative z-10 ${ (node.accrued_node_rewards || 0) > 0 ? 'bg-emerald-500 text-black shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-white/10 cursor-not-allowed border border-white/10'}`}
                     >
                       HARVEST_YIELD
                     </button>
                   </div>
                 </div>
 
-                <div className="xl:col-span-8 p-12 space-y-12 bg-black/20">
+                <div className="xl:col-span-8 p-10 space-y-10 bg-black/20">
                   {isEditing ? (
-                    <div className="space-y-12 animate-in fade-in zoom-in-95 duration-700">
-                      <div className="flex items-center gap-4 border-b border-white/10 pb-6">
-                        <Settings2 className="w-6 h-6 text-secondary" />
-                        <h3 className="text-xl font-black uppercase tracking-[0.3em] text-secondary">PROTOCOL_IDENTITY_PATCH</h3>
+                    <div className="space-y-10 animate-in fade-in zoom-in-95 duration-700">
+                      <div className="flex items-center gap-3 border-b border-white/10 pb-5">
+                        <Settings2 className="w-5 h-5 text-secondary" />
+                        <h3 className="text-lg font-black uppercase tracking-[0.3em] text-secondary">PROTOCOL_IDENTITY_PATCH</h3>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">XNODE_IDENTIFIER</label>
-                           <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-14 bg-white/5 text-[12px] font-mono font-bold tracking-tight" placeholder="ID_STRING" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                           <label className="text-[10px] uppercase font-black text-white/30 tracking-[0.3em]">XNODE_IDENTIFIER</label>
+                           <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 bg-white/5 text-[11px] font-mono font-bold tracking-tight" placeholder="ID_STRING" />
                         </div>
-                        <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">GLOBAL_SECTOR</label>
-                           <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-14 bg-white/5 text-[12px] font-mono font-bold tracking-tight" placeholder="e.g. FRANKFURT_DE" />
+                        <div className="space-y-3">
+                           <label className="text-[10px] uppercase font-black text-white/30 tracking-[0.3em]">GLOBAL_SECTOR</label>
+                           <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-12 bg-white/5 text-[11px] font-mono font-bold tracking-tight" placeholder="e.g. FRANKFURT_DE" />
                         </div>
-                        <div className="space-y-4 md:col-span-2">
-                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">PROTOCOL_BIO</label>
-                           <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[140px] bg-white/5 text-[12px] font-mono py-6 font-medium leading-relaxed" placeholder="Hardware and reliability commitment metrics..." />
+                        <div className="space-y-3 md:col-span-2">
+                           <label className="text-[10px] uppercase font-black text-white/30 tracking-[0.3em]">PROTOCOL_BIO</label>
+                           <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[120px] bg-white/5 text-[11px] font-mono py-5 font-medium leading-relaxed" placeholder="Hardware and reliability commitment metrics..." />
                         </div>
-                        <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-white/30 tracking-[0.3em]">COMMISSION_RATE (0-30%)</label>
+                        <div className="space-y-3">
+                           <label className="text-[10px] uppercase font-black text-white/30 tracking-[0.3em]">COMMISSION_RATE (0-30%)</label>
                            <div className="relative">
-                              <input type="number" step="0.1" value={formData.commission_rate} onChange={e => setFormData({...formData, commission_rate: Math.min(30, Math.max(0, Number(e.target.value)))})} className="exn-input h-14 bg-white/5 text-[13px] font-mono font-bold" />
-                              <span className="absolute right-6 top-4.5 text-[11px] font-black text-white/30">%</span>
+                              <input type="number" step="0.1" value={formData.commission_rate} onChange={e => setFormData({...formData, commission_rate: Math.min(30, Math.max(0, Number(e.target.value)))})} className="exn-input h-12 bg-white/5 text-[12px] font-mono font-bold" />
+                              <span className="absolute right-5 top-3.5 text-[10px] font-black text-white/30">%</span>
                            </div>
                         </div>
                       </div>
 
-                      <div className="flex gap-6 pt-6">
-                        <button onClick={() => setReviewAction('update')} className="exn-button flex-1 h-14 uppercase font-black tracking-[0.4em] text-[12px]">SYNCHRONIZE_METADATA</button>
-                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-14 uppercase font-black tracking-[0.4em] text-[12px] border-white/20 text-white/60 hover:bg-white/10">ABORT_PATCH</button>
+                      <div className="flex gap-5 pt-4">
+                        <button onClick={() => setReviewAction('update')} className="exn-button flex-1 h-12 uppercase font-black tracking-[0.4em] text-[11px]">SYNCHRONIZE_METADATA</button>
+                        <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-12 uppercase font-black tracking-[0.4em] text-[11px] border-white/20 text-white/60 hover:bg-white/10">ABORT_PATCH</button>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-16">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                         <div className="space-y-8">
+                    <div className="space-y-12">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                         <div className="space-y-6">
                             <div className="flex items-center gap-3">
-                               <Globe className="w-5 h-5 text-primary" />
-                               <h3 className="text-[11px] uppercase font-black tracking-[0.4em] text-white/40">NETWORK_LOCALIZATION</h3>
+                               <Globe className="w-4 h-4 text-primary" />
+                               <h3 className="text-[10px] uppercase font-black tracking-[0.4em] text-white/40">NETWORK_LOCALIZATION</h3>
                             </div>
-                            <div className="p-8 bg-white/5 rounded-2xl border border-white/10 space-y-6 shadow-2xl">
-                               <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.3em]">
+                            <div className="p-6 bg-white/5 rounded-xl border border-white/10 space-y-4 shadow-2xl">
+                               <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.3em]">
                                   <span className="text-white/30 font-black">SECTOR</span>
                                   <span className="text-white font-black font-mono">{node.location}</span>
                                </div>
                                <div className="h-px w-full bg-white/5" />
-                               <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.3em]">
+                               <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.3em]">
                                   <span className="text-white/30 font-black">COMMISSION</span>
                                   <span className="text-primary font-black font-mono">{(node.commission_rate / 100).toFixed(1)}%</span>
                                </div>
                                <div className="h-px w-full bg-white/5" />
-                               <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.3em]">
+                               <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.3em]">
                                   <span className="text-white/30 font-black">LICENSE_LINK</span>
                                   <span className="text-foreground font-mono font-black">{shortenAddress(node.license_id || 'N/A')}</span>
                                </div>
                             </div>
                          </div>
 
-                         <div className="space-y-8">
+                         <div className="space-y-6">
                             <div className="flex items-center gap-3">
-                               <Cpu className="w-5 h-5 text-primary" />
-                               <h3 className="text-[11px] uppercase font-black tracking-[0.4em] text-white/40">SYSTEM_CONTROLLER</h3>
+                               <Cpu className="w-4 h-4 text-primary" />
+                               <h3 className="text-[10px] uppercase font-black tracking-[0.4em] text-white/40">SYSTEM_CONTROLLER</h3>
                             </div>
-                            <div className="grid grid-cols-1 gap-4">
-                               <button onClick={() => startEditing(node)} className="h-14 exn-button-outline border-white/20 hover:bg-primary/10 hover:border-primary/40 uppercase text-[11px] font-black tracking-[0.3em] rounded-xl transition-all shadow-xl">PATCH_IDENTITY</button>
+                            <div className="grid grid-cols-1 gap-3">
+                               <button onClick={() => startEditing(node)} className="h-12 exn-button-outline border-white/20 hover:bg-primary/10 hover:border-primary/40 uppercase text-[10px] font-black tracking-[0.3em] rounded-xl transition-all shadow-xl">PATCH_IDENTITY</button>
                                {!node.seed_deposited ? (
-                                 <button onClick={() => handleDepositSeed(node.id)} className="h-14 exn-button uppercase text-[11px] font-black tracking-[0.3em]">INJECT_SEED_CAPITAL</button>
+                                 <button onClick={() => handleDepositSeed(node.id)} className="h-12 exn-button uppercase text-[10px] font-black tracking-[0.3em]">INJECT_SEED_CAPITAL</button>
                                ) : (
-                                 <button onClick={() => handleWithdrawSeed(node.id)} className="h-14 bg-primary/10 text-primary border border-primary/30 uppercase text-[11px] font-black tracking-[0.3em] rounded-xl hover:bg-primary/20 transition-all">WITHDRAW_SEED</button>
+                                 <button onClick={() => handleWithdrawSeed(node.id)} className="h-12 bg-primary/10 text-primary border border-primary/30 uppercase text-[10px] font-black tracking-[0.3em] rounded-xl hover:bg-primary/20 transition-all">WITHDRAW_SEED</button>
                                )}
                             </div>
                          </div>
                       </div>
 
-                      <div className="space-y-8 border-t border-white/10 pt-12">
-                         <div className="flex items-center gap-3">
-                            <AlertTriangle className="w-5 h-5 text-destructive" />
-                            <h3 className="text-[11px] uppercase font-black tracking-[0.4em] text-destructive/60">DECOMMISSION_PROTOCOLS</h3>
+                      <div className="space-y-6 border-t border-white/10 pt-10">
+                         <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-destructive" />
+                            <h3 className="text-[10px] uppercase font-black tracking-[0.4em] text-destructive/60">DECOMMISSION_PROTOCOLS</h3>
                          </div>
-                         <div className="p-10 bg-destructive/10 border border-destructive/30 rounded-2xl space-y-8 shadow-[0_0_50px_rgba(239,68,68,0.1)]">
-                            <p className="text-[11px] text-destructive/80 leading-relaxed uppercase font-black tracking-tight">
-                               CRITICAL_WARNING: DECOMMISSIONING THIS VALIDATOR WILL PERMANENTLY TERMINATE ITS ON-CHAIN REGISTRATION AND BURN THE ASSOCIATED XNODE LICENSE NFT. THIS OPERATION IS ATOMIC AND IRREVERSIBLE.
+                         <div className="p-8 bg-destructive/10 border border-destructive/30 rounded-xl space-y-6 shadow-[0_0_50px_rgba(239,68,68,0.1)]">
+                            <p className="text-[10px] text-destructive/80 leading-relaxed uppercase font-black tracking-tight">
+                               CRITICAL_WARNING: DECOMMISSIONING THIS VALIDATOR WILL PERMANENTLY TERMINATE ITS ON-CHAIN REGISTRATION AND BURN THE ASSOCIATED XNODE LICENSE NFT.
                             </p>
-                            <button onClick={() => setReviewAction('terminate')} className="w-full h-14 bg-destructive text-white uppercase text-[11px] font-black tracking-[0.4em] rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-2xl">
+                            <button onClick={() => setReviewAction('terminate')} className="w-full h-12 bg-destructive text-white uppercase text-[10px] font-black tracking-[0.4em] rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-2xl">
                               TERMINATE_REGISTRATION
                             </button>
                          </div>
@@ -305,43 +305,43 @@ export default function ManageNodePage() {
       </div>
 
       <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
-        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-lg">
-          <div className="p-10 space-y-10">
+        <AlertDialogContent className="exn-card border-primary/50 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md">
+          <div className="p-8 space-y-8">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-2xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-4">
-                <ShieldCheck className="w-8 h-8" />
+              <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
+                <ShieldCheck className="w-6 h-6" />
                 VERIFY_OPERATION
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
-                <div className="space-y-8 pt-6">
-                  <div className="p-8 bg-white/5 rounded-2xl border border-white/10 space-y-6 shadow-3xl">
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.3em]">
+                <div className="space-y-6 pt-6">
+                  <div className="p-6 bg-white/5 rounded-xl border border-white/10 space-y-4 shadow-3xl">
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.3em]">
                       <span className="text-white/30 font-black">OP_CODE</span>
                       <span className="text-white font-black font-mono">
                         {reviewAction === 'update' ? 'IDENTITY_PATCH' : reviewAction === 'terminate' ? 'SYSTEM_DECOMMISSION' : 'SEED_INJECTION'}
                       </span>
                     </div>
                     {reviewAction === 'update' && (
-                      <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.3em]">
+                      <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.3em]">
                         <span className="text-white/30 font-black">FEES_SET</span>
                         <span className="text-primary font-black font-mono">{formData?.commission_rate}%</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.3em]">
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.3em]">
                       <span className="text-white/30 font-black">NETWORK_LAYER</span>
                       <span className="text-emerald-500 font-black font-mono">PROTOCOL_MAINNET</span>
                     </div>
                   </div>
                   
                   <p className="text-[11px] text-white/40 uppercase leading-relaxed font-black tracking-[0.1em]">
-                    THIS OPERATION WILL BE RECORDED ON THE GLOBAL NETWORK LEDGER. A 6-SECOND VERIFICATION WINDOW WILL FOLLOW CONFIRMATION. PROCEED?
+                    THIS OPERATION WILL BE RECORDED ON THE GLOBAL NETWORK LEDGER. PROCEED?
                   </p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-6">
-              <AlertDialogCancel className="exn-button-outline flex-1 text-[11px] h-14 uppercase font-black border-white/20 text-white hover:bg-white/10">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={reviewAction === 'update' ? handleUpdate : reviewAction === 'terminate' ? handleTerminate : undefined} className="exn-button flex-1 text-[11px] h-14 uppercase font-black">CONFIRM</AlertDialogAction>
+            <AlertDialogFooter className="flex flex-row gap-4">
+              <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-12 uppercase font-black border-white/20 text-white hover:bg-white/10">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={reviewAction === 'update' ? handleUpdate : reviewAction === 'terminate' ? handleTerminate : undefined} className="exn-button flex-1 text-[10px] h-12 uppercase font-black">CONFIRM</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>

@@ -33,35 +33,35 @@ export function Footer() {
 
   return (
     <footer className="fixed bottom-0 left-0 w-full z-40 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
-      <div className="max-w-7xl auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
+      <div className="max-w-7xl auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-5">
           <div className="flex flex-col">
-            <h2 className="text-sm font-bold exn-gradient-text tracking-widest leading-none uppercase">EXNUS</h2>
-            <span className="text-[8px] text-foreground/40 tracking-[0.2em] font-bold uppercase">Protocol | Network</span>
+            <h2 className="text-xs font-bold exn-gradient-text tracking-widest leading-none uppercase">EXNUS</h2>
+            <span className="text-[7px] text-foreground/40 tracking-[0.2em] font-bold uppercase">Protocol | Network</span>
           </div>
-          <div className="hidden lg:flex items-center gap-4 border-l border-border pl-6">
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-black text-emerald-500 uppercase">Demo</span>
+          <div className="hidden lg:flex items-center gap-3 border-l border-border pl-5">
+            <div className="flex items-center gap-1">
+              <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[8px] font-black text-emerald-500 uppercase">Demo</span>
             </div>
-            <span className="text-[9px] text-muted-foreground uppercase font-black">
+            <span className="text-[8px] text-muted-foreground uppercase font-black">
               {state.networkStartDate ? `Epoch ${currentEpoch}` : 'Active'}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-6 text-[9px] text-muted-foreground uppercase font-black tracking-widest">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 text-[8px] text-muted-foreground uppercase font-black tracking-widest">
             <Link href="/" className="hover:text-primary transition-colors">Dashboard</Link>
-            <Link href="/purchase-license" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-              <Ticket className="w-3 h-3" /> Buy XNode
+            <Link href="/purchase-license" className="flex items-center gap-1 hover:text-primary transition-colors">
+              <Ticket className="w-2.5 h-2.5" /> Buy XNode
             </Link>
-            <Link href="/faucet" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-              <Droplets className="w-3 h-3" /> Faucet
+            <Link href="/faucet" className="flex items-center gap-1 hover:text-primary transition-colors">
+              <Droplets className="w-2.5 h-2.5" /> Faucet
             </Link>
             {isAdmin && (
-              <Link href="/admin" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                <ShieldCheck className="w-3 h-3" /> Admin
+              <Link href="/admin" className="flex items-center gap-1 hover:text-primary transition-colors">
+                <ShieldCheck className="w-2.5 h-2.5" /> Admin
               </Link>
             )}
           </div>

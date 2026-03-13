@@ -80,38 +80,38 @@ export function DashboardStats({
   }, [totalStaked, state.networkStartDate]);
 
   return (
-    <div className="space-y-10 mb-16 animate-in fade-in duration-1000">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+    <div className="space-y-6 mb-12 animate-in fade-in duration-1000">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        <div className="lg:col-span-3 relative h-[420px] exn-card bg-black/60 border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden backdrop-blur-3xl">
-          <div className="p-12 pb-0 flex justify-between items-start relative z-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(0,245,255,0.6)]" />
-                <p className="text-white/40 text-[11px] font-black uppercase tracking-[0.4em]">Protocol TVL</p>
+        <div className="lg:col-span-3 relative h-[320px] exn-card bg-black/60 border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden backdrop-blur-3xl">
+          <div className="p-8 pb-0 flex justify-between items-start relative z-10">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(0,245,255,0.6)]" />
+                <p className="text-white/40 text-[9px] font-black uppercase tracking-[0.4em]">Protocol TVL</p>
               </div>
-              <h3 className="text-[28px] font-black font-mono tracking-tighter text-white">
-                {totalStaked.toLocaleString()} <span className="text-[11px] text-primary/60 uppercase font-black ml-2">EXN</span>
+              <h3 className="text-[20px] font-black font-mono tracking-tighter text-white">
+                {totalStaked.toLocaleString()} <span className="text-[9px] text-primary/60 uppercase font-black ml-1">EXN</span>
               </h3>
             </div>
             
-            <div className="text-right space-y-3">
-              <div className="flex items-center justify-end gap-4">
-                <p className="text-[16px] font-bold text-emerald-500 font-mono tracking-tighter">
+            <div className="text-right space-y-2">
+              <div className="flex items-center justify-end gap-3">
+                <p className="text-[13px] font-bold text-emerald-500 font-mono tracking-tighter">
                   ${stakedUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${isTvlPositive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
-                  {isTvlPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${isTvlPositive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
+                  {isTvlPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                   {tvlTrend}%
                 </div>
               </div>
-              <p className="text-[11px] font-black uppercase text-white/20 tracking-[0.2em]">24H Network Velocity</p>
+              <p className="text-[9px] font-black uppercase text-white/20 tracking-[0.2em]">24H Network Velocity</p>
             </div>
           </div>
 
-          <div className="flex-1 w-full -mb-1 mt-8">
+          <div className="flex-1 w-full -mb-1 mt-6">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
@@ -125,11 +125,11 @@ export function DashboardStats({
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-black/95 backdrop-blur-3xl border border-white/20 p-6 rounded-2xl shadow-3xl space-y-3">
-                          <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">{payload[0].payload.date}</p>
+                        <div className="bg-black/95 backdrop-blur-3xl border border-white/20 p-4 rounded-xl shadow-3xl space-y-2">
+                          <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">{payload[0].payload.date}</p>
                           <div className="h-px w-full bg-white/10" />
-                          <p className="text-[14px] font-bold text-primary font-mono tracking-tighter">
-                            {Number(payload[0].value).toLocaleString()} <span className="text-[11px]">EXN</span>
+                          <p className="text-[12px] font-bold text-primary font-mono tracking-tighter">
+                            {Number(payload[0].value).toLocaleString()} <span className="text-[9px]">EXN</span>
                           </p>
                         </div>
                       );
@@ -141,7 +141,7 @@ export function DashboardStats({
                   type="monotone" 
                   dataKey="value" 
                   stroke="hsl(var(--primary))" 
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   fillOpacity={1} 
                   fill="url(#chartGradient)" 
                   animationDuration={2500}
@@ -151,26 +151,26 @@ export function DashboardStats({
           </div>
         </div>
 
-        <div className="flex flex-col gap-10 lg:col-span-1">
-          <div className="flex-1 exn-card p-12 bg-black/60 border-white/10 flex flex-col justify-center space-y-10 group hover:border-secondary/50 transition-all duration-700 backdrop-blur-3xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/5 blur-3xl rounded-full" />
-            <div className="space-y-4 relative z-10">
-              <p className="text-white/30 text-[11px] font-black uppercase tracking-[0.5em]">Treasury</p>
-              <div className="h-[2px] w-12 bg-secondary/40 rounded-full group-hover:w-20 transition-all duration-700" />
+        <div className="flex flex-col gap-6 lg:col-span-1">
+          <div className="flex-1 exn-card p-8 bg-black/60 border-white/10 flex flex-col justify-center space-y-6 group hover:border-secondary/50 transition-all duration-700 backdrop-blur-3xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 blur-3xl rounded-full" />
+            <div className="space-y-3 relative z-10">
+              <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.5em]">Treasury</p>
+              <div className="h-[2px] w-8 bg-secondary/40 rounded-full group-hover:w-16 transition-all duration-700" />
             </div>
             
             <div className="flex justify-between items-end relative z-10">
-              <div className="space-y-3">
-                <p className="text-[18px] font-mono font-bold text-white tracking-tighter">
-                  {treasuryBalance.toLocaleString()} <span className="text-[11px] text-white/30 ml-2">EXN</span>
+              <div className="space-y-2">
+                <p className="text-[15px] font-mono font-bold text-white tracking-tighter">
+                  {treasuryBalance.toLocaleString()} <span className="text-[9px] text-white/30 ml-1">EXN</span>
                 </p>
               </div>
-              <div className="text-right space-y-4">
-                <div className={`flex items-center gap-1.5 ml-auto w-fit px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${isTreasuryPositive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
-                  {isTreasuryPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+              <div className="text-right space-y-3">
+                <div className={`flex items-center gap-1 ml-auto w-fit px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${isTreasuryPositive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
+                  {isTreasuryPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {treasuryTrend}%
                 </div>
-                <p className="text-[14px] font-bold text-secondary/90 font-mono uppercase tracking-tight">
+                <p className="text-[12px] font-bold text-secondary/90 font-mono uppercase tracking-tight">
                   ${treasuryUsdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
