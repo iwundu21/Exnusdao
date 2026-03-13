@@ -43,11 +43,11 @@ export default function ManageNodePage() {
 
   if (!connected) return (
     <div className="flex flex-col items-center justify-center text-center px-10 py-32 space-y-6 animate-in fade-in duration-500">
-       <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20">
+       <div className="p-5 bg-primary/10 rounded-2xl border border-primary/30 shadow-2xl">
          <Wallet className="w-10 h-10 text-primary" />
        </div>
        <div className="space-y-3">
-         <h1 className="text-xl font-black uppercase tracking-tighter text-foreground">AUTHENTICATION_REQUIRED</h1>
+         <h1 className="text-xl font-black uppercase tracking-tighter text-white">AUTHENTICATION_REQUIRED</h1>
          <p className="text-white font-black text-[11px] uppercase tracking-[0.3em]">Establish wallet link to access management protocols.</p>
        </div>
     </div>
@@ -110,8 +110,8 @@ export default function ManageNodePage() {
          <Ticket className="w-12 h-12 text-destructive" />
        </div>
        <div className="space-y-4">
-         <h1 className="text-2xl font-black uppercase tracking-tighter text-foreground">LICENSE_AUTHORIZATION_REQUIRED</h1>
-         <p className="text-white/80 text-[11px] uppercase font-black tracking-[0.3em] max-w-md mx-auto leading-relaxed">
+         <h1 className="text-2xl font-black uppercase tracking-tighter text-white">LICENSE_AUTHORIZATION_REQUIRED</h1>
+         <p className="text-white text-[11px] uppercase font-black tracking-[0.3em] max-w-md mx-auto leading-relaxed">
            Validator management is restricted to verified XNode License holders. Please mint a license to initialize your infrastructure sector.
          </p>
        </div>
@@ -122,12 +122,12 @@ export default function ManageNodePage() {
   // Case 2: User owns a license but hasn't registered a node
   if (myNodes.length === 0) return (
     <div className="max-w-3xl mx-auto px-10 py-32 text-center space-y-8 animate-in fade-in duration-500">
-       <div className="p-6 bg-primary/10 rounded-3xl border border-primary/20 w-fit mx-auto shadow-2xl">
+       <div className="p-6 bg-primary/10 rounded-3xl border border-primary/30 w-fit mx-auto shadow-2xl">
          <ShieldAlert className="w-12 h-12 text-primary" />
        </div>
        <div className="space-y-4">
-         <h1 className="text-2xl font-black uppercase tracking-tighter text-foreground">NO_REGISTERED_NODES</h1>
-         <p className="text-white/80 text-[11px] uppercase font-black tracking-[0.3em] max-w-md mx-auto leading-relaxed">
+         <h1 className="text-2xl font-black uppercase tracking-tighter text-white">NO_REGISTERED_NODES</h1>
+         <p className="text-white text-[11px] uppercase font-black tracking-[0.3em] max-w-md mx-auto leading-relaxed">
            Wallet address has verified licenses but no bound XNode registrations. Provision your validator sector to begin operations.
          </p>
        </div>
@@ -137,7 +137,7 @@ export default function ManageNodePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-10 py-16 space-y-12 animate-in fade-in duration-500 pb-32">
-      <Link href="/" className="flex items-center gap-2 text-white/60 hover:text-white uppercase text-[10px] font-black tracking-[0.3em] transition-all"><ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL</Link>
+      <Link href="/" className="flex items-center gap-2 text-white/70 hover:text-white uppercase text-[10px] font-black tracking-[0.3em] transition-all"><ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL</Link>
       
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div className="space-y-4">
@@ -150,7 +150,7 @@ export default function ManageNodePage() {
         
         <div className="flex items-center gap-6 bg-primary/10 border border-primary/30 px-8 py-4 rounded-xl backdrop-blur-3xl shadow-3xl">
            <div className="space-y-1">
-              <p className="text-[10px] text-white/60 uppercase font-black tracking-[0.4em]">ACTIVE_IDENTITY</p>
+              <p className="text-[10px] text-white uppercase font-black tracking-[0.4em]">ACTIVE_IDENTITY</p>
               <p className="text-[12px] font-mono font-black text-white">{shortenAddress(walletAddress)}</p>
            </div>
         </div>
@@ -184,17 +184,17 @@ export default function ManageNodePage() {
                   </div>
 
                   <div className="grid grid-cols-1 gap-6">
-                    <div className="p-6 bg-white/5 rounded-2xl border border-white/15 flex items-center justify-between group/metric hover:border-primary/50 transition-all shadow-xl">
+                    <div className="p-6 bg-white/5 rounded-2xl border border-white/20 flex items-center justify-between group/metric hover:border-primary transition-all shadow-xl">
                        <div className="flex items-center gap-4">
-                         <Activity className="w-5 h-5 text-white/40 group-hover/metric:text-primary transition-colors" />
-                         <span className="text-[11px] uppercase font-black text-white/60 tracking-[0.3em]">NETWORK_WEIGHT</span>
+                         <Activity className="w-5 h-5 text-white group-hover:text-primary transition-colors" />
+                         <span className="text-[11px] uppercase font-black text-white tracking-[0.3em]">NETWORK_WEIGHT</span>
                        </div>
                        <span className="text-[13px] font-black font-mono text-primary">{(node.total_staked || 0).toLocaleString()}</span>
                     </div>
-                    <div className="p-6 bg-white/5 rounded-2xl border border-white/15 flex items-center justify-between group/metric hover:border-primary/50 transition-all shadow-xl">
+                    <div className="p-6 bg-white/5 rounded-2xl border border-white/20 flex items-center justify-between group/metric hover:border-primary transition-all shadow-xl">
                        <div className="flex items-center gap-4">
-                         <Database className="w-5 h-5 text-white/40 group-hover/metric:text-primary transition-colors" />
-                         <span className="text-[11px] uppercase font-black text-white/60 tracking-[0.3em]">ACTIVE_STAKERS</span>
+                         <Database className="w-5 h-5 text-white group-hover:text-primary transition-colors" />
+                         <span className="text-[11px] uppercase font-black text-white tracking-[0.3em]">ACTIVE_STAKERS</span>
                        </div>
                        <span className="text-[13px] font-black font-mono text-white">{stakerCount}</span>
                     </div>
@@ -207,7 +207,7 @@ export default function ManageNodePage() {
                         <p className="text-[11px] uppercase font-black text-emerald-500 tracking-[0.4em]">ACCRUED_COMMISSION</p>
                         <p className="text-xl font-black text-white font-mono tracking-tighter">{(node.accrued_node_rewards || 0).toLocaleString()} <span className="text-[11px] text-emerald-500 font-bold ml-1">EXN</span></p>
                       </div>
-                      <Zap className="w-6 h-6 text-emerald-500/50" />
+                      <Zap className="w-6 h-6 text-emerald-500" />
                     </div>
                     <button 
                       onClick={() => {
@@ -216,7 +216,7 @@ export default function ManageNodePage() {
                         setFeedback('success', 'ECONOMIC_YIELD_HARVESTED');
                       }} 
                       disabled={(node.accrued_node_rewards || 0) <= 0} 
-                      className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] transition-all relative z-10 shadow-3xl ${ (node.accrued_node_rewards || 0) > 0 ? 'bg-emerald-500 text-black hover:opacity-90 active:scale-95' : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10'}`}
+                      className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] transition-all relative z-10 shadow-3xl ${ (node.accrued_node_rewards || 0) > 0 ? 'bg-emerald-500 text-black hover:opacity-90 active:scale-95' : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'}`}
                     >
                       {(node.accrued_node_rewards || 0) > 0 ? 'HARVEST_COMMISSION' : 'NO_PENDING_YIELD'}
                     </button>
@@ -233,22 +233,22 @@ export default function ManageNodePage() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-white/40 tracking-[0.4em]">XNODE_IDENTIFIER</label>
+                           <label className="text-[11px] uppercase font-black text-white tracking-[0.4em]">XNODE_IDENTIFIER</label>
                            <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-14 bg-white/5 text-[12px] font-mono font-bold tracking-tight" placeholder="ID_STRING" />
                         </div>
                         <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-white/40 tracking-[0.4em]">GLOBAL_SECTOR</label>
+                           <label className="text-[11px] uppercase font-black text-white tracking-[0.4em]">GLOBAL_SECTOR</label>
                            <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-14 bg-white/5 text-[12px] font-mono font-bold tracking-tight" placeholder="e.g. FRANKFURT_DE" />
                         </div>
                         <div className="space-y-4 md:col-span-2">
-                           <label className="text-[11px] uppercase font-black text-white/40 tracking-[0.4em]">PROTOCOL_BIO</label>
+                           <label className="text-[11px] uppercase font-black text-white tracking-[0.4em]">PROTOCOL_BIO</label>
                            <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[140px] bg-white/5 text-[12px] font-mono py-6 font-medium leading-relaxed" placeholder="Hardware and reliability commitment metrics..." />
                         </div>
                         <div className="space-y-4">
-                           <label className="text-[11px] uppercase font-black text-white/40 tracking-[0.4em]">COMMISSION_RATE (0-30%)</label>
+                           <label className="text-[11px] uppercase font-black text-white tracking-[0.4em]">COMMISSION_RATE (0-30%)</label>
                            <div className="relative">
                               <input type="number" step="0.1" value={formData.commission_rate} onChange={e => setFormData({...formData, commission_rate: Math.min(30, Math.max(0, Number(e.target.value)))})} className="exn-input h-14 bg-white/5 text-[13px] font-mono font-bold" />
-                              <span className="absolute right-6 top-4.5 text-[11px] font-black text-white/40">%</span>
+                              <span className="absolute right-6 top-4.5 text-[11px] font-black text-white">%</span>
                            </div>
                         </div>
                       </div>
@@ -264,22 +264,22 @@ export default function ManageNodePage() {
                          <div className="space-y-8">
                             <div className="flex items-center gap-4">
                                <Globe className="w-5 h-5 text-primary" />
-                               <h3 className="text-[11px] uppercase font-black tracking-[0.5em] text-white/60">NETWORK_LOCALIZATION</h3>
+                               <h3 className="text-[11px] uppercase font-black tracking-[0.5em] text-white">NETWORK_LOCALIZATION</h3>
                             </div>
-                            <div className="p-8 bg-white/5 rounded-2xl border border-white/15 space-y-6 shadow-3xl">
+                            <div className="p-8 bg-white/5 rounded-2xl border border-white/20 space-y-6 shadow-3xl">
                                <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                                  <span className="text-white/40 font-black">SECTOR</span>
+                                  <span className="text-white font-black">SECTOR</span>
                                   <span className="text-white font-black font-mono">{node.location}</span>
                                </div>
                                <div className="h-px w-full bg-white/10" />
                                <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                                  <span className="text-white/40 font-black">COMMISSION</span>
+                                  <span className="text-white font-black">COMMISSION</span>
                                   <span className="text-primary font-black font-mono">{(node.commission_rate / 100).toFixed(1)}%</span>
                                </div>
                                <div className="h-px w-full bg-white/10" />
                                <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                                  <span className="text-white/40 font-black">LICENSE_LINK</span>
-                                  <span className="text-foreground font-mono font-black">{shortenAddress(node.license_id || 'N/A')}</span>
+                                  <span className="text-white font-black">LICENSE_LINK</span>
+                                  <span className="text-white font-mono font-black">{shortenAddress(node.license_id || 'N/A')}</span>
                                </div>
                             </div>
                          </div>
@@ -287,10 +287,10 @@ export default function ManageNodePage() {
                          <div className="space-y-8">
                             <div className="flex items-center gap-4">
                                <Cpu className="w-5 h-5 text-primary" />
-                               <h3 className="text-[11px] uppercase font-black tracking-[0.5em] text-white/60">SYSTEM_CONTROLLER</h3>
+                               <h3 className="text-[11px] uppercase font-black tracking-[0.5em] text-white">SYSTEM_CONTROLLER</h3>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
-                               <button onClick={() => startEditing(node)} className="h-14 exn-button-outline border-white/20 hover:bg-primary/15 hover:border-primary/50 uppercase text-[11px] font-black tracking-[0.4em] rounded-2xl transition-all shadow-xl">PATCH_IDENTITY</button>
+                               <button onClick={() => startEditing(node)} className="h-14 exn-button-outline border-white/20 hover:bg-primary/15 hover:border-primary uppercase text-[11px] font-black tracking-[0.4em] rounded-2xl transition-all shadow-xl">PATCH_IDENTITY</button>
                                {!node.seed_deposited ? (
                                  <button onClick={() => handleDepositSeed(node.id)} className="h-14 exn-button uppercase text-[11px] font-black tracking-[0.4em]">INJECT_SEED_CAPITAL</button>
                                ) : (
@@ -324,35 +324,37 @@ export default function ManageNodePage() {
       </div>
 
       <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
-        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md" asChild>
+        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md">
           <div className="p-10 space-y-10">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.4em] text-primary flex items-center gap-4">
-                <ShieldCheck className="w-7 h-7" />
-                VERIFY_OPERATION
+              <AlertDialogTitle asChild>
+                <div className="text-xl font-black uppercase tracking-[0.4em] text-primary flex items-center gap-4">
+                  <ShieldCheck className="w-7 h-7" />
+                  VERIFY_OPERATION
+                </div>
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-8 pt-6">
-                  <div className="p-8 bg-white/5 rounded-2xl border border-white/15 space-y-6 shadow-3xl">
+                  <div className="p-8 bg-white/5 rounded-2xl border border-white/20 space-y-6 shadow-3xl">
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/40 font-black">OP_CODE</span>
+                      <span className="text-white/70 font-black">OP_CODE</span>
                       <span className="text-white font-black font-mono uppercase">
                         {reviewAction === 'update' ? 'IDENTITY_PATCH' : reviewAction === 'terminate' ? 'SYSTEM_DECOMMISSION' : 'SEED_INJECTION'}
                       </span>
                     </div>
                     {reviewAction === 'update' && (
                       <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                        <span className="text-white/40 font-black">FEES_SET</span>
+                        <span className="text-white/70 font-black">FEES_SET</span>
                         <span className="text-primary font-black font-mono">{formData?.commission_rate}%</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/40 font-black">NETWORK_LAYER</span>
+                      <span className="text-white/70 font-black">NETWORK_LAYER</span>
                       <span className="text-emerald-500 font-black font-mono">PROTOCOL_MAINNET</span>
                     </div>
                   </div>
                   
-                  <p className="text-[11px] text-white/60 uppercase leading-relaxed font-black tracking-[0.1em]">
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-[0.1em]">
                     THIS OPERATION WILL BE PERMANENTLY RECORDED ON THE GLOBAL NETWORK LEDGER. PROCEED?
                   </p>
                 </div>
