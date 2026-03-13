@@ -19,14 +19,14 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   const [timeLeft, setTimeLeft] = useState<{ label: string; value: string; colorClass: string }>({
     label: 'Syncing...',
     value: '',
-    colorClass: 'text-white/50'
+    colorClass: 'text-white'
   });
 
   useEffect(() => {
     const updateCountdown = () => {
       const now = Date.now();
       if (now > deadline) {
-        setTimeLeft({ label: 'CONCLUDED', value: '', colorClass: 'text-white/60' });
+        setTimeLeft({ label: 'CONCLUDED', value: '', colorClass: 'text-white' });
         return true;
       }
       if (now > votingEndsAt) {
@@ -62,7 +62,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   }, [deadline, votingEndsAt]);
 
   return (
-    <div className={`flex items-center gap-2 text-[10px] uppercase font-black tracking-widest ${timeLeft.colorClass}`}>
+    <div className={`flex items-center gap-2 text-[11px] uppercase font-black tracking-widest ${timeLeft.colorClass}`}>
       <Clock className="w-3.5 h-3.5" />
       <span>{timeLeft.label}</span>
       <span className="font-mono text-white">{timeLeft.value}</span>
@@ -144,7 +144,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
     <div className="space-y-10 animate-in fade-in duration-700">
       <div className="flex justify-between items-center">
         <div className="space-y-1">
-          <h2 className="text-2xl font-black exn-gradient-text tracking-tighter uppercase leading-none">DAO_GOVERNANCE</h2>
+          <h2 className="text-xl font-black exn-gradient-text tracking-tighter uppercase leading-none">DAO_GOVERNANCE</h2>
           <p className="text-white font-black uppercase tracking-[0.4em] text-[10px]">STAKE-WEIGHTED CONSENSUS PROTOCOL</p>
         </div>
         <button 
@@ -170,13 +170,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                </div>
              )}
            </div>
-        </div>
-        <div className="p-5 bg-white/10 border border-white/20 rounded-xl flex items-center gap-4 shadow-lg">
-           <Info className="w-4 h-4 text-white" />
-           <p className="text-[9px] text-white font-black leading-tight tracking-widest uppercase">
-             7-DAY CYCLE: 6 DAYS VOTING (EMERALD) <br/>
-             FINAL 24H: CONSENSUS FREEZE (RED)
-           </p>
         </div>
       </div>
 
@@ -208,7 +201,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           </div>
 
           <div className="flex gap-5 mt-8">
-            <button onClick={handleCreateRequest} disabled={isProposalDisabled} className={`px-10 h-11 text-[10px] font-black uppercase tracking-[0.3em] transition-all shadow-xl ${!isProposalDisabled ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/20 cursor-not-allowed'}`}>
+            <button onClick={handleCreateRequest} disabled={isProposalDisabled} className={`px-10 h-11 text-[10px] font-black uppercase tracking-[0.3em] transition-all shadow-xl ${!isProposalDisabled ? 'exn-button' : 'bg-white/10 text-white border border-white/20 cursor-not-allowed'}`}>
               {isProcessing === 'SUBMIT_PROPOSAL' ? 'SUBMITTING...' : 'REVIEW_&_BROADCAST'}
             </button>
             <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 h-11 text-[10px] uppercase font-black tracking-[0.3em] border-white/20 text-white hover:bg-white/10">CANCEL</button>
@@ -238,21 +231,21 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     </span>
                     <h3 className="text-xl font-black text-white tracking-tighter uppercase leading-none">{prop.title}</h3>
                   </div>
-                  <p className="text-white/90 text-[12px] leading-relaxed font-medium italic border-l-2 border-primary/30 pl-5 tracking-tight">{prop.description}</p>
+                  <p className="text-white text-[12px] leading-relaxed font-medium italic border-l-2 border-primary/30 pl-5 tracking-tight">{prop.description}</p>
                   <div className="flex items-center gap-8 pt-2">
                     <ProposalCountdown deadline={prop.deadline} votingEndsAt={prop.voting_ends_at} />
-                    {isVotingLocked && <span className="text-[9px] text-destructive uppercase font-black bg-destructive/20 px-3 py-1 rounded border border-destructive/40 animate-pulse tracking-widest">FREEZE</span>}
+                    {isVotingLocked && <span className="text-[10px] text-destructive uppercase font-black bg-destructive/20 px-3 py-1 rounded border border-destructive/40 animate-pulse tracking-widest">FREEZE</span>}
                   </div>
                 </div>
 
                 <div className="w-full md:w-80 space-y-6 bg-white/5 p-6 rounded-2xl border border-white/15 shadow-xl">
                   <div className="space-y-3.5">
-                    <div className="flex justify-between items-end text-[9px] font-black uppercase tracking-widest">
+                    <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest">
                         <span className="text-emerald-400">YES: {yesPercent.toFixed(1)}%</span>
                         <span className="text-destructive">NO: {(100 - yesPercent).toFixed(1)}%</span>
                     </div>
                     <Progress value={yesPercent} className="h-2 bg-destructive/20" />
-                    <p className="text-[8px] text-white/60 uppercase font-black text-center tracking-[0.3em]">CONSENSUS_WEIGHT: {totalVotes.toLocaleString()} EXN</p>
+                    <p className="text-[9px] text-white uppercase font-black text-center tracking-[0.3em]">CONSENSUS_WEIGHT: {totalVotes.toLocaleString()} EXN</p>
                   </div>
 
                   {!isExpired && !isVotingLocked && !hasVoted && !isVotingForThis && (
@@ -266,7 +259,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     <div className="space-y-4 animate-in zoom-in-95 duration-500">
                       <textarea value={voteRationale} onChange={e => setVoteRationale(e.target.value)} placeholder="Rationale (3 EXN Fee)" className="exn-input h-24 text-[11px] bg-background font-mono py-3" />
                       <div className="grid grid-cols-2 gap-3">
-                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim() || !!isProcessing} className={`h-10 text-[10px] font-black uppercase transition-all shadow-lg ${voteRationale.trim() && !isProcessing ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/20 cursor-not-allowed'}`}>
+                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim() || !!isProcessing} className={`h-10 text-[10px] font-black uppercase transition-all shadow-lg ${voteRationale.trim() && !isProcessing ? 'exn-button' : 'bg-white/10 text-white border border-white/20 cursor-not-allowed'}`}>
                           {isActionProcessing ? 'VOTING...' : 'REVIEW'}
                         </button>
                         <button onClick={() => setVotingOn(null)} className="exn-button-outline h-10 text-[10px] font-black border-white/20 text-white">ABORT</button>
@@ -275,7 +268,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                   )}
 
                   {isExpired && (
-                    <button onClick={() => setExecutingProposal(prop)} disabled={prop.executed || !!isProcessing} className={`w-full h-12 uppercase text-[10px] font-black tracking-[0.3em] flex items-center justify-center gap-3 transition-all shadow-xl ${prop.executed || isProcessing ? 'bg-white/10 text-white/30 border border-white/20' : 'exn-button'}`}>
+                    <button onClick={() => setExecutingProposal(prop)} disabled={prop.executed || !!isProcessing} className={`w-full h-12 uppercase text-[10px] font-black tracking-[0.3em] flex items-center justify-center gap-3 transition-all shadow-xl ${prop.executed || isProcessing ? 'bg-white/10 text-white border border-white/20' : 'exn-button'}`}>
                       {isActionProcessing ? 'EXECUTING...' : (prop.executed ? 'FINALIZED_IN_LEDGER' : 'EXECUTE_CONSENSUS')}
                     </button>
                   )}
@@ -283,7 +276,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
               </div>
 
               <div className="bg-black/30">
-                <button onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)} className="w-full flex items-center justify-between px-8 py-4 text-[9px] font-black uppercase text-white/60 hover:text-white transition-all border-b border-white/10">
+                <button onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)} className="w-full flex items-center justify-between px-8 py-4 text-[10px] font-black uppercase text-white hover:text-primary transition-all border-b border-white/10">
                   <div className="flex items-center gap-3">
                     <MessageSquare className="w-4 h-4" />
                     NETWORK_RATIONALES ({prop.comments?.length || 0})
@@ -293,16 +286,16 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 {showComments && (
                   <div className="p-8 space-y-5 max-h-[350px] overflow-y-auto custom-scrollbar">
                     {(!prop.comments || prop.comments.length === 0) ? (
-                      <p className="text-[10px] text-white/30 uppercase font-black text-center py-10 tracking-[0.4em]">NO_RATIONALES_LOGGED</p>
+                      <p className="text-[10px] text-white uppercase font-black text-center py-10 tracking-[0.4em]">NO_RATIONALES_LOGGED</p>
                     ) : (
                       prop.comments.map((comment: any, idx: number) => (
                         <div key={idx} className="p-5 bg-white/5 rounded-xl border border-white/10 space-y-3 shadow-lg hover:border-primary/40 transition-all">
-                          <div className="flex justify-between items-center text-[9px] uppercase font-black">
+                          <div className="flex justify-between items-center text-[10px] uppercase font-black">
                             <div className="flex items-center gap-2.5">
                               <span className={`w-2 h-2 rounded-full ${comment.vote_stance === 'YES' ? 'bg-emerald-500' : 'bg-destructive'} shadow-lg`} />
                               <p className="font-mono text-primary">{shortenAddress(comment.author)}</p>
                             </div>
-                            <p className="text-white/40 tracking-widest">{new Date(comment.timestamp).toLocaleDateString()}</p>
+                            <p className="text-white tracking-widest">{new Date(comment.timestamp).toLocaleDateString()}</p>
                           </div>
                           <p className="text-[11px] text-white font-medium leading-relaxed pl-5 border-l-2 border-white/10 tracking-tight">{comment.text}</p>
                         </div>
@@ -328,15 +321,15 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 <div className="space-y-6 pt-4">
                   <div className="p-5 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-xl">
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white/70">TITLE</span>
+                      <span className="text-white">TITLE</span>
                       <span className="text-white truncate max-w-[150px]">{newProp.title}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white/70">NETWORK_FEE</span>
+                      <span className="text-white">NETWORK_FEE</span>
                       <span className="text-primary font-mono">10 EXN</span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-white/70 uppercase leading-relaxed font-black tracking-tight">PROPOSAL WILL BE BROADCAST TO THE NETWORK DAO FOR GLOBAL CONSENSUS.</p>
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">PROPOSAL WILL BE BROADCAST TO THE NETWORK DAO FOR GLOBAL CONSENSUS.</p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -360,17 +353,17 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 <div className="space-y-6 pt-4">
                   <div className="p-5 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-xl">
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white/70">STANCE</span>
+                      <span className="text-white">STANCE</span>
                       <span className={votingOn?.support ? "text-emerald-500" : "text-destructive"}>
                         {votingOn?.support ? 'YES_SUPPORT' : 'NO_REJECT'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white/70">WEIGHT</span>
+                      <span className="text-white">WEIGHT</span>
                       <span className="text-primary font-mono">{userStakeWeight.toLocaleString()}</span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-white/70 uppercase leading-relaxed font-black tracking-tight">YOUR CONSENSUS WEIGHT WILL BE PERMANENTLY RECORDED ON THE NETWORK LEDGER.</p>
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">YOUR CONSENSUS WEIGHT WILL BE PERMANENTLY RECORDED ON THE NETWORK LEDGER.</p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -394,15 +387,15 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 <div className="space-y-6 pt-4">
                   <div className="p-5 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-xl">
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white/70">PROPOSAL_ID</span>
+                      <span className="text-white">PROPOSAL_ID</span>
                       <span className="text-white font-mono">#{executingProposal?.id}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white/70">CONSENSUS</span>
+                      <span className="text-white">CONSENSUS</span>
                       <span className="text-emerald-500">PASSED_ENACTING</span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-white/70 uppercase leading-relaxed font-black tracking-tight">ENACTING THIS PROPOSAL WILL PERMANENTLY TRIGGER THE ASSOCIATED ON-CHAIN ACTIONS.</p>
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">ENACTING THIS PROPOSAL WILL PERMANENTLY TRIGGER THE ASSOCIATED ON-CHAIN ACTIONS.</p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
