@@ -194,7 +194,7 @@ export default function PurchaseLicensePage() {
         </div>
       </div>
 
-      <AlertDialog open={setShowReview} onOpenChange={setShowReview}>
+      <AlertDialog open={showReview} onOpenChange={setShowReview}>
         <AlertDialogContent className="exn-card border-primary bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-sm">
           <div className="p-8 space-y-8">
             <AlertDialogHeader>

@@ -41,7 +41,7 @@ export default function RegisterNodePage() {
 
   useEffect(() => {
     setMounted(true);
-    // Automated Geolocation Tracking
+    // Automated Geolocation Tracking via Network Origin
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
@@ -166,7 +166,7 @@ export default function RegisterNodePage() {
         </div>
         <h1 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE_REGISTRATION</h1>
         <p className="text-white text-[10px] font-black uppercase tracking-widest max-w-lg">
-          Establish infrastructure by binding a verified License NFT. Location and Flag are automatically synchronized to your physical origin.
+          Establish infrastructure by binding a verified License NFT. Location and Flag are automatically synchronized to your physical origin via autonomous diagnostic handshake.
         </p>
       </div>
 
@@ -317,7 +317,7 @@ export default function RegisterNodePage() {
       )}
 
       {/* Registration Review Dialog */}
-      <AlertDialog open={showReview} onOpenChange={setShowReview}>
+      <AlertDialog open={showReview} onOpenChange={(val) => setShowReview(val)}>
         <AlertDialogContent className="exn-card border-primary bg-black/95 backdrop-blur-3xl p-8 space-y-8 overflow-hidden max-md" asChild>
           <div>
             <AlertDialogHeader>
