@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Unlock, Clock, ShieldCheck, ArrowRightLeft, Database, MapPin, Zap } from 'lucide-react';
+import { Unlock, Clock, ShieldCheck, ArrowRightLeft, Database, MapPin, Zap, Info, CalendarClock } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -188,9 +188,9 @@ export function StakingActionForm({
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[320px] overflow-auto pr-2 custom-scrollbar">
+            <div className="space-y-3 max-h-[420px] overflow-auto pr-2 custom-scrollbar">
               {activeUserStakes.length === 0 ? (
-                <div className="text-center py-16 opacity-100">
+                <div className="text-center py-16">
                   <p className="text-[10px] uppercase font-black text-white tracking-[0.4em]">NO_ACTIVE_LOCKS</p>
                 </div>
               ) : (
@@ -200,22 +200,39 @@ export function StakingActionForm({
                   const multiplier = s.lock_multiplier || 1000;
                   const reward = v ? ((v.global_reward_index - s.reward_checkpoint) * s.amount * multiplier) / (REWARD_PRECISION * 1000) : 0;
                   const isMigrating = migrationStake?.id === s.id;
+                  const durationDays = Math.round((s.unlock_timestamp - s.staked_at) / (1000 * 60 * 60 * 24));
                   
                   return (
-                    <div key={s.id} className={`p-4 bg-white/5 border rounded-lg space-y-3 transition-all ${isMigrating ? 'border-primary ring-1 ring-primary/30' : 'border-white/20 hover:border-white/40'}`}>
+                    <div key={s.id} className={`p-4 bg-white/5 border rounded-lg space-y-4 transition-all ${isMigrating ? 'border-primary ring-1 ring-primary/30' : 'border-white/20 hover:border-white/40'}`}>
                       <div className="flex justify-between items-start">
                         <div className="space-y-1">
-                           <p className="text-[11px] font-black text-white font-mono uppercase">{s.amount.toLocaleString()} <span className="text-[9px]">EXN</span></p>
-                           <p className="text-[9px] font-black text-primary uppercase truncate max-w-[140px]">{v?.name || 'N/A'}</p>
+                           <p className="text-[12px] font-black text-white font-mono uppercase">{s.amount.toLocaleString()} <span className="text-[10px]">EXN</span></p>
+                           <p className="text-[10px] font-black text-primary uppercase truncate max-w-[140px]">{v?.name || 'N/A'}</p>
                         </div>
-                        <p className="text-[11px] font-black text-emerald-400 font-mono">+{reward.toFixed(4)}</p>
+                        <div className="text-right">
+                           <p className="text-[12px] font-black text-emerald-400 font-mono">+{reward.toFixed(4)}</p>
+                           <p className="text-[8px] text-white/60 uppercase font-bold">PENDING</p>
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-[8px] font-black uppercase text-white border-t border-white/10 pt-3">
-                        <div className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {new Date(s.staked_at).toLocaleDateString()}</div>
-                        <div className="text-right flex items-center justify-end gap-1">
-                          <Unlock className="w-2.5 h-2.5" />
-                          <span className={`${isLocked ? 'text-amber-400' : 'text-emerald-400'}`}>{new Date(s.unlock_timestamp).toLocaleDateString()}</span>
+                      <div className="grid grid-cols-2 gap-y-3 text-[9px] font-black uppercase text-white bg-black/40 p-3 rounded-lg border border-white/10">
+                        <div className="space-y-1">
+                          <p className="text-[7px] text-white/50 tracking-[0.2em]">DURATION</p>
+                          <p className="font-mono text-white flex items-center gap-1.5"><Clock className="w-2.5 h-2.5 text-primary" /> {durationDays} DAYS</p>
+                        </div>
+                        <div className="space-y-1 text-right">
+                          <p className="text-[7px] text-white/50 tracking-[0.2em]">YIELD_BOOST</p>
+                          <p className="font-mono text-emerald-400 flex items-center justify-end gap-1.5"><Zap className="w-2.5 h-2.5" /> {(multiplier/1000).toFixed(1)}x</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[7px] text-white/50 tracking-[0.2em]">STAKED_AT</p>
+                          <p className="font-mono text-white/90">{new Date(s.staked_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>
+                        </div>
+                        <div className="space-y-1 text-right">
+                          <p className="text-[7px] text-white/50 tracking-[0.2em]">UNLOCKS_AT</p>
+                          <p className={`font-mono ${isLocked ? 'text-amber-400' : 'text-emerald-400'}`}>
+                            {new Date(s.unlock_timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                          </p>
                         </div>
                       </div>
 
@@ -233,7 +250,7 @@ export function StakingActionForm({
                               ))}
                            </select>
                            <div className="flex gap-2">
-                             <button onClick={initiateMigration} disabled={!migrationTargetId} className={`flex-1 h-9 rounded text-[9px] font-black uppercase transition-all ${migrationTargetId ? 'bg-primary text-black' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}>CONFIRM_MIGRATION</button>
+                             <button onClick={initiateMigration} disabled={!migrationTargetId} className={`flex-1 h-9 rounded text-[9px] font-black uppercase transition-all ${migrationTargetId ? 'bg-primary text-black' : 'bg-white/10 text-white border border-white/20 cursor-not-allowed'}`}>CONFIRM</button>
                              <button onClick={() => setMigrationStake(null)} className="flex-1 h-9 rounded bg-white/5 text-white border border-white/20 text-[9px] font-black uppercase">ABORT</button>
                            </div>
                         </div>
@@ -340,6 +357,62 @@ export function StakingActionForm({
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
               <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
               <AlertDialogAction onClick={() => { if(showUnstakeReview) onUnstake(showUnstakeReview); setShowUnstakeReview(null); }} className="bg-destructive text-white flex-1 h-11 text-[10px] uppercase font-black rounded-lg hover:opacity-90">CONFIRM_RELEASE</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Harvest Single Review Dialog */}
+      <AlertDialog open={showClaimSingleReview !== null} onOpenChange={() => setShowClaimSingleReview(null)}>
+        <AlertDialogContent className="exn-card border-secondary/60 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-8 space-y-8">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-3">
+                <Zap className="w-5 h-5" /> VERIFY_HARVEST
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-6 pt-4">
+                  <div className="p-5 bg-white/5 rounded-xl border border-white/20 space-y-4 shadow-xl">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white">HARVEST_AMT</span>
+                      <span className="text-secondary font-mono">{(showClaimSingleReview?.amount || 0).toFixed(4)} EXN</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">HARVESTING WILL TRANSFER ACCRUED YIELD FROM THE PROTOCOL REWARD VAULT TO YOUR CONNECTED WALLET.</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={() => { if(showClaimSingleReview) onClaimSingle(showClaimSingleReview.id); setShowClaimSingleReview(null); }} className="bg-secondary text-white flex-1 h-11 text-[10px] uppercase font-black rounded-lg hover:opacity-90">CONFIRM_HARVEST</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Harvest All Review Dialog */}
+      <AlertDialog open={showClaimReview} onOpenChange={setShowClaimReview}>
+        <AlertDialogContent className="exn-card border-secondary/60 bg-black/95 p-0 overflow-hidden max-w-sm">
+          <div className="p-8 space-y-8">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-3">
+                <Zap className="w-5 h-5" /> VERIFY_MASS_HARVEST
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-6 pt-4">
+                  <div className="p-5 bg-white/5 rounded-xl border border-white/20 space-y-4 shadow-xl">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                      <span className="text-white">TOTAL_HARVEST</span>
+                      <span className="text-secondary font-mono">{(totalPendingRewards || 0).toFixed(4)} EXN</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">EXECUTING A MASS HARVEST WILL AGGREGATE ALL ACCRUED YIELD ACROSS YOUR ACTIVE LOCKS AND DEPOSIT TO YOUR WALLET.</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={() => { onClaim(); setShowClaimReview(false); }} className="bg-secondary text-white flex-1 h-11 text-[10px] uppercase font-black rounded-lg hover:opacity-90">CONFIRM_MASS_HARVEST</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
