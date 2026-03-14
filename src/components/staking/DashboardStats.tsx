@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -9,7 +10,7 @@ import {
   XAxis, 
   YAxis 
 } from 'recharts';
-import { ArrowUpRight, Cpu, Calendar, History } from 'lucide-react';
+import { ArrowUpRight, Cpu, Calendar } from 'lucide-react';
 
 interface DashboardStatsProps {
   totalStaked?: number;
@@ -66,7 +67,7 @@ export function DashboardStats({
   return (
     <div className="space-y-2 mb-6 animate-in fade-in duration-700">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
-        <div className="lg:col-span-3 h-36 exn-card bg-black border-white/30 flex flex-col overflow-hidden relative shadow-2xl">
+        <div className="lg:col-span-3 h-32 exn-card bg-black border-white/20 flex flex-col overflow-hidden relative shadow-2xl">
           <div className="p-3 pb-0 flex justify-between items-start relative z-10">
             <div>
               <p className="text-white text-[7px] font-black uppercase tracking-[0.2em]">PROTOCOL_TVL</p>
@@ -102,7 +103,7 @@ export function DashboardStats({
           </div>
         </div>
 
-        <div className="exn-card p-3 bg-black border-white/30 flex flex-col justify-center space-y-1 shadow-2xl">
+        <div className="exn-card p-3 bg-black border-white/20 flex flex-col justify-center space-y-1 shadow-2xl">
           <p className="text-white text-[7px] font-black uppercase tracking-[0.2em]">DAO_TREASURY</p>
           <div className="flex justify-between items-end">
             <p className="text-base font-mono font-black text-white tracking-tighter">
@@ -116,33 +117,32 @@ export function DashboardStats({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <div className="exn-card p-2.5 bg-black border-white/30 flex items-center justify-between">
+        <div className="exn-card p-2.5 bg-black border-white/20 flex items-center justify-between">
            <div className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-primary" />
+              <Calendar className="w-3 h-3 text-primary" />
               <div>
-                 <p className="text-[6px] text-white uppercase font-black">CURRENT_EPOCH</p>
+                 <p className="text-[6px] text-white uppercase font-black tracking-tighter">CURRENT_EPOCH</p>
                  <p className="text-[10px] font-black text-white font-mono">{currentEpoch}</p>
               </div>
            </div>
            <span className="text-[7px] text-emerald-400 font-black uppercase border border-emerald-400/30 px-1.5 py-0.5 rounded bg-emerald-500/5">STABLE</span>
         </div>
 
-        <div className="exn-card p-2.5 bg-black border-white/30 flex items-center justify-between">
+        <div className="exn-card p-2.5 bg-black border-white/20 flex items-center justify-between">
            <div className="flex items-center gap-2">
-              <History className="w-3.5 h-3.5 text-primary" />
               <div>
-                 <p className="text-[6px] text-white uppercase font-black">LAST_SETTLED</p>
+                 <p className="text-[6px] text-white uppercase font-black tracking-tighter">LAST_SETTLED</p>
                  <p className="text-[10px] font-black text-white font-mono">{state.lastCrankedEpoch || 0}</p>
               </div>
            </div>
            <span className="text-[7px] text-primary font-black uppercase border border-primary/30 px-1.5 py-0.5 rounded bg-primary/5">FINALIZED</span>
         </div>
 
-        <div className="exn-card p-2.5 bg-black border-white/30 flex items-center justify-between">
+        <div className="exn-card p-2.5 bg-black border-white/20 flex items-center justify-between">
            <div className="flex items-center gap-2">
-              <Cpu className="w-3.5 h-3.5 text-primary" />
+              <Cpu className="w-3 h-3 text-primary" />
               <div>
-                 <p className="text-[6px] text-white uppercase font-black">ACTIVE_NODES</p>
+                 <p className="text-[6px] text-white uppercase font-black tracking-tighter">ACTIVE_NODES</p>
                  <p className="text-[10px] font-black text-white font-mono">{state.validators.filter(v => v.is_active).length}</p>
               </div>
            </div>
