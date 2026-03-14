@@ -69,7 +69,7 @@ export default function RegisterNodePage() {
 
   if (myLicenses.length === 0) return (
     <div className="max-w-3xl mx-auto px-10 py-32 text-center space-y-8 animate-in fade-in duration-500">
-       <div className="p-6 bg-destructive/10 rounded-3xl border border-destructive/20 w-fit mx-auto shadow-2xl">
+       <div className="p-6 bg-destructive/10 rounded-3xl border border-destructive w-fit mx-auto shadow-2xl">
          <Ticket className="w-12 h-12 text-destructive" />
        </div>
        <div className="space-y-4">
@@ -154,7 +154,7 @@ export default function RegisterNodePage() {
       </div>
 
       {hasExistingNode ? (
-        <div className="exn-card p-12 flex flex-col items-center justify-center text-center space-y-8 border-primary/30 bg-primary/5 shadow-2xl backdrop-blur-3xl">
+        <div className="exn-card p-12 flex flex-col items-center justify-center text-center space-y-8 border-primary bg-primary/5 shadow-2xl backdrop-blur-3xl">
            <AlertCircle className="w-12 h-12 text-primary" />
            <div className="space-y-3">
              <h2 className="text-2xl font-black text-white uppercase tracking-tighter">ACTIVE_XNODE_DETECTED</h2>
@@ -164,7 +164,7 @@ export default function RegisterNodePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-7 exn-card p-8 space-y-10 bg-black/40 backdrop-blur-3xl border-white/20 shadow-3xl">
+          <div className="lg:col-span-7 exn-card p-8 space-y-10 bg-black/40 backdrop-blur-3xl border-white shadow-3xl">
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                  <h3 className="text-[9px] font-black text-white uppercase tracking-[0.4em]">NFT_AUTHORIZATION</h3>
@@ -202,7 +202,7 @@ export default function RegisterNodePage() {
                 <label className="text-[9px] text-white uppercase font-black tracking-[0.3em]">IDENTITY_ASSET (LOGO_UPLOAD)</label>
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-32 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group shadow-inner"
+                  className="w-full h-32 border-2 border-dashed border-white rounded-xl flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group shadow-inner"
                 >
                   <Upload className="w-6 h-6 text-white group-hover:text-primary transition-all duration-500" />
                   <p className="text-[9px] uppercase font-black text-white group-hover:text-primary transition-all tracking-[0.2em]">
@@ -229,7 +229,7 @@ export default function RegisterNodePage() {
             <button 
               onClick={handleRegisterInitiate} 
               disabled={isRegistrationDisabled} 
-              className={`w-full h-14 uppercase tracking-[0.5em] font-black transition-all shadow-3xl text-[11px] ${isRegistrationDisabled ? 'bg-white/5 text-white border border-white/20 cursor-not-allowed opacity-50' : 'exn-button'}`}
+              className={`w-full h-14 uppercase tracking-[0.5em] font-black transition-all shadow-3xl text-[11px] ${isRegistrationDisabled ? 'bg-white/5 text-white border border-white cursor-not-allowed opacity-50' : 'exn-button'}`}
             >
               REVIEW_PROVISIONING
             </button>
@@ -238,7 +238,7 @@ export default function RegisterNodePage() {
           <div className="lg:col-span-5 space-y-8">
             <div className="sticky top-32">
               <h3 className="text-[9px] font-black text-white uppercase tracking-[0.4em] mb-5">IDENTITY_PREVIEW_V2</h3>
-              <div className="exn-card overflow-hidden border-primary/30 bg-black/60 shadow-[0_40px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl group">
+              <div className="exn-card overflow-hidden border-primary bg-black/60 shadow-[0_40px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl group">
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image 
                     src={previewLogo}
@@ -280,11 +280,11 @@ export default function RegisterNodePage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-5 bg-white/5 rounded-xl border border-white/20 space-y-1.5 group-hover:border-primary transition-all shadow-xl">
+                    <div className="p-5 bg-white/5 rounded-xl border border-white space-y-1.5 group-hover:border-primary transition-all shadow-xl">
                       <p className="text-[9px] uppercase font-black text-white tracking-widest">NODE_FEE</p>
                       <p className="text-primary font-black text-[12px] font-mono tracking-tighter">{(formData.commission).toFixed(1)}%</p>
                     </div>
-                    <div className="p-5 bg-white/5 rounded-xl border border-white/20 space-y-1.5 group-hover:border-primary transition-all shadow-xl">
+                    <div className="p-5 bg-white/5 rounded-xl border border-white space-y-1.5 group-hover:border-primary transition-all shadow-xl">
                       <p className="text-[9px] uppercase font-black text-white tracking-widest">NFT_BOND</p>
                       <p className="text-white font-mono font-black text-[9px] truncate tracking-tighter">{formData.licenseId ? shortenAddress(formData.licenseId) : 'N/A'}</p>
                     </div>
@@ -298,7 +298,7 @@ export default function RegisterNodePage() {
 
       {/* Registration Review Dialog */}
       <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-8 space-y-8 overflow-hidden max-w-md">
+        <AlertDialogContent className="exn-card border-primary bg-black/95 backdrop-blur-3xl p-8 space-y-8 overflow-hidden max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
               <ShieldCheck className="w-6 h-6" />
@@ -306,7 +306,7 @@ export default function RegisterNodePage() {
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-6 pt-4">
-                <div className="p-6 bg-white/5 rounded-xl border border-white/20 space-y-4 shadow-3xl">
+                <div className="p-6 bg-white/5 rounded-xl border border-white space-y-4 shadow-3xl">
                   <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
                     <span className="text-white font-black">OP_CODE</span>
                     <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>

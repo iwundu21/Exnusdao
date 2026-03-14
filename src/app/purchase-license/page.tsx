@@ -100,7 +100,7 @@ export default function PurchaseLicensePage() {
             </p>
           </div>
 
-          <div className="exn-card p-10 space-y-12 border-white/20 bg-black/90 backdrop-blur-3xl shadow-3xl">
+          <div className="exn-card p-10 space-y-12 border-white bg-black/90 backdrop-blur-3xl shadow-3xl">
             <div className="flex justify-between items-center border-b border-white/10 pb-10">
               <div className="flex items-center gap-5">
                 <div className="p-4 bg-primary/15 rounded-2xl border border-primary/40 shadow-xl">
@@ -137,7 +137,7 @@ export default function PurchaseLicensePage() {
                 <button 
                   onClick={handleMintInitiate} 
                   disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || isMinting || hasLicense} 
-                  className={`w-full h-16 text-[12px] tracking-[0.6em] font-black uppercase flex items-center justify-center gap-4 transition-all shadow-3xl ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'}`}
+                  className={`w-full h-16 text-[12px] tracking-[0.6em] font-black uppercase flex items-center justify-center gap-4 transition-all shadow-3xl ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-white/10 text-white border border-white cursor-not-allowed'}`}
                 >
                   {isMinting ? (
                     'PROVISIONING_SECTOR...'
@@ -156,32 +156,32 @@ export default function PurchaseLicensePage() {
         </div>
 
         <div className="lg:col-span-5 space-y-8">
-           <div className="exn-card p-8 border-white/20 bg-black/90 backdrop-blur-3xl shadow-2xl">
+           <div className="exn-card p-8 border-white bg-black/90 backdrop-blur-3xl shadow-2xl">
               <h3 className="text-[11px] font-black text-white uppercase tracking-[0.5em] mb-8 flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-primary" /> INVENTORY_SCAN
               </h3>
               
               <div className="space-y-6">
                 {myLicenses.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
-                     <Ticket className="w-12 h-12 mb-4 text-white/20" />
-                     <p className="text-[11px] uppercase font-black text-white/40 tracking-[0.4em] text-center">NO_XNODE_NFT_DETECTED</p>
+                  <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-white rounded-2xl bg-white/5">
+                     <Ticket className="w-12 h-12 mb-4 text-white" />
+                     <p className="text-[11px] uppercase font-black text-white tracking-[0.4em] text-center">NO_XNODE_NFT_DETECTED</p>
                   </div>
                 ) : (
                   myLicenses.map((lic) => (
-                    <div key={lic.id} className="p-6 bg-white/5 rounded-2xl border border-white/15 space-y-5 group hover:border-primary/50 transition-all shadow-xl">
+                    <div key={lic.id} className="p-6 bg-white/5 rounded-2xl border border-white space-y-5 group hover:border-primary transition-all shadow-xl">
                        <div className="flex gap-6">
-                          <div className="w-14 h-14 relative rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl">
+                          <div className="w-14 h-14 relative rounded-xl overflow-hidden border-2 border-white shadow-2xl">
                              <Image src={lic.image_url || `https://picsum.photos/seed/${lic.id}/120/120`} alt="License" fill className="object-cover" />
                           </div>
                           <div className="flex-1 space-y-2">
                              <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="text-[10px] text-white/60 uppercase font-black mb-1 tracking-widest">MINT_ID</p>
+                                  <p className="text-[10px] text-white uppercase font-black mb-1 tracking-widest">MINT_ID</p>
                                   <p className="font-mono text-[12px] text-primary font-black tracking-tighter">{shortenAddress(lic.id)}</p>
                                 </div>
                                 <a href={getExplorerLink(lic.id)} target="_blank" rel="noopener noreferrer">
-                                   <ExternalLink className="w-4 h-4 text-white/40 hover:text-primary transition-all" />
+                                   <ExternalLink className="w-4 h-4 text-white hover:text-primary transition-all" />
                                 </a>
                              </div>
                           </div>
@@ -194,8 +194,8 @@ export default function PurchaseLicensePage() {
         </div>
       </div>
 
-      <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-sm">
+      <AlertDialog open={setShowReview} onOpenChange={setShowReview}>
+        <AlertDialogContent className="exn-card border-primary bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-sm">
           <div className="p-8 space-y-8">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
@@ -204,18 +204,18 @@ export default function PurchaseLicensePage() {
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
-                  <div className="p-6 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-3xl">
+                  <div className="p-6 bg-white/5 rounded-xl border border-white space-y-4 shadow-3xl">
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/70 font-black">OP_CODE</span>
+                      <span className="text-white font-black">OP_CODE</span>
                       <span className="text-white font-black font-mono">XNODE_MINT</span>
                     </div>
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white/70 font-black">MINT_COST</span>
+                      <span className="text-white font-black">MINT_COST</span>
                       <span className="text-emerald-400 font-mono font-black text-[13px]">{licensePrice.toLocaleString()} USDC</span>
                     </div>
                   </div>
                   
-                  <p className="text-[11px] text-white/80 uppercase leading-relaxed font-black tracking-tight">
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
                     BY CONFIRMING, THE MINT COST WILL BE DEDUCTED FROM YOUR USDC BALANCE.
                   </p>
                 </div>

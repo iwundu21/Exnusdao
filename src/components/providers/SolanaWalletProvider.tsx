@@ -6,6 +6,8 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
 
 // Default styles for the wallet modal
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -18,11 +20,18 @@ export function SolanaWalletProvider({ children }: { children: React.ReactNode }
     const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
     /**
-     * We pass an empty array to wallets. 
-     * Modern wallets like Phantom, Solflare, and Backpack implement the 'Wallet Standard'
-     * and will be discovered automatically without needing individual adapter packages.
+     * Explicitly defining adapters to avoid "mobile wallet protocol" errors 
+     * in specific cloud/sandboxed browser environments.
+     * We use individual software wallet adapters to avoid hardware-wallet 
+     * dependencies (like 'usb') that require native builds.
      */
-    const wallets = useMemo(() => [], []);
+    const wallets = useMemo(
+        () => [
+            new PhantomWalletAdapter(),
+            new SolflareWalletAdapter(),
+        ],
+        []
+    );
 
     return (
         <ConnectionProvider endpoint={endpoint}>

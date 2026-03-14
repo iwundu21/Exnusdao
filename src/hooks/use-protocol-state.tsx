@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
@@ -123,16 +122,16 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const signAction = useCallback(async (intent: string) => {
     if (!connected || !publicKey || !signMessage) {
       setFeedback('error', 'WALLET_AUTH_REQUIRED_FOR_SIGNATURE');
-      throw new Error('Wallet not ready');
+      throw new Error('Wallet not ready or signature function missing.');
     }
     try {
       setFeedback('warning', 'WAITING_FOR_WALLET_SIGNATURE...');
-      const message = `EXNUS_PROTOCOL_INTENT: ${intent}\nTIMESTAMP: ${Date.now()}\nWALLET: ${walletAddress}\nNETWORK: SOLANA_MAINNET`;
-      const encoded = new TextEncoder().encode(message);
-      await signMessage(encoded);
+      const messageText = `EXNUS_PROTOCOL_INTENT: ${intent}\nTIMESTAMP: ${Date.now()}\nWALLET: ${walletAddress}\nNETWORK: SOLANA_MAINNET`;
+      const encodedMessage = new TextEncoder().encode(messageText);
+      await signMessage(encodedMessage);
       return true;
-    } catch (e) {
-      setFeedback('error', 'SIGNATURE_REJECTED_BY_USER.');
+    } catch (e: any) {
+      setFeedback('error', e.message || 'SIGNATURE_REJECTED_BY_USER.');
       throw e;
     }
   }, [connected, publicKey, signMessage, walletAddress, setFeedback]);
