@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -85,14 +86,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
   const connected = !!walletAddress;
 
-  const startProcessing = (actionId: string, callback: () => void) => {
-    setIsProcessing(actionId);
-    setTimeout(() => {
-      callback();
-      setIsProcessing(null);
-    }, 6000);
-  };
-
   const handleCreateRequest = () => {
     if (!connected) return setFeedback('warning', 'Please connect wallet.');
     if (userStakeWeight < 1000000) return setFeedback('error', 'Min weight 1M EXN required.');
@@ -109,11 +102,9 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
   const confirmCreate = () => {
     setShowCreateReview(false);
-    startProcessing('SUBMIT_PROPOSAL', () => {
-      onCreate({ ...newProp, amount: Number(newProp.amount) || 0 });
-      setShowCreate(false);
-      setNewProp({ title: '', description: '', type: 0, amount: '', recipient: '' });
-    });
+    onCreate({ ...newProp, amount: Number(newProp.amount) || 0 });
+    setShowCreate(false);
+    setNewProp({ title: '', description: '', type: 0, amount: '', recipient: '' });
   };
 
   const confirmVote = () => {
@@ -123,22 +114,18 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
     const rationale = voteRationale;
     setShowVoteReview(false);
     setVotingOn(null);
-    startProcessing(`VOTE_${vOnId}`, () => {
-      onVote(vOnId, vOnSupport, rationale);
-      setVoteRationale('');
-    });
+    onVote(vOnId, vOnSupport, rationale);
+    setVoteRationale('');
   };
 
   const confirmExecute = () => {
     if (!executingProposal) return;
     const ePropId = executingProposal.id;
     setExecutingProposal(null);
-    startProcessing(`EXECUTE_${ePropId}`, () => {
-      onExecute(ePropId);
-    });
+    onExecute(ePropId);
   };
 
-  const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || !connected || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0)) || !!isProcessing;
+  const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || !connected || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0));
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
@@ -149,8 +136,8 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
-          disabled={!connected || !!isProcessing}
-          className={`exn-button uppercase tracking-[0.2em] text-[10px] font-black h-10 px-8 ${!connected || isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={!connected}
+          className={`exn-button uppercase tracking-[0.2em] text-[10px] font-black h-10 px-8 ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {showCreate ? 'CLOSE_FORM' : 'SUBMIT_PROPOSAL'}
         </button>
@@ -202,7 +189,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
           <div className="flex gap-5 mt-8">
             <button onClick={handleCreateRequest} disabled={isProposalDisabled} className={`px-10 h-11 text-[10px] font-black uppercase tracking-[0.3em] transition-all shadow-xl ${!isProposalDisabled ? 'exn-button' : 'bg-white/10 text-white border border-white/20 cursor-not-allowed'}`}>
-              {isProcessing === 'SUBMIT_PROPOSAL' ? 'SUBMITTING...' : 'REVIEW_&_BROADCAST'}
+              REVIEW_&_BROADCAST
             </button>
             <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 h-11 text-[10px] uppercase font-black tracking-[0.3em] border-white/20 text-white hover:bg-white/10">CANCEL</button>
           </div>
@@ -219,7 +206,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           const hasVoted = connected && prop.voters?.includes(walletAddress);
           const isVotingForThis = connected && votingOn?.id === prop.id;
           const showComments = activeCommentId === prop.id;
-          const isActionProcessing = isProcessing?.startsWith(`VOTE_${prop.id}`) || isProcessing === `EXECUTE_${prop.id}`;
 
           return (
             <div key={prop.id} className="exn-card p-0 border-white/20 bg-black/60 backdrop-blur-3xl shadow-2xl">
@@ -259,8 +245,8 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     <div className="space-y-4 animate-in zoom-in-95 duration-500">
                       <textarea value={voteRationale} onChange={e => setVoteRationale(e.target.value)} placeholder="Rationale (3 EXN Fee)" className="exn-input h-24 text-[11px] bg-background font-mono py-3" />
                       <div className="grid grid-cols-2 gap-3">
-                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim() || !!isProcessing} className={`h-10 text-[10px] font-black uppercase transition-all shadow-lg ${voteRationale.trim() && !isProcessing ? 'exn-button' : 'bg-white/10 text-white border border-white/20 cursor-not-allowed'}`}>
-                          {isActionProcessing ? 'VOTING...' : 'REVIEW'}
+                        <button onClick={handleVoteRequest} disabled={!voteRationale.trim()} className={`h-10 text-[10px] font-black uppercase transition-all shadow-lg ${voteRationale.trim() ? 'exn-button' : 'bg-white/10 text-white border border-white/20 cursor-not-allowed'}`}>
+                          REVIEW
                         </button>
                         <button onClick={() => setVotingOn(null)} className="exn-button-outline h-10 text-[10px] font-black border-white/20 text-white">ABORT</button>
                       </div>
@@ -268,8 +254,8 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                   )}
 
                   {isExpired && (
-                    <button onClick={() => setExecutingProposal(prop)} disabled={prop.executed || !!isProcessing} className={`w-full h-12 uppercase text-[10px] font-black tracking-[0.3em] flex items-center justify-center gap-3 transition-all shadow-xl ${prop.executed || isProcessing ? 'bg-white/10 text-white border border-white/20' : 'exn-button'}`}>
-                      {isActionProcessing ? 'EXECUTING...' : (prop.executed ? 'FINALIZED_IN_LEDGER' : 'EXECUTE_CONSENSUS')}
+                    <button onClick={() => setExecutingProposal(prop)} disabled={prop.executed} className={`w-full h-12 uppercase text-[10px] font-black tracking-[0.3em] flex items-center justify-center gap-3 transition-all shadow-xl ${prop.executed ? 'bg-white/10 text-white border border-white/20' : 'exn-button'}`}>
+                      {prop.executed ? 'FINALIZED_IN_LEDGER' : 'EXECUTE_CONSENSUS'}
                     </button>
                   )}
                 </div>

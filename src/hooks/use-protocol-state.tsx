@@ -127,7 +127,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     }
     try {
       setFeedback('warning', 'WAITING_FOR_WALLET_SIGNATURE...');
-      const message = `EXNUS_PROTOCOL_INTENT: ${intent}\nTIMESTAMP: ${Date.now()}\nWALLET: ${walletAddress}`;
+      const message = `EXNUS_PROTOCOL_INTENT: ${intent}\nTIMESTAMP: ${Date.now()}\nWALLET: ${walletAddress}\nNETWORK: SOLANA_MAINNET`;
       const encoded = new TextEncoder().encode(message);
       await signMessage(encoded);
       return true;

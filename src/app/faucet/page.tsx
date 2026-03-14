@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -33,7 +34,7 @@ export default function FaucetPage() {
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [reviewType, setReviewType] = useState<'exn' | 'usdc' | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const isProcessing = state.lastTransaction?.status === 'warning';
 
   useEffect(() => {
     setMounted(true);
@@ -85,16 +86,11 @@ export default function FaucetPage() {
     if (!reviewType) return;
     const type = reviewType;
     setReviewType(null);
-    setIsProcessing(true);
-    
-    setTimeout(() => {
-      if (type === 'exn') {
-        claimFaucetAssets(walletAddress, exnLimit, 0, 'exn');
-      } else {
-        claimFaucetAssets(walletAddress, 0, usdcLimit, 'usdc');
-      }
-      setIsProcessing(false);
-    }, 6000);
+    if (type === 'exn') {
+      claimFaucetAssets(walletAddress, exnLimit, 0, 'exn');
+    } else {
+      claimFaucetAssets(walletAddress, 0, usdcLimit, 'usdc');
+    }
   };
 
   return (

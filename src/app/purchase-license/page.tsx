@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -23,7 +24,7 @@ export default function PurchaseLicensePage() {
   const walletAddress = publicKey?.toBase58() || '';
   const { state, isLoaded, setFeedback, mintLicense, usdcBalance } = useProtocolState();
   const [mounted, setMounted] = useState(false);
-  const [isMinting, setIsMinting] = useState(false);
+  const isMinting = state.lastTransaction?.status === 'warning';
   const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
@@ -69,7 +70,6 @@ export default function PurchaseLicensePage() {
   };
 
   const confirmMint = () => {
-    setIsMinting(true);
     setShowReview(false);
     
     const mintAddress = `XNODE-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
@@ -82,10 +82,7 @@ export default function PurchaseLicensePage() {
       image_url: `https://picsum.photos/seed/${mintAddress}/400/400`
     };
 
-    setTimeout(() => {
-      mintLicense(walletAddress, licensePrice, newLicense);
-      setIsMinting(false);
-    }, 6000);
+    mintLicense(walletAddress, licensePrice, newLicense);
   };
 
   return (
@@ -225,7 +222,7 @@ export default function PurchaseLicensePage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-11 uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
+              <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-11 uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
               <AlertDialogAction onClick={confirmMint} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_MINT</AlertDialogAction>
             </AlertDialogFooter>
           </div>
