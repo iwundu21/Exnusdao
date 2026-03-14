@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Droplets, ShieldCheck, Ticket } from 'lucide-react';
+import { Droplets, ShieldCheck, Ticket, BookOpen } from 'lucide-react';
 import { useProtocolState } from '@/hooks/use-protocol-state';
 import { useWallet } from '@solana/wallet-adapter-react';
 
@@ -33,7 +33,7 @@ export function Footer() {
 
   return (
     <footer className="fixed bottom-0 left-0 w-full z-40 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
-      <div className="max-w-7xl auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-5">
           <div className="flex flex-col">
             <h2 className="text-xs font-bold exn-gradient-text tracking-widest leading-none uppercase">EXNUS</h2>
@@ -53,6 +53,9 @@ export function Footer() {
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-6 text-[8px] text-muted-foreground uppercase font-black tracking-widest">
             <Link href="/" className="hover:text-primary transition-colors">Dashboard</Link>
+            <Link href="/docs/protocol-spec" className="flex items-center gap-1 hover:text-primary transition-colors">
+              <BookOpen className="w-2.5 h-2.5" /> How it Works
+            </Link>
             <Link href="/purchase-license" className="flex items-center gap-1 hover:text-primary transition-colors">
               <Ticket className="w-2.5 h-2.5" /> Buy XNode
             </Link>
