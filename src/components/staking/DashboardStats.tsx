@@ -25,35 +25,30 @@ export function DashboardStats({
   treasuryBalance = 0 
 }: DashboardStatsProps) {
   const { state } = useProtocolState();
-  const [now, setNow] = useState(Date.now());
   const [timeframe, setTimeframe] = useState<'24H' | '7D'>('7D');
-  const [liveVariation, setLiveVariation] = useState(1);
+  const [mounted, setMounted] = useState(false);
   const exnPrice = state.exnPrice || 0.23;
   
   const stakedUsdValue = totalStaked * exnPrice;
   const treasuryUsdValue = treasuryBalance * exnPrice;
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now());
-      // Simulate slight live fluctuation for the current data point
-      setLiveVariation(0.9995 + Math.random() * 0.001);
-    }, 3000);
-    return () => clearInterval(timer);
+    setMounted(true);
   }, []);
 
   const currentEpoch = useMemo(() => {
     if (!state.networkStartDate) return 1;
-    const elapsed = now - state.networkStartDate;
+    const elapsed = Date.now() - state.networkStartDate;
     return Math.floor(elapsed / EPOCH_DURATION) + 1;
-  }, [state.networkStartDate, now]);
+  }, [state.networkStartDate]);
 
   const chartData = useMemo(() => {
     const points = timeframe === '24H' ? 24 : 14;
     const data = [];
     const currentVal = totalStaked || 0;
     
-    // Calculate start time based on timeframe
+    // Stable anchor for the chart timeline
+    const now = Date.now();
     const durationMs = timeframe === '24H' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
     const startTime = now - durationMs;
     const timeStep = durationMs / points;
@@ -62,15 +57,14 @@ export function DashboardStats({
       const pointTime = startTime + (i * timeStep);
       const progress = i / points;
       
-      // Professional growth curve simulation
+      // Professional growth curve simulation based on actual totalStaked
       const baseGrowth = 0.95 + (Math.log10(1 + progress * 9) / 1) * 0.05;
       const variation = 0.995 + (Math.sin(i * 1.8) * 0.005);
       
       let value = Math.floor(currentVal * variation * baseGrowth);
       
-      // Apply live variation to the absolute latest point
       if (i === points) {
-        value = Math.floor(currentVal * liveVariation);
+        value = currentVal;
       }
       
       const dateLabel = timeframe === '24H' 
@@ -83,7 +77,9 @@ export function DashboardStats({
       });
     }
     return data;
-  }, [totalStaked, timeframe, now, liveVariation]);
+  }, [totalStaked, timeframe]);
+
+  if (!mounted) return null;
 
   return (
     <div className="space-y-3 mb-8 animate-in fade-in duration-700">
@@ -94,19 +90,19 @@ export function DashboardStats({
               <div className="flex items-center gap-2">
                 <p className="text-white text-[8px] font-black uppercase tracking-[0.3em]">PROTOCOL_TVL_DIAGNOSTIC</p>
                 <div className="flex items-center gap-1.5 bg-primary/20 px-2 py-0.5 rounded border border-primary/40">
-                  <Activity className="w-2.5 h-2.5 text-primary animate-pulse" />
-                  <span className="text-[7px] font-black text-primary uppercase tracking-widest">LIVE_FEED</span>
+                  <Activity className="w-2.5 h-2.5 text-primary" />
+                  <span className="text-[7px] font-black text-primary uppercase tracking-widest">LIVE_STATE</span>
                 </div>
               </div>
               <h3 className="text-2xl font-black font-mono tracking-tighter text-white">
-                {(totalStaked * liveVariation).toLocaleString(undefined, { maximumFractionDigits: 0 })} <span className="text-[10px] text-primary">EXN</span>
+                {(totalStaked).toLocaleString(undefined, { maximumFractionDigits: 0 })} <span className="text-[10px] text-primary">EXN</span>
               </h3>
             </div>
             
             <div className="flex flex-col items-end gap-3">
               <div className="text-right">
                 <p className="text-sm font-black text-emerald-400 font-mono tracking-tighter">
-                  ${(stakedUsdValue * liveVariation).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  ${(stakedUsdValue).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </p>
                 <div className="flex items-center justify-end gap-1 text-[8px] font-black text-emerald-500 uppercase tracking-widest">
                   <ArrowUpRight className="w-3 h-3" /> +2.4%
@@ -161,7 +157,7 @@ export function DashboardStats({
                   strokeWidth={2} 
                   fillOpacity={1} 
                   fill="url(#chartGradient)" 
-                  animationDuration={1500}
+                  animationDuration={0}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -201,9 +197,8 @@ export function DashboardStats({
 
         <div className="exn-card p-3 bg-black border-white/20 flex items-center justify-between shadow-xl">
            <div className="flex items-center gap-3">
-              <Activity className="w-4 h-4 text-primary" />
               <div>
-                 <p className="text-[7px] text-white uppercase font-black tracking-widest">SETTLEMENT_HISTORY</p>
+                 <p className="text-[7px] text-white uppercase font-black tracking-widest">LAST_SETTLED</p>
                  <p className="text-xs font-black text-white font-mono">{state.lastCrankedEpoch || 0} EPOCHS</p>
               </div>
            </div>
