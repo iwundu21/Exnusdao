@@ -2,13 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
-  ArrowLeft,
-  Terminal,
-  Activity,
-  ArrowRight,
-  Cpu
-} from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProtocolSpecPage() {
@@ -23,28 +17,28 @@ export default function ProtocolSpecPage() {
   const sections = [
     {
       id: "infrastructure",
-      title: "LAYER_0: INFRASTRUCTURE_AUTHORIZATION",
-      content: "The foundation of the Exnus network is built upon the XNode License NFT standard. Every validator must mint a unique Metaplex-standard NFT to act as a cryptographic authorization key. This on-chain asset grants the holder permission to register infrastructure and participate in the protocol's reward sharding mechanism. The supply of licenses is strictly capped by the protocol's global parameter, ensuring infrastructure scarcity and network stability."
+      title: "LAYER_0: XNODE_INFRASTRUCTURE_SCARCITY",
+      content: "The Exnus network is built on a model of absolute infrastructure scarcity. Exactly 21 XNodes will ever exist on the Solana network. Each node is initialized via a unique XNode License NFT which acts as a cryptographic authorization key. Unlike traditional L1 validators, these XNodes are specialized infrastructure sectors designed for reward sharding and autonomous hardware verification, utilizing Solana's high-speed ledger for L1 settlement finality."
     },
     {
       id: "registration",
-      title: "LAYER_1: REGISTRATION_PROTOCOL",
-      content: "XNode Registration is an atomic handshake between a License NFT and a validator identity. During this process, the system autonomously tracks the owner's physical origin via a secure network diagnostic, synchronizing the country and flag to the global ledger. This automated geolocation prevents sector spoofing and ensures transparent infrastructure distribution across the network's geographic layers."
+      title: "LAYER_1: AUTONOMOUS_REGISTRATION_PROTOCOL",
+      content: "XNode registration is an atomic handshake between a License NFT and a hardware identity. During registration, the protocol autonomously tracks the owner's physical origin via a secure network diagnostic, synchronizing the country and flag to the global ledger. This process requires an active License NFT and prevents sector spoofing through automated geolocation verification."
     },
     {
-      id: "economic",
-      title: "LAYER_2: ECONOMIC_STAKING_LOGIC",
-      content: "The Exnus Economic Layer utilizes a time-locked staking model. Users lock EXN tokens into specific validator sectors to generate network weight. Staking tiers (30D, 60D, 90D, 180D) provide non-linear yield multipliers (up to 10.0x), rewarding long-term capital commitment. All staked principal is vaulted on-chain and can only be released after the maturity timestamp is verified by the network clock."
+      id: "seed-termination",
+      title: "LAYER_2: SEED_CAPITAL_&_TERMINATION",
+      content: "To activate an XNode, the owner must commit 15,000,000 EXN as seed capital. This capital remains vaulted as a network reliability bond. If an XNode owner withdraws this seed capital, the node is immediately decommissioned to a permanent 'OFFLINE' status. A decommissioned node stops accruing protocol rewards and commission fees, and the associated License NFT is burned from the network supply."
     },
     {
-      id: "consensus",
-      title: "LAYER_3: EPOCH_SETTLEMENT_CRANK",
-      content: "Network rewards are distributed in 30-day epoch cycles. At the conclusion of each epoch, the 'Crank' function settles the global reward block. Rewards are sharded among active validators based on their proportional network weight (Seed Capital + Delegated Stakes). This settlement update reshards the Global Reward Index, allowing individual stakers to harvest their accrued yield based on their specific entry and exit checkpoints."
+      id: "migration",
+      title: "LAYER_3: STAKING_&_ATOMIC_MIGRATION",
+      content: "Stakers commit EXN tokens to specific XNodes to generate network weight and earn yield. The protocol supports Atomic Migration: stakers can shift their locked principal from one active XNode to another at any time. Migration does not reset the original lock duration or maturity timestamp, ensuring that liquidity can move to more reliable sectors without penalizing the staker's long-term multipliers."
     },
     {
       id: "governance",
       title: "LAYER_4: DAO_CONSENSUS_GOVERNANCE",
-      content: "Exnus operates under a stake-weighted DAO governance model. Participation is strictly gated by on-chain stake weight. To cast a vote, a user must hold a verified XNode License or maintain a minimum stake of 10,000 EXN (plus a 3 EXN fee). Broadcasting a new proposal requires a senior consensus weight of 1,000,000 EXN and a 10 EXN protocol fee. Consensus is reached through on-chain voting where decision weight equals locked EXN volume."
+      content: "Governance is strictly gated by stake weight. Broadcasting a new proposal requires a 'Senior Consensus' weight of 1,000,000 EXN and a 10 EXN protocol fee. To participate in voting, a user must maintain a 'Member Consensus' weight of 10,000 EXN (or hold a verified XNode License) and pay a 3 EXN fee per vote. These thresholds ensure that only committed stakeholders can influence global protocol parameters."
     }
   ];
 
@@ -56,12 +50,11 @@ export default function ProtocolSpecPage() {
 
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <Terminal className="w-5 h-5 text-primary" />
-          <p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">EXNUS_PROTOCOL_SPEC_V3.1.0_STABLE</p>
+          <p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">EXNUS_PROTOCOL_SPEC_V3.2.0_STABLE</p>
         </div>
         <h1 className="text-5xl lg:text-7xl font-black exn-gradient-text tracking-tighter uppercase leading-none">HOW_IT_WORKS</h1>
         <p className="text-white text-[12px] font-black uppercase tracking-[0.5em] max-w-2xl leading-relaxed">
-          The Exnus protocol is a decentralized infrastructure network (DePIN) sharding rewards through stake-weighted consensus and autonomous hardware verification.
+          The Exnus protocol is a decentralized infrastructure layer built on Solana, utilizing a fixed-supply XNode model for reward sharding and autonomous hardware verification.
         </p>
       </div>
 
@@ -80,8 +73,7 @@ export default function ProtocolSpecPage() {
                    </p>
                    
                    <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-[0.4em]">
-                     <Activity className="w-4 h-4" />
-                     ON_CHAIN_VERIFIED_PROTOCOL
+                     ON_CHAIN_VERIFIED_PROTOCOL_LAYER
                    </div>
                 </div>
               </div>
@@ -94,15 +86,15 @@ export default function ProtocolSpecPage() {
         <div className="space-y-3">
           <h3 className="text-2xl font-black text-white uppercase tracking-tighter">ESTABLISH_INFRASTRUCTURE</h3>
           <p className="text-[11px] text-white font-black uppercase tracking-[0.4em] max-w-lg mx-auto leading-relaxed">
-            Initialize your sector on the global ledger. Mint your authorization key and register your validator node to begin consensus participation.
+            Initialize your sector on the global ledger. Mint your authorization key and register your XNode to begin consensus participation.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
            <Link href="/purchase-license" className="exn-button px-10 h-12 flex items-center gap-3 text-[11px] tracking-widest">
-             MINT_LICENSE <ArrowRight className="w-4 h-4" />
+             MINT_LICENSE
            </Link>
            <Link href="/register-node" className="exn-button-outline px-10 h-12 flex items-center gap-3 text-[11px] tracking-widest border-white/30 text-white">
-             REGISTER_NODE <Cpu className="w-4 h-4" />
+             REGISTER_XNODE
            </Link>
         </div>
       </div>
