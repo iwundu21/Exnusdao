@@ -39,6 +39,11 @@ export default function ProtocolSpecPage() {
       id: "governance",
       title: "LAYER_4: DAO_CONSENSUS_AUTHORIZATION",
       content: "Governance is strictly gated by stake weight and network participation. Broadcasting a new proposal requires a 'Senior Consensus' weight of 1,000,000 EXN and a 10 EXN protocol fee. To participate in voting, a user must maintain a 'Member Consensus' weight of 10,000 EXN (or hold an active XNode License) and pay a 3 EXN fee per vote. These parameters ensure high-integrity decision making."
+    },
+    {
+      id: "rewards",
+      title: "LAYER_5: REWARD_SHARDING_&_EPOCH_SETTLEMENT",
+      content: "The protocol operates on 30-day chronological cycles known as Epochs. At the conclusion of each Epoch, a 'Network Crank' is executed to shard the global reward pool among all active XNodes based on their relative stake weight. Rewards are distributed pro-rata to stakers based on their effective weight (Principal x Lock Multiplier). XNode owners receive a configured commission from the total yield sharded to their sector. All rewards are settled as liquid EXN on the Solana ledger."
     }
   ];
 
