@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -311,20 +310,22 @@ export function StakingActionForm({
             <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
               <ShieldCheck className="w-5 h-5" /> VERIFY_LOCK
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                  <span className="text-white">QUANTITY</span>
-                  <span className="text-white font-mono">{amountInput} EXN</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                  <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                    <span className="text-white">QUANTITY</span>
+                    <span className="text-white font-mono">{amountInput} EXN</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                    <span className="text-white">LOCK_PERIOD</span>
+                    <span className="text-emerald-400">{duration} DAYS</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                  <span className="text-white">LOCK_PERIOD</span>
-                  <span className="text-emerald-400">{duration} DAYS</span>
-                </div>
+                <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                  CONFIRMING WILL BROADCAST AN IMMUTABLE STAKING COMMITMENT TO THE NETWORK LEDGER.
+                </p>
               </div>
-              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                CONFIRMING WILL BROADCAST AN IMMUTABLE STAKING COMMITMENT TO THE NETWORK LEDGER.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-row gap-4 pt-2">
@@ -341,16 +342,18 @@ export function StakingActionForm({
             <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-secondary flex items-center gap-3">
               <Zap className="w-5 h-5" /> VERIFY_HARVEST
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                  <span className="text-white">TOTAL_YIELD</span>
-                  <span className="text-secondary font-mono">{totalPendingRewards.toFixed(4)} EXN</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                  <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                    <span className="text-white">TOTAL_YIELD</span>
+                    <span className="text-secondary font-mono">{totalPendingRewards.toFixed(4)} EXN</span>
+                  </div>
                 </div>
+                <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                  YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
+                </p>
               </div>
-              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-row gap-4 pt-2">
@@ -367,32 +370,34 @@ export function StakingActionForm({
             <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
               <ArrowRightLeft className="w-5 h-5" /> SELECT_TARGET_SECTOR
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <p className="text-[10px] text-white uppercase font-black tracking-widest">CHOOSE A NEW VALIDATOR SECTOR FOR THIS STAKE POSITION:</p>
-              <div className="space-y-3 max-h-[350px] overflow-auto custom-scrollbar pr-2">
-                {validators.filter((v: any) => v.is_active && v.id !== migrationStake?.validator_id).map((v: any) => (
-                  <button 
-                    key={v.id} 
-                    onClick={() => selectMigrationTarget(v)}
-                    className="w-full p-4 bg-white/5 border border-white/20 rounded-xl hover:border-primary transition-all flex justify-between items-center group shadow-md"
-                  >
-                    <div className="flex items-center gap-4 text-left">
-                       <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                         <Database className="w-4 h-4 text-primary" />
-                       </div>
-                       <div>
-                         <p className="text-[11px] font-black uppercase text-white tracking-tight">{v.name}</p>
-                         <div className="flex items-center gap-2 text-[9px] text-white font-black uppercase">
-                           <MapPin className="w-3.5 h-3.5" /> {v.location}
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <p className="text-[10px] text-white uppercase font-black tracking-widest">CHOOSE A NEW VALIDATOR SECTOR FOR THIS STAKE POSITION:</p>
+                <div className="space-y-3 max-h-[350px] overflow-auto custom-scrollbar pr-2">
+                  {validators.filter((v: any) => v.is_active && v.id !== migrationStake?.validator_id).map((v: any) => (
+                    <button 
+                      key={v.id} 
+                      onClick={() => selectMigrationTarget(v)}
+                      className="w-full p-4 bg-white/5 border border-white/20 rounded-xl hover:border-primary transition-all flex justify-between items-center group shadow-md"
+                    >
+                      <div className="flex items-center gap-4 text-left">
+                         <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                           <Database className="w-4 h-4 text-primary" />
                          </div>
-                       </div>
-                    </div>
-                    <div className="text-right">
-                       <p className="text-[10px] font-black text-emerald-400 font-mono">{(v.commission_rate/100).toFixed(1)}%</p>
-                       <p className="text-[8px] text-white font-black uppercase">FEE_TIER</p>
-                    </div>
-                  </button>
-                ))}
+                         <div>
+                           <p className="text-[11px] font-black uppercase text-white tracking-tight">{v.name}</p>
+                           <div className="flex items-center gap-2 text-[9px] text-white font-black uppercase">
+                             <MapPin className="w-3.5 h-3.5" /> {v.location}
+                           </div>
+                         </div>
+                      </div>
+                      <div className="text-right">
+                         <p className="text-[10px] font-black text-emerald-400 font-mono">{(v.commission_rate/100).toFixed(1)}%</p>
+                         <p className="text-[8px] text-white font-black uppercase">FEE_TIER</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -409,20 +414,22 @@ export function StakingActionForm({
             <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
               <ShieldCheck className="w-5 h-5" /> VERIFY_MIGRATION
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                  <span className="text-white">QUANTITY</span>
-                  <span className="text-white font-mono">{migrationStake?.amount.toLocaleString()} EXN</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                  <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                    <span className="text-white">QUANTITY</span>
+                    <span className="text-white font-mono">{migrationStake?.amount.toLocaleString()} EXN</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                    <span className="text-white">TARGET</span>
+                    <span className="text-primary truncate max-w-[150px]">{migrationTarget?.name}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                  <span className="text-white">TARGET</span>
-                  <span className="text-primary truncate max-w-[150px]">{migrationTarget?.name}</span>
-                </div>
+                <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                  MIGRATING ASSETS WILL REROUTE FUTURE REWARD SHARDING TO THE TARGET NETWORK SECTOR.
+                </p>
               </div>
-              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                MIGRATING ASSETS WILL REROUTE FUTURE REWARD SHARDING TO THE TARGET NETWORK SECTOR.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-row gap-4 pt-2">
@@ -439,16 +446,18 @@ export function StakingActionForm({
             <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-destructive flex items-center gap-3">
               <Unlock className="w-5 h-5" /> VERIFY_WITHDRAWAL
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                  <span className="text-white">PRINCIPAL</span>
-                  <span className="text-white font-mono">{userStakes.find((x: any) => x.id === showUnstakeReview)?.amount.toLocaleString()} EXN</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                  <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                    <span className="text-white">PRINCIPAL</span>
+                    <span className="text-white font-mono">{userStakes.find((x: any) => x.id === showUnstakeReview)?.amount.toLocaleString()} EXN</span>
+                  </div>
                 </div>
+                <p className="text-[10px] text-destructive uppercase leading-relaxed font-black tracking-tight">
+                  WITHDRAWING PRINCIPAL WILL TERMINATE THIS ACTIVE STAKE POSITION ON THE NETWORK LEDGER.
+                </p>
               </div>
-              <p className="text-[10px] text-destructive uppercase leading-relaxed font-black tracking-tight">
-                WITHDRAWING PRINCIPAL WILL TERMINATE THIS ACTIVE STAKE POSITION ON THE NETWORK LEDGER.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-row gap-4 pt-2">
@@ -465,16 +474,18 @@ export function StakingActionForm({
             <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-secondary flex items-center gap-3">
               <Zap className="w-5 h-5" /> VERIFY_HARVEST
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-4">
-              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                  <span className="text-white">POSITION_YIELD</span>
-                  <span className="text-secondary font-mono">{showClaimSingleReview?.amount.toFixed(4)} EXN</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                  <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                    <span className="text-white">POSITION_YIELD</span>
+                    <span className="text-secondary font-mono">{showClaimSingleReview?.amount.toFixed(4)} EXN</span>
+                  </div>
                 </div>
+                <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                  YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
+                </p>
               </div>
-              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-row gap-4 pt-2">

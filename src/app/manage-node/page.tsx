@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -353,29 +352,31 @@ export default function ManageNodePage() {
               <ShieldCheck className="w-7 h-7" />
               VERIFY_OPERATION
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-8 pt-6">
-              <div className="p-8 bg-white/10 rounded-2xl border border-white/30 space-y-6 shadow-3xl">
-                <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                  <span className="text-white font-black">OP_CODE</span>
-                  <span className="text-white font-black font-mono uppercase">
-                    {reviewAction === 'update' ? 'IDENTITY_PATCH' : reviewAction === 'terminate' ? 'SYSTEM_DECOMMISSION' : 'SEED_INJECTION'}
-                  </span>
-                </div>
-                {reviewAction === 'update' && (
+            <AlertDialogDescription asChild>
+              <div className="space-y-8 pt-6">
+                <div className="p-8 bg-white/10 rounded-2xl border border-white/30 space-y-6 shadow-3xl">
                   <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                    <span className="text-white font-black">FEES_SET</span>
-                    <span className="text-primary font-black font-mono">{formData?.commission_rate}%</span>
+                    <span className="text-white font-black">OP_CODE</span>
+                    <span className="text-white font-black font-mono uppercase">
+                      {reviewAction === 'update' ? 'IDENTITY_PATCH' : reviewAction === 'terminate' ? 'SYSTEM_DECOMMISSION' : 'SEED_INJECTION'}
+                    </span>
                   </div>
-                )}
-                <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                  <span className="text-white font-black">NETWORK_LAYER</span>
-                  <span className="text-emerald-500 font-black font-mono">PROTOCOL_MAINNET</span>
+                  {reviewAction === 'update' && (
+                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                      <span className="text-white font-black">FEES_SET</span>
+                      <span className="text-primary font-black font-mono">{formData?.commission_rate}%</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                    <span className="text-white font-black">NETWORK_LAYER</span>
+                    <span className="text-emerald-500 font-black font-mono">PROTOCOL_MAINNET</span>
+                  </div>
                 </div>
+                
+                <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-[0.1em]">
+                  THIS OPERATION WILL BE PERMANENTLY RECORDED ON THE GLOBAL NETWORK LEDGER. PROCEED?
+                </p>
               </div>
-              
-              <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-[0.1em]">
-                THIS OPERATION WILL BE PERMANENTLY RECORDED ON THE GLOBAL NETWORK LEDGER. PROCEED?
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-row gap-6">

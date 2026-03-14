@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -304,25 +303,27 @@ export default function RegisterNodePage() {
               <ShieldCheck className="w-6 h-6" />
               VERIFY_BINDING
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-6 pt-6">
-              <div className="p-6 bg-white/5 rounded-xl border border-white/20 space-y-4 shadow-3xl">
-                <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
-                  <span className="text-white font-black">OP_CODE</span>
-                  <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-6 pt-4">
+                <div className="p-6 bg-white/5 rounded-xl border border-white/20 space-y-4 shadow-3xl">
+                  <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
+                    <span className="text-white font-black">OP_CODE</span>
+                    <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
+                    <span className="text-white font-black">LICENSE_ID</span>
+                    <span className="text-white font-mono font-black text-[9px]">{shortenAddress(formData.licenseId)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
+                    <span className="text-white font-black">IDENTITY_NAME</span>
+                    <span className="text-primary font-black font-mono text-[10px]">{formData.name}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
-                  <span className="text-white font-black">LICENSE_ID</span>
-                  <span className="text-white font-mono font-black text-[9px]">{shortenAddress(formData.licenseId)}</span>
-                </div>
-                <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
-                  <span className="text-white font-black">IDENTITY_NAME</span>
-                  <span className="text-primary font-black font-mono text-[10px]">{formData.name}</span>
-                </div>
+                
+                <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
+                  BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY.
+                </p>
               </div>
-              
-              <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
-                BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-row gap-4 pt-2">
