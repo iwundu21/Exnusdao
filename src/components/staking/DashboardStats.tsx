@@ -218,8 +218,15 @@ export function DashboardStats({
            <div className="flex items-center gap-3">
               <Cpu className="w-4 h-4 text-primary" />
               <div>
-                 <p className="text-[7px] text-white uppercase font-black tracking-widest">OPERATIONAL_NODES</p>
-                 <p className="text-xs font-black text-white font-mono">{state.validators.filter(v => v.is_active).length} UNITS</p>
+                 <p className="text-[7px] text-white uppercase font-black tracking-widest">NETWORK_NODES</p>
+                 <div className="flex gap-4">
+                    <div>
+                       <p className="text-xs font-black text-emerald-400 font-mono">{state.validators.filter(v => v.is_active).length} ON</p>
+                    </div>
+                    <div className="border-l border-white/20 pl-4">
+                       <p className="text-xs font-black text-destructive font-mono">{state.validators.filter(v => !v.is_active).length} OFF</p>
+                    </div>
+                 </div>
               </div>
            </div>
            <span className="text-[8px] text-primary font-black uppercase border border-primary/30 px-2 py-0.5 rounded bg-primary/5 shadow-sm">SYNCED_LAYER</span>
