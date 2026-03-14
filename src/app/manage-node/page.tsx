@@ -127,10 +127,10 @@ export default function ManageNodePage() {
        <div className="space-y-4">
          <h1 className="text-2xl font-black uppercase tracking-tighter text-white">NO_REGISTERED_NODES</h1>
          <p className="text-white text-[11px] uppercase font-black tracking-tighter max-w-md mx-auto leading-relaxed">
-           Wallet address has verified licenses but no bound XNode registrations. Provision your validator sector to begin operations.
+           Wallet address has verified licenses but no bound XNode registrations. Register your validator sector to begin operations.
          </p>
        </div>
-       <Link href="/register-node" className="exn-button inline-flex items-center justify-center px-12 h-12 text-[11px] tracking-tighter">INITIALIZE_PROVISIONING</Link>
+       <Link href="/register-node" className="exn-button inline-flex items-center justify-center px-12 h-12 text-[11px] tracking-tighter">INITIALIZE_REGISTRATION</Link>
     </div>
   );
 
@@ -327,7 +327,7 @@ export default function ManageNodePage() {
         })}
       </div>
 
-      <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
+      <AlertDialog open={reviewAction !== null} onOpenChange={setReviewAction(null)}>
         <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-10 space-y-10 overflow-hidden max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-black uppercase tracking-widest text-primary flex items-center gap-4">

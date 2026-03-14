@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -46,7 +47,7 @@ export function Navbar() {
       {hasLicense && (
         <>
           <Link href="/register-node" className="flex items-center gap-2 text-white hover:text-primary transition-all font-black text-[11px] uppercase tracking-widest">
-            <Hammer className="w-3.5 h-3.5" /> PROVISION XNODE
+            <Hammer className="w-3.5 h-3.5" /> REGISTER XNODE
           </Link>
           <Link href="/manage-node" className="flex items-center gap-2 text-white hover:text-primary transition-all font-black text-[11px] uppercase tracking-widest">
             <Settings className="w-3.5 h-3.5" /> XNODE MANAGEMENT
@@ -65,7 +66,7 @@ export function Navbar() {
       {hasLicense && (
         <>
           <Link href="/register-node" className="flex items-center gap-4 text-[12px] font-black uppercase tracking-widest text-white hover:text-primary transition-all">
-            <Hammer className="w-5 h-5" /> PROVISION XNODE
+            <Hammer className="w-5 h-5" /> REGISTER XNODE
           </Link>
           <Link href="/manage-node" className="flex items-center gap-4 text-[12px] font-black uppercase tracking-widest text-white hover:text-primary transition-all">
             <Settings className="w-5 h-5" /> XNODE MANAGEMENT

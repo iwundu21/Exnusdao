@@ -75,7 +75,7 @@ export default function RegisterNodePage() {
        <div className="space-y-4">
          <h1 className="text-2xl font-black uppercase tracking-tighter text-white">LICENSE_AUTHORIZATION_REQUIRED</h1>
          <p className="text-white text-[11px] uppercase font-black tracking-widest max-w-md mx-auto leading-relaxed">
-           XNode Provisioning is restricted to verified License holders. Please mint a license to initialize your infrastructure sector.
+           XNode Registration is restricted to verified License holders. Please mint a license to initialize your infrastructure sector.
          </p>
        </div>
        <Link href="/purchase-license" className="exn-button inline-flex items-center justify-center px-12 h-12 text-[11px] tracking-tighter">INITIALIZE_MINT_SEQUENCE</Link>
@@ -147,7 +147,7 @@ export default function RegisterNodePage() {
       </Link>
 
       <div className="space-y-3">
-        <h1 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE_PROVISIONING</h1>
+        <h1 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE_REGISTRATION</h1>
         <p className="text-white text-[10px] font-black uppercase tracking-widest max-w-lg">
           Establish decentralized infrastructure by binding a verified XNode License NFT to a new validator identity.
         </p>
@@ -231,7 +231,7 @@ export default function RegisterNodePage() {
               disabled={isRegistrationDisabled} 
               className={`w-full h-14 uppercase tracking-widest font-black transition-all shadow-3xl text-[11px] ${isRegistrationDisabled ? 'bg-white/5 text-white border border-white cursor-not-allowed opacity-50' : 'exn-button'}`}
             >
-              REVIEW_PROVISIONING
+              REVIEW_REGISTRATION
             </button>
           </div>
 
@@ -281,11 +281,11 @@ export default function RegisterNodePage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-5 bg-white/5 rounded-xl border border-white space-y-1.5 group-hover:border-primary transition-all shadow-xl">
-                      <p className="text-[9px] uppercase font-black text-white tracking-widest">NODE_FEE</p>
+                      <p className="text-[9px] uppercase font-black text-white tracking-[0.1em]">NODE_FEE</p>
                       <p className="text-primary font-black text-[12px] font-mono tracking-tighter">{(formData.commission).toFixed(1)}%</p>
                     </div>
                     <div className="p-5 bg-white/5 rounded-xl border border-white space-y-1.5 group-hover:border-primary transition-all shadow-xl">
-                      <p className="text-[9px] uppercase font-black text-white tracking-widest">NFT_BOND</p>
+                      <p className="text-[9px] uppercase font-black text-white tracking-[0.1em]">NFT_BOND</p>
                       <p className="text-white font-mono font-black text-[9px] truncate tracking-tighter">{formData.licenseId ? shortenAddress(formData.licenseId) : 'N/A'}</p>
                     </div>
                   </div>
