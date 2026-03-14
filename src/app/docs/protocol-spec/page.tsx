@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -18,12 +17,12 @@ export default function ProtocolSpecPage() {
     {
       id: "infrastructure",
       title: "LAYER_0: XNODE_SCARCITY_MODEL",
-      content: "The Exnus network is governed by absolute infrastructure scarcity. Exactly 21 XNodes will ever exist on the Solana network. Each node is initialized via a unique XNode License NFT which serves as the cryptographic authorization key. These are specialized infrastructure sectors (XNodes) designed for reward sharding, utilizing Solana's high-speed ledger for L1 settlement finality."
+      content: "The Exnus network is governed by absolute infrastructure scarcity. Exactly 21 XNodes will ever exist on the Solana network. These are specialized infrastructure sectors (XNodes) designed for reward sharding, utilizing Solana's high-speed ledger for L1 settlement finality. Each node is initialized via a unique XNode License NFT which serves as the cryptographic authorization key."
     },
     {
       id: "seed-lifecycle",
       title: "LAYER_1: SEED_CAPITAL_&_OFFLINE_STATE",
-      content: "To activate an XNode, a seed commitment of 15,000,000 EXN is required. Withdrawal of this seed capital puts the XNode into a temporary 'OFFLINE' status. In this state, the node stops accruing protocol rewards and commission fees. The owner may re-deposit the seed capital at any time to restore the 'ONLINE' status and resume participation in the network consensus."
+      content: "To activate an XNode, a seed commitment of 15,000,000 EXN is required. Withdrawal of this seed capital puts the XNode into a temporary 'OFFLINE' status, halting reward accrual and commission fees. The owner may re-deposit the seed capital at any time to restore 'ONLINE' status and resume participation in network consensus."
     },
     {
       id: "termination",
@@ -33,17 +32,17 @@ export default function ProtocolSpecPage() {
     {
       id: "migration",
       title: "LAYER_3: ATOMIC_STAKE_MIGRATION",
-      content: "The protocol supports Atomic Migration for all stakers. If an XNode goes offline or is permanently terminated, stakers can migrate their locked principal to any other active XNode at any time. Crucially, migration does NOT reset the original lock duration or maturity timestamp. Stakers maintain their original multipliers and yield timelines while shifting their support to more reliable sectors."
+      content: "The protocol supports Atomic Migration for all stakers. If an XNode goes offline or is permanently terminated, stakers can migrate their locked principal to any other active XNode at any time. Crucially, migration does NOT reset the original lock duration or maturity timestamp. Stakers maintain their original multipliers and yield timelines while shifting their support."
     },
     {
       id: "governance",
       title: "LAYER_4: DAO_CONSENSUS_AUTHORIZATION",
-      content: "Governance is strictly gated by stake weight and network participation. Broadcasting a new proposal requires a 'Senior Consensus' weight of 1,000,000 EXN and a 10 EXN protocol fee. To participate in voting, a user must maintain a 'Member Consensus' weight of 10,000 EXN (or hold an active XNode License) and pay a 3 EXN fee per vote. These parameters ensure high-integrity decision making."
+      content: "Governance is strictly gated by stake weight. Broadcasting a new proposal requires a 'Senior Consensus' weight of 1,000,000 EXN and a 10 EXN fee. To participate in voting, a user must maintain a 'Member Consensus' weight of 10,000 EXN (or hold an active XNode License) and pay a 3 EXN fee per vote. These parameters ensure high-integrity decision making."
     },
     {
       id: "rewards",
       title: "LAYER_5: REWARD_SHARDING_&_EPOCH_SETTLEMENT",
-      content: "The protocol operates on 30-day chronological cycles known as Epochs. At the conclusion of each Epoch, a 'Network Crank' is executed to shard the global reward pool among all active XNodes based on their relative stake weight. Rewards are distributed pro-rata to stakers based on their effective weight (Principal x Lock Multiplier). XNode owners receive a configured commission from the total yield sharded to their sector. All rewards are settled as liquid EXN on the Solana ledger."
+      content: "The protocol operates on 30-day cycles known as Epochs. At the conclusion of each Epoch, a 'Network Crank' is executed to shard the global reward pool among active XNodes. This action is entirely PERMISSIONLESS; any participant in the network can trigger the settlement of a matured Epoch. Rewards are distributed pro-rata based on effective weight (Principal x Lock Multiplier), with owners receiving their configured commission. All rewards settle as liquid EXN on the Solana ledger."
     }
   ];
 
