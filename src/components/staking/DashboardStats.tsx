@@ -84,6 +84,7 @@ export function DashboardStats({
   return (
     <div className="space-y-3 mb-8 animate-in fade-in duration-700">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+        {/* Protocol TVL Diagnostic */}
         <div className="lg:col-span-3 h-48 exn-card bg-black border-white/20 flex flex-col overflow-hidden relative shadow-3xl">
           <div className="p-4 pb-0 flex justify-between items-start relative z-10">
             <div className="space-y-1">
@@ -164,21 +165,29 @@ export function DashboardStats({
           </div>
         </div>
 
-        <div className="exn-card p-4 bg-black border-white/20 flex flex-col justify-between space-y-4 shadow-3xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-all">
-             <Activity className="w-16 h-16 text-primary" />
+        {/* DAO Treasury Reserve Card */}
+        <div className="exn-card p-4 bg-black border-white/20 flex flex-col justify-center shadow-3xl relative overflow-hidden group">
+          <div className="flex justify-between items-start relative z-10">
+            <div className="space-y-1">
+              <p className="text-white text-[8px] font-black uppercase tracking-[0.3em]">DAO_TREASURY_RESERVE</p>
+              <p className="text-xl font-mono font-black text-white tracking-tighter">
+                {treasuryBalance.toLocaleString()} <span className="text-[10px] text-primary">EXN</span>
+              </p>
+            </div>
+            
+            <div className="text-right flex flex-col items-end">
+              <p className="text-white text-[8px] font-black uppercase tracking-widest mb-1">MARKET_VALUE</p>
+              <p className="text-base font-black text-emerald-400 font-mono tracking-tighter">
+                ${treasuryUsdValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
+              <div className="flex items-center justify-end gap-1 text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1">
+                <ArrowUpRight className="w-3 h-3" /> +1.2%
+              </div>
+            </div>
           </div>
-          <div className="space-y-1 relative z-10">
-            <p className="text-white text-[8px] font-black uppercase tracking-[0.3em]">DAO_TREASURY_RESERVE</p>
-            <p className="text-xl font-mono font-black text-white tracking-tighter">
-              {treasuryBalance.toLocaleString()} <span className="text-[10px] text-primary">EXN</span>
-            </p>
-          </div>
-          <div className="space-y-1 relative z-10">
-             <p className="text-[8px] text-white/50 uppercase font-black tracking-widest">MARKET_VALUE_USD</p>
-             <p className="text-base font-black text-emerald-400 font-mono tracking-tighter">
-               ${treasuryUsdValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-             </p>
+          
+          <div className="mt-4 pt-2 border-t border-white/5 relative z-10">
+             <p className="text-[7px] text-white uppercase font-black tracking-[0.4em]">TREASURY_SYNCED</p>
           </div>
         </div>
       </div>
