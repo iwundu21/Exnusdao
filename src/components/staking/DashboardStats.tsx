@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -7,11 +6,10 @@ import {
   Area, 
   AreaChart, 
   ResponsiveContainer, 
-  Tooltip, 
   XAxis, 
   YAxis 
 } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, Cpu, Calendar, Zap, History } from 'lucide-react';
+import { ArrowUpRight, Cpu, Calendar, History } from 'lucide-react';
 
 interface DashboardStatsProps {
   totalStaked?: number;
@@ -29,6 +27,7 @@ export function DashboardStats({
   const exnPrice = state.exnPrice || 0.23;
   
   const stakedUsdValue = totalStaked * exnPrice;
+  const treasuryUsdValue = treasuryBalance * exnPrice;
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -109,7 +108,9 @@ export function DashboardStats({
             <p className="text-base font-mono font-black text-white tracking-tighter">
               {treasuryBalance.toLocaleString()} <span className="text-[7px] text-primary">EXN</span>
             </p>
-            <div className="text-[7px] font-black text-emerald-400 font-mono">+$2.1K</div>
+            <div className="text-[7px] font-black text-emerald-400 font-mono">
+              ${treasuryUsdValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            </div>
           </div>
         </div>
       </div>
