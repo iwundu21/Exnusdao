@@ -17,28 +17,28 @@ export default function ProtocolSpecPage() {
   const sections = [
     {
       id: "infrastructure",
-      title: "LAYER_0: XNODE_INFRASTRUCTURE_SCARCITY",
-      content: "The Exnus network is built on a model of absolute infrastructure scarcity. Exactly 21 XNodes will ever exist on the Solana network. Each node is initialized via a unique XNode License NFT which acts as a cryptographic authorization key. Unlike traditional L1 validators, these XNodes are specialized infrastructure sectors designed for reward sharding and autonomous hardware verification, utilizing Solana's high-speed ledger for L1 settlement finality."
+      title: "LAYER_0: XNODE_SCARCITY_MODEL",
+      content: "The Exnus network is governed by absolute infrastructure scarcity. Exactly 21 XNodes will ever exist on the Solana network. Each node is initialized via a unique XNode License NFT which serves as the cryptographic authorization key. These are specialized infrastructure sectors (XNodes) designed for reward sharding, utilizing Solana's high-speed ledger for L1 settlement finality."
     },
     {
-      id: "registration",
-      title: "LAYER_1: AUTONOMOUS_REGISTRATION_PROTOCOL",
-      content: "XNode registration is an atomic handshake between a License NFT and a hardware identity. During registration, the protocol autonomously tracks the owner's physical origin via a secure network diagnostic, synchronizing the country and flag to the global ledger. This process requires an active License NFT and prevents sector spoofing through automated geolocation verification."
+      id: "seed-lifecycle",
+      title: "LAYER_1: SEED_CAPITAL_&_OFFLINE_STATE",
+      content: "To activate an XNode, a seed commitment of 15,000,000 EXN is required. Withdrawal of this seed capital puts the XNode into a temporary 'OFFLINE' status. In this state, the node stops accruing protocol rewards and commission fees. The owner may re-deposit the seed capital at any time to restore the 'ONLINE' status and resume participation in the network consensus."
     },
     {
-      id: "seed-termination",
-      title: "LAYER_2: SEED_CAPITAL_&_TERMINATION",
-      content: "To activate an XNode, the owner must commit 15,000,000 EXN as seed capital. This capital remains vaulted as a network reliability bond. If an XNode owner withdraws this seed capital, the node is immediately decommissioned to a permanent 'OFFLINE' status. A decommissioned node stops accruing protocol rewards and commission fees, and the associated License NFT is burned from the network supply."
+      id: "termination",
+      title: "LAYER_2: PERMANENT_TERMINATION_&_NFT_BURN",
+      content: "XNode Termination is a permanent and irreversible protocol action. Upon termination, the XNode's registration is deleted from the global ledger, and the associated XNode License NFT is automatically burned on-chain. This action permanently reduces the available infrastructure capacity of the network and cannot be undone."
     },
     {
       id: "migration",
-      title: "LAYER_3: STAKING_&_ATOMIC_MIGRATION",
-      content: "Stakers commit EXN tokens to specific XNodes to generate network weight and earn yield. The protocol supports Atomic Migration: stakers can shift their locked principal from one active XNode to another at any time. Migration does not reset the original lock duration or maturity timestamp, ensuring that liquidity can move to more reliable sectors without penalizing the staker's long-term multipliers."
+      title: "LAYER_3: ATOMIC_STAKE_MIGRATION",
+      content: "The protocol supports Atomic Migration for all stakers. If an XNode goes offline or is permanently terminated, stakers can migrate their locked principal to any other active XNode at any time. Crucially, migration does NOT reset the original lock duration or maturity timestamp. Stakers maintain their original multipliers and yield timelines while shifting their support to more reliable sectors."
     },
     {
       id: "governance",
-      title: "LAYER_4: DAO_CONSENSUS_GOVERNANCE",
-      content: "Governance is strictly gated by stake weight. Broadcasting a new proposal requires a 'Senior Consensus' weight of 1,000,000 EXN and a 10 EXN protocol fee. To participate in voting, a user must maintain a 'Member Consensus' weight of 10,000 EXN (or hold a verified XNode License) and pay a 3 EXN fee per vote. These thresholds ensure that only committed stakeholders can influence global protocol parameters."
+      title: "LAYER_4: DAO_CONSENSUS_AUTHORIZATION",
+      content: "Governance is strictly gated by stake weight and network participation. Broadcasting a new proposal requires a 'Senior Consensus' weight of 1,000,000 EXN and a 10 EXN protocol fee. To participate in voting, a user must maintain a 'Member Consensus' weight of 10,000 EXN (or hold an active XNode License) and pay a 3 EXN fee per vote. These parameters ensure high-integrity decision making."
     }
   ];
 
@@ -50,11 +50,11 @@ export default function ProtocolSpecPage() {
 
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">EXNUS_PROTOCOL_SPEC_V3.2.0_STABLE</p>
+          <p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">EXNUS_PROTOCOL_SPEC_V3.5.0_STABLE</p>
         </div>
-        <h1 className="text-5xl lg:text-7xl font-black exn-gradient-text tracking-tighter uppercase leading-none">HOW_IT_WORKS</h1>
+        <h1 className="text-5xl lg:text-7xl font-black exn-gradient-text tracking-tighter uppercase leading-none">NETWORK_BLUEPRINTS</h1>
         <p className="text-white text-[12px] font-black uppercase tracking-[0.5em] max-w-2xl leading-relaxed">
-          The Exnus protocol is a decentralized infrastructure layer built on Solana, utilizing a fixed-supply XNode model for reward sharding and autonomous hardware verification.
+          The Exnus protocol is a decentralized infrastructure layer built on Solana, utilizing a fixed-supply 21 XNode model for reward sharding and autonomous hardware verification.
         </p>
       </div>
 
