@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -181,7 +182,7 @@ export default function ManageNodePage() {
             <div key={node.id} className="exn-card p-0 border-white/30 relative overflow-hidden group bg-black/80 backdrop-blur-3xl shadow-3xl">
               <div className="absolute top-0 right-0 p-10 z-10">
                  <div className={`flex items-center gap-3 text-[11px] font-black uppercase px-6 py-2.5 rounded-xl border backdrop-blur-3xl ${node.is_active ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-destructive/20 text-destructive border-destructive/50'}`}>
-                    <div className={`w-2 h-2 rounded-full ${node.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-destructive'}`} />
+                    <div className={`w-2.5 h-2.5 rounded-full ${node.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-destructive'}`} />
                     {node.is_active ? 'STATUS_ONLINE' : 'STATUS_OFFLINE'}
                  </div>
               </div>
@@ -346,47 +347,41 @@ export default function ManageNodePage() {
       </div>
 
       <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
-        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md" asChild>
-          <div className="p-10 space-y-10">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-xl font-black uppercase tracking-[0.4em] text-primary flex items-center gap-4">
-                  <ShieldCheck className="w-7 h-7" />
-                  VERIFY_OPERATION
+        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-10 space-y-10 overflow-hidden max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.4em] text-primary flex items-center gap-4">
+              <ShieldCheck className="w-7 h-7" />
+              VERIFY_OPERATION
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-8 pt-6">
+              <div className="p-8 bg-white/10 rounded-2xl border border-white/30 space-y-6 shadow-3xl">
+                <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                  <span className="text-white font-black">OP_CODE</span>
+                  <span className="text-white font-black font-mono uppercase">
+                    {reviewAction === 'update' ? 'IDENTITY_PATCH' : reviewAction === 'terminate' ? 'SYSTEM_DECOMMISSION' : 'SEED_INJECTION'}
+                  </span>
                 </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-8 pt-6">
-                  <div className="p-8 bg-white/10 rounded-2xl border border-white/30 space-y-6 shadow-3xl">
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white font-black">OP_CODE</span>
-                      <span className="text-white font-black font-mono uppercase">
-                        {reviewAction === 'update' ? 'IDENTITY_PATCH' : reviewAction === 'terminate' ? 'SYSTEM_DECOMMISSION' : 'SEED_INJECTION'}
-                      </span>
-                    </div>
-                    {reviewAction === 'update' && (
-                      <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                        <span className="text-white font-black">FEES_SET</span>
-                        <span className="text-primary font-black font-mono">{formData?.commission_rate}%</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white font-black">NETWORK_LAYER</span>
-                      <span className="text-emerald-500 font-black font-mono">PROTOCOL_MAINNET</span>
-                    </div>
+                {reviewAction === 'update' && (
+                  <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                    <span className="text-white font-black">FEES_SET</span>
+                    <span className="text-primary font-black font-mono">{formData?.commission_rate}%</span>
                   </div>
-                  
-                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-[0.1em]">
-                    THIS OPERATION WILL BE PERMANENTLY RECORDED ON THE GLOBAL NETWORK LEDGER. PROCEED?
-                  </p>
+                )}
+                <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                  <span className="text-white font-black">NETWORK_LAYER</span>
+                  <span className="text-emerald-500 font-black font-mono">PROTOCOL_MAINNET</span>
                 </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-6">
-              <AlertDialogCancel className="exn-button-outline flex-1 text-[11px] h-14 uppercase font-black border-white/30 text-white hover:bg-white/15">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={reviewAction === 'update' ? handleUpdate : reviewAction === 'terminate' ? handleTerminate : undefined} className="exn-button flex-1 text-[11px] h-14 uppercase font-black">CONFIRM_OPS</AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
+              </div>
+              
+              <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-[0.1em]">
+                THIS OPERATION WILL BE PERMANENTLY RECORDED ON THE GLOBAL NETWORK LEDGER. PROCEED?
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-6">
+            <AlertDialogCancel className="exn-button-outline flex-1 text-[11px] h-14 uppercase font-black border-white/30 text-white hover:bg-white/15">ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={reviewAction === 'update' ? handleUpdate : reviewAction === 'terminate' ? handleTerminate : undefined} className="exn-button flex-1 text-[11px] h-14 uppercase font-black">CONFIRM_OPS</AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>

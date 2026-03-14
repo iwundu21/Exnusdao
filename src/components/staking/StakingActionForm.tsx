@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -305,217 +306,181 @@ export function StakingActionForm({
 
       {/* Stake Review */}
       <AlertDialog open={showStakeReview} onOpenChange={setShowStakeReview}>
-        <AlertDialogContent className="exn-card border-primary bg-black p-0 overflow-hidden max-w-sm" asChild>
-          <div className="p-8 space-y-8">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
-                  <ShieldCheck className="w-5 h-5" /> VERIFY_LOCK
+        <AlertDialogContent className="exn-card border-primary bg-black p-8 space-y-8 overflow-hidden max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
+              <ShieldCheck className="w-5 h-5" /> VERIFY_LOCK
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                  <span className="text-white">QUANTITY</span>
+                  <span className="text-white font-mono">{amountInput} EXN</span>
                 </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-6 pt-4">
-                  <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">QUANTITY</span>
-                      <span className="text-white font-mono">{amountInput} EXN</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">LOCK_PERIOD</span>
-                      <span className="text-emerald-400">{duration} DAYS</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                    CONFIRMING WILL BROADCAST AN IMMUTABLE STAKING COMMITMENT TO THE NETWORK LEDGER.
-                  </p>
+                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                  <span className="text-white">LOCK_PERIOD</span>
+                  <span className="text-emerald-400">{duration} DAYS</span>
                 </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white hover:bg-white/10">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmStake} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_LOCK</AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
+              </div>
+              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                CONFIRMING WILL BROADCAST AN IMMUTABLE STAKING COMMITMENT TO THE NETWORK LEDGER.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+            <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white hover:bg-white/10">ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStake} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_LOCK</AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Claim All Review */}
       <AlertDialog open={showClaimReview} onOpenChange={setShowClaimReview}>
-        <AlertDialogContent className="exn-card border-secondary bg-black p-0 overflow-hidden max-w-sm" asChild>
-          <div className="p-8 space-y-8">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-base font-black uppercase tracking-widest text-secondary flex items-center gap-3">
-                  <Zap className="w-5 h-5" /> VERIFY_HARVEST
+        <AlertDialogContent className="exn-card border-secondary bg-black p-8 space-y-8 overflow-hidden max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-secondary flex items-center gap-3">
+              <Zap className="w-5 h-5" /> VERIFY_HARVEST
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                  <span className="text-white">TOTAL_YIELD</span>
+                  <span className="text-secondary font-mono">{totalPendingRewards.toFixed(4)} EXN</span>
                 </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-6 pt-4">
-                  <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">TOTAL_YIELD</span>
-                      <span className="text-secondary font-mono">{totalPendingRewards.toFixed(4)} EXN</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                    YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
-                  </p>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmClaimAll} className="exn-button flex-1 h-11 text-[10px] uppercase font-black bg-secondary">CONFIRM_HARVEST</AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
+              </div>
+              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+            <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmClaimAll} className="exn-button flex-1 h-11 text-[10px] uppercase font-black bg-secondary">CONFIRM_HARVEST</AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Migration Selector Dialog */}
       <AlertDialog open={!!migrationStake && !showMigrationReview} onOpenChange={() => setMigrationStake(null)}>
-        <AlertDialogContent className="exn-card border-primary bg-black p-0 overflow-hidden max-w-md" asChild>
-          <div className="p-8 space-y-8">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
-                  <ArrowRightLeft className="w-5 h-5" /> SELECT_TARGET_SECTOR
-                </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-6 pt-4">
-                  <p className="text-[10px] text-white uppercase font-black tracking-widest">CHOOSE A NEW VALIDATOR SECTOR FOR THIS STAKE POSITION:</p>
-                  <div className="space-y-3 max-h-[350px] overflow-auto custom-scrollbar pr-2">
-                    {validators.filter((v: any) => v.is_active && v.id !== migrationStake?.validator_id).map((v: any) => (
-                      <button 
-                        key={v.id} 
-                        onClick={() => selectMigrationTarget(v)}
-                        className="w-full p-4 bg-white/5 border border-white/20 rounded-xl hover:border-primary transition-all flex justify-between items-center group shadow-md"
-                      >
-                        <div className="flex items-center gap-4 text-left">
-                           <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                             <Database className="w-4 h-4 text-primary" />
-                           </div>
-                           <div>
-                             <p className="text-[11px] font-black uppercase text-white tracking-tight">{v.name}</p>
-                             <div className="flex items-center gap-2 text-[9px] text-white font-black uppercase">
-                               <MapPin className="w-3 h-3" /> {v.location}
-                             </div>
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           <p className="text-[10px] font-black text-emerald-400 font-mono">{(v.commission_rate/100).toFixed(1)}%</p>
-                           <p className="text-[8px] text-white font-black uppercase">FEE_TIER</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="pt-2">
-              <AlertDialogCancel className="exn-button-outline w-full h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setMigrationStake(null)}>ABORT_MIGRATION</AlertDialogCancel>
-            </AlertDialogFooter>
-          </div>
+        <AlertDialogContent className="exn-card border-primary bg-black p-8 space-y-8 overflow-hidden max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
+              <ArrowRightLeft className="w-5 h-5" /> SELECT_TARGET_SECTOR
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <p className="text-[10px] text-white uppercase font-black tracking-widest">CHOOSE A NEW VALIDATOR SECTOR FOR THIS STAKE POSITION:</p>
+              <div className="space-y-3 max-h-[350px] overflow-auto custom-scrollbar pr-2">
+                {validators.filter((v: any) => v.is_active && v.id !== migrationStake?.validator_id).map((v: any) => (
+                  <button 
+                    key={v.id} 
+                    onClick={() => selectMigrationTarget(v)}
+                    className="w-full p-4 bg-white/5 border border-white/20 rounded-xl hover:border-primary transition-all flex justify-between items-center group shadow-md"
+                  >
+                    <div className="flex items-center gap-4 text-left">
+                       <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                         <Database className="w-4 h-4 text-primary" />
+                       </div>
+                       <div>
+                         <p className="text-[11px] font-black uppercase text-white tracking-tight">{v.name}</p>
+                         <div className="flex items-center gap-2 text-[9px] text-white font-black uppercase">
+                           <MapPin className="w-3.5 h-3.5" /> {v.location}
+                         </div>
+                       </div>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-[10px] font-black text-emerald-400 font-mono">{(v.commission_rate/100).toFixed(1)}%</p>
+                       <p className="text-[8px] text-white font-black uppercase">FEE_TIER</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-2">
+            <AlertDialogCancel className="exn-button-outline w-full h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setMigrationStake(null)}>ABORT_MIGRATION</AlertDialogCancel>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Migration Review */}
       <AlertDialog open={showMigrationReview} onOpenChange={setShowMigrationReview}>
-        <AlertDialogContent className="exn-card border-primary bg-black p-0 overflow-hidden max-w-sm" asChild>
-          <div className="p-8 space-y-8">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
-                  <ShieldCheck className="w-5 h-5" /> VERIFY_MIGRATION
+        <AlertDialogContent className="exn-card border-primary bg-black p-8 space-y-8 overflow-hidden max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-primary flex items-center gap-3">
+              <ShieldCheck className="w-5 h-5" /> VERIFY_MIGRATION
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                  <span className="text-white">QUANTITY</span>
+                  <span className="text-white font-mono">{migrationStake?.amount.toLocaleString()} EXN</span>
                 </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-6 pt-4">
-                  <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">QUANTITY</span>
-                      <span className="text-white font-mono">{migrationStake?.amount.toLocaleString()} EXN</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">TARGET</span>
-                      <span className="text-primary truncate max-w-[150px]">{migrationTarget?.name}</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                    MIGRATING ASSETS WILL REROUTE FUTURE REWARD SHARDING TO THE TARGET NETWORK SECTOR.
-                  </p>
+                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                  <span className="text-white">TARGET</span>
+                  <span className="text-primary truncate max-w-[150px]">{migrationTarget?.name}</span>
                 </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setShowMigrationReview(false)}>ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmMigration} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_MIGRATION</AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
+              </div>
+              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                MIGRATING ASSETS WILL REROUTE FUTURE REWARD SHARDING TO THE TARGET NETWORK SECTOR.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+            <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setShowMigrationReview(false)}>ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmMigration} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_MIGRATION</AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Unstake Review */}
       <AlertDialog open={!!showUnstakeReview} onOpenChange={() => setShowUnstakeReview(null)}>
-        <AlertDialogContent className="exn-card border-destructive bg-black p-0 overflow-hidden max-w-sm" asChild>
-          <div className="p-8 space-y-8">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-base font-black uppercase tracking-widest text-destructive flex items-center gap-3">
-                  <Unlock className="w-5 h-5" /> VERIFY_WITHDRAWAL
+        <AlertDialogContent className="exn-card border-destructive bg-black p-8 space-y-8 overflow-hidden max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-destructive flex items-center gap-3">
+              <Unlock className="w-5 h-5" /> VERIFY_WITHDRAWAL
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                  <span className="text-white">PRINCIPAL</span>
+                  <span className="text-white font-mono">{userStakes.find((x: any) => x.id === showUnstakeReview)?.amount.toLocaleString()} EXN</span>
                 </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-6 pt-4">
-                  <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">PRINCIPAL</span>
-                      <span className="text-white font-mono">{userStakes.find((x: any) => x.id === showUnstakeReview)?.amount.toLocaleString()} EXN</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-destructive uppercase leading-relaxed font-black tracking-tight">
-                    WITHDRAWING PRINCIPAL WILL TERMINATE THIS ACTIVE STAKE POSITION ON THE NETWORK LEDGER.
-                  </p>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setShowUnstakeReview(null)}>ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmUnstake} className="bg-destructive text-white flex-1 h-11 text-[10px] uppercase font-black rounded-xl hover:opacity-90">CONFIRM_WITHDRAW</AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
+              </div>
+              <p className="text-[10px] text-destructive uppercase leading-relaxed font-black tracking-tight">
+                WITHDRAWING PRINCIPAL WILL TERMINATE THIS ACTIVE STAKE POSITION ON THE NETWORK LEDGER.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+            <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setShowUnstakeReview(null)}>ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUnstake} className="bg-destructive text-white flex-1 h-11 text-[10px] uppercase font-black rounded-xl hover:opacity-90">CONFIRM_WITHDRAW</AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Claim Single Review */}
       <AlertDialog open={!!showClaimSingleReview} onOpenChange={() => setShowClaimSingleReview(null)}>
-        <AlertDialogContent className="exn-card border-secondary bg-black p-0 overflow-hidden max-w-sm" asChild>
-          <div className="p-8 space-y-8">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-base font-black uppercase tracking-widest text-secondary flex items-center gap-3">
-                  <Zap className="w-5 h-5" /> VERIFY_HARVEST
+        <AlertDialogContent className="exn-card border-secondary bg-black p-8 space-y-8 overflow-hidden max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-black uppercase tracking-widest text-secondary flex items-center gap-3">
+              <Zap className="w-5 h-5" /> VERIFY_HARVEST
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-4">
+              <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
+                <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                  <span className="text-white">POSITION_YIELD</span>
+                  <span className="text-secondary font-mono">{showClaimSingleReview?.amount.toFixed(4)} EXN</span>
                 </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-6 pt-4">
-                  <div className="p-5 bg-white/5 border border-white/20 rounded-xl space-y-4 shadow-xl">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">POSITION_YIELD</span>
-                      <span className="text-secondary font-mono">{showClaimSingleReview?.amount.toFixed(4)} EXN</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
-                    YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
-                  </p>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setShowClaimSingleReview(null)}>ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmClaimSingle} className="exn-button flex-1 h-11 text-[10px] uppercase font-black bg-secondary">CONFIRM_HARVEST</AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
+              </div>
+              <p className="text-[10px] text-white uppercase leading-relaxed font-black tracking-tight">
+                YIELD WILL BE ATOMICALLY TRANSFERRED TO YOUR CONNECTED WALLET BALANCE.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+            <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white text-white" onClick={() => setShowClaimSingleReview(null)}>ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmClaimSingle} className="exn-button flex-1 h-11 text-[10px] uppercase font-black bg-secondary">CONFIRM_HARVEST</AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>

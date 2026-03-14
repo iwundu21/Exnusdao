@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -66,7 +67,6 @@ export default function RegisterNodePage() {
   const existingNode = state.validators.find(v => v.owner === walletAddress);
   const hasExistingNode = !!existingNode;
 
-  // Case 1: User doesn't own a license
   if (myLicenses.length === 0) return (
     <div className="max-w-3xl mx-auto px-10 py-32 text-center space-y-8 animate-in fade-in duration-500">
        <div className="p-6 bg-destructive/10 rounded-3xl border border-destructive/20 w-fit mx-auto shadow-2xl">
@@ -142,7 +142,7 @@ export default function RegisterNodePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-10 py-16 space-y-10 animate-in fade-in duration-500">
-      <Link href="/" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors uppercase text-[9px] font-black tracking-[0.2em]">
+      <Link href="/" className="flex items-center gap-2 text-white hover:text-white transition-colors uppercase text-[9px] font-black tracking-[0.2em]">
         <ArrowLeft className="w-3.5 h-3.5" /> EXIT_TERMINAL
       </Link>
 
@@ -229,7 +229,7 @@ export default function RegisterNodePage() {
             <button 
               onClick={handleRegisterInitiate} 
               disabled={isRegistrationDisabled} 
-              className={`w-full h-14 uppercase tracking-[0.5em] font-black transition-all shadow-3xl text-[11px] ${isRegistrationDisabled ? 'bg-white/5 text-white/40 border border-white/20 cursor-not-allowed opacity-50' : 'exn-button'}`}
+              className={`w-full h-14 uppercase tracking-[0.5em] font-black transition-all shadow-3xl text-[11px] ${isRegistrationDisabled ? 'bg-white/5 text-white border border-white/20 cursor-not-allowed opacity-50' : 'exn-button'}`}
             >
               REVIEW_PROVISIONING
             </button>
@@ -250,7 +250,7 @@ export default function RegisterNodePage() {
                   
                   <div className="absolute top-4 right-6">
                     <div className="flex items-center gap-1.5 bg-emerald-500 text-black text-[9px] px-3 py-1.5 rounded-lg font-black uppercase border border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)]">
-                      <CheckCircle2 className="w-3 h-3" />
+                      <CheckCircle2 className="w-3.5 h-3.5" />
                       SECURE_ID_VERIFIED
                     </div>
                   </div>
@@ -273,7 +273,7 @@ export default function RegisterNodePage() {
                 
                 <div className="p-8 space-y-8">
                   <div className="space-y-3">
-                    <p className="text-[9px] text-white/60 uppercase font-black tracking-[0.4em]">NETWORK_BIO</p>
+                    <p className="text-[9px] text-white uppercase font-black tracking-[0.4em]">NETWORK_BIO</p>
                     <p className="text-[11px] text-white leading-relaxed font-medium italic min-h-[3rem] tracking-tight">
                       {formData.description || "Establish hardware metrics..."}
                     </p>
@@ -298,43 +298,37 @@ export default function RegisterNodePage() {
 
       {/* Registration Review Dialog */}
       <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-0 overflow-hidden max-w-md">
-          <div className="p-8 space-y-8">
-            <AlertDialogHeader>
-              <AlertDialogTitle asChild>
-                <div className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
-                  <ShieldCheck className="w-6 h-6" />
-                  VERIFY_BINDING
+        <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-8 space-y-8 overflow-hidden max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
+              <ShieldCheck className="w-6 h-6" />
+              VERIFY_BINDING
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-6 pt-6">
+              <div className="p-6 bg-white/5 rounded-xl border border-white/20 space-y-4 shadow-3xl">
+                <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
+                  <span className="text-white font-black">OP_CODE</span>
+                  <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>
                 </div>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-6 pt-6">
-                  <div className="p-6 bg-white/5 rounded-xl border border-white/20 space-y-4 shadow-3xl">
-                    <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
-                      <span className="text-white/70 font-black">OP_CODE</span>
-                      <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
-                      <span className="text-white/70 font-black">LICENSE_ID</span>
-                      <span className="text-white font-mono font-black text-[9px]">{shortenAddress(formData.licenseId)}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
-                      <span className="text-white/70 font-black">IDENTITY_NAME</span>
-                      <span className="text-primary font-black font-mono text-[10px]">{formData.name}</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
-                    BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY.
-                  </p>
+                <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
+                  <span className="text-white font-black">LICENSE_ID</span>
+                  <span className="text-white font-mono font-black text-[9px]">{shortenAddress(formData.licenseId)}</span>
                 </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-              <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-12 uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmRegistration} className="exn-button flex-1 h-12 text-[10px] uppercase font-black">CONFIRM_BIND</AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
+                <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em]">
+                  <span className="text-white font-black">IDENTITY_NAME</span>
+                  <span className="text-primary font-black font-mono text-[10px]">{formData.name}</span>
+                </div>
+              </div>
+              
+              <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
+                BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+            <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-12 uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRegistration} className="exn-button flex-1 h-12 text-[10px] uppercase font-black">CONFIRM_BIND</AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
