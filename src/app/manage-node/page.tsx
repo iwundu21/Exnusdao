@@ -30,7 +30,6 @@ export default function ManageNodePage() {
   const [formData, setFormData] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
   const [reviewAction, setReviewAction] = useState<'update' | 'terminate' | 'seed' | null>(null);
-  const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -175,7 +174,7 @@ export default function ManageNodePage() {
                 <div className="xl:col-span-4 p-10 border-r border-white/20 space-y-12">
                   <div className="flex items-center gap-6">
                     <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-white/30 shadow-3xl bg-black/40">
-                      <Image src={logoUrl} alt="logo" fill className="object-contain" />
+                      <Image src={logoUrl} alt="logo" fill className="object-cover" />
                     </div>
                     <div className="space-y-3">
                       <h2 className="text-2xl font-black uppercase tracking-tighter text-white leading-none">{node.name}</h2>

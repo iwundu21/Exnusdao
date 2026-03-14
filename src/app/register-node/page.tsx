@@ -244,7 +244,7 @@ export default function RegisterNodePage() {
                     src={previewLogo}
                     alt="Preview"
                     fill
-                    className={`object-contain transition-all duration-1000 ${formData.logo_uri.length > 0 ? 'opacity-100' : 'opacity-20 grayscale'}`}
+                    className={`object-cover transition-all duration-1000 ${formData.logo_uri.length > 0 ? 'opacity-100' : 'opacity-20 grayscale'}`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none" />
                   
