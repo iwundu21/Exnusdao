@@ -20,10 +20,9 @@ export function SolanaWalletProvider({ children }: { children: React.ReactNode }
     const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
     /**
-     * Explicitly defining adapters to avoid "mobile wallet protocol" errors 
-     * in specific cloud/sandboxed browser environments.
-     * We use individual software wallet adapters to avoid hardware-wallet 
-     * dependencies (like 'usb') that require native builds.
+     * Explicitly using Phantom and Solflare adapters to avoid dependency 
+     * on '@solana/wallet-adapter-wallets' which triggers node-gyp build failures 
+     * in specific cloud environments.
      */
     const wallets = useMemo(
         () => [
