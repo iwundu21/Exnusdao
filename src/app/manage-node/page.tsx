@@ -69,56 +69,40 @@ export default function ManageNodePage() {
     });
   };
 
-  const startProcessing = (action: string, callback: () => void) => {
-    setIsProcessing(action);
-    setTimeout(() => {
-      callback();
-      setIsProcessing(null);
-    }, 6000);
-  };
-
   const handleUpdate = () => {
     if (!editingNodeId || !formData) return;
     setReviewAction(null);
-    startProcessing('PATCH_IDENTITY', () => {
-      updateValidator(editingNodeId, {
-        name: formData.name,
-        location: formData.location,
-        description: formData.description,
-        logo_uri: formData.logo_uri,
-        commission_rate: formData.commission_rate * 100,
-      });
-      setEditingNodeId(null);
+    updateValidator(editingNodeId, {
+      name: formData.name,
+      location: formData.location,
+      description: formData.description,
+      logo_uri: formData.logo_uri,
+      commission_rate: formData.commission_rate * 100,
     });
+    setEditingNodeId(null);
   };
 
   const handleTerminate = () => {
     const node = myNodes[0];
     if (!node) return;
     setReviewAction(null);
-    startProcessing('TERMINATE_REGISTRATION', () => {
-      terminateValidator(node.id, walletAddress, node.seed_deposited ? state.seedAmount : 0, node.accrued_node_rewards || 0, node.license_id!);
-      router.push('/');
-    });
+    terminateValidator(node.id, walletAddress, node.seed_deposited ? state.seedAmount : 0, node.accrued_node_rewards || 0, node.license_id!);
+    router.push('/');
   };
 
   const handleDepositSeed = (vId: string) => {
     if (exnBalance < state.seedAmount) return setFeedback('error', `Insufficient EXN capital for seed.`);
-    startProcessing('INJECT_SEED', () => {
-      updateUserBalance(walletAddress, -state.seedAmount, 0);
-      updateValidator(vId, { seed_deposited: true, is_active: true, total_staked: state.seedAmount });
-      setFeedback('success', 'XNode seed committed to protocol.');
-    });
+    updateUserBalance(walletAddress, -state.seedAmount, 0);
+    updateValidator(vId, { seed_deposited: true, is_active: true, total_staked: state.seedAmount });
+    setFeedback('success', 'XNode seed committed to protocol.');
   };
 
   const handleWithdrawSeed = (vId: string) => {
     const node = state.validators.find(v => v.id === vId);
     if (!node?.seed_deposited) return;
-    startProcessing('WITHDRAW_SEED', () => {
-      updateUserBalance(walletAddress, state.seedAmount, 0);
-      updateValidator(vId, { seed_deposited: false, is_active: false, total_staked: 0 });
-      setFeedback('success', 'Seed capital withdrawn.');
-    });
+    updateUserBalance(walletAddress, state.seedAmount, 0);
+    updateValidator(vId, { seed_deposited: false, is_active: false, total_staked: 0 });
+    setFeedback('success', 'Seed capital withdrawn.');
   };
 
   if (myLicenses.length === 0) return (
@@ -190,8 +174,8 @@ export default function ManageNodePage() {
               <div className="grid grid-cols-1 xl:grid-cols-12">
                 <div className="xl:col-span-4 p-10 border-r border-white/20 space-y-12">
                   <div className="flex items-center gap-6">
-                    <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-white/30 shadow-3xl">
-                      <Image src={logoUrl} alt="logo" fill className="object-cover" />
+                    <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-white/30 shadow-3xl bg-black/40">
+                      <Image src={logoUrl} alt="logo" fill className="object-contain" />
                     </div>
                     <div className="space-y-3">
                       <h2 className="text-2xl font-black uppercase tracking-tighter text-white leading-none">{node.name}</h2>
@@ -226,16 +210,14 @@ export default function ManageNodePage() {
                     </div>
                     <button 
                       onClick={() => {
-                        startProcessing('HARVEST_COMMISSION', () => {
-                          updateUserBalance(walletAddress, node.accrued_node_rewards, 0);
-                          updateValidator(node.id, { accrued_node_rewards: 0 });
-                          setFeedback('success', 'ECONOMIC_YIELD_HARVESTED');
-                        });
+                        updateUserBalance(walletAddress, node.accrued_node_rewards, 0);
+                        updateValidator(node.id, { accrued_node_rewards: 0 });
+                        setFeedback('success', 'ECONOMIC_YIELD_HARVESTED');
                       }} 
-                      disabled={(node.accrued_node_rewards || 0) <= 0 || !!isProcessing} 
-                      className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] transition-all relative z-10 shadow-3xl ${ (node.accrued_node_rewards || 0) > 0 && !isProcessing ? 'bg-emerald-500 text-black hover:opacity-90 active:scale-95' : 'bg-white/10 text-white border border-white/30 cursor-not-allowed'}`}
+                      disabled={(node.accrued_node_rewards || 0) <= 0} 
+                      className={`w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] transition-all relative z-10 shadow-3xl ${ (node.accrued_node_rewards || 0) > 0 ? 'bg-emerald-500 text-black hover:opacity-90 active:scale-95' : 'bg-white/10 text-white border border-white/30 cursor-not-allowed'}`}
                     >
-                      {isProcessing === 'HARVEST_COMMISSION' ? 'HARVESTING...' : ( (node.accrued_node_rewards || 0) > 0 ? 'HARVEST_COMMISSION' : 'NO_PENDING_YIELD')}
+                      { (node.accrued_node_rewards || 0) > 0 ? 'HARVEST_COMMISSION' : 'NO_PENDING_YIELD'}
                     </button>
                   </div>
                 </div>
@@ -271,8 +253,8 @@ export default function ManageNodePage() {
                       </div>
 
                       <div className="flex gap-6 pt-6">
-                        <button onClick={() => setReviewAction('update')} disabled={!!isProcessing} className="exn-button flex-1 h-14 uppercase font-black tracking-[0.4em] text-[12px]">
-                          {isProcessing === 'PATCH_IDENTITY' ? 'SYNCHRONIZING...' : 'SYNCHRONIZE_PATCH'}
+                        <button onClick={() => setReviewAction('update')} className="exn-button flex-1 h-14 uppercase font-black tracking-[0.4em] text-[12px]">
+                          SYNCHRONIZE_PATCH
                         </button>
                         <button onClick={() => setEditingNodeId(null)} className="exn-button-outline flex-1 h-14 uppercase font-black tracking-[0.4em] text-[12px] border-white/30 text-white hover:bg-white/15">ABORT_SEQUENCE</button>
                       </div>
@@ -309,14 +291,14 @@ export default function ManageNodePage() {
                                <h3 className="text-[11px] uppercase font-black tracking-[0.5em] text-white">SYSTEM_CONTROLLER</h3>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
-                               <button onClick={() => startEditing(node)} disabled={!!isProcessing} className="h-14 exn-button-outline border-white/30 hover:bg-primary/20 hover:border-primary uppercase text-[11px] font-black tracking-[0.4em] rounded-2xl transition-all shadow-xl text-white">PATCH_IDENTITY</button>
+                               <button onClick={() => startEditing(node)} className="h-14 exn-button-outline border-white/30 hover:bg-primary/20 hover:border-primary uppercase text-[11px] font-black tracking-[0.4em] rounded-2xl transition-all shadow-xl text-white">PATCH_IDENTITY</button>
                                {!node.seed_deposited ? (
-                                 <button onClick={() => handleDepositSeed(node.id)} disabled={!!isProcessing} className="h-14 exn-button uppercase text-[11px] font-black tracking-[0.4em]">
-                                   {isProcessing === 'INJECT_SEED' ? 'INJECTING...' : 'INJECT_SEED_CAPITAL'}
+                                 <button onClick={() => handleDepositSeed(node.id)} className="h-14 exn-button uppercase text-[11px] font-black tracking-[0.4em]">
+                                   INJECT_SEED_CAPITAL
                                  </button>
                                ) : (
-                                 <button onClick={() => handleWithdrawSeed(node.id)} disabled={!!isProcessing} className="h-14 bg-primary/20 text-primary border border-primary/50 uppercase text-[11px] font-black tracking-[0.4em] rounded-2xl hover:bg-primary/30 transition-all">
-                                   {isProcessing === 'WITHDRAW_SEED' ? 'WITHDRAWING...' : 'WITHDRAW_SEED'}
+                                 <button onClick={() => handleWithdrawSeed(node.id)} className="h-14 bg-primary/20 text-primary border border-primary/50 uppercase text-[11px] font-black tracking-[0.4em] rounded-2xl hover:bg-primary/30 transition-all">
+                                   WITHDRAW_SEED
                                  </button>
                                )}
                             </div>
@@ -332,8 +314,8 @@ export default function ManageNodePage() {
                             <p className="text-[11px] text-destructive font-black leading-relaxed uppercase tracking-tight">
                                CRITICAL_WARNING: DECOMMISSIONING THIS VALIDATOR WILL PERMANENTLY TERMINATE ITS ON-CHAIN REGISTRATION AND BURN THE ASSOCIATED XNODE LICENSE NFT.
                             </p>
-                            <button onClick={() => setReviewAction('terminate')} disabled={!!isProcessing} className="w-full h-14 bg-destructive text-white uppercase text-[11px] font-black tracking-[0.5em] rounded-2xl hover:opacity-95 active:scale-95 transition-all shadow-3xl">
-                              {isProcessing === 'TERMINATE_REGISTRATION' ? 'TERMINATING...' : 'TERMINATE_REGISTRATION'}
+                            <button onClick={() => setReviewAction('terminate')} className="w-full h-14 bg-destructive text-white uppercase text-[11px] font-black tracking-[0.5em] rounded-2xl hover:opacity-95 active:scale-95 transition-all shadow-3xl">
+                              TERMINATE_REGISTRATION
                             </button>
                          </div>
                       </div>

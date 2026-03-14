@@ -239,14 +239,14 @@ export default function RegisterNodePage() {
             <div className="sticky top-32">
               <h3 className="text-[9px] font-black text-white uppercase tracking-[0.4em] mb-5">IDENTITY_PREVIEW_V2</h3>
               <div className="exn-card overflow-hidden border-primary bg-black/60 shadow-[0_40px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl group">
-                <div className="relative h-48 w-full overflow-hidden">
+                <div className="relative h-48 w-full overflow-hidden bg-black/40">
                   <Image 
                     src={previewLogo}
                     alt="Preview"
                     fill
-                    className={`object-cover transition-all duration-1000 ${formData.logo_uri.length > 0 ? 'opacity-80 scale-105' : 'opacity-20 grayscale'}`}
+                    className={`object-contain transition-all duration-1000 ${formData.logo_uri.length > 0 ? 'opacity-100' : 'opacity-20 grayscale'}`}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none" />
                   
                   <div className="absolute top-4 right-6">
                     <div className="flex items-center gap-1.5 bg-emerald-500 text-black text-[9px] px-3 py-1.5 rounded-lg font-black uppercase border border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)]">

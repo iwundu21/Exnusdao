@@ -49,15 +49,15 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                     : 'border-white/20 hover:border-primary/40'
               }`}
             >
-              <div className="relative h-24 w-full overflow-hidden border-b border-white/10">
+              <div className="relative h-24 w-full overflow-hidden border-b border-white/10 bg-black/40">
                  <Image 
                   src={logoUrl}
                   alt={validator.name}
                   fill
-                  className="object-cover opacity-40 group-hover:opacity-60 transition-all duration-700"
+                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-700"
                   data-ai-hint="validator tech"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                 
                 <div className="absolute top-2 right-2 flex items-center gap-1.5">
                    <div className="bg-black/90 text-primary text-[7px] px-2 py-0.5 rounded border border-primary/40 font-black tracking-widest">
