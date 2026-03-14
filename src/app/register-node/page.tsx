@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Upload, AlertCircle, Wallet, Ticket, ShieldCheck, MapPin, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Upload, AlertCircle, Wallet, Ticket, ShieldCheck, MapPin, CheckCircle2, Globe, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState, Validator } from '@/hooks/use-protocol-state';
 import Image from 'next/image';
@@ -28,18 +28,31 @@ export default function RegisterNodePage() {
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showReview, setShowReview] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(true);
   
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     logo_uri: '',
-    location: '',
+    location: 'DETECTING...',
     commission: 10,
     licenseId: ''
   });
 
   useEffect(() => {
     setMounted(true);
+    // Automated Geolocation Tracking
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        const locationString = `${data.country_name} ${data.country_emoji || ''}`.toUpperCase();
+        setFormData(prev => ({ ...prev, location: locationString }));
+        setGeoLoading(false);
+      })
+      .catch(() => {
+        setFormData(prev => ({ ...prev, location: 'UNKNOWN SECTOR' }));
+        setGeoLoading(false);
+      });
   }, []);
 
   if (!mounted || !isLoaded) return (
@@ -106,8 +119,8 @@ export default function RegisterNodePage() {
     if (license.is_burned) return setFeedback('error', 'XNode License has been burned.');
     if (license.is_claimed) return setFeedback('error', 'License is already bound to another node.');
 
-    if (!formData.name.trim() || !formData.location.trim() || !formData.description.trim() || !formData.licenseId) {
-      return setFeedback('error', 'All required fields must be completed.');
+    if (!formData.name.trim() || !formData.description.trim() || !formData.licenseId || geoLoading) {
+      return setFeedback('error', 'Required fields incomplete or location sync pending.');
     }
 
     setShowReview(true);
@@ -138,7 +151,7 @@ export default function RegisterNodePage() {
 
   const availableLicenses = state.licenses.filter(l => l.owner === walletAddress && !l.is_claimed && !l.is_burned);
   const previewLogo = formData.logo_uri.length > 0 ? formData.logo_uri : `https://picsum.photos/seed/placeholder/800/400`;
-  const isRegistrationDisabled = !formData.licenseId || !formData.name.trim() || !formData.location.trim() || !formData.description.trim();
+  const isRegistrationDisabled = !formData.licenseId || !formData.name.trim() || geoLoading || !formData.description.trim();
 
   return (
     <div className="max-w-6xl mx-auto px-10 py-16 space-y-10 animate-in fade-in duration-500">
@@ -147,9 +160,13 @@ export default function RegisterNodePage() {
       </Link>
 
       <div className="space-y-3">
+        <div className="flex items-center gap-2">
+           <Globe className="w-4 h-4 text-primary" />
+           <p className="text-[10px] font-black uppercase tracking-widest text-primary">NETWORK_LAYER_REGISTRATION</p>
+        </div>
         <h1 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE_REGISTRATION</h1>
         <p className="text-white text-[10px] font-black uppercase tracking-widest max-w-lg">
-          Establish decentralized infrastructure by binding a verified XNode License NFT to a new validator identity.
+          Establish infrastructure by binding a verified License NFT. Location and Flag are automatically synchronized to your physical origin.
         </p>
       </div>
 
@@ -194,8 +211,11 @@ export default function RegisterNodePage() {
                 <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 text-xs font-mono font-bold bg-black/60" placeholder="ID_STRING_V1" />
               </div>
               <div className="space-y-3">
-                <label className="text-[9px] text-white uppercase font-black tracking-widest">SECTOR_LOCATION *</label>
-                <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="exn-input h-12 text-xs font-mono font-bold bg-black/60" placeholder="e.g. FRANKFURT_DE" />
+                <label className="text-[9px] text-white uppercase font-black tracking-widest">AUTONOMOUS_LOCALIZATION (SYNCED)</label>
+                <div className="exn-input h-12 bg-white/5 border-white/20 flex items-center px-4 gap-3 text-xs font-mono font-black text-emerald-400">
+                  {geoLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MapPin className="w-3.5 h-3.5" />}
+                  {formData.location}
+                </div>
               </div>
               
               <div className="md:col-span-2 space-y-3">
@@ -298,39 +318,45 @@ export default function RegisterNodePage() {
 
       {/* Registration Review Dialog */}
       <AlertDialog open={showReview} onOpenChange={setShowReview}>
-        <AlertDialogContent className="exn-card border-primary bg-black/95 backdrop-blur-3xl p-8 space-y-8 overflow-hidden max-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-black uppercase tracking-widest text-primary flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6" />
-              VERIFY_BINDING
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-6 pt-4">
-                <div className="p-6 bg-white/5 rounded-xl border border-white space-y-4 shadow-3xl">
-                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                    <span className="text-white font-black">OP_CODE</span>
-                    <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>
+        <AlertDialogContent className="exn-card border-primary bg-black/95 backdrop-blur-3xl p-8 space-y-8 overflow-hidden max-md" asChild>
+          <div>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl font-black uppercase tracking-widest text-primary flex items-center gap-3">
+                <ShieldCheck className="w-6 h-6" />
+                VERIFY_BINDING
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-6 pt-4">
+                  <div className="p-6 bg-white/5 rounded-xl border border-white space-y-4 shadow-3xl">
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white font-black">OP_CODE</span>
+                      <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white font-black">LICENSE_ID</span>
+                      <span className="text-white font-mono font-black text-[9px]">{shortenAddress(formData.licenseId)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white font-black">IDENTITY_NAME</span>
+                      <span className="text-primary font-black font-mono text-[10px]">{formData.name}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <span className="text-white font-black">SYNCED_SECTOR</span>
+                      <span className="text-emerald-400 font-black font-mono text-[10px]">{formData.location}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                    <span className="text-white font-black">LICENSE_ID</span>
-                    <span className="text-white font-mono font-black text-[9px]">{shortenAddress(formData.licenseId)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                    <span className="text-white font-black">IDENTITY_NAME</span>
-                    <span className="text-primary font-black font-mono text-[10px]">{formData.name}</span>
-                  </div>
+                  
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
+                    BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY AND SYNCHRONIZING YOUR PHYSICAL ORIGIN.
+                  </p>
                 </div>
-                
-                <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
-                  BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY.
-                </p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-row gap-4 pt-2">
-            <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-12 uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRegistration} className="exn-button flex-1 h-12 text-[10px] uppercase font-black">CONFIRM_BIND</AlertDialogAction>
-          </AlertDialogFooter>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex flex-row gap-4 pt-2">
+              <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-12 uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmRegistration} className="exn-button flex-1 h-12 text-[10px] uppercase font-black">CONFIRM_BIND</AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
