@@ -11,11 +11,11 @@ import {
   Coins,
   ShieldAlert,
   RotateCcw,
-  ArrowUpRight,
   Banknote,
   Ticket,
   Zap,
-  Play
+  Play,
+  Layers
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -174,7 +174,7 @@ export default function AdminPage() {
   const currentEpoch = Math.floor((now - (state.networkStartDate || now)) / (30 * 24 * 60 * 60 * 1000)) + 1;
 
   return (
-    <div className="max-w-6xl mx-auto px-10 py-10 space-y-10 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto px-10 py-10 space-y-10 animate-in fade-in duration-500 pb-32">
       <div className="flex justify-between items-end">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function AdminPage() {
                     <h3 className="text-base font-bold uppercase tracking-widest text-white">Network Governance</h3>
                  </div>
                  
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-3">
                        <p className="text-[10px] text-white uppercase font-black">License Price (USDC)</p>
                        <div className="relative">
@@ -236,6 +236,13 @@ export default function AdminPage() {
                        <div className="relative">
                           <Zap className="absolute left-4 top-3 w-3.5 h-3.5 text-white" />
                           <input value={formatInput(newRewardCap)} onChange={e => handleTextChange(e.target.value, setNewRewardCap)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white bg-white/10" />
+                       </div>
+                    </div>
+                    <div className="space-y-3">
+                       <p className="text-[10px] text-white uppercase font-black">Supply Cap (Licenses)</p>
+                       <div className="relative">
+                          <Layers className="absolute left-4 top-3 w-3.5 h-3.5 text-white" />
+                          <input value={formatInput(newLicenseLimit)} onChange={e => handleTextChange(e.target.value, setNewLicenseLimit)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white bg-white/10" />
                        </div>
                     </div>
                  </div>
