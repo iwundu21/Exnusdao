@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo } from 'react';
@@ -13,16 +12,12 @@ import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 export function SolanaWalletProvider({ children }: { children: React.ReactNode }) {
-    // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
     const network = WalletAdapterNetwork.Mainnet;
-
-    // Standard RPC endpoint for the selected network
     const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
     /**
-     * Explicitly using Phantom and Solflare adapters to avoid dependency 
-     * on '@solana/wallet-adapter-wallets' which triggers node-gyp build failures 
-     * in specific cloud environments.
+     * Using specific adapters to bypass build failures associated with
+     * the '@solana/wallet-adapter-wallets' meta-package.
      */
     const wallets = useMemo(
         () => [

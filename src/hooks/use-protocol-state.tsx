@@ -181,8 +181,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       const uRef = doc(db, 'users', address);
       setDoc(gRef, { [vault]: increment(amount) }, { merge: true });
       setDoc(uRef, { exnBalance: increment(-amount) }, { merge: true });
+      setFeedback('success', 'VAULT CAPITAL INJECTED.');
     } catch (e) { console.error(e); }
-  }, [db, signAction]);
+  }, [db, signAction, setFeedback]);
 
   const adminWithdrawUsdc = useCallback(async (address: string, amount: number) => {
     if (!address || !db) return;
@@ -192,8 +193,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
       const uRef = doc(db, 'users', address);
       setDoc(gRef, { usdcVaultBalance: increment(-amount) }, { merge: true });
       setDoc(uRef, { usdcBalance: increment(amount) }, { merge: true });
+      setFeedback('success', 'USDC WITHDRAWAL COMPLETE.');
     } catch (e) { console.error(e); }
-  }, [db, signAction]);
+  }, [db, signAction, setFeedback]);
 
   const adminUpdateSettings = useCallback(async (settings: Partial<ProtocolState>) => {
     if (!db) return;
@@ -440,8 +442,9 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         networkStartDate: Date.now(),
         settledEpochs: []
       }, { merge: true });
+      setFeedback('success', 'PROTOCOL RESET SUCCESSFUL.');
     } catch (e) { console.error(e); }
-  }, [db, signAction]);
+  }, [db, signAction, setFeedback]);
 
   const state: ProtocolState = {
     treasuryBalance: globalData?.treasuryBalance ?? 0,
