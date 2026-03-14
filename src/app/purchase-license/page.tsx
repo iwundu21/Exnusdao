@@ -96,7 +96,7 @@ export default function PurchaseLicensePage() {
           <div className="space-y-4">
             <h1 className="text-5xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE_MINTING</h1>
             <p className="text-white font-black text-[11px] uppercase tracking-[0.5em] max-w-lg leading-relaxed">
-              Provision unique XNode License NFTs to gain infrastructure registration rights.
+              Mint unique XNode License NFTs to gain infrastructure registration rights.
             </p>
           </div>
 
@@ -140,7 +140,7 @@ export default function PurchaseLicensePage() {
                   className={`w-full h-16 text-[12px] tracking-[0.6em] font-black uppercase flex items-center justify-center gap-4 transition-all shadow-3xl ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-white/10 text-white border border-white cursor-not-allowed'}`}
                 >
                   {isMinting ? (
-                    'PROVISIONING_SECTOR...'
+                    'MINTING_IN_PROGRESS...'
                   ) : hasLicense ? (
                     'AUTHORIZATION_OWNED'
                   ) : (
@@ -200,7 +200,7 @@ export default function PurchaseLicensePage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
                 <ShieldCheck className="w-6 h-6" />
-                VERIFY_PROVISIONING
+                VERIFY_MINT
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
@@ -209,7 +209,7 @@ export default function PurchaseLicensePage() {
                       <span className="text-white font-black">OP_CODE</span>
                       <span className="text-white font-black font-mono">XNODE_MINT</span>
                     </div>
-                    <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
+                    <div className="flex justify-between items-center text-[11px] uppercase tracking-widest">
                       <span className="text-white font-black">MINT_COST</span>
                       <span className="text-emerald-400 font-mono font-black text-[13px]">{licensePrice.toLocaleString()} USDC</span>
                     </div>

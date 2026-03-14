@@ -226,7 +226,7 @@ export default function RegisterNodePage() {
                 >
                   <Upload className="w-6 h-6 text-white group-hover:text-primary transition-all duration-500" />
                   <p className="text-[9px] uppercase font-black text-white group-hover:text-primary transition-all tracking-widest">
-                    {formData.logo_uri.length > 0 ? 'REPLACE_ASSET' : 'CLICK_TO_PROVISION_LOGO'}
+                    {formData.logo_uri.length > 0 ? 'REPLACE_ASSET' : 'CLICK_TO_UPLOAD_LOGO'}
                   </p>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
@@ -295,7 +295,7 @@ export default function RegisterNodePage() {
                   <div className="space-y-3">
                     <p className="text-[9px] text-white uppercase font-black tracking-widest">NETWORK_BIO</p>
                     <p className="text-[11px] text-white leading-relaxed font-medium italic min-h-[3rem] tracking-tight">
-                      {formData.description || "Establish hardware metrics..."}
+                      {formData.description || "Describe hardware metrics..."}
                     </p>
                   </div>
 

@@ -327,7 +327,7 @@ export default function ManageNodePage() {
         })}
       </div>
 
-      <AlertDialog open={reviewAction !== null} onOpenChange={setReviewAction(null)}>
+      <AlertDialog open={reviewAction !== null} onOpenChange={() => setReviewAction(null)}>
         <AlertDialogContent className="exn-card border-primary/60 bg-black/95 backdrop-blur-3xl p-10 space-y-10 overflow-hidden max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-black uppercase tracking-widest text-primary flex items-center gap-4">
