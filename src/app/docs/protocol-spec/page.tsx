@@ -36,13 +36,13 @@ export default function ProtocolSpecPage() {
     },
     {
       id: "governance",
-      title: "LAYER_4: DAO_CONSENSUS_AUTHORIZATION",
-      content: "Governance is strictly gated by stake weight. Broadcasting a new proposal requires a 'Senior Consensus' weight of 1,000,000 EXN and a 10 EXN fee. To participate in voting, a user must maintain a 'Member Consensus' weight of 10,000 EXN (or hold an active XNode License) and pay a 3 EXN fee per vote. These parameters ensure high-integrity decision making."
+      title: "LAYER_4: DAO_CONSENSUS_&_TRANSACTION_PROPOSALS",
+      content: "Governance is gated by stake weight. BROADCASTING A PROPOSAL requires a weight of 1,000,000 EXN and a 10 EXN fee. VOTING requires 10,000 EXN weight and a 3 EXN fee. TRANSACTION PROPOSALS (Treasury Distributions) enable the DAO to shift assets from the protocol treasury to any recipient upon consensus finalization. Execution of passed transaction proposals is atomic and non-custodial."
     },
     {
       id: "rewards",
       title: "LAYER_5: REWARD_SHARDING_&_EPOCH_SETTLEMENT",
-      content: "The protocol operates on 30-day cycles known as Epochs. At the conclusion of each Epoch, a 'Network Crank' is executed to shard the global reward pool among active XNodes. This action is entirely PERMISSIONLESS; any participant in the network can trigger the settlement of a matured Epoch. Rewards are distributed pro-rata based on effective weight (Principal x Lock Multiplier), with owners receiving their configured commission. All rewards settle as liquid EXN on the Solana ledger."
+      content: "The protocol operates on 30-day cycles known as Epochs. At the conclusion of each Epoch, a 'Network Crank' is executed to shard the global reward pool among active XNodes. This action is PERMISSIONLESS; any network participant can settle a matured Epoch. Rewards are distributed pro-rata based on effective weight (Principal x Lock Multiplier). All rewards settle as liquid EXN on the Solana ledger."
     }
   ];
 

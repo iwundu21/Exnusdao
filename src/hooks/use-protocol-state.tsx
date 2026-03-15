@@ -71,7 +71,7 @@ interface ProtocolContextType {
   claimRewards: (stakeId: string, amount: number, newCheckpoint: number, wallet: string) => void;
   castVote: (pId: number, support: boolean, weight: number, comment: any) => void;
   createProposal: (proposal: any) => void;
-  executeProposal: (pId: number, passed: boolean, type: number, amount: number, recipient: string, wallet: string) => void;
+  executeProposal: (pId: number, passed: boolean, type: number, amount: number, recipient: string, executorWallet: string) => void;
   crankEpoch: (targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => void;
   registerValidator: (validator: any, licenseId: string) => void;
   updateValidator: (vId: string, data: any) => void;
@@ -332,16 +332,25 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
 
-  const executeProposal = useCallback(async (pId: number) => {
+  const executeProposal = useCallback(async (pId: number, passed: boolean, type: number, amount: number, recipient: string, executorWallet: string) => {
     if (!db) return;
     try {
-      await signAction(`EXECUTE_PROPOSAL_${pId}`);
+      await signAction(`EXECUTE_PROPOSAL_${pId}_STATUS_${passed ? 'PASSED' : 'REJECTED'}`);
       setFeedback('warning', 'ENACTING DAO CONSENSUS...');
-      setTimeout(() => {
+      setTimeout(async () => {
         const pRef = doc(db, 'proposals', pId.toString());
+        const gRef = doc(db, 'protocol', 'global');
         const hash = generateTxHash();
-        setDoc(pRef, { executed: true }, { merge: true });
-        setFeedback('success', 'PROPOSAL ENACTED.', hash);
+        
+        await setDoc(pRef, { executed: true, passed }, { merge: true });
+        
+        if (passed && type === 1 && amount > 0 && recipient) {
+          const rRef = doc(db, 'users', recipient);
+          await setDoc(gRef, { treasuryBalance: increment(-amount) }, { merge: true });
+          await setDoc(rRef, { exnBalance: increment(amount) }, { merge: true });
+        }
+        
+        setFeedback('success', passed ? 'PROPOSAL ENACTED & ASSETS SHIFTED.' : 'PROPOSAL REJECTED & FINALIZED.', hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
