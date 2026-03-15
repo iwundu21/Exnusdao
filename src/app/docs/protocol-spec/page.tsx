@@ -64,27 +64,25 @@ export default function ProtocolSpecPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-10">
-        {sections.map((section) => {
-          return (
-            <div key={section.id} className="exn-card p-10 bg-black/80 border-white/20 relative group hover:border-primary/50 transition-all shadow-3xl overflow-hidden">
-              <div className="space-y-8 relative z-10">
-                <div className="flex items-center gap-5">
-                  <h2 className="text-xl font-black text-white uppercase tracking-widest">{section.title}</h2>
-                </div>
+        {sections.map((section) => (
+          <div key={section.id} className="exn-card p-10 bg-black/80 border-white/20 relative group hover:border-primary/50 transition-all shadow-3xl overflow-hidden">
+            <div className="space-y-8 relative z-10">
+              <div className="flex items-center gap-5">
+                <h2 className="text-xl font-black text-white uppercase tracking-widest">{section.title}</h2>
+              </div>
 
-                <div className="space-y-6">
-                   <p className="text-[13px] text-white font-medium leading-relaxed border-l-2 border-primary/30 pl-8 tracking-tight italic">
-                     {section.content}
-                   </p>
-                   
-                   <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-[0.4em]">
-                     ON_CHAIN_VERIFIED_PROTOCOL_LAYER
-                   </div>
-                </div>
+              <div className="space-y-6">
+                 <p className="text-[13px] text-white font-medium leading-relaxed border-l-2 border-primary/30 pl-8 tracking-tight italic">
+                   {section.content}
+                 </p>
+                 
+                 <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-[0.4em]">
+                   ON_CHAIN_VERIFIED_PROTOCOL_LAYER
+                 </div>
               </div>
             </div>
-          );
-        section.content})}
+          </div>
+        ))}
       </div>
 
       <div className="exn-card p-12 bg-primary/5 border-primary/40 text-center space-y-8 shadow-3xl">
