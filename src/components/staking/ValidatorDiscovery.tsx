@@ -3,7 +3,7 @@
 
 import React, { useMemo } from 'react';
 import Image from 'next/image';
-import { MapPin, Globe, ShieldCheck, Database, Zap } from 'lucide-react';
+import { MapPin, Globe } from 'lucide-react';
 
 export function ValidatorDiscovery({ validators, onSelect, userStakes = [], walletAddress, selectedId }: any) {
   const totalNetworkWeight = useMemo(() => {
@@ -14,8 +14,8 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <h2 className="text-lg font-black exn-gradient-text uppercase tracking-tight leading-none">NETWORK_DISCOVERY</h2>
-          <p className="text-[8px] text-white uppercase font-black tracking-[0.3em]">NODE_INDEX_V3.1.2_STABLE</p>
+          <h2 className="text-lg font-black exn-gradient-text uppercase tracking-tight leading-none">NETWORK DISCOVERY</h2>
+          <p className="text-[8px] text-white uppercase font-black tracking-[0.3em]">NODE INDEX V3.1.2 STABLE</p>
         </div>
         <div className="flex gap-1.5">
           <div className="bg-black/80 text-white text-[8px] px-2 py-1 rounded border border-white/20 font-black uppercase tracking-widest backdrop-blur-xl">
@@ -61,7 +61,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                 
                 <div className="absolute top-2 right-2 flex items-center gap-1.5">
                    <div className="bg-black/90 text-primary text-[7px] px-2 py-0.5 rounded border border-primary/40 font-black tracking-widest">
-                      {weightShare.toFixed(2)}%_WEIGHT
+                      {weightShare.toFixed(2)}% WEIGHT
                    </div>
                    {isUserStaked && (
                      <div className="bg-emerald-500 text-black text-[7px] px-2 py-0.5 rounded font-black border border-emerald-400">
@@ -80,7 +80,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5 text-[8px] text-primary uppercase font-black tracking-widest">
                     <Globe className="w-2.5 h-2.5" />
-                    <span>SECTOR_METADATA</span>
+                    <span>SECTOR METADATA</span>
                   </div>
                   <p className="text-[10px] text-white font-medium italic line-clamp-1 border-l-2 border-primary/30 pl-2 tracking-tight">
                     {validator.description}
@@ -89,11 +89,11 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-2.5 bg-white/5 rounded-lg border border-white/10 space-y-0.5">
-                    <p className="text-[7px] uppercase font-black text-white tracking-[0.1em]">STAKED_WEIGHT</p>
+                    <p className="text-[7px] uppercase font-black text-white tracking-[0.1em]">STAKED WEIGHT</p>
                     <p className="text-primary font-black text-xs font-mono tracking-tighter">{(validator.total_staked || 0).toLocaleString()}</p>
                   </div>
                   <div className="p-2.5 bg-white/5 rounded-lg border border-white/10 space-y-0.5">
-                    <p className="text-[7px] uppercase font-black text-white tracking-[0.1em]">ACTIVE_STAKERS</p>
+                    <p className="text-[7px] uppercase font-black text-white tracking-[0.1em]">ACTIVE STAKERS</p>
                     <p className="text-white font-black text-xs font-mono tracking-tighter">{stakerCount}</p>
                   </div>
                 </div>
@@ -121,7 +121,7 @@ export function ValidatorDiscovery({ validators, onSelect, userStakes = [], wall
                       : 'bg-white/5 text-white border border-white/10 cursor-not-allowed'
                   }`}
                 >
-                  {isSelected ? 'IDENTITY_SELECTED' : (validator.is_active ? 'PROVISION_STAKE' : 'SECTOR_OFFLINE')}
+                  {isSelected ? 'IDENTITY SELECTED' : (validator.is_active ? 'PROVISION STAKE' : 'SECTOR OFFLINE')}
                 </button>
               </div>
             </div>

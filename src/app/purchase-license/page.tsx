@@ -34,7 +34,7 @@ export default function PurchaseLicensePage() {
   if (!mounted || !isLoaded) return (
     <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
       <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">SYNCING_NETWORK_STATE</p>
+      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">SYNCING NETWORK STATE</p>
     </div>
   );
 
@@ -45,7 +45,7 @@ export default function PurchaseLicensePage() {
            <Wallet className="w-12 h-12 text-primary" />
          </div>
          <div className="space-y-4">
-           <h1 className="text-3xl font-black uppercase tracking-tighter text-white">AUTHENTICATION_REQUIRED</h1>
+           <h1 className="text-3xl font-black uppercase tracking-tighter text-white">AUTHENTICATION REQUIRED</h1>
            <p className="text-white font-black text-[11px] uppercase tracking-[0.4em]">Connect your wallet to provision your XNode License NFT.</p>
          </div>
       </div>
@@ -88,13 +88,13 @@ export default function PurchaseLicensePage() {
   return (
     <div className="max-w-6xl mx-auto px-10 py-16 space-y-12 animate-in fade-in duration-500">
       <Link href="/" className="flex items-center gap-2 text-white hover:text-primary transition-colors uppercase text-[10px] font-black tracking-[0.3em]">
-        <ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL
+        <ArrowLeft className="w-4 h-4" /> EXIT TERMINAL
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-7 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-5xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE_MINTING</h1>
+            <h1 className="text-5xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE MINTING</h1>
             <p className="text-white font-black text-[11px] uppercase tracking-[0.5em] max-w-lg leading-relaxed">
               Mint unique XNode License NFTs to gain infrastructure registration rights.
             </p>
@@ -107,8 +107,8 @@ export default function PurchaseLicensePage() {
                   <Ticket className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                  <p className="text-base font-black text-white uppercase tracking-widest">XNODE_AUTHORIZATION</p>
-                  <p className="text-[11px] text-primary font-black uppercase tracking-[0.3em]">NFT_METAPLEX_STANDARD</p>
+                  <p className="text-base font-black text-white uppercase tracking-widest">XNODE AUTHORIZATION</p>
+                  <p className="text-[11px] text-primary font-black uppercase tracking-[0.3em]">NFT METAPLEX STANDARD</p>
                 </div>
               </div>
               <div className="text-right">
@@ -119,7 +119,7 @@ export default function PurchaseLicensePage() {
             <div className="space-y-8">
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-[0.4em]">
-                   <span className="text-white">MINTED / TOTAL_SUPPLY_CAP</span>
+                   <span className="text-white">MINTED / TOTAL SUPPLY CAP</span>
                    <div className="flex items-center gap-2 font-black">
                      <span className={remainingSlots > 0 ? "text-primary" : "text-destructive"}>{currentMintedCount}</span>
                      <span className="text-white/20">/</span>
@@ -140,13 +140,13 @@ export default function PurchaseLicensePage() {
                   className={`w-full h-16 text-[12px] tracking-[0.6em] font-black uppercase flex items-center justify-center gap-4 transition-all shadow-3xl ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-white/10 text-white border border-white cursor-not-allowed'}`}
                 >
                   {isMinting ? (
-                    'MINTING_IN_PROGRESS...'
+                    'MINTING IN PROGRESS...'
                   ) : hasLicense ? (
-                    'AUTHORIZATION_OWNED'
+                    'AUTHORIZATION OWNED'
                   ) : (
                     <>
                       <Sparkles className="w-6 h-6" />
-                      MINT_XNODE_LICENSE
+                      MINT XNODE LICENSE
                     </>
                   )}
                 </button>
@@ -158,14 +158,14 @@ export default function PurchaseLicensePage() {
         <div className="lg:col-span-5 space-y-8">
            <div className="exn-card p-8 border-white bg-black/90 backdrop-blur-3xl shadow-2xl">
               <h3 className="text-[11px] font-black text-white uppercase tracking-[0.5em] mb-8 flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-primary" /> INVENTORY_SCAN
+                <ShieldCheck className="w-5 h-5 text-primary" /> INVENTORY SCAN
               </h3>
               
               <div className="space-y-6">
                 {myLicenses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-white rounded-2xl bg-white/5">
                      <Ticket className="w-12 h-12 mb-4 text-white" />
-                     <p className="text-[11px] uppercase font-black text-white tracking-[0.4em] text-center">NO_XNODE_NFT_DETECTED</p>
+                     <p className="text-[11px] uppercase font-black text-white tracking-[0.4em] text-center">NO XNODE NFT DETECTED</p>
                   </div>
                 ) : (
                   myLicenses.map((lic) => (
@@ -177,7 +177,7 @@ export default function PurchaseLicensePage() {
                           <div className="flex-1 space-y-2">
                              <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="text-[10px] text-white uppercase font-black mb-1 tracking-widest">MINT_ID</p>
+                                  <p className="text-[10px] text-white uppercase font-black mb-1 tracking-widest">MINT ID</p>
                                   <p className="font-mono text-[12px] text-primary font-black tracking-tighter">{shortenAddress(lic.id)}</p>
                                 </div>
                                 <a href={getExplorerLink(lic.id)} target="_blank" rel="noopener noreferrer">
@@ -200,17 +200,17 @@ export default function PurchaseLicensePage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
                 <ShieldCheck className="w-6 h-6" />
-                VERIFY_MINT
+                VERIFY MINT
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
                   <div className="p-6 bg-white/5 rounded-xl border border-white space-y-4 shadow-3xl">
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-[0.4em]">
-                      <span className="text-white font-black">OP_CODE</span>
-                      <span className="text-white font-black font-mono">XNODE_MINT</span>
+                      <span className="text-white font-black">OP CODE</span>
+                      <span className="text-white font-black font-mono">XNODE MINT</span>
                     </div>
                     <div className="flex justify-between items-center text-[11px] uppercase tracking-widest">
-                      <span className="text-white font-black">MINT_COST</span>
+                      <span className="text-white font-black">MINT COST</span>
                       <span className="text-emerald-400 font-mono font-black text-[13px]">{licensePrice.toLocaleString()} USDC</span>
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export default function PurchaseLicensePage() {
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
               <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-11 uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmMint} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_MINT</AlertDialogAction>
+              <AlertDialogAction onClick={confirmMint} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM MINT</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>

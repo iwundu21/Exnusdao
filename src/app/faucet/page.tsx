@@ -45,7 +45,7 @@ export default function FaucetPage() {
   if (!mounted || !isLoaded) return (
     <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
       <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">SYNCING_CLOUD_ASSETS</p>
+      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">SYNCING CLOUD ASSETS</p>
     </div>
   );
 
@@ -56,7 +56,7 @@ export default function FaucetPage() {
            <Wallet className="w-12 h-12 text-primary" />
          </div>
          <div className="space-y-4">
-           <h1 className="text-3xl font-black uppercase tracking-tighter text-white">AUTHENTICATION_REQUIRED</h1>
+           <h1 className="text-3xl font-black uppercase tracking-tighter text-white">AUTHENTICATION REQUIRED</h1>
            <p className="text-white font-black text-[11px] uppercase tracking-[0.4em]">Connect your wallet to receive protocol test tokens.</p>
          </div>
       </div>
@@ -96,11 +96,11 @@ export default function FaucetPage() {
   return (
     <div className="max-w-6xl mx-auto px-10 py-16 space-y-12 animate-in fade-in duration-500">
       <Link href="/" className="flex items-center gap-2 text-white hover:text-primary transition-colors uppercase text-[10px] font-black tracking-[0.3em]">
-        <ArrowLeft className="w-4 h-4" /> EXIT_TERMINAL
+        <ArrowLeft className="w-4 h-4" /> EXIT TERMINAL
       </Link>
 
       <div className="space-y-4">
-        <h1 className="text-5xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">TOKEN_FAUCET</h1>
+        <h1 className="text-5xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">TOKEN FAUCET</h1>
         <p className="text-white font-black text-[11px] uppercase tracking-[0.5em] max-w-lg leading-relaxed">
           Generate testnet assets for protocol verification. Distribution limited to 24h intervals.
         </p>
@@ -123,7 +123,7 @@ export default function FaucetPage() {
           </div>
 
           <div className="space-y-2.5 relative z-10">
-            <p className="text-[11px] text-white uppercase font-black tracking-[0.5em]">DYNAMIC_ASSET_DROP</p>
+            <p className="text-[11px] text-white uppercase font-black tracking-[0.5em]">DYNAMIC ASSET DROP</p>
             <h3 className="text-3xl font-black text-white font-mono tracking-tighter">{exnLimit.toLocaleString()} <span className="text-xs text-primary font-black uppercase ml-2">EXN</span></h3>
           </div>
 
@@ -132,7 +132,7 @@ export default function FaucetPage() {
             disabled={exnTimeLeft > 0 || isProcessing} 
             className={`w-full h-16 uppercase tracking-[0.6em] font-black transition-all rounded-2xl relative z-10 text-[12px] shadow-3xl ${exnTimeLeft === 0 && !isProcessing ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'}`}
           >
-            {isProcessing ? 'PROCESSING...' : (exnTimeLeft > 0 ? 'COOLDOWN_ACTIVE' : 'GENERATE_EXN')}
+            {isProcessing ? 'PROCESSING...' : (exnTimeLeft > 0 ? 'COOLDOWN ACTIVE' : 'GENERATE EXN')}
           </button>
         </div>
 
@@ -152,7 +152,7 @@ export default function FaucetPage() {
           </div>
 
           <div className="space-y-2.5 relative z-10">
-            <p className="text-[11px] text-white uppercase font-black tracking-[0.5em]">STABLE_ASSET_DROP</p>
+            <p className="text-[11px] text-white uppercase font-black tracking-[0.5em]">STABLE ASSET DROP</p>
             <h3 className="text-3xl font-black text-white font-mono tracking-tighter">{usdcLimit.toLocaleString()} <span className="text-xs text-emerald-500 font-black uppercase ml-2">USDC</span></h3>
           </div>
 
@@ -161,7 +161,7 @@ export default function FaucetPage() {
             disabled={usdcTimeLeft > 0 || isProcessing} 
             className={`w-full h-16 uppercase tracking-[0.6em] font-black transition-all rounded-2xl relative z-10 text-[12px] shadow-3xl ${usdcTimeLeft === 0 && !isProcessing ? 'bg-emerald-500 text-black hover:opacity-90 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.5)]' : 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'}`}
           >
-            {isProcessing ? 'PROCESSING...' : (usdcTimeLeft > 0 ? 'COOLDOWN_ACTIVE' : 'GENERATE_USDC')}
+            {isProcessing ? 'PROCESSING...' : (usdcTimeLeft > 0 ? 'COOLDOWN ACTIVE' : 'GENERATE USDC')}
           </button>
         </div>
       </div>
@@ -172,19 +172,19 @@ export default function FaucetPage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-black uppercase tracking-[0.3em] text-primary flex items-center gap-3">
                 <ShieldCheck className="w-6 h-6" />
-                VERIFY_DROP_REQUEST
+                VERIFY DROP REQUEST
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
                   <div className="p-6 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-3xl">
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em] font-black">
-                      <span className="text-white/60">OP_CODE</span>
-                      <span className="text-white font-mono">FAUCET_GEN</span>
+                      <span className="text-white/60">OP CODE</span>
+                      <span className="text-white font-mono">FAUCET GEN</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em] font-black">
-                      <span className="text-white/60">ASSET_TYPE</span>
+                      <span className="text-white/60">ASSET TYPE</span>
                       <span className={reviewType === 'exn' ? "text-primary" : "text-emerald-500"}>
-                        {reviewType === 'exn' ? 'PROTOCOL_EXN' : 'STABLE_USDC'}
+                        {reviewType === 'exn' ? 'PROTOCOL EXN' : 'STABLE USDC'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.4em] font-black">
@@ -203,7 +203,7 @@ export default function FaucetPage() {
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
               <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-11 uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmClaim} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_REQUEST</AlertDialogAction>
+              <AlertDialogAction onClick={confirmClaim} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM REQUEST</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>

@@ -47,7 +47,6 @@ export function DashboardStats({
     const data = [];
     const currentVal = totalStaked || 0;
     
-    // Stable anchor for the chart timeline
     const now = Date.now();
     const durationMs = timeframe === '24H' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
     const startTime = now - durationMs;
@@ -56,16 +55,11 @@ export function DashboardStats({
     for (let i = 0; i <= points; i++) {
       const pointTime = startTime + (i * timeStep);
       const progress = i / points;
-      
-      // Professional growth curve simulation based on actual totalStaked
       const baseGrowth = 0.95 + (Math.log10(1 + progress * 9) / 1) * 0.05;
       const variation = 0.995 + (Math.sin(i * 1.8) * 0.005);
       
       let value = Math.floor(currentVal * variation * baseGrowth);
-      
-      if (i === points) {
-        value = currentVal;
-      }
+      if (i === points) value = currentVal;
       
       const dateLabel = timeframe === '24H' 
         ? new Date(pointTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -89,10 +83,10 @@ export function DashboardStats({
           <div className="p-4 pb-0 flex justify-between items-start relative z-10">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <p className="text-white text-[8px] font-black uppercase tracking-[0.3em]">PROTOCOL_TVL_DIAGNOSTIC</p>
+                <p className="text-white text-[8px] font-black uppercase tracking-[0.3em]">PROTOCOL TVL DIAGNOSTIC</p>
                 <div className="flex items-center gap-1.5 bg-primary/20 px-2 py-0.5 rounded border border-primary/40">
                   <Activity className="w-2.5 h-2.5 text-primary" />
-                  <span className="text-[7px] font-black text-primary uppercase tracking-widest">LIVE_STATE</span>
+                  <span className="text-[7px] font-black text-primary uppercase tracking-widest">LIVE STATE</span>
                 </div>
               </div>
               <h3 className="text-2xl font-black font-mono tracking-tighter text-white">
@@ -169,14 +163,14 @@ export function DashboardStats({
         <div className="exn-card p-4 bg-black border-white/20 flex flex-col justify-center shadow-3xl relative overflow-hidden group">
           <div className="flex justify-between items-start relative z-10">
             <div className="space-y-1">
-              <p className="text-white text-[8px] font-black uppercase tracking-[0.3em]">DAO_TREASURY_RESERVE</p>
+              <p className="text-white text-[8px] font-black uppercase tracking-[0.3em]">DAO TREASURY RESERVE</p>
               <p className="text-xl font-mono font-black text-white tracking-tighter">
                 {treasuryBalance.toLocaleString()} <span className="text-[10px] text-primary">EXN</span>
               </p>
             </div>
             
             <div className="text-right flex flex-col items-end">
-              <p className="text-white text-[8px] font-black uppercase tracking-widest mb-1">MARKET_VALUE</p>
+              <p className="text-white text-[8px] font-black uppercase tracking-widest mb-1">MARKET VALUE</p>
               <p className="text-base font-black text-emerald-400 font-mono tracking-tighter">
                 ${treasuryUsdValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
@@ -187,7 +181,7 @@ export function DashboardStats({
           </div>
           
           <div className="mt-4 pt-2 border-t border-white/5 relative z-10">
-             <p className="text-[7px] text-white uppercase font-black tracking-[0.4em]">TREASURY_SYNCED</p>
+             <p className="text-[7px] text-white uppercase font-black tracking-[0.4em]">TREASURY SYNCED</p>
           </div>
         </div>
       </div>
@@ -197,17 +191,17 @@ export function DashboardStats({
            <div className="flex items-center gap-3">
               <Calendar className="w-4 h-4 text-primary" />
               <div>
-                 <p className="text-[7px] text-white uppercase font-black tracking-widest">ACTIVE_NETWORK_EPOCH</p>
+                 <p className="text-[7px] text-white uppercase font-black tracking-widest">ACTIVE NETWORK EPOCH</p>
                  <p className="text-xs font-black text-white font-mono">{currentEpoch}</p>
               </div>
            </div>
-           <span className="text-[8px] text-emerald-400 font-black uppercase border border-emerald-400/30 px-2 py-0.5 rounded bg-emerald-500/5 shadow-sm">STABLE_STATE</span>
+           <span className="text-[8px] text-emerald-400 font-black uppercase border border-emerald-400/30 px-2 py-0.5 rounded bg-emerald-500/5 shadow-sm">STABLE STATE</span>
         </div>
 
         <div className="exn-card p-3 bg-black border-white/20 flex items-center justify-between shadow-xl">
            <div className="flex items-center gap-3">
               <div>
-                 <p className="text-[7px] text-white uppercase font-black tracking-widest">LAST_SETTLED</p>
+                 <p className="text-[7px] text-white uppercase font-black tracking-widest">LAST SETTLED</p>
                  <p className="text-xs font-black text-white font-mono">{state.lastCrankedEpoch || 0} EPOCHS</p>
               </div>
            </div>
@@ -218,7 +212,7 @@ export function DashboardStats({
            <div className="flex items-center gap-3">
               <Cpu className="w-4 h-4 text-primary" />
               <div>
-                 <p className="text-[7px] text-white uppercase font-black tracking-widest">NETWORK_NODES</p>
+                 <p className="text-[7px] text-white uppercase font-black tracking-widest">NETWORK NODES</p>
                  <div className="flex gap-4">
                     <div>
                        <p className="text-xs font-black text-emerald-400 font-mono">{state.validators.filter(v => v.is_active).length} ON</p>
@@ -229,7 +223,7 @@ export function DashboardStats({
                  </div>
               </div>
            </div>
-           <span className="text-[8px] text-primary font-black uppercase border border-primary/30 px-2 py-0.5 rounded bg-primary/5 shadow-sm">SYNCED_LAYER</span>
+           <span className="text-[8px] text-primary font-black uppercase border border-primary/30 px-2 py-0.5 rounded bg-primary/5 shadow-sm">SYNCED LAYER</span>
         </div>
       </div>
     </div>

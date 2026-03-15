@@ -14,22 +14,14 @@ export function TransactionStatus() {
 
   useEffect(() => {
     setMounted(true);
-    
-    const handleFeedback = (feedback: any) => {
-      setTx(feedback);
-    };
-
+    const handleFeedback = (feedback: any) => setTx(feedback);
     errorEmitter.on('feedback', handleFeedback);
-    return () => {
-      errorEmitter.off('feedback', handleFeedback);
-    };
+    return () => { errorEmitter.off('feedback', handleFeedback); };
   }, []);
 
   useEffect(() => {
     if (tx && tx.status !== 'warning') {
-      const timer = setTimeout(() => {
-        setTx(null);
-      }, 7000);
+      const timer = setTimeout(() => setTx(null), 7000);
       return () => clearTimeout(timer);
     }
   }, [tx]);
@@ -43,7 +35,7 @@ export function TransactionStatus() {
       text: 'text-emerald-500',
       icon: CheckCircle2,
       glow: 'shadow-[0_0_50px_rgba(16,185,129,0.4)]',
-      label: 'NETWORK_CONFIRMED'
+      label: 'NETWORK CONFIRMED'
     },
     error: {
       bg: 'bg-destructive/15',
@@ -51,7 +43,7 @@ export function TransactionStatus() {
       text: 'text-destructive',
       icon: AlertCircle,
       glow: 'shadow-[0_0_50px_rgba(239,68,68,0.3)]',
-      label: 'CONSENSUS_REJECTED'
+      label: 'CONSENSUS REJECTED'
     },
     warning: {
       bg: 'bg-primary/15',
@@ -59,7 +51,7 @@ export function TransactionStatus() {
       text: 'text-primary',
       icon: Cpu,
       glow: 'shadow-[0_0_50px_rgba(0,245,255,0.4)]',
-      label: 'BROADCASTING_BLOCK'
+      label: 'BROADCASTING BLOCK'
     }
   };
 
@@ -137,27 +129,12 @@ export function TransactionStatus() {
       </div>
       
       <style jsx>{`
-        @keyframes progress-6s {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-        @keyframes progress-fast {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-        @keyframes scan {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(300%); }
-        }
-        .animate-progress-6s {
-          animation: progress-6s 6000ms linear forwards;
-        }
-        .animate-progress-fast {
-          animation: progress-fast 7000ms linear forwards;
-        }
-        .animate-scan {
-          animation: scan 2s linear infinite;
-        }
+        @keyframes progress-6s { from { width: 100%; } to { width: 0%; } }
+        @keyframes progress-fast { from { width: 100%; } to { width: 0%; } }
+        @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(300%); } }
+        .animate-progress-6s { animation: progress-6s 6000ms linear forwards; }
+        .animate-progress-fast { animation: progress-fast 7000ms linear forwards; }
+        .animate-scan { animation: scan 2s linear infinite; }
       `}</style>
     </div>
   );

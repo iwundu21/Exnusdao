@@ -41,7 +41,6 @@ export default function RegisterNodePage() {
 
   useEffect(() => {
     setMounted(true);
-    // Automated Geolocation Tracking via Network Origin
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
@@ -58,7 +57,7 @@ export default function RegisterNodePage() {
   if (!mounted || !isLoaded) return (
     <div className="h-screen w-screen flex flex-col items-center justify-center bg-background space-y-4">
       <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[9px]">VERIFYING_NETWORK_STATE</p>
+      <p className="exn-gradient-text font-black uppercase tracking-[0.4em] animate-pulse text-[9px]">VERIFYING NETWORK STATE</p>
     </div>
   );
 
@@ -69,7 +68,7 @@ export default function RegisterNodePage() {
            <Wallet className="w-10 h-10 text-primary" />
          </div>
          <div className="space-y-3">
-           <h1 className="text-2xl font-black uppercase tracking-tighter text-white">AUTH_REQUIRED</h1>
+           <h1 className="text-2xl font-black uppercase tracking-tighter text-white">AUTH REQUIRED</h1>
            <p className="text-white text-[10px] uppercase font-black tracking-widest">Please connect your Solana wallet to verify XNode License ownership.</p>
          </div>
       </div>
@@ -86,12 +85,12 @@ export default function RegisterNodePage() {
          <Ticket className="w-12 h-12 text-destructive" />
        </div>
        <div className="space-y-4">
-         <h1 className="text-2xl font-black uppercase tracking-tighter text-white">LICENSE_AUTHORIZATION_REQUIRED</h1>
+         <h1 className="text-2xl font-black uppercase tracking-tighter text-white">LICENSE AUTHORIZATION REQUIRED</h1>
          <p className="text-white text-[11px] uppercase font-black tracking-widest max-w-md mx-auto leading-relaxed">
            XNode Registration is restricted to verified License holders. Please mint a license to initialize your infrastructure sector.
          </p>
        </div>
-       <Link href="/purchase-license" className="exn-button inline-flex items-center justify-center px-12 h-12 text-[11px] tracking-tighter">INITIALIZE_MINT_SEQUENCE</Link>
+       <Link href="/purchase-license" className="exn-button inline-flex items-center justify-center px-12 h-12 text-[11px] tracking-tighter">INITIALIZE MINT SEQUENCE</Link>
     </div>
   );
 
@@ -156,15 +155,15 @@ export default function RegisterNodePage() {
   return (
     <div className="max-w-6xl mx-auto px-10 py-16 space-y-10 animate-in fade-in duration-500">
       <Link href="/" className="flex items-center gap-2 text-white hover:text-white transition-colors uppercase text-[9px] font-black tracking-widest">
-        <ArrowLeft className="w-3.5 h-3.5" /> EXIT_TERMINAL
+        <ArrowLeft className="w-3.5 h-3.5" /> EXIT TERMINAL
       </Link>
 
       <div className="space-y-3">
         <div className="flex items-center gap-2">
            <Globe className="w-4 h-4 text-primary" />
-           <p className="text-[10px] font-black uppercase tracking-widest text-primary">NETWORK_LAYER_REGISTRATION</p>
+           <p className="text-[10px] font-black uppercase tracking-widest text-primary">NETWORK LAYER REGISTRATION</p>
         </div>
-        <h1 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE_REGISTRATION</h1>
+        <h1 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE REGISTRATION</h1>
         <p className="text-white text-[10px] font-black uppercase tracking-widest max-w-lg">
           Establish infrastructure by binding a verified License NFT. Location and Flag are automatically synchronized to your physical origin via autonomous diagnostic handshake.
         </p>
@@ -174,21 +173,21 @@ export default function RegisterNodePage() {
         <div className="exn-card p-12 flex flex-col items-center justify-center text-center space-y-8 border-primary bg-primary/5 shadow-2xl backdrop-blur-3xl">
            <AlertCircle className="w-12 h-12 text-primary" />
            <div className="space-y-3">
-             <h2 className="text-2xl font-black text-white uppercase tracking-tighter">ACTIVE_XNODE_DETECTED</h2>
+             <h2 className="text-2xl font-black text-white uppercase tracking-tighter">ACTIVE XNODE DETECTED</h2>
              <p className="text-[10px] text-white uppercase font-black tracking-widest">Only one XNode registration permitted per unique wallet address.</p>
            </div>
-           <Link href="/manage-node" className="exn-button h-12 flex items-center justify-center px-10 text-[10px]">MANAGE_EXISTING_NODE</Link>
+           <Link href="/manage-node" className="exn-button h-12 flex items-center justify-center px-10 text-[10px]">MANAGE EXISTING NODE</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-7 exn-card p-8 space-y-10 bg-black/40 backdrop-blur-3xl border-white shadow-3xl">
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                 <h3 className="text-[9px] font-black text-white uppercase tracking-widest">NFT_AUTHORIZATION</h3>
+                 <h3 className="text-[9px] font-black text-white uppercase tracking-widest">NFT AUTHORIZATION</h3>
               </div>
               
               <div className="space-y-3">
-                <label className="text-[9px] text-white uppercase font-black tracking-widest">SELECT_XNODE_LICENSE *</label>
+                <label className="text-[9px] text-white uppercase font-black tracking-widest">SELECT XNODE LICENSE *</label>
                 <div className="relative group">
                    <Ticket className="absolute left-4 top-3.5 w-4.5 h-4.5 text-primary" />
                    <select 
@@ -196,7 +195,7 @@ export default function RegisterNodePage() {
                     onChange={e => setFormData({...formData, licenseId: e.target.value})} 
                     className="exn-input h-12 pl-12 text-[10px] font-mono font-black tracking-tight bg-black/60"
                    >
-                    <option value="">SCAN_FOR_MINTED_LICENSES...</option>
+                    <option value="">SCAN FOR MINTED LICENSES...</option>
                     {availableLicenses.map(l => (
                       <option key={l.id} value={l.id}>{l.id}</option>
                     ))}
@@ -207,11 +206,11 @@ export default function RegisterNodePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <label className="text-[9px] text-white uppercase font-black tracking-widest">XNODE_NAME *</label>
-                <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 text-xs font-mono font-bold bg-black/60" placeholder="ID_STRING_V1" />
+                <label className="text-[9px] text-white uppercase font-black tracking-widest">XNODE NAME *</label>
+                <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="exn-input h-12 text-xs font-mono font-bold bg-black/60" placeholder="ID STRING V1" />
               </div>
               <div className="space-y-3">
-                <label className="text-[9px] text-white uppercase font-black tracking-widest">AUTONOMOUS_LOCALIZATION (SYNCED)</label>
+                <label className="text-[9px] text-white uppercase font-black tracking-widest">AUTONOMOUS LOCALIZATION (SYNCED)</label>
                 <div className="exn-input h-12 bg-white/5 border-white/20 flex items-center px-4 gap-3 text-xs font-mono font-black text-emerald-400">
                   {geoLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MapPin className="w-3.5 h-3.5" />}
                   {formData.location}
@@ -219,21 +218,21 @@ export default function RegisterNodePage() {
               </div>
               
               <div className="md:col-span-2 space-y-3">
-                <label className="text-[9px] text-white uppercase font-black tracking-widest">IDENTITY_ASSET (LOGO_UPLOAD)</label>
+                <label className="text-[9px] text-white uppercase font-black tracking-widest">IDENTITY ASSET (LOGO UPLOAD)</label>
                 <div 
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full h-32 border-2 border-dashed border-white rounded-xl flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group shadow-inner"
                 >
                   <Upload className="w-6 h-6 text-white group-hover:text-primary transition-all duration-500" />
                   <p className="text-[9px] uppercase font-black text-white group-hover:text-primary transition-all tracking-widest">
-                    {formData.logo_uri.length > 0 ? 'REPLACE_ASSET' : 'CLICK_TO_UPLOAD_LOGO'}
+                    {formData.logo_uri.length > 0 ? 'REPLACE ASSET' : 'CLICK TO LOGO UPLOAD'}
                   </p>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="text-[9px] text-white uppercase font-black tracking-widest">COMMISSION_TIER (0-30%)</label>
+                <label className="text-[9px] text-white uppercase font-black tracking-widest">COMMISSION TIER (0-30%)</label>
                 <div className="relative">
                   <input type="number" value={formData.commission} onChange={e => setFormData({...formData, commission: Math.min(30, Math.max(0, Number(e.target.value)))})} className="exn-input h-12 text-xs font-mono font-bold bg-black/60" />
                   <span className="absolute right-5 top-3.5 text-white font-black text-[9px]">%</span>
@@ -241,7 +240,7 @@ export default function RegisterNodePage() {
               </div>
 
               <div className="md:col-span-2 space-y-3">
-                <label className="text-[9px] text-white uppercase font-black tracking-widest">PROTOCOL_BIO *</label>
+                <label className="text-[9px] text-white uppercase font-black tracking-widest">PROTOCOL BIO *</label>
                 <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="exn-input min-h-[100px] py-4 text-[11px] font-mono font-medium leading-relaxed bg-black/60" placeholder="Describe hardware commitment..." />
               </div>
             </div>
@@ -251,13 +250,13 @@ export default function RegisterNodePage() {
               disabled={isRegistrationDisabled} 
               className={`w-full h-14 uppercase tracking-widest font-black transition-all shadow-3xl text-[11px] ${isRegistrationDisabled ? 'bg-white/5 text-white border border-white cursor-not-allowed opacity-50' : 'exn-button'}`}
             >
-              REVIEW_REGISTRATION
+              REVIEW REGISTRATION
             </button>
           </div>
 
           <div className="lg:col-span-5 space-y-8">
             <div className="sticky top-32">
-              <h3 className="text-[9px] font-black text-white uppercase tracking-widest mb-5">IDENTITY_PREVIEW_V2</h3>
+              <h3 className="text-[9px] font-black text-white uppercase tracking-widest mb-5">IDENTITY PREVIEW V2</h3>
               <div className="exn-card overflow-hidden border-primary bg-black/60 shadow-[0_40px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl group">
                 <div className="relative h-48 w-full overflow-hidden bg-black/40">
                   <Image 
@@ -271,7 +270,7 @@ export default function RegisterNodePage() {
                   <div className="absolute top-4 right-6">
                     <div className="flex items-center gap-1.5 bg-emerald-500 text-black text-[9px] px-3 py-1.5 rounded-lg font-black uppercase border border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)]">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      SECURE_ID_VERIFIED
+                      SECURE ID VERIFIED
                     </div>
                   </div>
 
@@ -279,7 +278,7 @@ export default function RegisterNodePage() {
                     <div className="flex items-center gap-2">
                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_20px_#10b981]" />
                        <h4 className="text-xl font-black text-white tracking-tighter uppercase leading-none">
-                         {formData.name || 'UNASSIGNED_NAME'}
+                         {formData.name || 'UNASSIGNED NAME'}
                        </h4>
                     </div>
                     {formData.location && (
@@ -293,7 +292,7 @@ export default function RegisterNodePage() {
                 
                 <div className="p-8 space-y-8">
                   <div className="space-y-3">
-                    <p className="text-[9px] text-white uppercase font-black tracking-widest">NETWORK_BIO</p>
+                    <p className="text-[9px] text-white uppercase font-black tracking-widest">NETWORK BIO</p>
                     <p className="text-[11px] text-white leading-relaxed font-medium italic min-h-[3rem] tracking-tight">
                       {formData.description || "Describe hardware metrics..."}
                     </p>
@@ -301,11 +300,11 @@ export default function RegisterNodePage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-5 bg-white/5 rounded-xl border border-white space-y-1.5 group-hover:border-primary transition-all shadow-xl">
-                      <p className="text-[9px] uppercase font-black text-white tracking-[0.1em]">NODE_FEE</p>
+                      <p className="text-[9px] uppercase font-black text-white tracking-[0.1em]">NODE FEE</p>
                       <p className="text-primary font-black text-[12px] font-mono tracking-tighter">{(formData.commission).toFixed(1)}%</p>
                     </div>
                     <div className="p-5 bg-white/5 rounded-xl border border-white space-y-1.5 group-hover:border-primary transition-all shadow-xl">
-                      <p className="text-[9px] uppercase font-black text-white tracking-[0.1em]">NFT_BOND</p>
+                      <p className="text-[9px] uppercase font-black text-white tracking-[0.1em]">NFT BOND</p>
                       <p className="text-white font-mono font-black text-[9px] truncate tracking-tighter">{formData.licenseId ? shortenAddress(formData.licenseId) : 'N/A'}</p>
                     </div>
                   </div>
@@ -323,25 +322,25 @@ export default function RegisterNodePage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-black uppercase tracking-widest text-primary flex items-center gap-3">
                 <ShieldCheck className="w-6 h-6" />
-                VERIFY_BINDING
+                VERIFY BINDING
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
                   <div className="p-6 bg-white/5 rounded-xl border border-white space-y-4 shadow-3xl">
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                      <span className="text-white font-black">OP_CODE</span>
-                      <span className="text-white font-black font-mono">XNODE_BIND_ATOMIC</span>
+                      <span className="text-white font-black">OP CODE</span>
+                      <span className="text-white font-black font-mono">XNODE BIND ATOMIC</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                      <span className="text-white font-black">LICENSE_ID</span>
+                      <span className="text-white font-black">LICENSE ID</span>
                       <span className="text-white font-mono font-black text-[9px]">{shortenAddress(formData.licenseId)}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                      <span className="text-white font-black">IDENTITY_NAME</span>
+                      <span className="text-white font-black">IDENTITY NAME</span>
                       <span className="text-primary font-black font-mono text-[10px]">{formData.name}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                      <span className="text-white font-black">SYNCED_SECTOR</span>
+                      <span className="text-white font-black">SYNCED SECTOR</span>
                       <span className="text-emerald-400 font-black font-mono text-[10px]">{formData.location}</span>
                     </div>
                   </div>
@@ -354,7 +353,7 @@ export default function RegisterNodePage() {
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
               <AlertDialogCancel className="exn-button-outline flex-1 text-[10px] h-12 uppercase font-black border-white text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmRegistration} className="exn-button flex-1 h-12 text-[10px] uppercase font-black">CONFIRM_BIND</AlertDialogAction>
+              <AlertDialogAction onClick={confirmRegistration} className="exn-button flex-1 h-12 text-[10px] uppercase font-black">CONFIRM BIND</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>

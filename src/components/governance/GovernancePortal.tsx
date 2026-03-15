@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, Zap, Info, ShieldCheck, Coins, Wallet } from 'lucide-react';
+import { MessageSquare, User, Landmark, Clock, Zap, ShieldCheck, Coins, Wallet, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { shortenAddress } from '@/lib/utils';
 import {
   AlertDialog,
@@ -38,7 +38,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         const f = (n: number) => n.toString().padStart(2, '0');
         setTimeLeft({ 
-          label: 'VOTING_LOCKED | FINAL_RESULTS_IN: ', 
+          label: 'VOTING LOCKED | FINAL RESULTS IN: ', 
           value: `${days}D ${f(hours)}H ${f(minutes)}M ${f(seconds)}S`,
           colorClass: 'text-destructive font-black' 
         });
@@ -51,7 +51,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
       const f = (n: number) => n.toString().padStart(2, '0');
       setTimeLeft({ 
-        label: 'VOTING_ENDS_IN: ', 
+        label: 'VOTING ENDS IN: ', 
         value: `${days}D ${f(hours)}H ${f(minutes)}M ${f(seconds)}S`,
         colorClass: 'text-emerald-500 font-black' 
       });
@@ -109,20 +109,16 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
   const confirmVote = () => {
     if (!votingOn) return;
-    const vOnId = votingOn.id;
-    const vOnSupport = votingOn.support;
-    const rationale = voteRationale;
+    onVote(votingOn.id, votingOn.support, userStakeWeight, voteRationale);
     setShowVoteReview(false);
     setVotingOn(null);
-    onVote(vOnId, vOnSupport, rationale);
     setVoteRationale('');
   };
 
   const confirmExecute = () => {
     if (!executingProposal) return;
-    const ePropId = executingProposal.id;
+    onExecute(executingProposal.id);
     setExecutingProposal(null);
-    onExecute(ePropId);
   };
 
   const isProposalDisabled = !newProp.title.trim() || !newProp.description.trim() || !connected || (newProp.type === 1 && (!newProp.recipient.trim() || !newProp.amount || Number(newProp.amount) <= 0));
@@ -131,15 +127,15 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
     <div className="space-y-10 animate-in fade-in duration-700">
       <div className="flex justify-between items-center">
         <div className="space-y-1">
-          <h2 className="text-xl font-black exn-gradient-text tracking-tighter uppercase leading-none">DAO_GOVERNANCE</h2>
-          <p className="text-white font-black uppercase tracking-[0.4em] text-[10px]">STAKE-WEIGHTED CONSENSUS PROTOCOL</p>
+          <h2 className="text-xl font-black exn-gradient-text tracking-tighter uppercase leading-none">DAO GOVERNANCE</h2>
+          <p className="text-white font-black uppercase tracking-[0.4em] text-[10px]">STAKE WEIGHTED CONSENSUS PROTOCOL</p>
         </div>
         <button 
           onClick={() => setShowCreate(!showCreate)}
           disabled={!connected}
           className={`exn-button uppercase tracking-[0.2em] text-[10px] font-black h-10 px-8 ${!connected ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          {showCreate ? 'CLOSE_FORM' : 'SUBMIT_PROPOSAL'}
+          {showCreate ? 'CLOSE FORM' : 'SUBMIT PROPOSAL'}
         </button>
       </div>
 
@@ -147,13 +143,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
         <div className="p-5 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-between backdrop-blur-xl shadow-lg">
            <div className="flex items-center gap-2">
              <User className="w-4 h-4 text-primary" />
-             <p className="text-[10px] uppercase font-black tracking-[0.2em] text-white">CONSENSUS_WEIGHT</p>
+             <p className="text-[10px] uppercase font-black tracking-[0.2em] text-white">CONSENSUS WEIGHT</p>
            </div>
            <div className="text-right">
              <p className="text-xs font-black text-primary font-mono">{connected ? userStakeWeight.toLocaleString() : '0'} EXN</p>
              {connected && isNodeOwner && (
                <div className="flex items-center gap-1 justify-end text-[8px] text-emerald-400 font-black uppercase mt-0.5">
-                 <ShieldCheck className="w-3 h-3" /> SEED_ACTIVE
+                 <ShieldCheck className="w-3 h-3" /> SEED ACTIVE
                </div>
              )}
            </div>
@@ -164,29 +160,29 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
         <div className="exn-card p-8 border-secondary/50 bg-black/90 backdrop-blur-3xl shadow-3xl">
           <div className="flex items-center gap-2 mb-6 border-b border-white/10 pb-5">
             <Landmark className="w-5 h-5 text-secondary" />
-            <h3 className="text-sm font-black uppercase tracking-[0.3em] text-secondary">NEW_DAO_PROPOSAL (FEE: 10 EXN)</h3>
+            <h3 className="text-sm font-black uppercase tracking-[0.3em] text-secondary">NEW DAO PROPOSAL (FEE: 10 EXN)</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-5">
                <div className="space-y-2.5">
-                 <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">PROPOSAL_TITLE</label>
-                 <input value={newProp.title} onChange={e => setNewProp({...newProp, title: e.target.value})} className="exn-input text-[11px] font-mono h-11" placeholder="e.g. PIP-004: NETWORK_EXPANSION" />
+                 <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">PROPOSAL TITLE</label>
+                 <input value={newProp.title} onChange={e => setNewProp({...newProp, title: e.target.value})} className="exn-input text-[11px] font-mono h-11" placeholder="e.g. PIP-004: NETWORK EXPANSION" />
                </div>
                <div className="space-y-2.5">
                  <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">CATEGORY</label>
                  <select value={newProp.type} onChange={e => setNewProp({...newProp, type: Number(e.target.value)})} className="exn-input text-[10px] font-black h-11 uppercase">
-                   <option value={0}>PROTOCOL_PARAMETER</option>
-                   {isAdmin && <option value={1}>TREASURY_DISTRIBUTION</option>}
+                   <option value={0}>PROTOCOL PARAMETER</option>
+                   {isAdmin && <option value={1}>TREASURY DISTRIBUTION</option>}
                  </select>
                  {newProp.type === 1 && !isAdmin && (
-                   <p className="text-[9px] text-destructive font-black uppercase tracking-widest mt-1">AUTHORITY_RESTRICTED</p>
+                   <p className="text-[9px] text-destructive font-black uppercase tracking-widest mt-1">AUTHORITY RESTRICTED</p>
                  )}
                </div>
             </div>
             
             <div className="space-y-2.5">
-              <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">RATIONALE_DETAILS</label>
+              <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">RATIONALE DETAILS</label>
               <textarea value={newProp.description} onChange={e => setNewProp({...newProp, description: e.target.value})} className="exn-input h-[120px] text-[11px] py-4 font-mono font-medium leading-relaxed" placeholder="Describe infrastructure adjustments..." />
             </div>
 
@@ -194,7 +190,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
                 <div className="space-y-2.5">
                   <label className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] flex items-center gap-2">
-                    <Coins className="w-3 h-3" /> TRANSACTION_AMOUNT (EXN)
+                    <Coins className="w-3 h-3" /> TX AMOUNT (EXN)
                   </label>
                   <input 
                     type="number" 
@@ -206,13 +202,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 </div>
                 <div className="space-y-2.5">
                   <label className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] flex items-center gap-2">
-                    <Wallet className="w-3 h-3" /> RECIPIENT_ADDRESS
+                    <Wallet className="w-3 h-3" /> RECIPIENT ADDRESS
                   </label>
                   <input 
                     value={newProp.recipient} 
                     onChange={e => setNewProp({...newProp, recipient: e.target.value})} 
                     className="exn-input text-[11px] font-mono h-11 bg-emerald-500/5 border-emerald-500/30 text-white" 
-                    placeholder="SOL_WALLET_ADDRESS" 
+                    placeholder="SOL WALLET ADDRESS" 
                   />
                 </div>
               </div>
@@ -221,7 +217,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
           <div className="flex gap-5 mt-8">
             <button onClick={handleCreateRequest} disabled={isProposalDisabled} className={`px-10 h-11 text-[10px] font-black uppercase tracking-[0.3em] transition-all shadow-xl ${!isProposalDisabled ? 'exn-button' : 'bg-white/10 text-white border border-white/20 cursor-not-allowed'}`}>
-              REVIEW_&_BROADCAST
+              REVIEW & BROADCAST
             </button>
             <button onClick={() => setShowCreate(false)} className="exn-button-outline px-10 h-11 text-[10px] uppercase font-black tracking-[0.3em] border-white/20 text-white hover:bg-white/10">CANCEL</button>
           </div>
@@ -254,11 +250,11 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                   {prop.type === 1 && prop.amount > 0 && (
                     <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-2">
                        <div className="flex justify-between items-center text-[10px] font-black uppercase">
-                         <span className="text-white/60">TX_AMOUNT</span>
+                         <span className="text-white/60">TX AMOUNT</span>
                          <span className="text-emerald-400 font-mono">{prop.amount.toLocaleString()} EXN</span>
                        </div>
                        <div className="flex justify-between items-center text-[10px] font-black uppercase">
-                         <span className="text-white/60">TARGET_RECIPIENT</span>
+                         <span className="text-white/60">TARGET RECIPIENT</span>
                          <span className="text-white font-mono">{shortenAddress(prop.recipient)}</span>
                        </div>
                     </div>
@@ -277,13 +273,13 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                         <span className="text-destructive">NO: {(100 - yesPercent).toFixed(1)}%</span>
                     </div>
                     <Progress value={yesPercent} className="h-2 bg-destructive/20" />
-                    <p className="text-[9px] text-white uppercase font-black text-center tracking-[0.3em]">CONSENSUS_WEIGHT: {totalVotes.toLocaleString()} EXN</p>
+                    <p className="text-[9px] text-white uppercase font-black text-center tracking-[0.3em]">CONSENSUS WEIGHT: {totalVotes.toLocaleString()} EXN</p>
                   </div>
 
                   {!isExpired && !isVotingLocked && !hasVoted && !isVotingForThis && (
                     <div className="grid grid-cols-2 gap-3">
-                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 font-black py-2.5 rounded-lg text-[10px] uppercase border border-emerald-500/30 transition-all shadow-md">VOTE_YES</button>
-                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/15 hover:bg-destructive/25 text-destructive font-black py-2.5 rounded-lg text-[10px] uppercase border border-destructive/30 transition-all shadow-md">VOTE_NO</button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: true })} className="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 font-black py-2.5 rounded-lg text-[10px] uppercase border border-emerald-500/30 transition-all shadow-md">VOTE YES</button>
+                      <button onClick={() => setVotingOn({ id: prop.id, support: false })} className="bg-destructive/15 hover:bg-destructive/25 text-destructive font-black py-2.5 rounded-lg text-[10px] uppercase border border-destructive/30 transition-all shadow-md">VOTE NO</button>
                     </div>
                   )}
 
@@ -301,7 +297,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
 
                   {isExpired && (
                     <button onClick={() => setExecutingProposal(prop)} disabled={prop.executed} className={`w-full h-12 uppercase text-[10px] font-black tracking-[0.3em] flex items-center justify-center gap-3 transition-all shadow-xl ${prop.executed ? 'bg-white/10 text-white border border-white/20' : 'exn-button'}`}>
-                      {prop.executed ? 'FINALIZED_IN_LEDGER' : 'EXECUTE_CONSENSUS'}
+                      {prop.executed ? 'FINALIZED IN LEDGER' : 'EXECUTE CONSENSUS'}
                     </button>
                   )}
                 </div>
@@ -311,14 +307,14 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                 <button onClick={() => setActiveCommentId(activeCommentId === prop.id ? null : prop.id)} className="w-full flex items-center justify-between px-8 py-4 text-[10px] font-black uppercase text-white hover:text-primary transition-all border-b border-white/10">
                   <div className="flex items-center gap-3">
                     <MessageSquare className="w-4 h-4" />
-                    NETWORK_RATIONALES ({prop.comments?.length || 0})
+                    NETWORK RATIONALES ({prop.comments?.length || 0})
                   </div>
                   {showComments ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {showComments && (
                   <div className="p-8 space-y-5 max-h-[350px] overflow-y-auto custom-scrollbar">
                     {(!prop.comments || prop.comments.length === 0) ? (
-                      <p className="text-[10px] text-white uppercase font-black text-center py-10 tracking-[0.4em]">NO_RATIONALES_LOGGED</p>
+                      <p className="text-[10px] text-white uppercase font-black text-center py-10 tracking-[0.4em]">NO RATIONALES LOGGED</p>
                     ) : (
                       prop.comments.map((comment: any, idx: number) => (
                         <div key={idx} className="p-5 bg-white/5 rounded-xl border border-white/10 space-y-3 shadow-lg hover:border-primary/40 transition-all">
@@ -347,7 +343,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           <div className="p-8 space-y-8">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-3">
-                <ShieldCheck className="w-6 h-6" /> VERIFY_PROPOSAL
+                <ShieldCheck className="w-6 h-6" /> VERIFY PROPOSAL
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
@@ -358,12 +354,12 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     </div>
                     {newProp.type === 1 && (
                       <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                        <span className="text-emerald-400">TX_VALUE</span>
+                        <span className="text-emerald-400">TX VALUE</span>
                         <span className="text-emerald-400 font-mono">{Number(newProp.amount).toLocaleString()} EXN</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">NETWORK_FEE</span>
+                      <span className="text-white">NETWORK FEE</span>
                       <span className="text-primary font-mono">10 EXN</span>
                     </div>
                   </div>
@@ -373,7 +369,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
               <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmCreate} className="exn-button flex-1 h-11 text-[10px] uppercase font-black bg-secondary">CONFIRM_BROADCAST</AlertDialogAction>
+              <AlertDialogAction onClick={confirmCreate} className="exn-button flex-1 h-11 text-[10px] uppercase font-black bg-secondary">CONFIRM BROADCAST</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
@@ -385,7 +381,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           <div className="p-8 space-y-8">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-primary flex items-center gap-3">
-                <CheckCircle2 className="w-6 h-6" /> VERIFY_VOTE
+                <CheckCircle2 className="w-6 h-6" /> VERIFY VOTE
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
@@ -393,7 +389,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
                       <span className="text-white">STANCE</span>
                       <span className={votingOn?.support ? "text-emerald-500" : "text-destructive"}>
-                        {votingOn?.support ? 'YES_SUPPORT' : 'NO_REJECT'}
+                        {votingOn?.support ? 'YES SUPPORT' : 'NO REJECT'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
@@ -407,7 +403,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
               <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmVote} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM_VOTE</AlertDialogAction>
+              <AlertDialogAction onClick={confirmVote} className="exn-button flex-1 h-11 text-[10px] uppercase font-black">CONFIRM VOTE</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
@@ -419,27 +415,27 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
           <div className="p-8 space-y-8">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base font-black uppercase tracking-[0.2em] text-emerald-500 flex items-center gap-3">
-                <Zap className="w-6 h-6" /> VERIFY_EXECUTION
+                <Zap className="w-6 h-6" /> VERIFY EXECUTION
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-6 pt-4">
                   <div className="p-5 bg-white/5 rounded-xl border border-white/15 space-y-4 shadow-xl">
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
-                      <span className="text-white">PROPOSAL_ID</span>
+                      <span className="text-white">PROPOSAL ID</span>
                       <span className="text-white font-mono">#{executingProposal?.id}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
                       <span className="text-white">CONSENSUS</span>
-                      <span className="text-emerald-400">PASSED_ENACTING</span>
+                      <span className="text-emerald-400">PASSED ENACTING</span>
                     </div>
                   </div>
-                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">ENACTING THIS PROPOSAL WILL PERMANENTLY TRIGGER THE ASSOCIATED ON-CHAIN ACTIONS.</p>
+                  <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">ENACTING THIS PROPOSAL WILL PERMANENTLY TRIGGER THE ASSOCIATED ON CHAIN ACTIONS.</p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row gap-4 pt-2">
               <AlertDialogCancel className="exn-button-outline flex-1 h-11 text-[10px] uppercase font-black border-white/20 text-white">ABORT</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmExecute} className="bg-emerald-500 text-black flex-1 h-11 text-[10px] uppercase font-black rounded-xl hover:opacity-90 shadow-lg">CONFIRM_ENACT</AlertDialogAction>
+              <AlertDialogAction onClick={confirmExecute} className="bg-emerald-500 text-black flex-1 h-11 text-[10px] uppercase font-black rounded-xl hover:opacity-90 shadow-lg">CONFIRM ENACT</AlertDialogAction>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
