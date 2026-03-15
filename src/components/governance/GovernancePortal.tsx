@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, Zap, Info, ShieldCheck } from 'lucide-react';
+import { MessageSquare, ShieldAlert, User, CheckCircle2, ChevronDown, ChevronUp, Landmark, Clock, Zap, Info, ShieldCheck, Coins, Wallet } from 'lucide-react';
 import { shortenAddress } from '@/lib/utils';
 import {
   AlertDialog,
@@ -76,7 +76,6 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
   
-  const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [votingOn, setVotingOn] = useState<{ id: number; support: boolean } | null>(null);
   const [voteRationale, setVoteRationale] = useState('');
   
@@ -181,10 +180,39 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                  </select>
                </div>
             </div>
+            
             <div className="space-y-2.5">
               <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">RATIONALE_DETAILS</label>
               <textarea value={newProp.description} onChange={e => setNewProp({...newProp, description: e.target.value})} className="exn-input h-[120px] text-[11px] py-4 font-mono font-medium leading-relaxed" placeholder="Describe infrastructure adjustments..." />
             </div>
+
+            {newProp.type === 1 && (
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
+                <div className="space-y-2.5">
+                  <label className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] flex items-center gap-2">
+                    <Coins className="w-3 h-3" /> TRANSACTION_AMOUNT (EXN)
+                  </label>
+                  <input 
+                    type="number" 
+                    value={newProp.amount} 
+                    onChange={e => setNewProp({...newProp, amount: e.target.value})} 
+                    className="exn-input text-[11px] font-mono h-11 bg-emerald-500/5 border-emerald-500/30 text-white" 
+                    placeholder="0.00" 
+                  />
+                </div>
+                <div className="space-y-2.5">
+                  <label className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] flex items-center gap-2">
+                    <Wallet className="w-3 h-3" /> RECIPIENT_ADDRESS
+                  </label>
+                  <input 
+                    value={newProp.recipient} 
+                    onChange={e => setNewProp({...newProp, recipient: e.target.value})} 
+                    className="exn-input text-[11px] font-mono h-11 bg-emerald-500/5 border-emerald-500/30 text-white" 
+                    placeholder="SOL_WALLET_ADDRESS" 
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-5 mt-8">
@@ -218,6 +246,20 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     <h3 className="text-xl font-black text-white tracking-tighter uppercase leading-none">{prop.title}</h3>
                   </div>
                   <p className="text-white text-[12px] leading-relaxed font-medium italic border-l-2 border-primary/30 pl-5 tracking-tight">{prop.description}</p>
+                  
+                  {prop.type === 1 && prop.amount > 0 && (
+                    <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-2">
+                       <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                         <span className="text-white/60">TX_AMOUNT</span>
+                         <span className="text-emerald-400 font-mono">{prop.amount.toLocaleString()} EXN</span>
+                       </div>
+                       <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                         <span className="text-white/60">TARGET_RECIPIENT</span>
+                         <span className="text-white font-mono">{shortenAddress(prop.recipient)}</span>
+                       </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-8 pt-2">
                     <ProposalCountdown deadline={prop.deadline} votingEndsAt={prop.voting_ends_at} />
                     {isVotingLocked && <span className="text-[10px] text-destructive uppercase font-black bg-destructive/20 px-3 py-1 rounded border border-destructive/40 animate-pulse tracking-widest">FREEZE</span>}
@@ -310,6 +352,12 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                       <span className="text-white">TITLE</span>
                       <span className="text-white truncate max-w-[150px]">{newProp.title}</span>
                     </div>
+                    {newProp.type === 1 && (
+                      <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
+                        <span className="text-emerald-400">TX_VALUE</span>
+                        <span className="text-emerald-400 font-mono">{Number(newProp.amount).toLocaleString()} EXN</span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
                       <span className="text-white">NETWORK_FEE</span>
                       <span className="text-primary font-mono">10 EXN</span>
@@ -378,7 +426,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest">
                       <span className="text-white">CONSENSUS</span>
-                      <span className="text-emerald-500">PASSED_ENACTING</span>
+                      <span className="text-emerald-400">PASSED_ENACTING</span>
                     </div>
                   </div>
                   <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">ENACTING THIS PROPOSAL WILL PERMANENTLY TRIGGER THE ASSOCIATED ON-CHAIN ACTIONS.</p>
