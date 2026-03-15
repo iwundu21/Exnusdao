@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -37,7 +38,7 @@ export default function ProtocolSpecPage() {
     {
       id: "governance",
       title: "LAYER_4: DAO_CONSENSUS_&_TRANSACTION_PROPOSALS",
-      content: "Governance is gated by stake weight. BROADCASTING A PROPOSAL requires a weight of 1,000,000 EXN and a 10 EXN fee. VOTING requires 10,000 EXN weight and a 3 EXN fee. TRANSACTION PROPOSALS (Treasury Distributions) enable the DAO to shift assets from the protocol treasury to any recipient upon consensus finalization. Execution of passed transaction proposals is atomic and non-custodial."
+      content: "Governance is gated by stake weight. BROADCASTING A PROPOSAL requires a weight of 1,000,000 EXN and a 10 EXN fee. TRANSACTION PROPOSALS (Treasury Distributions) are restricted to the Protocol Authority for broadcasting. Once a transaction proposal achieves consensus finalization, its execution is PERMISSIONLESS; any network participant can trigger the atomic shift of assets from the protocol treasury to the recipient. VOTING requires 10,000 EXN weight and a 3 EXN fee."
     },
     {
       id: "rewards",
@@ -83,7 +84,7 @@ export default function ProtocolSpecPage() {
               </div>
             </div>
           );
-        })}
+        section.content})}
       </div>
 
       <div className="exn-card p-12 bg-primary/5 border-primary/40 text-center space-y-8 shadow-3xl">

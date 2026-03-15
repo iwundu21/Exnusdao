@@ -71,7 +71,7 @@ function ProposalCountdown({ deadline, votingEndsAt }: { deadline: number; votin
   );
 }
 
-export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOwner = false, walletAddress = '', onVote, onCreate, onExecute, setFeedback }: any) {
+export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOwner = false, isAdmin = false, walletAddress = '', onVote, onCreate, onExecute, setFeedback }: any) {
   const [showCreate, setShowCreate] = useState(false);
   const [newProp, setNewProp] = useState({ title: '', description: '', type: 0, amount: '', recipient: '' });
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
@@ -88,6 +88,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
   const handleCreateRequest = () => {
     if (!connected) return setFeedback('warning', 'Please connect wallet.');
     if (userStakeWeight < 1000000) return setFeedback('error', 'Min weight 1M EXN required.');
+    if (newProp.type === 1 && !isAdmin) return setFeedback('error', 'Only Protocol Authority can broadcast Transaction Proposals.');
     setShowCreateReview(true);
   };
 
@@ -176,8 +177,11 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
                  <label className="text-[10px] text-white uppercase font-black tracking-[0.2em]">CATEGORY</label>
                  <select value={newProp.type} onChange={e => setNewProp({...newProp, type: Number(e.target.value)})} className="exn-input text-[10px] font-black h-11 uppercase">
                    <option value={0}>PROTOCOL_PARAMETER</option>
-                   <option value={1}>TREASURY_DISTRIBUTION</option>
+                   {isAdmin && <option value={1}>TREASURY_DISTRIBUTION</option>}
                  </select>
+                 {newProp.type === 1 && !isAdmin && (
+                   <p className="text-[9px] text-destructive font-black uppercase tracking-widest mt-1">AUTHORITY_RESTRICTED</p>
+                 )}
                </div>
             </div>
             
@@ -186,7 +190,7 @@ export function GovernancePortal({ proposals = [], userStakeWeight = 0, isNodeOw
               <textarea value={newProp.description} onChange={e => setNewProp({...newProp, description: e.target.value})} className="exn-input h-[120px] text-[11px] py-4 font-mono font-medium leading-relaxed" placeholder="Describe infrastructure adjustments..." />
             </div>
 
-            {newProp.type === 1 && (
+            {newProp.type === 1 && isAdmin && (
               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
                 <div className="space-y-2.5">
                   <label className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] flex items-center gap-2">

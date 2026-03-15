@@ -67,6 +67,8 @@ export default function Home() {
     return state.validators.some(v => v.owner === walletAddress);
   }, [state?.validators, walletAddress]);
 
+  const isAdmin = walletAddress === state.adminWallet;
+
   const totalStakedReal = useMemo(() => {
     if (!state?.validators) return 0;
     return state.validators.reduce((acc, v) => acc + (v.total_staked || 0), 0);
@@ -94,14 +96,14 @@ export default function Home() {
     setFeedback('success', `Successfully locked ${numAmt.toLocaleString()} EXN in protocol.`);
   };
 
-  const handleVote = (pId: number, support: boolean, comment: string) => {
+  const handleVote = (pId: number, support: boolean, weight: number, comment: string) => {
     if (!connected) return setFeedback('error', 'Wallet Connection Required');
     if (!isNodeOwner && userStakeWeight < MIN_STAKE_FOR_VOTE) return setFeedback('error', 'Min stake 10k EXN required.');
     if (exnBalance < VOTE_FEE) return setFeedback('error', 'Insufficient EXN fee.');
 
-    const weight = userStakeWeight;
+    const weightToCast = weight;
     updateUserBalance(walletAddress, -VOTE_FEE, 0);
-    castVote(pId, support, weight, {
+    castVote(pId, support, weightToCast, {
       id: `c${Date.now()}`,
       author: walletAddress,
       text: comment,
@@ -252,6 +254,7 @@ export default function Home() {
               proposals={state.proposals} 
               userStakeWeight={userStakeWeight}
               isNodeOwner={isNodeOwner}
+              isAdmin={isAdmin}
               walletAddress={walletAddress}
               onVote={handleVote}
               onCreate={handleCreateProposal}
