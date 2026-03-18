@@ -2,11 +2,11 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Settings, LayoutDashboard, Hammer, Coins, CircleDollarSign, Menu, Ticket, Droplets, ShieldCheck } from 'lucide-react';
+import { Settings, LayoutDashboard, Hammer, Coins, CircleDollarSign, Menu, Ticket, Droplets, ShieldCheck, Wallet, Power, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 import { useProtocolState } from '@/hooks/use-protocol-state';
+import { shortenAddress } from '@/lib/utils';
 import {
   Sheet,
   SheetContent,
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sheet";
 
 export function Navbar() {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, connect, disconnect, isConnecting } = useFakeWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const { state, isLoaded, registerUser, exnBalance, usdcBalance } = useProtocolState();
   const [mounted, setMounted] = useState(false);
@@ -137,36 +137,29 @@ export function Navbar() {
         )}
         
         <div className="flex items-center gap-4">
-          {mounted ? (
-            <WalletMultiButton className="exn-wallet-button" />
-          ) : (
-            <div className="h-11 w-32 bg-white/20 rounded-xl animate-pulse" />
+          {mounted && (
+            <button 
+              onClick={connected ? disconnect : connect} 
+              disabled={isConnecting}
+              className={`flex items-center gap-3 px-6 h-11 rounded-xl font-black uppercase text-[11px] tracking-widest transition-all shadow-xl ${connected ? 'bg-destructive/20 text-destructive border border-destructive/50 hover:bg-destructive hover:text-white' : 'exn-button'}`}
+            >
+              {isConnecting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : connected ? (
+                <>
+                  <Power className="w-4 h-4" />
+                  {shortenAddress(walletAddress)}
+                </>
+              ) : (
+                <>
+                  <Wallet className="w-4 h-4" />
+                  IDENTITY LINK
+                </>
+              )}
+            </button>
           )}
         </div>
       </div>
-
-      <style jsx global>{`
-        .exn-wallet-button {
-          background: linear-gradient(to right, #00f5ff, #a855f7) !important;
-          color: black !important;
-          font-weight: 900 !important;
-          text-transform: uppercase !important;
-          font-size: 11px !important;
-          letter-spacing: 0.2em !important;
-          height: 42px !important;
-          line-height: 42px !important;
-          border-radius: 12px !important;
-          padding: 0 24px !important;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-          border: none !important;
-          box-shadow: 0 0 25px rgba(0, 245, 255, 0.4) !important;
-        }
-        .exn-wallet-button:hover {
-          opacity: 0.9 !important;
-          transform: translateY(-2px) !important;
-          box-shadow: 0 0 35px rgba(0, 245, 255, 0.6) !important;
-        }
-      `}</style>
     </nav>
   );
 }

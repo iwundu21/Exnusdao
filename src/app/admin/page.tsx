@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { useProtocolState } from '@/hooks/use-protocol-state';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 import { 
   ShieldCheck, 
   Settings, 
@@ -19,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminPage() {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey } = useFakeWallet();
   const { 
     state, 
     resetProtocol,
@@ -135,7 +136,7 @@ export default function AdminPage() {
     
     if (totalWeight <= 0) return setFeedback('error', 'No active network weight.');
     
-    crankEpoch(nextEpoch, state.rewardCap, activeValidators, totalWeight);
+    crankEpoch(nextEpoch, state.rewardCap);
     setFeedback('success', `Admin Override: Epoch ${nextEpoch} settled.`);
   };
 
@@ -152,7 +153,7 @@ export default function AdminPage() {
       <div className="flex flex-col items-center justify-center py-32 text-center space-y-6 animate-in fade-in duration-500">
          <Lock className="w-10 h-10 text-primary" />
          <h1 className="text-2xl font-bold uppercase text-white">Authority Required</h1>
-         <p className="text-white text-[10px] font-black uppercase tracking-widest">Please connect your wallet to access the terminal.</p>
+         <p className="text-white text-[10px] font-black uppercase tracking-widest">Please link your virtual identity to access the terminal.</p>
       </div>
     );
   }
@@ -165,7 +166,7 @@ export default function AdminPage() {
          </div>
          <h1 className="text-2xl font-bold uppercase text-destructive">Unauthorized Access</h1>
          <p className="text-white text-[11px] font-black uppercase tracking-[0.4em] max-w-md mx-auto">
-            This terminal is restricted to the designated Protocol Authority wallet.
+            This terminal is restricted to the designated Protocol Authority identity.
          </p>
       </div>
     );
@@ -227,21 +228,21 @@ export default function AdminPage() {
                     <div className="space-y-3">
                        <p className="text-[10px] text-white uppercase font-black">License Price (USDC)</p>
                        <div className="relative">
-                          <Ticket className="absolute left-4 top-3 w-3.5 h-3.5 text-white" />
+                          <Ticket className="absolute left-4 top-3.5 w-3.5 h-3.5 text-white" />
                           <input value={formatInput(newLicensePrice)} onChange={e => handleTextChange(e.target.value, setNewLicensePrice)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white bg-white/10" />
                        </div>
                     </div>
                     <div className="space-y-3">
                        <p className="text-[10px] text-white uppercase font-black">Reward Cap (EXN)</p>
                        <div className="relative">
-                          <Zap className="absolute left-4 top-3 w-3.5 h-3.5 text-white" />
+                          <Zap className="absolute left-4 top-3.5 w-3.5 h-3.5 text-white" />
                           <input value={formatInput(newRewardCap)} onChange={e => handleTextChange(e.target.value, setNewRewardCap)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white bg-white/10" />
                        </div>
                     </div>
                     <div className="space-y-3">
                        <p className="text-[10px] text-white uppercase font-black">Supply Cap (Licenses)</p>
                        <div className="relative">
-                          <Layers className="absolute left-4 top-3 w-3.5 h-3.5 text-white" />
+                          <Layers className="absolute left-4 top-3.5 w-3.5 h-3.5 text-white" />
                           <input value={formatInput(newLicenseLimit)} onChange={e => handleTextChange(e.target.value, setNewLicenseLimit)} className="exn-input h-11 pl-10 font-mono text-[12px] text-white border-white bg-white/10" />
                        </div>
                     </div>

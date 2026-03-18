@@ -1,11 +1,11 @@
+
 "use client";
 
 import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 import { doc, setDoc, collection, deleteDoc, increment, arrayUnion } from 'firebase/firestore';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export interface Validator {
   id: string;
@@ -72,7 +72,7 @@ interface ProtocolContextType {
   castVote: (pId: number, support: boolean, weight: number, comment: any) => void;
   createProposal: (proposal: any) => void;
   executeProposal: (pId: number, passed: boolean, type: number, amount: number, recipient: string, executorWallet: string) => void;
-  crankEpoch: (targetEpoch: number, totalPool: number, activeValidators: any[], totalWeight: number) => void;
+  crankEpoch: (targetEpoch: number, totalPool: number) => void;
   registerValidator: (validator: any, licenseId: string) => void;
   updateValidator: (vId: string, data: any) => void;
   terminateValidator: (vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => void;
@@ -85,7 +85,7 @@ const ADMIN_WALLET_ADDRESS = '9Kqt28pfMVBsBvXYYnYQCT2BZyorAwzbR6dUmgQfsZYW';
 const SIMULATED_DELAY = 6000;
 
 export function ProtocolProvider({ children }: { children: ReactNode }) {
-  const { publicKey, signMessage, connected } = useWallet();
+  const { publicKey, signMessage, connected } = useFakeWallet();
   const db = useFirestore();
   const walletAddress = publicKey?.toBase58() || '';
 
@@ -121,17 +121,17 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
 
   const signAction = useCallback(async (intent: string) => {
     if (!connected || !publicKey || !signMessage) {
-      setFeedback('error', 'WALLET_AUTH_REQUIRED_FOR_SIGNATURE');
-      throw new Error('Wallet not ready or signature function missing.');
+      setFeedback('error', 'IDENTITY AUTH REQUIRED');
+      throw new Error('Simulation identity not active.');
     }
     try {
-      setFeedback('warning', 'WAITING_FOR_WALLET_SIGNATURE...');
-      const messageText = `EXNUS_PROTOCOL_INTENT: ${intent}\nTIMESTAMP: ${Date.now()}\nWALLET: ${walletAddress}\nNETWORK: SOLANA_MAINNET`;
+      setFeedback('warning', 'WAITING FOR SIMULATED SIGNATURE...');
+      const messageText = `EXNUS INTENT: ${intent}\nTIMESTAMP: ${Date.now()}\nIDENTITY: ${walletAddress}`;
       const encodedMessage = new TextEncoder().encode(messageText);
       await signMessage(encodedMessage);
       return true;
     } catch (e: any) {
-      setFeedback('error', e.message || 'SIGNATURE_REJECTED_BY_USER.');
+      setFeedback('error', 'SIGNATURE FAILED');
       throw e;
     }
   }, [connected, publicKey, signMessage, walletAddress, setFeedback]);
@@ -155,7 +155,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const claimFaucetAssets = useCallback(async (address: string, exn: number, usdc: number, type: 'exn' | 'usdc') => {
     if (!address || !db) return;
     try {
-      await signAction(`CLAIM_FAUCET_${type.toUpperCase()}_ASSETS`);
+      await signAction(`CLAIM FAUCET ${type.toUpperCase()}`);
       setFeedback('warning', `BROADCASTING ${type.toUpperCase()} ASSET DROP...`);
       setTimeout(() => {
         const ref = doc(db, 'users', address);
@@ -167,7 +167,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
           [timestampField]: Date.now(),
           lastActive: Date.now()
         }, { merge: true }).then(() => {
-          setFeedback('success', `${type.toUpperCase()} ASSETS CONFIRMED.`, hash);
+          setFeedback('success', `${type.toUpperCase()} ASSETS CONFIRMED`, hash);
         });
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
@@ -176,34 +176,34 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const adminFundVault = useCallback(async (address: string, amount: number, vault: string) => {
     if (!address || !db) return;
     try {
-      await signAction(`ADMIN_FUND_VAULT_${vault}_AMT_${amount}`);
+      await signAction(`ADMIN FUND ${vault} AMT ${amount}`);
       const gRef = doc(db, 'protocol', 'global');
       const uRef = doc(db, 'users', address);
       setDoc(gRef, { [vault]: increment(amount) }, { merge: true });
       setDoc(uRef, { exnBalance: increment(-amount) }, { merge: true });
-      setFeedback('success', 'VAULT CAPITAL INJECTED.');
+      setFeedback('success', 'VAULT CAPITAL INJECTED');
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
 
   const adminWithdrawUsdc = useCallback(async (address: string, amount: number) => {
     if (!address || !db) return;
     try {
-      await signAction(`ADMIN_WITHDRAW_USDC_AMT_${amount}`);
+      await signAction(`ADMIN WITHDRAW USDC AMT ${amount}`);
       const gRef = doc(db, 'protocol', 'global');
       const uRef = doc(db, 'users', address);
       setDoc(gRef, { usdcVaultBalance: increment(-amount) }, { merge: true });
       setDoc(uRef, { usdcBalance: increment(amount) }, { merge: true });
-      setFeedback('success', 'USDC WITHDRAWAL COMPLETE.');
+      setFeedback('success', 'USDC WITHDRAWAL COMPLETE');
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
 
   const adminUpdateSettings = useCallback(async (settings: Partial<ProtocolState>) => {
     if (!db) return;
     try {
-      await signAction(`ADMIN_UPDATE_PROTOCOL_SETTINGS`);
+      await signAction(`ADMIN UPDATE PROTOCOL`);
       const gRef = doc(db, 'protocol', 'global');
       setDoc(gRef, settings, { merge: true }).then(() => {
-        setFeedback('success', 'PROTOCOL SETTINGS SYNCHRONIZED.');
+        setFeedback('success', 'PROTOCOL SETTINGS SYNCHRONIZED');
       });
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -211,7 +211,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const mintLicense = useCallback(async (address: string, price: number, license: any) => {
     if (!address || !db) return;
     try {
-      await signAction(`MINT_XNODE_LICENSE_${license.id}`);
+      await signAction(`MINT XNODE LICENSE ${license.id}`);
       setFeedback('warning', 'PROVISIONING XNODE LICENSE NFT...');
       setTimeout(() => {
         const lRef = doc(db, 'licenses', license.id);
@@ -221,7 +221,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         setDoc(lRef, license);
         setDoc(uRef, { usdcBalance: increment(-price) }, { merge: true });
         setDoc(gRef, { usdcVaultBalance: increment(price) }, { merge: true });
-        setFeedback('success', `LICENSE ${license.id} MINTED.`, hash);
+        setFeedback('success', `LICENSE ${license.id} MINTED`, hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -229,8 +229,8 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const addStake = useCallback(async (stake: any) => {
     if (!db) return;
     try {
-      await signAction(`STAKE_${stake.amount}_EXN_TO_${stake.validator_id}`);
-      setFeedback('warning', 'ESTABLISHING STAKING LOCK...');
+      await signAction(`STAKE ${stake.amount} EXN`);
+      setFeedback('warning', 'ESTABLISHING PROTOCOL LOCK...');
       setTimeout(() => {
         const sRef = doc(collection(db, 'stakes'));
         const gRef = doc(db, 'protocol', 'global');
@@ -239,7 +239,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         setDoc(sRef, { ...stake, id: sRef.id });
         setDoc(gRef, { stakedVaultBalance: increment(stake.amount) }, { merge: true });
         setDoc(vRef, { total_staked: increment(stake.amount) }, { merge: true });
-        setFeedback('success', `${stake.amount.toLocaleString()} EXN COMMITTED.`, hash);
+        setFeedback('success', `${stake.amount.toLocaleString()} EXN COMMITTED`, hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -247,7 +247,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const unstake = useCallback(async (stakeId: string, amount: number, validatorId: string) => {
     if (!db) return;
     try {
-      await signAction(`UNSTAKE_${amount}_EXN_FROM_${validatorId}`);
+      await signAction(`UNSTAKE ${amount} EXN`);
       setFeedback('warning', 'EXECUTING PRINCIPAL WITHDRAWAL...');
       setTimeout(() => {
         const sRef = doc(db, 'stakes', stakeId);
@@ -257,7 +257,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         setDoc(sRef, { unstaked: true }, { merge: true });
         setDoc(gRef, { stakedVaultBalance: increment(-amount) }, { merge: true });
         setDoc(vRef, { total_staked: increment(-amount) }, { merge: true });
-        setFeedback('success', 'PRINCIPAL RETURNED TO WALLET.', hash);
+        setFeedback('success', 'PRINCIPAL RETURNED TO LEDGER', hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -265,7 +265,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const migrateStake = useCallback(async (stakeId: string, amount: number, oldValidatorId: string, newValidatorId: string) => {
     if (!db) return;
     try {
-      await signAction(`MIGRATE_STAKE_${amount}_EXN_TO_${newValidatorId}`);
+      await signAction(`MIGRATE STAKE TO ${newValidatorId}`);
       setFeedback('warning', 'EXECUTING SECTOR MIGRATION...');
       setTimeout(() => {
         const sRef = doc(db, 'stakes', stakeId);
@@ -275,7 +275,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         setDoc(sRef, { validator_id: newValidatorId, reward_checkpoint: 0 }, { merge: true });
         setDoc(oldVRef, { total_staked: increment(-amount) }, { merge: true });
         setDoc(newVRef, { total_staked: increment(amount) }, { merge: true });
-        setFeedback('success', 'STAKE MIGRATED TO NEW SECTOR.', hash);
+        setFeedback('success', 'STAKE MIGRATED TO NEW SECTOR', hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -283,14 +283,14 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const claimRewards = useCallback(async (stakeId: string, amount: number, newCheckpoint: number, wallet: string) => {
     if (!db) return;
     try {
-      await signAction(`CLAIM_REWARDS_AMT_${amount}`);
+      await signAction(`CLAIM REWARDS AMT ${amount}`);
       setFeedback('warning', 'HARVESTING ACCRUED YIELD...');
       setTimeout(() => {
         const sRef = doc(db, 'stakes', stakeId);
         const hash = generateTxHash();
         setDoc(sRef, { reward_checkpoint: newCheckpoint }, { merge: true });
         updateUserBalance(wallet, amount, 0);
-        setFeedback('success', 'REWARDS DEPOSITED.', hash);
+        setFeedback('success', 'REWARDS DEPOSITED', hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, updateUserBalance, signAction, setFeedback]);
@@ -298,7 +298,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const castVote = useCallback(async (pId: number, support: boolean, weight: number, comment: any) => {
     if (!db || !walletAddress) return;
     try {
-      await signAction(`CAST_VOTE_${support ? 'YES' : 'NO'}_PROPOSAL_${pId}`);
+      await signAction(`CAST VOTE ${support ? 'YES' : 'NO'}`);
       setFeedback('warning', 'ESTABLISHING CONSENSUS DECISION...');
       setTimeout(() => {
         const pRef = doc(db, 'proposals', pId.toString());
@@ -311,7 +311,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
           voters: arrayUnion(walletAddress)
         }, { merge: true });
         setDoc(gRef, { treasuryBalance: increment(3) }, { merge: true });
-        setFeedback('success', 'CONSENSUS VOTE RECORDED.', hash);
+        setFeedback('success', 'CONSENSUS VOTE RECORDED', hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, walletAddress, signAction, setFeedback]);
@@ -319,7 +319,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const createProposal = useCallback(async (proposal: any) => {
     if (!db) return;
     try {
-      await signAction(`CREATE_DAO_PROPOSAL_${proposal.title}`);
+      await signAction(`CREATE PROPOSAL ${proposal.title}`);
       setFeedback('warning', 'BROADCASTING PROPOSAL TO NETWORK...');
       setTimeout(() => {
         const pRef = doc(db, 'proposals', proposal.id.toString());
@@ -327,7 +327,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         const hash = generateTxHash();
         setDoc(pRef, proposal);
         setDoc(gRef, { treasuryBalance: increment(10) }, { merge: true });
-        setFeedback('success', 'PROPOSAL BROADCAST SUCCESSFUL.', hash);
+        setFeedback('success', 'PROPOSAL BROADCAST SUCCESSFUL', hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -335,7 +335,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const executeProposal = useCallback(async (pId: number, passed: boolean, type: number, amount: number, recipient: string, executorWallet: string) => {
     if (!db) return;
     try {
-      await signAction(`EXECUTE_PROPOSAL_${pId}_STATUS_${passed ? 'PASSED' : 'REJECTED'}`);
+      await signAction(`EXECUTE PROPOSAL ${pId}`);
       setFeedback('warning', 'ENACTING DAO CONSENSUS...');
       setTimeout(async () => {
         const pRef = doc(db, 'proposals', pId.toString());
@@ -350,7 +350,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
           await setDoc(rRef, { exnBalance: increment(amount) }, { merge: true });
         }
         
-        setFeedback('success', passed ? 'PROPOSAL ENACTED & ASSETS SHIFTED.' : 'PROPOSAL REJECTED & FINALIZED.', hash);
+        setFeedback('success', passed ? 'PROPOSAL ENACTED' : 'PROPOSAL FINALIZED', hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -358,7 +358,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const crankEpoch = useCallback(async (targetEpoch: number, totalPool: number) => {
     if (!db) return;
     try {
-      await signAction(`CRANK_NETWORK_EPOCH_${targetEpoch}`);
+      await signAction(`CRANK EPOCH ${targetEpoch}`);
       setFeedback('warning', 'SETTLING EPOCH REWARDS...');
       setTimeout(() => {
         const gRef = doc(db, 'protocol', 'global');
@@ -367,7 +367,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
           lastCrankedEpoch: targetEpoch,
           rewardVaultBalance: increment(-totalPool)
         }, { merge: true });
-        setFeedback('success', `EPOCH ${targetEpoch} SETTLED.`, hash);
+        setFeedback('success', `EPOCH ${targetEpoch} SETTLED`, hash);
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
@@ -375,7 +375,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const registerValidator = useCallback(async (validator: any, licenseId: string) => {
     if (!db) return;
     try {
-      await signAction(`REGISTER_VALIDATOR_${validator.name}`);
+      await signAction(`REGISTER XNODE ${validator.name}`);
       setFeedback('warning', 'PROVISIONING XNODE SECTOR...');
       setTimeout(() => {
         const vRef = doc(db, 'validators', validator.id);
@@ -383,7 +383,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         const hash = generateTxHash();
         setDoc(vRef, validator).then(() => {
           setDoc(lRef, { is_claimed: true }, { merge: true });
-          setFeedback('success', 'XNODE IDENTITY REGISTERED.', hash);
+          setFeedback('success', 'XNODE IDENTITY REGISTERED', hash);
         });
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
@@ -392,13 +392,13 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const updateValidator = useCallback(async (vId: string, data: any) => {
     if (!db) return;
     try {
-      await signAction(`UPDATE_VALIDATOR_IDENTITY_${vId}`);
+      await signAction(`UPDATE XNODE ${vId}`);
       setFeedback('warning', 'PROPAGATING IDENTITY UPDATES...');
       setTimeout(() => {
         const vRef = doc(db, 'validators', vId);
         const hash = generateTxHash();
         setDoc(vRef, data, { merge: true }).then(() => {
-          setFeedback('success', 'IDENTITY SYNCHRONIZED.', hash);
+          setFeedback('success', 'IDENTITY SYNCHRONIZED', hash);
         });
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
@@ -407,7 +407,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const terminateValidator = useCallback(async (vId: string, wallet: string, seedRefund: number, rewards: number, licenseId: string) => {
     if (!db) return;
     try {
-      await signAction(`TERMINATE_VALIDATOR_REGISTRATION_${vId}`);
+      await signAction(`TERMINATE XNODE ${vId}`);
       setFeedback('warning', 'DECOMMISSIONING XNODE IDENTITY...');
       setTimeout(() => {
         const vRef = doc(db, 'validators', vId);
@@ -416,7 +416,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         deleteDoc(vRef).then(() => {
           setDoc(lRef, { is_burned: true, is_claimed: false }, { merge: true });
           updateUserBalance(wallet, seedRefund + rewards, 0);
-          setFeedback('success', 'REGISTRATION TERMINATED.', hash);
+          setFeedback('success', 'REGISTRATION TERMINATED', hash);
         });
       }, SIMULATED_DELAY);
     } catch (e) { console.error(e); }
@@ -431,7 +431,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
   const resetProtocol = useCallback(async () => {
     if (!db) return;
     try {
-      await signAction('RESET_PROTOCOL_STATE');
+      await signAction('RESET PROTOCOL');
       const gRef = doc(db, 'protocol', 'global');
       await setDoc(gRef, {
         treasuryBalance: 3000000,
@@ -451,7 +451,7 @@ export function ProtocolProvider({ children }: { children: ReactNode }) {
         networkStartDate: Date.now(),
         settledEpochs: []
       }, { merge: true });
-      setFeedback('success', 'PROTOCOL RESET SUCCESSFUL.');
+      setFeedback('success', 'PROTOCOL RESET SUCCESSFUL');
     } catch (e) { console.error(e); }
   }, [db, signAction, setFeedback]);
 

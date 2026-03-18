@@ -8,7 +8,7 @@ import { StakingActionForm } from '@/components/staking/StakingActionForm';
 import { GovernancePortal } from '@/components/governance/GovernancePortal';
 import { CrankTerminal } from '@/components/admin/CrankTerminal';
 import { useProtocolState } from '@/hooks/use-protocol-state';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 
 const REWARD_PRECISION = 1_000_000;
 const PROPOSAL_FEE = 10;
@@ -18,7 +18,7 @@ const MIN_STAKE_FOR_VOTE = 10_000;
 const EPOCH_DURATION = 30 * 24 * 60 * 60 * 1000;
 
 export default function Home() {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey } = useFakeWallet();
   const walletAddress = publicKey?.toBase58() || '';
   
   const { 
@@ -89,7 +89,7 @@ export default function Home() {
   }, [state?.userStakes, state?.validators, walletAddress]);
 
   const handleStake = (stakeData: any) => {
-    if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    if (!connected) return setFeedback('error', 'Simulation Link Required');
     const numAmt = stakeData.amount;
     updateUserBalance(walletAddress, -numAmt, 0);
     addStake({ ...stakeData, owner: walletAddress });
@@ -97,7 +97,7 @@ export default function Home() {
   };
 
   const handleVote = (pId: number, support: boolean, weight: number, comment: string) => {
-    if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    if (!connected) return setFeedback('error', 'Simulation Link Required');
     if (!isNodeOwner && userStakeWeight < MIN_STAKE_FOR_VOTE) return setFeedback('error', 'Min stake 10k EXN required.');
     if (exnBalance < VOTE_FEE) return setFeedback('error', 'Insufficient EXN fee.');
 
@@ -114,7 +114,7 @@ export default function Home() {
   };
 
   const handleCreateProposal = (data: any) => {
-    if (!connected) return setFeedback('error', 'Wallet Connection Required');
+    if (!connected) return setFeedback('error', 'Simulation Link Required');
     if (userStakeWeight < MIN_STAKE_FOR_PROPOSAL) return setFeedback('error', 'Stake Weight Insufficient');
     if (exnBalance < PROPOSAL_FEE) return setFeedback('error', 'Insufficient Fee');
 
@@ -153,7 +153,7 @@ export default function Home() {
     const totalWeight = activeValidators.reduce((acc, v) => acc + v.total_staked, 0);
     if (totalWeight <= 0) return setFeedback('error', 'No active weight.');
 
-    crankEpoch(targetEpoch, state.rewardCap, activeValidators, totalWeight);
+    crankEpoch(targetEpoch, state.rewardCap);
     setFeedback('success', `Epoch ${targetEpoch} settled.`);
   };
 
@@ -201,8 +201,8 @@ export default function Home() {
     <div className="max-w-7xl mx-auto px-10 py-10 space-y-12">
       <div className="flex gap-8 border-b border-border">
         <button onClick={() => setActiveTab('staking')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'staking' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>DASHBOARD</button>
-        <button onClick={() => setActiveTab('governance')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>DAO_PORTAL</button>
-        <button onClick={() => setActiveTab('crank')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>NETWORK_CRANK</button>
+        <button onClick={() => setActiveTab('governance')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'governance' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>DAO PORTAL</button>
+        <button onClick={() => setActiveTab('crank')} className={`pb-4 text-[11px] font-black tracking-widest uppercase transition-all ${activeTab === 'crank' ? 'text-primary border-b-2 border-primary' : 'text-white/40 hover:text-white'}`}>NETWORK CRANK</button>
       </div>
 
       {!isLoaded ? (
