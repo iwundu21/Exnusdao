@@ -1,13 +1,12 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Upload, AlertCircle, Wallet, Ticket, ShieldCheck, MapPin, CheckCircle2, Globe, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState, Validator } from '@/hooks/use-protocol-state';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress } from '@/lib/utils';
 import {
   AlertDialog,
@@ -22,7 +21,7 @@ import {
 
 export default function RegisterNodePage() {
   const router = useRouter();
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected } = useFakeWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const { state, isLoaded, setFeedback, registerValidator } = useProtocolState();
   const [mounted, setMounted] = useState(false);
@@ -69,7 +68,7 @@ export default function RegisterNodePage() {
          </div>
          <div className="space-y-3">
            <h1 className="text-2xl font-black uppercase tracking-tighter text-white">AUTH REQUIRED</h1>
-           <p className="text-white text-[10px] uppercase font-black tracking-widest">Please connect your Solana wallet to verify XNode License ownership.</p>
+           <p className="text-white text-[10px] uppercase font-black tracking-widest">Please establish a virtual identity link to verify XNode License ownership.</p>
          </div>
       </div>
     );
@@ -109,8 +108,8 @@ export default function RegisterNodePage() {
   };
 
   const handleRegisterInitiate = () => {
-    if (!connected) return setFeedback('error', 'Wallet Connection Required');
-    if (hasExistingNode) return setFeedback('warning', 'Only one XNode registration permitted per wallet.');
+    if (!connected) return setFeedback('error', 'IDENTITY AUTH REQUIRED');
+    if (hasExistingNode) return setFeedback('warning', 'Only one XNode registration permitted per virtual identity.');
     
     const license = state.licenses.find(l => l.id === formData.licenseId);
     if (!license) return setFeedback('error', 'Invalid license NFT selected.');
@@ -153,7 +152,7 @@ export default function RegisterNodePage() {
   const isRegistrationDisabled = !formData.licenseId || !formData.name.trim() || geoLoading || !formData.description.trim();
 
   return (
-    <div className="max-w-6xl mx-auto px-10 py-16 space-y-10 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto px-10 py-16 space-y-10 animate-in fade-in duration-500 pb-32">
       <Link href="/" className="flex items-center gap-2 text-white hover:text-white transition-colors uppercase text-[9px] font-black tracking-widest">
         <ArrowLeft className="w-3.5 h-3.5" /> EXIT TERMINAL
       </Link>
@@ -165,7 +164,7 @@ export default function RegisterNodePage() {
         </div>
         <h1 className="text-4xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE REGISTRATION</h1>
         <p className="text-white text-[10px] font-black uppercase tracking-widest max-w-lg">
-          Establish infrastructure by binding a verified License NFT. Location and Flag are automatically synchronized to your physical origin via autonomous diagnostic handshake.
+          Establish infrastructure by binding a verified License NFT. Location and Flag are automatically synchronized to your virtual identity.
         </p>
       </div>
 
@@ -174,7 +173,7 @@ export default function RegisterNodePage() {
            <AlertCircle className="w-12 h-12 text-primary" />
            <div className="space-y-3">
              <h2 className="text-2xl font-black text-white uppercase tracking-tighter">ACTIVE XNODE DETECTED</h2>
-             <p className="text-[10px] text-white uppercase font-black tracking-widest">Only one XNode registration permitted per unique wallet address.</p>
+             <p className="text-[10px] text-white uppercase font-black tracking-widest">Only one XNode registration permitted per unique virtual identity.</p>
            </div>
            <Link href="/manage-node" className="exn-button h-12 flex items-center justify-center px-10 text-[10px]">MANAGE EXISTING NODE</Link>
         </div>
@@ -346,7 +345,7 @@ export default function RegisterNodePage() {
                   </div>
                   
                   <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
-                    BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY AND SYNCHRONIZING YOUR PHYSICAL ORIGIN.
+                    BY CONFIRMING, YOU ARE ATOMICALLY BINDING YOUR XNODE LICENSE NFT TO THIS VALIDATOR IDENTITY AND SYNCHRONIZING YOUR VIRTUAL PROTOCOL IDENTITY.
                   </p>
                 </div>
               </AlertDialogDescription>

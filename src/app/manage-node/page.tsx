@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Wallet, ShieldAlert, AlertTriangle, Terminal, Database, Cpu, Globe, Settings2, ShieldCheck, Zap, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { shortenAddress } from '@/lib/utils';
 import {
   AlertDialog,
@@ -21,7 +21,7 @@ import {
 
 export default function ManageNodePage() {
   const router = useRouter();
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected } = useFakeWallet();
   const walletAddress = publicKey?.toBase58() || '';
   
   const { state, isLoaded, setFeedback, exnBalance, updateUserBalance, updateValidator, terminateValidator } = useProtocolState();
@@ -48,7 +48,7 @@ export default function ManageNodePage() {
        </div>
        <div className="space-y-3">
          <h1 className="text-xl font-black uppercase tracking-tighter text-white">AUTHENTICATION REQUIRED</h1>
-         <p className="text-white font-black text-[11px] uppercase tracking-tighter">Establish wallet link to access management protocols.</p>
+         <p className="text-white font-black text-[11px] uppercase tracking-tighter">Establish virtual identity link to access management protocols.</p>
        </div>
     </div>
   );
@@ -111,7 +111,7 @@ export default function ManageNodePage() {
        <div className="space-y-4">
          <h1 className="text-2xl font-black uppercase tracking-tighter text-white">LICENSE AUTHORIZATION REQUIRED</h1>
          <p className="text-white text-[11px] uppercase font-black tracking-tighter max-w-md mx-auto leading-relaxed">
-           XNode management is restricted to verified License holders. Please mint a license to initialize your infrastructure sector.
+           XNode management is restricted to verified License holders. Please provision a virtual identity and mint a license.
          </p>
        </div>
        <Link href="/purchase-license" className="exn-button inline-flex items-center justify-center px-12 h-12 text-[11px] tracking-tighter">INITIALIZE MINT SEQUENCE</Link>
@@ -126,7 +126,7 @@ export default function ManageNodePage() {
        <div className="space-y-4">
          <h1 className="text-2xl font-black uppercase tracking-tighter text-white">NO REGISTERED XNODES</h1>
          <p className="text-white text-[11px] uppercase font-black tracking-tighter max-w-md mx-auto leading-relaxed">
-           Wallet address has verified licenses but no bound XNode registrations. Register your infrastructure sector to begin operations.
+           Identity has verified licenses but no bound XNode registrations. Register your infrastructure sector to begin operations.
          </p>
        </div>
        <Link href="/register-node" className="exn-button inline-flex items-center justify-center px-12 h-12 text-[11px] tracking-tighter">INITIALIZE REGISTRATION</Link>
@@ -308,7 +308,7 @@ export default function ManageNodePage() {
                          </div>
                          <div className="p-8 bg-destructive/15 border border-destructive/40 rounded-xl space-y-6 shadow-3xl">
                             <p className="text-[10px] text-destructive font-black leading-relaxed uppercase tracking-tight">
-                               CRITICAL WARNING: DECOMMISSIONING THIS XNODE WILL PERMANENTLY TERMINATE ITS ON CHAIN REGISTRATION AND BURN THE ASSOCIATED LICENSE NFT.
+                               CRITICAL WARNING: DECOMMISSIONING THIS XNODE WILL PERMANENTLY TERMINATE ITS REGISTRATION AND BURN THE ASSOCIATED LICENSE NFT.
                             </p>
                             <button onClick={() => setReviewAction('terminate')} className="w-full h-12 bg-destructive text-white uppercase text-[10px] font-black tracking-widest rounded-xl hover:opacity-95 active:scale-95 transition-all shadow-3xl">
                               TERMINATE REGISTRATION
@@ -342,7 +342,7 @@ export default function ManageNodePage() {
                   </div>
                   <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
                     <span className="text-white font-black">NETWORK LAYER</span>
-                    <span className="text-emerald-500 font-black font-mono">PROTOCOL MAINNET</span>
+                    <span className="text-emerald-500 font-black font-mono">VIRTUAL SIMULATION</span>
                   </div>
                 </div>
                 

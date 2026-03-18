@@ -1,11 +1,10 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { Ticket, Wallet, ArrowLeft, Sparkles, ShieldCheck, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 import { shortenAddress, getExplorerLink } from '@/lib/utils';
 import Image from 'next/image';
 import {
@@ -20,11 +19,10 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function PurchaseLicensePage() {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected } = useFakeWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const { state, isLoaded, setFeedback, mintLicense, usdcBalance } = useProtocolState();
   const [mounted, setMounted] = useState(false);
-  const isMinting = state.lastTransaction?.status === 'warning';
   const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
@@ -46,7 +44,7 @@ export default function PurchaseLicensePage() {
          </div>
          <div className="space-y-4">
            <h1 className="text-3xl font-black uppercase tracking-tighter text-white">AUTHENTICATION REQUIRED</h1>
-           <p className="text-white font-black text-[11px] uppercase tracking-[0.4em]">Connect your wallet to provision your XNode License NFT.</p>
+           <p className="text-white font-black text-[11px] uppercase tracking-[0.4em]">Establish your virtual identity to provision your XNode License NFT.</p>
          </div>
       </div>
     );
@@ -61,8 +59,8 @@ export default function PurchaseLicensePage() {
   const hasLicense = myLicenses.length > 0;
 
   const handleMintInitiate = () => {
-    if (!connected) return setFeedback('error', 'Wallet Connection Required');
-    if (hasLicense) return setFeedback('warning', 'Only one XNode License permitted per wallet.');
+    if (!connected) return setFeedback('error', 'IDENTITY AUTH REQUIRED');
+    if (hasLicense) return setFeedback('warning', 'Only one XNode License permitted per virtual identity.');
     if (totalLimit > 0 && currentMintedCount >= totalLimit) return setFeedback('warning', 'Maximum license supply cap reached.');
     if (licensePrice > 0 && usdcBalance < licensePrice) return setFeedback('error', `Insufficient USDC balance.`);
 
@@ -86,7 +84,7 @@ export default function PurchaseLicensePage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-10 py-16 space-y-12 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto px-10 py-16 space-y-12 animate-in fade-in duration-500 pb-32">
       <Link href="/" className="flex items-center gap-2 text-white hover:text-primary transition-colors uppercase text-[10px] font-black tracking-[0.3em]">
         <ArrowLeft className="w-4 h-4" /> EXIT TERMINAL
       </Link>
@@ -96,7 +94,7 @@ export default function PurchaseLicensePage() {
           <div className="space-y-4">
             <h1 className="text-5xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">XNODE MINTING</h1>
             <p className="text-white font-black text-[11px] uppercase tracking-[0.5em] max-w-lg leading-relaxed">
-              Mint unique XNode License NFTs to gain infrastructure registration rights.
+              Mint unique XNode License NFTs to gain infrastructure registration rights on the Solana network.
             </p>
           </div>
 
@@ -136,14 +134,10 @@ export default function PurchaseLicensePage() {
               <div className="space-y-4">
                 <button 
                   onClick={handleMintInitiate} 
-                  disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || isMinting || hasLicense} 
-                  className={`w-full h-16 text-[12px] tracking-[0.6em] font-black uppercase flex items-center justify-center gap-4 transition-all shadow-3xl ${((totalLimit === 0 || currentMintedCount < totalLimit) && !isMinting && !hasLicense) ? 'exn-button' : 'bg-white/10 text-white border border-white cursor-not-allowed'}`}
+                  disabled={(totalLimit > 0 && currentMintedCount >= totalLimit) || hasLicense} 
+                  className={`w-full h-16 text-[12px] tracking-[0.6em] font-black uppercase flex items-center justify-center gap-4 transition-all shadow-3xl ${((totalLimit === 0 || currentMintedCount < totalLimit) && !hasLicense) ? 'exn-button' : 'bg-white/10 text-white border border-white cursor-not-allowed'}`}
                 >
-                  {isMinting ? (
-                    'MINTING IN PROGRESS...'
-                  ) : hasLicense ? (
-                    'AUTHORIZATION OWNED'
-                  ) : (
+                  {hasLicense ? 'AUTHORIZATION OWNED' : (
                     <>
                       <Sparkles className="w-6 h-6" />
                       MINT XNODE LICENSE
@@ -216,7 +210,7 @@ export default function PurchaseLicensePage() {
                   </div>
                   
                   <p className="text-[11px] text-white uppercase leading-relaxed font-black tracking-tight">
-                    BY CONFIRMING, THE MINT COST WILL BE DEDUCTED FROM YOUR USDC BALANCE.
+                    BY CONFIRMING, THE MINT COST WILL BE DEDUCTED FROM YOUR VIRTUAL USDC BALANCE.
                   </p>
                 </div>
               </AlertDialogDescription>

@@ -1,11 +1,10 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { Coins, CircleDollarSign, Wallet, ArrowLeft, Clock, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useProtocolState } from '@/hooks/use-protocol-state';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useFakeWallet } from '@/hooks/use-fake-wallet';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +19,7 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function FaucetPage() {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey } = useFakeWallet();
   const walletAddress = publicKey?.toBase58() || '';
   const { 
     state, 
@@ -34,7 +33,9 @@ export default function FaucetPage() {
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [reviewType, setReviewType] = useState<'exn' | 'usdc' | null>(null);
-  const isProcessing = state.lastTransaction?.status === 'warning';
+  
+  // Use protocol state feedback for processing status
+  const isProcessing = false; // Simulated delay handled in hook
 
   useEffect(() => {
     setMounted(true);
@@ -57,7 +58,7 @@ export default function FaucetPage() {
          </div>
          <div className="space-y-4">
            <h1 className="text-3xl font-black uppercase tracking-tighter text-white">AUTHENTICATION REQUIRED</h1>
-           <p className="text-white font-black text-[11px] uppercase tracking-[0.4em]">Connect your wallet to receive protocol test tokens.</p>
+           <p className="text-white font-black text-[11px] uppercase tracking-[0.4em]">Establish a virtual identity link to receive protocol test tokens.</p>
          </div>
       </div>
     );
@@ -78,7 +79,7 @@ export default function FaucetPage() {
 
   const initiateClaim = (type: 'exn' | 'usdc') => {
     const timeLeft = type === 'exn' ? exnTimeLeft : usdcTimeLeft;
-    if (timeLeft > 0) return setFeedback('warning', `Cooldown active. Ready in ${formatTime(timeLeft)}.`);
+    if (timeLeft > 0) return setFeedback('warning', `COOLDOWN ACTIVE. READY IN ${formatTime(timeLeft)}.`);
     setReviewType(type);
   };
 
@@ -94,7 +95,7 @@ export default function FaucetPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-10 py-16 space-y-12 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto px-10 py-16 space-y-12 animate-in fade-in duration-500 pb-32">
       <Link href="/" className="flex items-center gap-2 text-white hover:text-primary transition-colors uppercase text-[10px] font-black tracking-[0.3em]">
         <ArrowLeft className="w-4 h-4" /> EXIT TERMINAL
       </Link>
@@ -102,7 +103,7 @@ export default function FaucetPage() {
       <div className="space-y-4">
         <h1 className="text-5xl font-black exn-gradient-text tracking-tighter uppercase text-white leading-none">TOKEN FAUCET</h1>
         <p className="text-white font-black text-[11px] uppercase tracking-[0.5em] max-w-lg leading-relaxed">
-          Generate testnet assets for protocol verification. Distribution limited to 24h intervals.
+          Generate testnet assets for protocol verification. Distribution limited to 24h intervals for each virtual identity.
         </p>
       </div>
 
@@ -129,10 +130,10 @@ export default function FaucetPage() {
 
           <button 
             onClick={() => initiateClaim('exn')} 
-            disabled={exnTimeLeft > 0 || isProcessing} 
-            className={`w-full h-16 uppercase tracking-[0.6em] font-black transition-all rounded-2xl relative z-10 text-[12px] shadow-3xl ${exnTimeLeft === 0 && !isProcessing ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'}`}
+            disabled={exnTimeLeft > 0} 
+            className={`w-full h-16 uppercase tracking-[0.6em] font-black transition-all rounded-2xl relative z-10 text-[12px] shadow-3xl ${exnTimeLeft === 0 ? 'exn-button' : 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'}`}
           >
-            {isProcessing ? 'PROCESSING...' : (exnTimeLeft > 0 ? 'COOLDOWN ACTIVE' : 'GENERATE EXN')}
+            {exnTimeLeft > 0 ? 'COOLDOWN ACTIVE' : 'GENERATE EXN'}
           </button>
         </div>
 
@@ -158,10 +159,10 @@ export default function FaucetPage() {
 
           <button 
             onClick={() => initiateClaim('usdc')} 
-            disabled={usdcTimeLeft > 0 || isProcessing} 
-            className={`w-full h-16 uppercase tracking-[0.6em] font-black transition-all rounded-2xl relative z-10 text-[12px] shadow-3xl ${usdcTimeLeft === 0 && !isProcessing ? 'bg-emerald-500 text-black hover:opacity-90 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.5)]' : 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'}`}
+            disabled={usdcTimeLeft > 0} 
+            className={`w-full h-16 uppercase tracking-[0.6em] font-black transition-all rounded-2xl relative z-10 text-[12px] shadow-3xl ${usdcTimeLeft === 0 ? 'bg-emerald-500 text-black hover:opacity-90 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.5)]' : 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'}`}
           >
-            {isProcessing ? 'PROCESSING...' : (usdcTimeLeft > 0 ? 'COOLDOWN ACTIVE' : 'GENERATE USDC')}
+            {usdcTimeLeft > 0 ? 'COOLDOWN ACTIVE' : 'GENERATE USDC'}
           </button>
         </div>
       </div>
@@ -196,7 +197,7 @@ export default function FaucetPage() {
                   </div>
                   
                   <p className="text-[11px] text-white/80 uppercase leading-relaxed font-black tracking-tight">
-                    CONFIRMING WILL INITIATE ATOMIC ASSET GENERATION TO YOUR CONNECTED WALLET ADDRESS.
+                    CONFIRMING WILL INITIATE ATOMIC ASSET GENERATION TO YOUR VIRTUAL PROTOCOL IDENTITY.
                   </p>
                 </div>
               </AlertDialogDescription>
